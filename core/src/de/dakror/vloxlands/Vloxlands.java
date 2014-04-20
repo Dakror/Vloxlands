@@ -35,7 +35,7 @@ public class Vloxlands extends ApplicationAdapter
 	@Override
 	public void create()
 	{
-		currentGame = this; // hi
+		currentGame = this;
 		
 		Voxel.loadVoxels();
 		modelBatch = new ModelBatch();
