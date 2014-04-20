@@ -51,7 +51,7 @@ public class Vloxlands extends ApplicationAdapter
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		world = new World(2, 2, 2);
+		world = new World(8, 8, 8);
 		worldMiddle = world.size.cpy().scl(0.5f * Chunk.SIZE);
 		camera.position.set(worldMiddle.cpy());
 		camera.position.y += world.size.y;
