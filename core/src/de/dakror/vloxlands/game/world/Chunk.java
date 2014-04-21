@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.Direction;
@@ -21,10 +20,9 @@ public class Chunk
 	
 	Vector3 index, pos;
 	byte[] voxels;
+	float weight, uplift;
 	
 	Mesh opaque;// , transp;
-	
-	final BoundingBox boundingBox;
 	
 	boolean empty;
 	boolean updateRequired;
@@ -37,41 +35,28 @@ public class Chunk
 	private final int backOffset;
 	
 	Vector2 tex;
+	Island island;
 	
-	public Chunk(Vector3 index)
+	public Chunk(Vector3 index, Island island)
 	{
 		this.index = index;
+		this.island = island;
 		pos = index.cpy().scl(SIZE);
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
-		int in = 0;
+		for (int i = 0; i < voxels.length; i++)
+			voxels[i] = 0;
 		
-		Voxel[] v = { Voxel.get("STONE"), Voxel.get("DIRT"), Voxel.get("WEAK_CRYSTAL") };
-		
-		for (int x = 0; x < SIZE; x++)
-		{
-			for (int y = 0; y < SIZE; y++)
-			{
-				for (int z = 0; z < SIZE; z++)
-				{
-					voxels[in] = v[(int) (Math.random() * v.length)].getId();
-					
-					in++;
-				}
-			}
-		}
 		
 		// empty = true;
 		updateRequired = true;
 		
-		topOffset = SIZE * SIZE;
-		bottomOffset = -SIZE * SIZE;
-		leftOffset = -1;
-		rightOffset = 1;
-		frontOffset = -SIZE;
-		backOffset = SIZE;
-		
-		boundingBox = new BoundingBox(pos, pos.cpy().add(new Vector3(SIZE, SIZE, SIZE)));
+		topOffset = SIZE;
+		bottomOffset = -SIZE;
+		leftOffset = -SIZE * SIZE;
+		rightOffset = SIZE * SIZE;
+		frontOffset = -1;
+		backOffset = 1;
 		
 		int len = SIZE * SIZE * SIZE * 6 * 6 / 3;
 		short[] indices = new short[len];
@@ -93,9 +78,9 @@ public class Chunk
 		// transp.setIndices(indices);
 	}
 	
-	public Chunk(int x, int y, int z)
+	public Chunk(int x, int y, int z, Island island)
 	{
-		this(new Vector3(x, y, z));
+		this(new Vector3(x, y, z), island);
 	}
 	
 	public void add(int x, int y, int z, byte id)
@@ -110,34 +95,32 @@ public class Chunk
 	
 	public void set(int x, int y, int z, byte id, boolean force)
 	{
-		if (x > SIZE || x < 0) return;
-		if (y > SIZE || y < 0) return;
-		if (z > SIZE || z < 0) return;
+		if (x >= SIZE || x < 0) return;
+		if (y >= SIZE || y < 0) return;
+		if (z >= SIZE || z < 0) return;
 		
-		if (!force && voxels[x + z * SIZE + y * SIZE * SIZE] != Voxel.get("AIR").getId()) return;
+		if (!force && voxels[z + y * SIZE + x * SIZE * SIZE] != Voxel.get("AIR").getId()) return;
 		
-		voxels[x + z * SIZE + y * SIZE * SIZE] = id;
+		voxels[z + y * SIZE + x * SIZE * SIZE] = id;
 		
 		updateRequired = true;
 	}
 	
 	public byte get(int x, int y, int z)
 	{
-		if (x > SIZE || x < 0) return -1;
-		if (y > SIZE || y < 0) return -1;
-		if (z > SIZE || z < 0) return -1;
+		if (x >= SIZE || x < 0) return -1;
+		if (y >= SIZE || y < 0) return -1;
+		if (z >= SIZE || z < 0) return -1;
 		
-		return voxels[x + z * SIZE + y * SIZE * SIZE];
+		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
 	public int getVoxelCount()
 	{
 		int c = 0;
 		
-		byte air = Voxel.get("AIR").getId();
-		
 		for (byte b : voxels)
-			if (b != air) c++;
+			if (b != 0) c++;
 		
 		return c;
 	}
@@ -172,20 +155,58 @@ public class Chunk
 		return empty;
 	}
 	
+	public void calculateWeight()
+	{
+		weight = 0;
+		for (int x = 0; x < SIZE; x++)
+		{
+			for (int y = 0; y < SIZE; y++)
+			{
+				for (int z = 0; z < SIZE; z++)
+				{
+					if (get(x, y, z) == 0) continue;
+					weight += Voxel.getVoxelForId(get(x, y, z)).getWeight();
+				}
+			}
+		}
+	}
+	
+	public void calculateUplift()
+	{
+		uplift = 0;
+		for (int x = 0; x < SIZE; x++)
+		{
+			for (int y = 0; y < SIZE; y++)
+			{
+				for (int z = 0; z < SIZE; z++)
+				{
+					if (get(x, y, z) == 0) continue;
+					uplift += Voxel.getVoxelForId(get(x, y, z)).getUplift();
+				}
+			}
+		}
+	}
+	
+	public void grassify(Island island)
+	{
+		for (int i = 0; i < SIZE; i++)
+			for (int j = 0; j < SIZE; j++)
+				for (int k = 0; k < SIZE; k++)
+					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
+	}
+	
 	public int calculateVertices(float[] vertices)// , boolean opaque)
 	{
-		byte air = Voxel.get("AIR").getId();
-		
 		int i = 0;
 		int vertexOffset = 0;
-		for (int y = 0; y < SIZE; y++)
+		for (int x = 0; x < SIZE; x++)
 		{
-			for (int z = 0; z < SIZE; z++)
+			for (int y = 0; y < SIZE; y++)
 			{
-				for (int x = 0; x < SIZE; x++, i++)
+				for (int z = 0; z < SIZE; z++, i++)
 				{
 					byte voxel = voxels[i];
-					if (voxel == air) continue;
+					if (voxel == 0) continue;
 					
 					// if (Voxel.getVoxelForId(voxel).isOpaque() != opaque)
 					// {
@@ -233,7 +254,6 @@ public class Chunk
 		}
 		return vertexOffset / VERTEX_SIZE;
 	}
-	
 	
 	public int createUp(int x, int y, int z, byte id, float[] vertices, int vertexOffset)
 	{
