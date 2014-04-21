@@ -103,7 +103,6 @@ public class Voxel
 		return getTexCoord(x, y, z, d).cpy().scl(TEXSIZE);
 	}
 	
-	
 	public void setTextureY(int textureY)
 	{
 		this.textureY = textureY;

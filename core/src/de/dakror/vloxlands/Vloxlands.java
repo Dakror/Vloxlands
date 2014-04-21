@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
@@ -46,12 +48,11 @@ public class Vloxlands extends ApplicationAdapter
 		
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
-		modelBatch = new ModelBatch();
+		modelBatch = new ModelBatch(Gdx.files.internal("shader.vs"), Gdx.files.internal("shader.fs"));
 		DefaultShader.defaultCullFace = GL20.GL_FRONT;
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.5f;
 		camera.far = 1000;
-		
 		controller = new CameraInputController(camera);
 		// controller.setVelocity(20);
 		Gdx.input.setInputProcessor(controller);
@@ -66,7 +67,6 @@ public class Vloxlands extends ApplicationAdapter
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		// worldMiddle = world.size.cpy().scl(0.5f * Chunk.SIZE);
 		// camera.position.set(worldMiddle.cpy());
-		camera.position.y += 100;
 		
 		controller.target = worldMiddle;
 		controller.translateTarget = false;
@@ -77,6 +77,8 @@ public class Vloxlands extends ApplicationAdapter
 		controller.translateButton = Buttons.LEFT;
 		
 		camera.position.set(worldMiddle);
+		camera.position.y -= Island.SIZE / 4;
+		camera.position.z += Island.SIZE / 4;
 	}
 	
 	@Override
@@ -104,6 +106,36 @@ public class Vloxlands extends ApplicationAdapter
 		{
 			world.tick(tick++);
 			last = System.currentTimeMillis();
+		}
+	}
+	
+	@Override
+	public void resize(int width, int height)
+	{
+		camera.update();
+	}
+	
+	public static class VoxelShader extends DefaultShader
+	{
+		public final int u_faceCount;
+		
+		public VoxelShader(Renderable renderable)
+		{
+			super(renderable);
+			
+			u_faceCount = register("u_faceCount");
+		}
+		
+		@Override
+		public void render(Renderable renderable)
+		{
+			if (!renderable.material.has(BlendingAttribute.Type)) context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+			bindMaterial(renderable);
+			if (lighting) bindLights(renderable);
+			
+			set(u_faceCount, (Integer) renderable.userData);
+			
+			super.render(renderable);
 		}
 	}
 }

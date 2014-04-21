@@ -170,7 +170,9 @@ public class Island implements RenderableProvider, Tickable
 				opaque.meshPartOffset = 0;
 				opaque.meshPartSize = chunk.opaqueVerts;
 				opaque.primitiveType = GL20.GL_TRIANGLES;
-				//
+				opaque.userData = 1; // face count
+				
+				
 				// Renderable transp = pool.obtain();
 				// transp.material = this.transp;
 				// transp.mesh = chunk.getTransparentMesh();

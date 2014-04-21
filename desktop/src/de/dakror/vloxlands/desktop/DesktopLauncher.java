@@ -13,7 +13,7 @@ public class DesktopLauncher
 		config.title = "Vloxlands";
 		config.width = 1280;
 		config.height = 720;
-		config.samples = 8;
+		config.samples = 0;
 		config.foregroundFPS = 0;
 		config.vSyncEnabled = false;
 		new LwjglApplication(new Vloxlands(), config);

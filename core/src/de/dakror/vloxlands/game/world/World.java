@@ -2,12 +2,10 @@ package de.dakror.vloxlands.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.glutils.MipMapGenerator;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -39,9 +37,9 @@ public class World implements RenderableProvider, Tickable
 		
 		islands = new Island[width * depth];
 		
-		Texture tex = new Texture(Gdx.files.internal("voxelTextures.png"), true);
-		MipMapGenerator.setUseHardwareMipMap(false);
-		tex.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.Nearest);
+		Texture tex = new Texture(Gdx.files.internal("voxelTextures.png")/* , true */);
+		// MipMapGenerator.setUseHardwareMipMap(false);
+		// tex.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 	}
