@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.gen.IslandGenerator;
+import de.dakror.vloxlands.generate.IslandGenerator;
 import de.dakror.vloxlands.util.Tickable;
 
 
