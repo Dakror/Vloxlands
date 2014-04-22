@@ -134,8 +134,10 @@ public class Chunk implements Meshable
 			return true;
 		}
 		
-		if (!updateRequired) return true;
+		if (!updateRequired) return meshing;
 		empty = getVoxelCount() == 0;
+		
+		if (empty) return true;
 		
 		if (!meshing)
 		{

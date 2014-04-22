@@ -170,6 +170,7 @@ public class Island implements RenderableProvider, Tickable
 			if (Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
 				if (chunk.updateMeshes()) visibleChunks++;
+				
 				if (chunk.isEmpty()) continue;
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setTranslation(pos.x, pos.y, pos.z);
