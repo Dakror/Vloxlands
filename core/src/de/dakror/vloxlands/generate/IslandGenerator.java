@@ -12,7 +12,7 @@ import de.dakror.vloxlands.generate.structure.TopLayerGenerator;
 public class IslandGenerator
 {
 	public static final int MIN = 24;
-	public static final int MAX = 48;
+	public static final int MAX = 32;
 	
 	public static Island generate()
 	{

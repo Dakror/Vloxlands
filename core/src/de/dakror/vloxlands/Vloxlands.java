@@ -146,8 +146,14 @@ public class Vloxlands extends ApplicationAdapter
 			touchpadStyle.background = touchpadBack;
 			touchpadStyle.knob = touchpadFront;
 			
+			int size = (int) (160 * (Gdx.graphics.getHeight() / 720f));
+			int size2 = (int) (100 * (Gdx.graphics.getHeight() / 720f));
+			
+			touchpadStyle.knob.setMinWidth(size2);
+			touchpadStyle.knob.setMinHeight(size2);
+			
 			touchpad = new Touchpad(10, touchpadStyle);
-			touchpad.setBounds(15, 15, 160, 160);
+			touchpad.setBounds(15, 15, size, size);
 			
 			stage = new Stage(new ScreenViewport(camera2));
 			stage.addActor(touchpad);
