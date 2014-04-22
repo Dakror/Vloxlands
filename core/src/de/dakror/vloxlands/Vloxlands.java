@@ -3,6 +3,7 @@ package de.dakror.vloxlands;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -38,6 +39,8 @@ public class Vloxlands extends ApplicationAdapter
 	long last;
 	int tick;
 	
+	boolean debug = true;
+	
 	Vector3 worldMiddle;
 	
 	@Override
@@ -58,6 +61,13 @@ public class Vloxlands extends ApplicationAdapter
 		camera.far = 1000;
 		controller = new CameraInputController(camera)
 		{
+			@Override
+			public boolean keyUp(int keycode)
+			{
+				if (keycode == Keys.F1) debug = !debug;
+				return super.keyUp(keycode);
+			}
+			
 			@Override
 			public boolean touchDown(int screenX, int screenY, int pointer, int button)
 			{
@@ -96,7 +106,7 @@ public class Vloxlands extends ApplicationAdapter
 		
 		camera.position.set(worldMiddle);
 		camera.position.y -= Island.SIZE / 4;
-		camera.position.z += Island.SIZE / 3 * 2;
+		camera.position.z += Island.SIZE / 2;
 	}
 	
 	@Override
@@ -112,13 +122,17 @@ public class Vloxlands extends ApplicationAdapter
 		
 		if (last == 0) last = System.currentTimeMillis();
 		
-		spriteBatch.begin();
-		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
-		font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-		font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
-		font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
-		font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
-		spriteBatch.end();
+		if (debug)
+		{
+			spriteBatch.begin();
+			font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
+			font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
+			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
+			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
+			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
+			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 100);
+			spriteBatch.end();
+		}
 		
 		if (System.currentTimeMillis() - last >= 16) // ~60 a sec
 		{

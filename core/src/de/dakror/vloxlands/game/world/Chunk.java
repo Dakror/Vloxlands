@@ -20,20 +20,21 @@ import de.dakror.vloxlands.util.Meshable;
  */
 public class Chunk implements Meshable
 {
-	public static final int SIZE = 8;
+	public static final int SIZE = 16;
 	public static final int VERTEX_SIZE = 10;
 	
-	public int opaqueVerts;// , transpVerts;
+	public int opaqueVerts, transpVerts;
 	
-	Vector3 index, pos;
+	public Vector3 index;
+	Vector3 pos;
 	byte[] voxels;
 	FloatArray opaqueMeshData;
+	FloatArray transpMeshData;
 	
 	float weight, uplift;
 	
-	Mesh opaque;// , transp;
+	Mesh opaque, transp;
 	
-	boolean empty;
 	boolean updateRequired;
 	boolean meshing;
 	boolean meshRequest;
@@ -41,6 +42,8 @@ public class Chunk implements Meshable
 	
 	Vector2 tex;
 	Island island;
+	
+	int[] resources;
 	
 	public Chunk(Vector3 index, Island island)
 	{
@@ -52,8 +55,9 @@ public class Chunk implements Meshable
 		for (int i = 0; i < voxels.length; i++)
 			voxels[i] = 0;
 		
+		resources = new int[Voxel.VOXELS];
+		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
 		
-		// empty = true;
 		updateRequired = true;
 		
 		int len = SIZE * SIZE * SIZE * 6 * 6 / 3;
@@ -71,11 +75,12 @@ public class Chunk implements Meshable
 		
 		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		opaque.setIndices(indices);
+		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();
+		transpMeshData = new FloatArray();
 		
-		// transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
-		// transp.setIndices(indices);
 		MeshingThread.register(this);
 	}
 	
@@ -102,7 +107,12 @@ public class Chunk implements Meshable
 		
 		if (!force && voxels[z + y * SIZE + x * SIZE * SIZE] != Voxel.get("AIR").getId()) return;
 		
+		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
+		
 		voxels[z + y * SIZE + x * SIZE * SIZE] = id;
+		
+		resources[id + 128]++;
+		
 		updateRequired = true;
 	}
 	
@@ -115,36 +125,21 @@ public class Chunk implements Meshable
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
-	public int getVoxelCount()
-	{
-		int c = 0;
-		
-		for (byte b : voxels)
-			if (b != 0) c++;
-		
-		return c;
-	}
-	
-	public boolean updateMeshes()// , float[] transpMeshData)
+	public boolean updateMeshes()
 	{
 		if (doneMeshing)
 		{
 			opaque.setVertices(opaqueMeshData.items, 0, (opaqueVerts / 6 * 4) * VERTEX_SIZE);
+			transp.setVertices(transpMeshData.items, 0, (transpVerts / 6 * 4) * VERTEX_SIZE);
 			doneMeshing = false;
 			return true;
 		}
 		
 		if (!updateRequired) return meshing;
-		empty = getVoxelCount() == 0;
-		
-		if (empty) return true;
-		
-		if (!meshing)
-		{
-			meshRequest = true;
-		}
 		
 		updateRequired = false;
+		
+		if (!meshing) meshRequest = true;
 		
 		return false;
 	}
@@ -154,14 +149,19 @@ public class Chunk implements Meshable
 		return opaque;
 	}
 	
-	// public Mesh getTransparentMesh()
-	// {
-	// return transp;
-	// }
+	public Mesh getTransparentMesh()
+	{
+		return transp;
+	}
 	
 	public boolean isEmpty()
 	{
-		return empty;
+		return getResource(Voxel.get("AIR").getId()) == SIZE * SIZE * SIZE;
+	}
+	
+	public int getResource(byte id)
+	{
+		return resources[id + 128];
 	}
 	
 	public void calculateWeight()
@@ -204,12 +204,12 @@ public class Chunk implements Meshable
 					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
 	}
 	
-	public void getVertices()// , boolean opaque)
+	public void getVertices()
 	{
 		ObjectMap<VoxelFaceKey, VoxelFace> faces = new ObjectMap<VoxelFaceKey, VoxelFace>();
+		ObjectMap<VoxelFaceKey, VoxelFace> transpFaces = new ObjectMap<VoxelFaceKey, VoxelFace>();
 		
 		int i = 0;
-		int vertexOffset = 0;
 		for (int x = 0; x < SIZE; x++)
 		{
 			for (int y = 0; y < SIZE; y++)
@@ -218,17 +218,20 @@ public class Chunk implements Meshable
 				{
 					byte voxel = voxels[i];
 					if (voxel == 0) continue;
+					Voxel v = Voxel.getVoxelForId(voxel);
 					
-					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z)) continue;
+					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
 					
 					for (Direction d : Direction.values())
 					{
-						if (island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z) == 0)
+						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
+						Voxel ww = Voxel.getVoxelForId(w);
+						if (w == 0 || !ww.isOpaque() && w != voxel)
 						{
 							VoxelFace face = new VoxelFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getVoxelForId(voxel).getTextureUV(x, y, z, d));
-							faces.put(new VoxelFaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal()), face);
-							// vertexOffset = face.getVertexData(vertices, vertexOffset);
-							// vertexOffset = createFace(x, y, z, voxel, vertices, vertexOffset, d);
+							VoxelFaceKey key = new VoxelFaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal());
+							if (v.isOpaque()) faces.put(key, face);
+							else transpFaces.put(key, face);
 						}
 					}
 				}
@@ -236,10 +239,12 @@ public class Chunk implements Meshable
 		}
 		
 		faces = Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
+		transpFaces = Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
 		for (VoxelFace vf : faces.values())
-		{
-			vf.getVertexData(opaqueMeshData, vertexOffset);
-		}
+			vf.getVertexData(opaqueMeshData);
+		
+		for (VoxelFace vf : transpFaces.values())
+			vf.getVertexData(transpMeshData);
 	}
 	
 	@Override
@@ -249,9 +254,12 @@ public class Chunk implements Meshable
 		{
 			meshing = true;
 			opaqueMeshData.clear();
+			transpMeshData.clear();
 			getVertices();// , true);
-			int numVerts = opaqueMeshData.size / VERTEX_SIZE;
-			opaqueVerts = numVerts / 4 * 6;
+			int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
+			int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
+			opaqueVerts = opaqueNumVerts / 4 * 6;
+			transpVerts = transpNumVerts / 4 * 6;
 			meshRequest = false;
 			doneMeshing = true;
 		}

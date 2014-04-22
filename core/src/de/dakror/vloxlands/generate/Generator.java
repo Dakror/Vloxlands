@@ -5,7 +5,11 @@ import java.io.ByteArrayOutputStream;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 
 public abstract class Generator
@@ -78,6 +82,56 @@ public abstract class Generator
 		while (v.dst(center) > radius - rad2);
 		
 		return v;
+	}
+	
+	public static boolean hasNaturalVoxel(Chunk c)
+	{
+		Array<Voxel> naturalVoxels = new Array<Voxel>();
+		naturalVoxels.add(Voxel.get("STONE"));
+		naturalVoxels.add(Voxel.get("DIRT"));
+		
+		for (Voxel b : naturalVoxels)
+			if (c.getResource(b.getId()) > 0) return true;
+		
+		return false;
+	}
+	
+	public static Vector3 pickRandomNaturalChunk(Island island)
+	{
+		int i = 0;
+		int chunks = island.getChunks().length;
+		
+		do
+			i = MathUtils.random(chunks - 1);
+		while (island.getChunk(i) == null || !hasNaturalVoxel(island.getChunk(i)));
+		
+		return island.getChunk(i).index;
+	}
+	
+	public static Vector3 pickRandomNaturalVoxel(Island island)
+	{
+		Array<Byte> naturalVoxels = new Array<Byte>();
+		naturalVoxels.add(Voxel.get("STONE").getId());
+		naturalVoxels.add(Voxel.get("DIRT").getId());
+		
+		Vector3 c = pickRandomNaturalChunk(island);
+		Chunk chunk = island.getChunk(c.x, c.y, c.z);
+		
+		Array<Vector3> chunkVoxels = new Array<Vector3>();
+		
+		for (int i = 0; i < Chunk.SIZE; i++)
+		{
+			for (int j = 0; j < Chunk.SIZE; j++)
+			{
+				for (int k = 0; k < Chunk.SIZE; k++)
+				{
+					byte id = chunk.get(i, j, k);
+					if (naturalVoxels.contains(id, false)) chunkVoxels.add(new Vector3(i + c.x * Chunk.SIZE, j + c.y * Chunk.SIZE, k + c.z * Chunk.SIZE));
+				}
+			}
+		}
+		
+		return chunkVoxels.get((int) (MathUtils.random() * chunkVoxels.size));
 	}
 	
 	public abstract void generate(Island island);
