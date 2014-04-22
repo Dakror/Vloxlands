@@ -118,9 +118,9 @@ public class Chunk implements Meshable
 	
 	public byte get(int x, int y, int z)
 	{
-		if (x >= SIZE || x < 0) return -1;
-		if (y >= SIZE || y < 0) return -1;
-		if (z >= SIZE || z < 0) return -1;
+		if (x >= SIZE || x < 0) return 0;
+		if (y >= SIZE || y < 0) return 0;
+		if (z >= SIZE || z < 0) return 0;
 		
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}

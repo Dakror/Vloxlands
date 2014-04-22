@@ -89,8 +89,8 @@ public class CrystalGenerator extends Generator
 								uplifted += CRYSTALS[index].getUplift();
 								
 								byte b = island.get(i, j, k);
-								if (b != Voxel.get("AIR").getId() && b != 0) uplifted += Voxel.getVoxelForId(b).getWeight();
-								
+								if (b != Voxel.get("AIR").getId()) uplifted += //
+								Voxel.getVoxelForId(b).getWeight();
 								island.set(i, j, k, CRYSTALS[index].getId());
 							}
 						}
