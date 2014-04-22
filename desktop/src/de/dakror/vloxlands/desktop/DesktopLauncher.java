@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.desktop;
 
+import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
@@ -13,9 +14,11 @@ public class DesktopLauncher
 		config.title = "Vloxlands";
 		config.width = 1280;
 		config.height = 720;
-		config.samples = 8;
 		config.foregroundFPS = 0;
 		config.vSyncEnabled = false;
+		config.addIcon("img/logo/logo128.png", FileType.Internal);
+		config.addIcon("img/logo/logo32.png", FileType.Internal);
+		config.addIcon("img/logo/logo16.png", FileType.Internal);
 		new LwjglApplication(new Vloxlands(), config);
 	}
 }

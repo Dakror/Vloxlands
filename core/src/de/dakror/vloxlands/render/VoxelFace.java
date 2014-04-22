@@ -1,0 +1,285 @@
+package de.dakror.vloxlands.render;
+
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.FloatArray;
+
+import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.util.Direction;
+
+public class VoxelFace
+{
+	public static class VoxelFaceKey implements Comparable<VoxelFaceKey>
+	{
+		public int x, y, z, d;
+		
+		public VoxelFaceKey(int x, int y, int z, int d)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.d = d;
+		}
+		
+		public VoxelFaceKey(VoxelFace vf)
+		{
+			x = (int) vf.pos.x;
+			y = (int) vf.pos.y;
+			z = (int) vf.pos.z;
+			d = vf.dir.ordinal();
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return ((x * Island.CHUNKS + y) * Island.CHUNKS + z) * Island.CHUNKS + d;
+		}
+		
+		@Override
+		public boolean equals(Object o)
+		{
+			if (!(o instanceof VoxelFaceKey)) return false;
+			
+			return hashCode() == o.hashCode();
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "[" + x + ", " + y + ", " + z + ", " + Direction.values()[d] + "]";
+		}
+		
+		@Override
+		public int compareTo(VoxelFaceKey o)
+		{
+			if (x != o.x) return x - o.x;
+			else if (y != o.x) return y - o.y;
+			else if (z != o.z) return z - o.z;
+			
+			return d - o.d;
+		}
+	}
+	
+	public Direction dir;
+	public Vector3 pos, tl, tr, bl, br, n;
+	
+	public Vector2 tex;
+	public int sizeX, sizeY, sizeZ;
+	
+	public VoxelFace(Direction dir, Vector3 pos, Vector2 tex)
+	{
+		this(dir, pos, tex, 1, 1, 1);
+	}
+	
+	public VoxelFace(VoxelFace o)
+	{
+		sizeX = o.sizeX;
+		sizeY = o.sizeY;
+		sizeZ = o.sizeZ;
+		dir = o.dir;
+		tex = o.tex.cpy();
+		pos = o.pos.cpy();
+		
+		updateVertices();
+	}
+	
+	public VoxelFace(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
+	{
+		super();
+		this.dir = dir;
+		this.pos = pos;
+		this.tex = tex;
+		setSize(sizeX, sizeY, sizeZ);
+	}
+	
+	public void setSize(int sizeX, int sizeY, int sizeZ)
+	{
+		this.sizeX = sizeX;
+		this.sizeY = sizeY;
+		this.sizeZ = sizeZ;
+		
+		updateVertices();
+	}
+	
+	public void updateVertices()
+	{
+		tl = new Vector3(0, sizeY, 0);
+		tr = new Vector3(sizeX, sizeY, 0);
+		bl = new Vector3(0, 0, 0);
+		br = new Vector3(sizeX, 0, 0);
+		switch (dir)
+		{
+			case NORTH:
+			{
+				tl.x = sizeX;
+				bl.x = sizeX;
+				
+				tr.z = sizeZ;
+				br.z = sizeZ;
+				
+				break;
+			}
+			case SOUTH:
+			{
+				tl.z = sizeZ;
+				bl.z = sizeZ;
+				
+				tr.x = 0;
+				br.x = 0;
+				
+				break;
+			}
+			case WEST:
+			{
+				tl.z = sizeZ;
+				bl.z = sizeZ;
+				tr.z = sizeZ;
+				br.z = sizeZ;
+				
+				tl.x = sizeX;
+				bl.x = sizeX;
+				tr.x = 0;
+				br.x = 0;
+				
+				break;
+			}
+			case UP:
+			{
+				tl.z = sizeZ;
+				tr.z = sizeZ;
+				
+				bl.y = sizeY;
+				br.y = sizeY;
+				break;
+			}
+			case DOWN:
+			{
+				tl.y = 0;
+				tr.y = 0;
+				
+				bl.z = sizeZ;
+				br.z = sizeZ;
+				break;
+			}
+			default:
+				break;
+		}
+		
+		n = bl.cpy().sub(br).crs(tr.cpy().sub(br)).nor();
+	}
+	
+	public void getVertexData(FloatArray vert, int offset)
+	{
+		boolean zDir = dir == Direction.WEST || dir == Direction.EAST;
+		boolean yDir = dir == Direction.UP || dir == Direction.DOWN;
+		
+		int tx = zDir ? sizeX : yDir ? sizeX : sizeZ;
+		int ty = yDir ? sizeZ : sizeY;
+		// vert[offset++] = tl.x + pos.x;
+		// vert[offset++] = tl.y + pos.y;
+		// vert[offset++] = tl.z + pos.z;
+		// vert[offset++] = n.x;
+		// vert[offset++] = n.y;
+		// vert[offset++] = n.z;
+		// vert[offset++] = tex.x;
+		// vert[offset++] = tex.y;
+		// vert[offset++] = tx;
+		// vert[offset++] = ty;
+		//
+		// vert[offset++] = tr.x + pos.x;
+		// vert[offset++] = tr.y + pos.y;
+		// vert[offset++] = tr.z + pos.z;
+		// vert[offset++] = n.x;
+		// vert[offset++] = n.y;
+		// vert[offset++] = n.z;
+		// vert[offset++] = tex.x + Voxel.TEXSIZE;
+		// vert[offset++] = tex.y;
+		// vert[offset++] = tx;
+		// vert[offset++] = ty;
+		//
+		// vert[offset++] = br.x + pos.x;
+		// vert[offset++] = br.y + pos.y;
+		// vert[offset++] = br.z + pos.z;
+		// vert[offset++] = n.x;
+		// vert[offset++] = n.y;
+		// vert[offset++] = n.z;
+		// vert[offset++] = tex.x + Voxel.TEXSIZE;
+		// vert[offset++] = tex.y + Voxel.TEXSIZE;
+		// vert[offset++] = tx;
+		// vert[offset++] = ty;
+		//
+		// vert[offset++] = bl.x + pos.x;
+		// vert[offset++] = bl.y + pos.y;
+		// vert[offset++] = bl.z + pos.z;
+		// vert[offset++] = n.x;
+		// vert[offset++] = n.y;
+		// vert[offset++] = n.z;
+		// vert[offset++] = tex.x;
+		// vert[offset++] = tex.y + Voxel.TEXSIZE;
+		// vert[offset++] = tx;
+		// vert[offset++] = ty;
+		//
+		// return offset;
+		vert.add(tl.x + pos.x);
+		vert.add(tl.y + pos.y);
+		vert.add(tl.z + pos.z);
+		vert.add(n.x);
+		vert.add(n.y);
+		vert.add(n.z);
+		vert.add(tex.x);
+		vert.add(tex.y);
+		vert.add(tx);
+		vert.add(ty);
+		
+		vert.add(tr.x + pos.x);
+		vert.add(tr.y + pos.y);
+		vert.add(tr.z + pos.z);
+		vert.add(n.x);
+		vert.add(n.y);
+		vert.add(n.z);
+		vert.add(tex.x + Voxel.TEXSIZE);
+		vert.add(tex.y);
+		vert.add(tx);
+		vert.add(ty);
+		
+		vert.add(br.x + pos.x);
+		vert.add(br.y + pos.y);
+		vert.add(br.z + pos.z);
+		vert.add(n.x);
+		vert.add(n.y);
+		vert.add(n.z);
+		vert.add(tex.x + Voxel.TEXSIZE);
+		vert.add(tex.y + Voxel.TEXSIZE);
+		vert.add(tx);
+		vert.add(ty);
+		
+		vert.add(bl.x + pos.x);
+		vert.add(bl.y + pos.y);
+		vert.add(bl.z + pos.z);
+		vert.add(n.x);
+		vert.add(n.y);
+		vert.add(n.z);
+		vert.add(tex.x);
+		vert.add(tex.y + Voxel.TEXSIZE);
+		vert.add(tx);
+		vert.add(ty);
+	}
+	
+	public void increaseSize(int sizeX, int sizeY, int sizeZ)
+	{
+		setSize(this.sizeX + sizeX, this.sizeY + sizeY, this.sizeZ + sizeZ);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "VoxelFace[pos=" + pos.toString() + ", DIR=" + dir + ", sizeX=" + sizeX + ", sizeY=" + sizeY + ", sizeZ=" + sizeZ + ", tl=" + tl + ", tr=" + tr + ", bl=" + bl + ", br=" + br + "]";
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		return toString().equals(obj.toString());
+	}
+}

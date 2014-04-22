@@ -17,7 +17,6 @@ public enum Direction
 	
 	WEST(0, 0, 1, 0, 180, 0);
 	
-	
 	public Vector3 dir;
 	Vector3 rot;
 	
@@ -32,7 +31,7 @@ public enum Direction
 		return new Vector3(b.rot.x - a.rot.x, b.rot.y - a.rot.y, b.rot.z - a.rot.z);
 	}
 	
-	public static Array<Direction> get90DegreeDiretions(Direction d)
+	public static Array<Direction> get90DegreeDirections(Direction d)
 	{
 		Array<Direction> l = new Array<Direction>();
 		for (Direction e : Direction.values())
