@@ -98,6 +98,10 @@ uniform vec4 u_fogColor;
 varying float v_fog;
 #endif // fogFlag
 
+float frac(float f) {
+	return f-floor(f);
+}
+
 void main() {
 	#if defined(normalFlag) 
 		vec3 normal = v_normal;
@@ -105,9 +109,16 @@ void main() {
 
 	vec2 texCoord = v_texCoords0.st;
 	vec2 fac = v_texCoords1.st;
+
+	float ts = 16.0 / 512.0;
 	
-	vec2 texUV = vec2(frac(fac.x*texCoord.x),frac(fac.y*texCoord.y));
+	vec2 texStart = vec2(floor(texCoord.x / ts) * ts, floor(texCoord.y / ts) * ts); // rounding down texCoord
 	
+	float x = mod(texCoord.x * fac.x, ts);
+	float y = mod(texCoord.y * fac.y, ts);
+	
+	vec2 texUV = vec2(x + texStart.x, y + texStart.y);
+
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, texUV) * u_diffuseColor * v_color;
 	#elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)

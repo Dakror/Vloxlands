@@ -1,8 +1,11 @@
 package de.dakror.vloxlands.game.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Config;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -30,8 +33,10 @@ public class Island implements RenderableProvider, Tickable
 	 */
 	public float initBalance = 0;
 	
-	float[] opaqueMeshData;
+	// float[] opaqueMeshData;
 	// float[] transpMeshData;
+	
+	boolean printedPrefixLength;
 	
 	public Vector3 index, pos;
 	
@@ -46,7 +51,7 @@ public class Island implements RenderableProvider, Tickable
 				for (int k = 0; k < CHUNKS; k++)
 					chunks[l++] = new Chunk(i, j, k, this);
 		
-		opaqueMeshData = new float[Chunk.SIZE * Chunk.SIZE * Chunk.SIZE * Chunk.VERTEX_SIZE * 6];
+		// opaqueMeshData = new float[Chunk.SIZE * Chunk.SIZE * Chunk.SIZE * Chunk.VERTEX_SIZE * 6];
 		// transpMeshData = new float[Chunk.SIZE * Chunk.SIZE * Chunk.SIZE * Chunk.VERTEX_SIZE * 6];
 	}
 	
@@ -122,6 +127,11 @@ public class Island implements RenderableProvider, Tickable
 		chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE, id, force);
 	}
 	
+	public boolean isSurrounded(float x, float y, float z)
+	{
+		return get(x - 1, y, z) != 0 && get(x + 1, y, z) != 0 && get(x, y - 1, z) != 0 && get(x, y + 1, z) != 0 && get(x, y, z - 1) != 0 && get(x, y, z + 1) != 0;
+	}
+	
 	public float getWeight()
 	{
 		return weight;
@@ -159,10 +169,8 @@ public class Island implements RenderableProvider, Tickable
 			Chunk chunk = chunks[i];
 			if (Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
-				visibleChunks++;
-				chunk.updateMeshes(opaqueMeshData);// , transpMeshData);
+				if (chunk.updateMeshes()) visibleChunks++;
 				if (chunk.isEmpty()) continue;
-				
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setTranslation(pos.x, pos.y, pos.z);
 				opaque.material = World.opaque;
@@ -170,9 +178,12 @@ public class Island implements RenderableProvider, Tickable
 				opaque.meshPartOffset = 0;
 				opaque.meshPartSize = chunk.opaqueVerts;
 				opaque.primitiveType = GL20.GL_TRIANGLES;
-				opaque.userData = 1; // face count
 				
-				
+				if (!printedPrefixLength)
+				{
+					Gdx.app.log("prefixLength", DefaultShader.createPrefix(opaque, new Config()).split("\n").length + "");
+					printedPrefixLength = true;
+				}
 				// Renderable transp = pool.obtain();
 				// transp.material = this.transp;
 				// transp.mesh = chunk.getTransparentMesh();

@@ -28,7 +28,7 @@ public class World implements RenderableProvider, Tickable
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks;
+	public int visibleChunks, chunks, vertices;
 	
 	public World(int width, int depth)
 	{
@@ -37,7 +37,7 @@ public class World implements RenderableProvider, Tickable
 		
 		islands = new Island[width * depth];
 		
-		Texture tex = new Texture(Gdx.files.internal("voxelTextures.png")/* , true */);
+		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png")/* , true */);
 		// MipMapGenerator.setUseHardwareMipMap(false);
 		// tex.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
 		
@@ -91,6 +91,9 @@ public class World implements RenderableProvider, Tickable
 				visibleChunks += island.visibleChunks;
 			}
 		}
+		
+		if (vertices == 0) for (Renderable r : renderables)
+			vertices += r.mesh.getNumVertices();
 		
 		// entities
 	}

@@ -186,7 +186,7 @@ public class Voxel
 	
 	public static void loadVoxels()
 	{
-		CSVReader csv = new CSVReader(Gdx.files.internal("voxels.csv"));
+		CSVReader csv = new CSVReader(Gdx.files.internal("data/voxels.csv"));
 		String[] categories = csv.readRow();
 		String[] defaults = csv.readRow();
 		String cell;

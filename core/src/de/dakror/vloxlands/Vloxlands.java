@@ -9,20 +9,21 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.render.MeshingThread;
 
 public class Vloxlands extends ApplicationAdapter
 {
+	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
+	
 	public static Vloxlands currentGame;
 	
 	public PerspectiveCamera camera;
@@ -44,18 +45,37 @@ public class Vloxlands extends ApplicationAdapter
 	{
 		currentGame = this;
 		
+		Gdx.app.log("Seed", seed + "");
+		MathUtils.random.setSeed(seed);
+		
 		Voxel.loadVoxels();
 		
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
-		modelBatch = new ModelBatch(Gdx.files.internal("shader.vs"), Gdx.files.internal("shader.fs"));
-		DefaultShader.defaultCullFace = GL20.GL_FRONT;
+		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.5f;
 		camera.far = 1000;
-		controller = new CameraInputController(camera);
+		controller = new CameraInputController(camera)
+		{
+			@Override
+			public boolean touchDown(int screenX, int screenY, int pointer, int button)
+			{
+				Gdx.input.setCursorCatched(true);
+				return super.touchDown(screenX, screenY, pointer, button);
+			}
+			
+			@Override
+			public boolean touchUp(int screenX, int screenY, int pointer, int button)
+			{
+				Gdx.input.setCursorCatched(false);
+				return super.touchUp(screenX, screenY, pointer, button);
+			}
+		};
 		// controller.setVelocity(20);
 		Gdx.input.setInputProcessor(controller);
+		
+		new MeshingThread();
 		
 		lights = new Environment();
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
@@ -65,8 +85,6 @@ public class Vloxlands extends ApplicationAdapter
 		world.addIsland(0, 0);
 		Vector3 p = world.getIslands()[0].pos;
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
-		// worldMiddle = world.size.cpy().scl(0.5f * Chunk.SIZE);
-		// camera.position.set(worldMiddle.cpy());
 		
 		controller.target = worldMiddle;
 		controller.translateTarget = false;
@@ -78,7 +96,7 @@ public class Vloxlands extends ApplicationAdapter
 		
 		camera.position.set(worldMiddle);
 		camera.position.y -= Island.SIZE / 4;
-		camera.position.z += Island.SIZE / 4;
+		camera.position.z += Island.SIZE / 3 * 2;
 	}
 	
 	@Override
@@ -97,9 +115,10 @@ public class Vloxlands extends ApplicationAdapter
 		spriteBatch.begin();
 		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 		font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-		font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
-		font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
-		font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
+		font.draw(spriteBatch, "F: " + world.vertices / 4, 0, Gdx.graphics.getHeight() - 40);
+		font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 60);
+		font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
+		font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
 		spriteBatch.end();
 		
 		if (System.currentTimeMillis() - last >= 16) // ~60 a sec
@@ -112,30 +131,9 @@ public class Vloxlands extends ApplicationAdapter
 	@Override
 	public void resize(int width, int height)
 	{
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+		camera.viewportWidth = width;
+		camera.viewportHeight = height;
 		camera.update();
-	}
-	
-	public static class VoxelShader extends DefaultShader
-	{
-		public final int u_faceCount;
-		
-		public VoxelShader(Renderable renderable)
-		{
-			super(renderable);
-			
-			u_faceCount = register("u_faceCount");
-		}
-		
-		@Override
-		public void render(Renderable renderable)
-		{
-			if (!renderable.material.has(BlendingAttribute.Type)) context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-			bindMaterial(renderable);
-			if (lighting) bindLights(renderable);
-			
-			set(u_faceCount, (Integer) renderable.userData);
-			
-			super.render(renderable);
-		}
 	}
 }
