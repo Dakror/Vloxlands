@@ -115,10 +115,9 @@ public class Vloxlands extends ApplicationAdapter
 		spriteBatch.begin();
 		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 		font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-		font.draw(spriteBatch, "F: " + world.vertices / 4, 0, Gdx.graphics.getHeight() - 40);
-		font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 60);
-		font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
-		font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
+		font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
+		font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
+		font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
 		spriteBatch.end();
 		
 		if (System.currentTimeMillis() - last >= 16) // ~60 a sec

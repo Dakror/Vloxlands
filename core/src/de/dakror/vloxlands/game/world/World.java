@@ -28,7 +28,7 @@ public class World implements RenderableProvider, Tickable
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks, vertices;
+	public int visibleChunks, chunks;
 	
 	public World(int width, int depth)
 	{
@@ -91,10 +91,6 @@ public class World implements RenderableProvider, Tickable
 				visibleChunks += island.visibleChunks;
 			}
 		}
-		
-		if (vertices == 0) for (Renderable r : renderables)
-			vertices += r.mesh.getNumVertices();
-		
 		// entities
 	}
 	
