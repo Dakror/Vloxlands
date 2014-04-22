@@ -20,7 +20,7 @@ import de.dakror.vloxlands.util.Meshable;
  */
 public class Chunk implements Meshable
 {
-	public static final int SIZE = 16;
+	public static final int SIZE = 8;
 	public static final int VERTEX_SIZE = 10;
 	
 	public int opaqueVerts, transpVerts;
@@ -75,7 +75,7 @@ public class Chunk implements Meshable
 		
 		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		opaque.setIndices(indices);
-		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp = new Mesh(false, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();
@@ -226,7 +226,7 @@ public class Chunk implements Meshable
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
 						Voxel ww = Voxel.getVoxelForId(w);
-						if (w == 0 || !ww.isOpaque() && w != voxel)
+						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
 							VoxelFace face = new VoxelFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getVoxelForId(voxel).getTextureUV(x, y, z, d));
 							VoxelFaceKey key = new VoxelFaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal());
