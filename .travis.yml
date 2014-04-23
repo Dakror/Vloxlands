@@ -1,4 +1,6 @@
 language: java
+before_install:
+ - chmod +x gradlew
 script:
  -gradlew desktop:dist
  -gradlew android:assembleRelease
