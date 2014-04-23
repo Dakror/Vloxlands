@@ -20,5 +20,7 @@ fi
 # Add the Android SDK tools to the PATH.
 export PATH="${PATH}:${ANDROID_HOME}/tools"
 
+chmod +x ./gradlew
+
 ./gradlew desktop:dist
 ./gradlew android:assembleRelease
