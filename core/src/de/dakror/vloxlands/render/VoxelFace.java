@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.util.Direction;
 
 public class VoxelFace
@@ -33,7 +33,7 @@ public class VoxelFace
 		@Override
 		public int hashCode()
 		{
-			return ((x * Island.CHUNKS + y) * Island.CHUNKS + z) * Island.CHUNKS + d;
+			return ((x * Chunk.SIZE + y) * Chunk.SIZE + z) * Chunk.SIZE + d;
 		}
 		
 		@Override
@@ -169,58 +169,14 @@ public class VoxelFace
 		n = bl.cpy().sub(br).crs(tr.cpy().sub(br)).nor();
 	}
 	
-	public void getVertexData(FloatArray vert, int offset)
+	public void getVertexData(FloatArray vert)
 	{
 		boolean zDir = dir == Direction.WEST || dir == Direction.EAST;
 		boolean yDir = dir == Direction.UP || dir == Direction.DOWN;
 		
 		int tx = zDir ? sizeX : yDir ? sizeX : sizeZ;
 		int ty = yDir ? sizeZ : sizeY;
-		// vert[offset++] = tl.x + pos.x;
-		// vert[offset++] = tl.y + pos.y;
-		// vert[offset++] = tl.z + pos.z;
-		// vert[offset++] = n.x;
-		// vert[offset++] = n.y;
-		// vert[offset++] = n.z;
-		// vert[offset++] = tex.x;
-		// vert[offset++] = tex.y;
-		// vert[offset++] = tx;
-		// vert[offset++] = ty;
-		//
-		// vert[offset++] = tr.x + pos.x;
-		// vert[offset++] = tr.y + pos.y;
-		// vert[offset++] = tr.z + pos.z;
-		// vert[offset++] = n.x;
-		// vert[offset++] = n.y;
-		// vert[offset++] = n.z;
-		// vert[offset++] = tex.x + Voxel.TEXSIZE;
-		// vert[offset++] = tex.y;
-		// vert[offset++] = tx;
-		// vert[offset++] = ty;
-		//
-		// vert[offset++] = br.x + pos.x;
-		// vert[offset++] = br.y + pos.y;
-		// vert[offset++] = br.z + pos.z;
-		// vert[offset++] = n.x;
-		// vert[offset++] = n.y;
-		// vert[offset++] = n.z;
-		// vert[offset++] = tex.x + Voxel.TEXSIZE;
-		// vert[offset++] = tex.y + Voxel.TEXSIZE;
-		// vert[offset++] = tx;
-		// vert[offset++] = ty;
-		//
-		// vert[offset++] = bl.x + pos.x;
-		// vert[offset++] = bl.y + pos.y;
-		// vert[offset++] = bl.z + pos.z;
-		// vert[offset++] = n.x;
-		// vert[offset++] = n.y;
-		// vert[offset++] = n.z;
-		// vert[offset++] = tex.x;
-		// vert[offset++] = tex.y + Voxel.TEXSIZE;
-		// vert[offset++] = tx;
-		// vert[offset++] = ty;
-		//
-		// return offset;
+		
 		vert.add(tl.x + pos.x);
 		vert.add(tl.y + pos.y);
 		vert.add(tl.z + pos.z);

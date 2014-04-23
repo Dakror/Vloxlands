@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -22,13 +23,13 @@ public class World implements RenderableProvider, Tickable
 {
 	public static final int MAXHEIGHT = 512;
 	
-	static Material opaque;// , transp;
+	static Material opaque, transp;
 	
 	Island[] islands;
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks, vertices;
+	public int visibleChunks, chunks;
 	
 	public World(int width, int depth)
 	{
@@ -37,11 +38,10 @@ public class World implements RenderableProvider, Tickable
 		
 		islands = new Island[width * depth];
 		
-		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png")/* , true */);
-		// MipMapGenerator.setUseHardwareMipMap(false);
-		// tex.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
+		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png"));
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
+		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
 	}
 	
 	/**
@@ -91,10 +91,6 @@ public class World implements RenderableProvider, Tickable
 				visibleChunks += island.visibleChunks;
 			}
 		}
-		
-		if (vertices == 0) for (Renderable r : renderables)
-			vertices += r.mesh.getNumVertices();
-		
 		// entities
 	}
 	

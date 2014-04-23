@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
 
 /**
@@ -32,9 +34,6 @@ public class Island implements RenderableProvider, Tickable
 	 * Used to balance after generating. Smaller than 1
 	 */
 	public float initBalance = 0;
-	
-	// float[] opaqueMeshData;
-	// float[] transpMeshData;
 	
 	boolean printedPrefixLength;
 	
@@ -90,8 +89,8 @@ public class Island implements RenderableProvider, Tickable
 	@Override
 	public void tick(int tick)
 	{
-		// float deltaY = (int) (((uplift * World.calculateUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
-		// pos.y += deltaY;
+		float deltaY = (int) (((uplift * World.calculateUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
+		pos.y += deltaY;
 	}
 	
 	public byte get(float x, float y, float z)
@@ -127,9 +126,15 @@ public class Island implements RenderableProvider, Tickable
 		chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE, id, force);
 	}
 	
-	public boolean isSurrounded(float x, float y, float z)
+	public boolean isSurrounded(float x, float y, float z, boolean opaque)
 	{
-		return get(x - 1, y, z) != 0 && get(x + 1, y, z) != 0 && get(x, y - 1, z) != 0 && get(x, y + 1, z) != 0 && get(x, y, z - 1) != 0 && get(x, y, z + 1) != 0;
+		for (Direction d : Direction.values())
+		{
+			Voxel v = Voxel.getVoxelForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			if (v.isOpaque() != opaque || v.getId() == 0) return false;
+		}
+		
+		return true;
 	}
 	
 	public float getWeight()
@@ -152,6 +157,16 @@ public class Island implements RenderableProvider, Tickable
 		return chunks;
 	}
 	
+	public Chunk getChunk(float x, float y, float z)
+	{
+		return getChunk((int) (x * CHUNKS * CHUNKS + y * CHUNKS + z));
+	}
+	
+	public Chunk getChunk(int i)
+	{
+		return chunks[i];
+	}
+	
 	public void grassify()
 	{
 		for (Chunk c : chunks)
@@ -169,8 +184,10 @@ public class Island implements RenderableProvider, Tickable
 			Chunk chunk = chunks[i];
 			if (Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
-				if (chunk.updateMeshes()) visibleChunks++;
+				if (chunk.updateMeshes() && !chunk.isEmpty()) visibleChunks++;
+				
 				if (chunk.isEmpty()) continue;
+				
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setTranslation(pos.x, pos.y, pos.z);
 				opaque.material = World.opaque;
@@ -179,20 +196,22 @@ public class Island implements RenderableProvider, Tickable
 				opaque.meshPartSize = chunk.opaqueVerts;
 				opaque.primitiveType = GL20.GL_TRIANGLES;
 				
+				Renderable transp = pool.obtain();
+				transp.worldTransform.setTranslation(pos.x, pos.y, pos.z);
+				transp.material = World.transp;
+				transp.mesh = chunk.getTransparentMesh();
+				transp.meshPartOffset = 0;
+				transp.meshPartSize = chunk.transpVerts;
+				transp.primitiveType = GL20.GL_TRIANGLES;
+				
 				if (!printedPrefixLength)
 				{
 					Gdx.app.log("prefixLength", DefaultShader.createPrefix(opaque, new Config()).split("\n").length + "");
 					printedPrefixLength = true;
 				}
-				// Renderable transp = pool.obtain();
-				// transp.material = this.transp;
-				// transp.mesh = chunk.getTransparentMesh();
-				// transp.meshPartOffset = 0;
-				// transp.meshPartSize = chunk.transpVerts;
-				// transp.primitiveType = GL20.GL_TRIANGLES;
-				//
+				
 				renderables.add(opaque);
-				// renderables.add(transp);
+				renderables.add(transp);
 			}
 		}
 	}

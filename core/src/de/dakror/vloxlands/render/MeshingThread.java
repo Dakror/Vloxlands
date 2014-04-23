@@ -37,7 +37,7 @@ public class MeshingThread extends Thread
 		while (true)
 		{
 			for (Meshable m : meshables)
-				m.mesh();
+				if (m != null) m.mesh();
 			try
 			{
 				Thread.sleep(16);
