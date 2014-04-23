@@ -1,8 +1,8 @@
 language: java
 install:
-  - sudo ./install_prerequisites.sh
+  - sh ./install_prerequisites.sh
 script:
-  - sudo ./build.sh
+  - sh ./build.sh
 branches:
   only:
     - master
