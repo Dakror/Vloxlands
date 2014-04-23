@@ -1,5 +1,5 @@
 language: java
-fefore_install:
+before_install:
    - ANDROID_API_LEVEL=19
    - ANDROID_BUILD_TOOLS_VERSION=19.0.3
    - ANDROID_OS_VERSION=4.3
@@ -21,8 +21,8 @@ fefore_install:
    - unzip build-tools_r$ANDROID_BUILD_TOOLS_VERSION-linux.zip -d $ANDROID_HOME
    - mkdir -p $ANDROID_HOME/build-tools/
    - mv $ANDROID_HOME/android-$ANDROID_OS_VERSION $ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION
-
-
+   -chmod +x ./gradlew
+   
 branches:
   only:
     - master
