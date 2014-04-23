@@ -21,6 +21,8 @@ if [ -z "${ANDROID_HOME}" ]; then
 
 # Set the version of the Android SDK to install.
 android_sdk_version="22.6.2"
+android_version="19"
+android_tools_version="19.0.3"
 
 # Download the Android SDK.
 wget --quiet "http://dl.google.com/android/android-sdk_r${android_sdk_version}-linux.tgz"
@@ -35,4 +37,4 @@ fi
 export PATH="${PATH}:${ANDROID_HOME}/tools"
 
 # Install/update the required Android SDK components.
-echo yes | android update sdk -a --filter "platform-tools,build-tools-17.0.0,android-17" --no-ui --force > /dev/null
+echo yes | android update sdk -a --filter "platform-tools,build-tools-${android_tools_version},android-${android_version}" --no-ui --force > /dev/null
