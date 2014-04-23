@@ -1,8 +1,28 @@
 language: java
-install:
-  - sudo bash ./install_prerequisites.sh
-script:
-  - sudo bash ./build.sh
+fefore_install:
+   - ANDROID_API_LEVEL=19
+   - ANDROID_BUILD_TOOLS_VERSION=19.0.3
+   - ANDROID_OS_VERSION=4.3
+   - ANDROID_SDK_VERSION=22.2.1
+
+   # Install Android SDK
+   - sudo apt-get update -qq
+   - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
+   - wget http://dl.google.com/android/android-sdk_r$ANDROID_SDK_VERSION-linux.tgz
+   - tar xzf android-sdk_r$ANDROID_SDK_VERSION-linux.tgz
+   - export ANDROID_HOME=$PWD/android-sdk-linux
+   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+
+   # Install Android SDK components.
+   - echo yes | android update sdk --filter platform-tools,android-$ANDROID_API_LEVEL,extra-android-support --no-ui --force
+
+   # Install Android build tools
+   - wget https://dl-ssl.google.com/android/repository/build-tools_r$ANDROID_BUILD_TOOLS_VERSION-linux.zip
+   - unzip build-tools_r$ANDROID_BUILD_TOOLS_VERSION-linux.zip -d $ANDROID_HOME
+   - mkdir -p $ANDROID_HOME/build-tools/
+   - mv $ANDROID_HOME/android-$ANDROID_OS_VERSION $ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION
+
+
 branches:
   only:
     - master
