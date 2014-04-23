@@ -20,7 +20,7 @@ fi
 if [ -z "${ANDROID_HOME}" ]; then
 
 # Set the version of the Android SDK to install.
-android_sdk_version="22.2.1"
+android_sdk_version="22.6.2"
 
 # Download the Android SDK.
 wget --quiet "http://dl.google.com/android/android-sdk_r${android_sdk_version}-linux.tgz"
