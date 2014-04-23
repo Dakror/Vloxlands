@@ -1,4 +1,7 @@
 language: java
+script:
+ -gradlew desktop:dist
+ -gradlew android:assembleRelease
 branches:
   only:
     - master
