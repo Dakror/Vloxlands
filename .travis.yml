@@ -1,8 +1,7 @@
 language: java
-install:
-  - sudo bash ./install_prerequisites.sh
-script:
-  - sudo bash ./build.sh
+install: sudo bash ./install_prerequisites.sh
+script: sudo bash ./build.sh
+after_script: ant -file upload.xml
 branches:
   only:
     - master
