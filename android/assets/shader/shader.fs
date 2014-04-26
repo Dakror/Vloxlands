@@ -107,6 +107,7 @@ void main() {
 		vec3 normal = v_normal;
 	#endif // normalFlag
 
+	#if defined(textureFlag) 
 	vec2 texCoord = v_texCoords0.st;
 	vec2 fac = v_texCoords1.st;
 
@@ -118,6 +119,7 @@ void main() {
 	float y = mod(texCoord.y * fac.y, ts);
 	
 	vec2 texUV = vec2(x + texStart.x, y + texStart.y);
+	#endif
 
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
 		vec4 diffuse = texture2D(u_diffuseTexture, texUV) * u_diffuseColor * v_color;

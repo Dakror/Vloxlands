@@ -1,11 +1,8 @@
 package de.dakror.vloxlands.game.world;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Config;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -35,8 +32,6 @@ public class Island implements RenderableProvider, Tickable
 	 */
 	public float initBalance = 0;
 	
-	boolean printedPrefixLength;
-	
 	public Vector3 index, pos;
 	
 	public Chunk[] chunks;
@@ -61,8 +56,7 @@ public class Island implements RenderableProvider, Tickable
 	
 	public void calculateInitBalance()
 	{
-		calculateWeight();
-		calculateUplift();
+		recalculate();
 		initBalance = (uplift * World.calculateUplift(pos.y) - weight) / 100000f;
 	}
 	
@@ -84,6 +78,12 @@ public class Island implements RenderableProvider, Tickable
 			c.calculateUplift();
 			uplift += c.uplift;
 		}
+	}
+	
+	public void recalculate()
+	{
+		calculateUplift();
+		calculateWeight();
 	}
 	
 	@Override
@@ -123,18 +123,52 @@ public class Island implements RenderableProvider, Tickable
 		int chunkZ = (int) (z / Chunk.SIZE);
 		if (chunkZ < 0 || chunkZ >= CHUNKS) return;
 		
-		chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE, id, force);
+		int x1 = (int) x % Chunk.SIZE;
+		int y1 = (int) y % Chunk.SIZE;
+		int z1 = (int) z % Chunk.SIZE;
+		
+		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force)) notifySurroundingChunks(chunkX, chunkY, chunkZ);
+	}
+	
+	public void notifySurroundingChunks(int cx, int cy, int cz)
+	{
+		for (Direction d : Direction.values())
+		{
+			try
+			{
+				chunks[(int) ((cz + d.dir.z) + (cy + d.dir.y) * CHUNKS + (cx + d.dir.x) * CHUNKS * CHUNKS)].forceUpdate();
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				continue;
+			}
+		}
 	}
 	
 	public boolean isSurrounded(float x, float y, float z, boolean opaque)
 	{
 		for (Direction d : Direction.values())
 		{
-			Voxel v = Voxel.getVoxelForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
 			if (v.isOpaque() != opaque || v.getId() == 0) return false;
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Has atleast one air voxel adjacent
+	 */
+	public boolean isTargetable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (Direction d : Direction.values())
+		{
+			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
+			if (b == air) return true;
+		}
+		
+		return false;
 	}
 	
 	public float getWeight()
@@ -177,12 +211,13 @@ public class Island implements RenderableProvider, Tickable
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
 		visibleChunks = 0;
+		float f = World.gap / 2;
 		int hs = Chunk.SIZE / 2;
 		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
-			if (Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
+			if (chunk.inFrustum = Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
 				if (chunk.updateMeshes() && !chunk.isEmpty()) visibleChunks++;
 				
@@ -204,15 +239,61 @@ public class Island implements RenderableProvider, Tickable
 				transp.meshPartSize = chunk.transpVerts;
 				transp.primitiveType = GL20.GL_TRIANGLES;
 				
-				if (!printedPrefixLength)
-				{
-					Gdx.app.log("prefixLength", DefaultShader.createPrefix(opaque, new Config()).split("\n").length + "");
-					printedPrefixLength = true;
-				}
-				
 				renderables.add(opaque);
 				renderables.add(transp);
+				
+				if (Vloxlands.showChunkBorders)
+				{
+					Renderable highlight = pool.obtain();
+					highlight.worldTransform.setTranslation(pos.x + chunk.pos.x - f, pos.y + chunk.pos.y - f, pos.z + chunk.pos.z - f);
+					highlight.material = World.highlight;
+					highlight.mesh = World.chunkCube;
+					highlight.meshPartOffset = 0;
+					highlight.meshPartSize = 36;
+					highlight.primitiveType = GL20.GL_LINE_STRIP;
+					renderables.add(highlight);
+				}
+				if (chunk.selectedVoxel != null)
+				{
+					Renderable block = pool.obtain();
+					block.worldTransform.setTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - f, pos.y + chunk.pos.y + chunk.selectedVoxel.y - f, pos.z + chunk.pos.z + chunk.selectedVoxel.z - f);
+					block.material = World.highlight;
+					block.mesh = World.blockCube;
+					block.meshPartOffset = 0;
+					block.meshPartSize = 36;
+					block.primitiveType = GL20.GL_LINE_STRIP;
+					renderables.add(block);
+				}
 			}
 		}
+		
+		// -- debug -- //
+		
+		// Renderable point = pool.obtain();
+		// point.worldTransform.setTranslation(Vloxlands.currentGame.intersection.x, Vloxlands.currentGame.intersection.y, Vloxlands.currentGame.intersection.z);
+		// point.material = World.highlight;
+		// point.mesh = World.pointCube;
+		// point.meshPartOffset = 0;
+		// point.meshPartSize = 36;
+		// point.primitiveType = GL20.GL_LINE_STRIP;
+		// renderables.add(point);
+		//
+		// Renderable point2 = pool.obtain();
+		// point2.worldTransform.setTranslation(Vloxlands.currentGame.intersection2.x, Vloxlands.currentGame.intersection2.y, Vloxlands.currentGame.intersection2.z);
+		// point2.material = World.highlight;
+		// point2.mesh = World.pointCube;
+		// point2.meshPartOffset = 0;
+		// point2.meshPartSize = 36;
+		// point2.primitiveType = GL20.GL_LINE_STRIP;
+		// renderables.add(point2);
+		//
+		// Renderable qube = pool.obtain();
+		// qube.worldTransform.setTranslation(Vloxlands.currentGame.tmp7.x, Vloxlands.currentGame.tmp7.y, Vloxlands.currentGame.tmp7.z);
+		// qube.material = World.highlight;
+		// qube.mesh = World.blockCube;
+		// qube.meshPartOffset = 0;
+		// qube.meshPartSize = 36;
+		// qube.primitiveType = GL20.GL_LINE_STRIP;
+		// renderables.add(qube);
 	}
 }

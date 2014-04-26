@@ -2,6 +2,7 @@ package de.dakror.vloxlands.game.voxel;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import de.dakror.vloxlands.util.CSVReader;
@@ -50,12 +51,12 @@ public class Voxel
 		this.id = (byte) id;
 	}
 	
-	public static Voxel getVoxelForId(byte id)
+	public static Voxel getForId(byte id)
 	{
 		return voxelList[id + 128];
 	}
 	
-	public synchronized static Voxel getVoxelForId(int id)
+	public synchronized static Voxel getForId(int id)
 	{
 		return voxelList[id];
 	}
@@ -86,7 +87,7 @@ public class Voxel
 	{
 		for (int i = 0; i < voxelList.length; i++)
 		{
-			Voxel v = Voxel.getVoxelForId(i);
+			Voxel v = Voxel.getForId(i);
 			if (v.getName().equals(name)) return i;
 		}
 		System.err.println("[Voxel] [" + this.name + "] not found");
@@ -182,6 +183,11 @@ public class Voxel
 	public static Voxel get(String name)
 	{
 		return voxels.get(name);
+	}
+	
+	public static Array<?> getAll()
+	{
+		return voxels.values().toArray();
 	}
 	
 	public static void loadVoxels()
