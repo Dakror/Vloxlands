@@ -1,12 +1,18 @@
 package de.dakror.vloxlands.game.world;
 
+import java.util.Comparator;
+
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
 
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
@@ -26,8 +32,10 @@ public class Chunk implements Meshable
 	public int opaqueVerts, transpVerts;
 	
 	public Vector3 index;
-	Vector3 pos;
+	public Vector3 pos;
+	
 	byte[] voxels;
+	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
 	
@@ -35,10 +43,15 @@ public class Chunk implements Meshable
 	
 	Mesh opaque, transp;
 	
+	public boolean inFrustum;
+	public boolean selected;
+	
 	boolean updateRequired;
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
+	
+	public Vector3 selectedVoxel;
 	
 	Vector2 tex;
 	Island island;
@@ -94,18 +107,23 @@ public class Chunk implements Meshable
 		set(x, y, z, id, false);
 	}
 	
-	public void set(int x, int y, int z, byte id)
+	public boolean set(int x, int y, int z, byte id)
 	{
-		set(x, y, z, id, true);
+		return set(x, y, z, id, true);
 	}
 	
-	public void set(int x, int y, int z, byte id, boolean force)
+	public boolean set(int x, int y, int z, byte id, boolean force)
 	{
-		if (x >= SIZE || x < 0) return;
-		if (y >= SIZE || y < 0) return;
-		if (z >= SIZE || z < 0) return;
+		if (x >= SIZE || x < 0) return false;
+		if (y >= SIZE || y < 0) return false;
+		if (z >= SIZE || z < 0) return false;
 		
-		if (!force && voxels[z + y * SIZE + x * SIZE * SIZE] != Voxel.get("AIR").getId()) return;
+		if (!force && voxels[z + y * SIZE + x * SIZE * SIZE] != Voxel.get("AIR").getId()) return false;
+		
+		if (selectedVoxel != null)
+		{
+			if (selectedVoxel.equals(new Vector3(x, y, z)) && id == Voxel.get("AIR").getId()) selectedVoxel = null;
+		}
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
@@ -113,6 +131,13 @@ public class Chunk implements Meshable
 		
 		resources[id + 128]++;
 		
+		updateRequired = true;
+		
+		return true;
+	}
+	
+	public void forceUpdate()
+	{
 		updateRequired = true;
 	}
 	
@@ -125,17 +150,22 @@ public class Chunk implements Meshable
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
+	public byte[] getVoxels()
+	{
+		return voxels;
+	}
+	
 	public boolean updateMeshes()
 	{
 		if (doneMeshing)
 		{
-			opaque.setVertices(opaqueMeshData.items, 0, (opaqueVerts / 6 * 4) * VERTEX_SIZE);
-			transp.setVertices(transpMeshData.items, 0, (transpVerts / 6 * 4) * VERTEX_SIZE);
+			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
+			transp.setVertices(transpMeshData.items, 0, transpMeshData.size);
 			doneMeshing = false;
 			return true;
 		}
 		
-		if (!updateRequired) return meshing;
+		if (!updateRequired) return !meshing;
 		
 		updateRequired = false;
 		
@@ -159,6 +189,48 @@ public class Chunk implements Meshable
 		return getResource(Voxel.get("AIR").getId()) == SIZE * SIZE * SIZE;
 	}
 	
+	public boolean pickVoxel(Ray ray, Vector3 intersection, Vector3 v)
+	{
+		byte air = Voxel.get("AIR").getId();
+		
+		float distance = 0;
+		Vector3 is = new Vector3();
+		Vector3 voxel = null;
+		
+		for (int x = 0; x < Chunk.SIZE; x++)
+		{
+			for (int y = 0; y < Chunk.SIZE; y++)
+			{
+				for (int z = 0; z < Chunk.SIZE; z++)
+				{
+					byte b = get(x, y, z);
+					
+					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
+					
+					Vloxlands.currentGame.tmp3.set(Vloxlands.currentGame.tmp1.cpy().add(x, y, z));
+					Vloxlands.currentGame.tmp4.set(Vloxlands.currentGame.tmp3.cpy().add(1, 1, 1));
+					Vloxlands.currentGame.bb2.set(Vloxlands.currentGame.tmp3, Vloxlands.currentGame.tmp4);
+					
+					if (Intersector.intersectRayBounds(ray, Vloxlands.currentGame.bb2, is))
+					{
+						float dist = ray.origin.dst(is);
+						if (voxel == null || (dist = ray.origin.dst(is)) < distance)
+						{
+							voxel = new Vector3(x, y, z);
+							distance = dist;
+							intersection.set(is);
+						}
+					}
+				}
+			}
+		}
+		
+		
+		if (voxel != null) v.set(voxel);
+		
+		return voxel != null;
+	}
+	
 	public int getResource(byte id)
 	{
 		return resources[id + 128];
@@ -174,7 +246,7 @@ public class Chunk implements Meshable
 				for (int z = 0; z < SIZE; z++)
 				{
 					if (get(x, y, z) == 0) continue;
-					weight += Voxel.getVoxelForId(get(x, y, z)).getWeight();
+					weight += Voxel.getForId(get(x, y, z)).getWeight();
 				}
 			}
 		}
@@ -190,7 +262,7 @@ public class Chunk implements Meshable
 				for (int z = 0; z < SIZE; z++)
 				{
 					if (get(x, y, z) == 0) continue;
-					uplift += Voxel.getVoxelForId(get(x, y, z)).getUplift();
+					uplift += Voxel.getForId(get(x, y, z)).getUplift();
 				}
 			}
 		}
@@ -204,7 +276,7 @@ public class Chunk implements Meshable
 					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
 	}
 	
-	public void getVertices()
+	public synchronized void getVertices()
 	{
 		ObjectMap<VoxelFaceKey, VoxelFace> faces = new ObjectMap<VoxelFaceKey, VoxelFace>();
 		ObjectMap<VoxelFaceKey, VoxelFace> transpFaces = new ObjectMap<VoxelFaceKey, VoxelFace>();
@@ -218,17 +290,17 @@ public class Chunk implements Meshable
 				{
 					byte voxel = voxels[i];
 					if (voxel == 0) continue;
-					Voxel v = Voxel.getVoxelForId(voxel);
+					Voxel v = Voxel.getForId(voxel);
 					
 					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
 					
 					for (Direction d : Direction.values())
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
-						Voxel ww = Voxel.getVoxelForId(w);
+						Voxel ww = Voxel.getForId(w);
 						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
-							VoxelFace face = new VoxelFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getVoxelForId(voxel).getTextureUV(x, y, z, d));
+							VoxelFace face = new VoxelFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
 							VoxelFaceKey key = new VoxelFaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal());
 							if (v.isOpaque()) faces.put(key, face);
 							else transpFaces.put(key, face);
@@ -243,8 +315,19 @@ public class Chunk implements Meshable
 		for (VoxelFace vf : faces.values())
 			vf.getVertexData(opaqueMeshData);
 		
-		for (VoxelFace vf : transpFaces.values())
-			vf.getVertexData(transpMeshData);
+		Array<VoxelFaceKey> vfks = transpFaces.keys().toArray();
+		
+		vfks.sort(new Comparator<VoxelFaceKey>()
+		{
+			@Override
+			public int compare(VoxelFaceKey o1, VoxelFaceKey o2)
+			{
+				return o1.compareTo(o2);
+			}
+		});
+		
+		for (VoxelFaceKey vfk : vfks)
+			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
 	
 	@Override
@@ -255,13 +338,14 @@ public class Chunk implements Meshable
 			meshing = true;
 			opaqueMeshData.clear();
 			transpMeshData.clear();
-			getVertices();// , true);
+			getVertices();
 			int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
 			int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
 			opaqueVerts = opaqueNumVerts / 4 * 6;
 			transpVerts = transpNumVerts / 4 * 6;
 			meshRequest = false;
 			doneMeshing = true;
+			meshing = false;
 		}
 	}
 }

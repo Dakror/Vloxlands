@@ -1,17 +1,21 @@
 package de.dakror.vloxlands.game.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.generate.IslandGenerator;
+import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Tickable;
 
 
@@ -23,13 +27,16 @@ public class World implements RenderableProvider, Tickable
 {
 	public static final int MAXHEIGHT = 512;
 	
-	static Material opaque, transp;
+	static Material opaque, transp, highlight;
 	
 	Island[] islands;
 	
 	int width, depth;
 	
 	public int visibleChunks, chunks;
+	
+	public static Mesh chunkCube, blockCube, pointCube;
+	public static final float gap = 0.01f;
 	
 	public World(int width, int depth)
 	{
@@ -42,6 +49,11 @@ public class World implements RenderableProvider, Tickable
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
+		highlight = new Material(TextureAttribute.createDiffuse(tex), ColorAttribute.createDiffuse(Color.ORANGE));
+		
+		chunkCube = Mesher.genCube(Chunk.SIZE + gap);
+		blockCube = Mesher.genCube(1 + gap);
+		pointCube = Mesher.genCube(0.05f);
 	}
 	
 	/**
@@ -91,6 +103,7 @@ public class World implements RenderableProvider, Tickable
 				visibleChunks += island.visibleChunks;
 			}
 		}
+		
 		// entities
 	}
 	
