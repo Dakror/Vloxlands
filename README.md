@@ -7,6 +7,6 @@ The Crystals keeping the islands floating, are your needed resources to expand y
 This is my second attempt on the concept.<br>
 If you want to check out the first one, look here: [Ichmed/Vloxlands](https://github.com/Ichmed/Vloxlands).
 
-`Master` is always stable, while nightlies can be built from the `develop` branch.
+Branches: `Master` is always stable, while nightlies can be built from the `develop` branch.
 
 Powered by [libGDX](https://github.com/libgdx/libgdx).
