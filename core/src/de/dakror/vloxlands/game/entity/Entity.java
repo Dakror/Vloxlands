@@ -2,72 +2,94 @@ package de.dakror.vloxlands.game.entity;
 
 import java.util.UUID;
 
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
+import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
+import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
+import com.badlogic.gdx.utils.Disposable;
 
-import de.dakror.vloxlands.game.world.Chunk;
+import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.util.Tickable;
 
 /**
  * @author Dakror
  */
-public abstract class Entity implements Tickable
+public abstract class Entity implements Tickable, Disposable
 {
-	public static int MAX_VERTICES = 256;
-	FloatArray meshData;
+	static class MotionState extends btMotionState
+	{
+		private final Matrix4 transform;
+		
+		public MotionState(final Matrix4 transform)
+		{
+			this.transform = transform;
+		}
+		
+		@Override
+		public void getWorldTransform(final Matrix4 worldTrans)
+		{
+			worldTrans.set(transform);
+		}
+		
+		@Override
+		public void setWorldTransform(final Matrix4 worldTrans)
+		{
+			transform.set(worldTrans);
+		}
+	}
 	
-	Vector3 pos;
-	Vector3 size;
-	Vector3 direction;
+	Matrix4 transform;
 	
-	Mesh mesh;
+	public ModelInstance modelInstance;
 	
-	UUID uuid;
+	int id;
 	String name;
 	
-	float velocity;
 	float weight;
 	float uplift;
 	
-	public int verts;
+	boolean markedForRemoval;
+	boolean airborne;
 	
-	public Entity(float width, float height, float depth, String name)
+	btConvexShape collisionShape;
+	btRigidBody rigidBody;
+	btPairCachingGhostObject ghostObject;
+	btKinematicCharacterController controller;
+	
+	MotionState motionState;
+	
+	public Entity(float x, float y, float z, Vector3 trn, String model)
 	{
-		uuid = UUID.randomUUID();
-		size = new Vector3(width, height, depth);
-		this.name = name;
-		pos = new Vector3();
-		direction = new Vector3();
-		
-		meshData = new FloatArray();
-		
-		int len = MAX_VERTICES * 6 * 6 / 3;
-		short[] indices = new short[len];
-		short j = 0;
-		for (int i = 0; i < len; i += 6, j += 4)
-		{
-			indices[i + 0] = (short) (j + 0);
-			indices[i + 1] = (short) (j + 1);
-			indices[i + 2] = (short) (j + 2);
-			indices[i + 3] = (short) (j + 2);
-			indices[i + 4] = (short) (j + 3);
-			indices[i + 5] = (short) (j + 0);
-		}
-		
-		mesh = new Mesh(true, MAX_VERTICES * 6 * 4, MAX_VERTICES * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
-		mesh.setIndices(indices);
+		id = UUID.randomUUID().hashCode();
+		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
+		markedForRemoval = false;
 	}
 	
-	public Vector3 getDirection()
+	protected void createPhysics(btConvexShape shape, float mass)
 	{
-		return direction;
-	}
-	
-	public void setDirection(Vector3 direction)
-	{
-		this.direction = direction;
+		collisionShape = shape;
+		transform = modelInstance.transform;
+		motionState = new MotionState(modelInstance.transform);
+		
+		ghostObject = new btPairCachingGhostObject();
+		ghostObject.setWorldTransform(transform);
+		ghostObject.setCollisionShape(collisionShape);
+		ghostObject.setCollisionFlags(btCollisionObject.CollisionFlags.CF_CHARACTER_OBJECT);
+		
+		controller = new btKinematicCharacterController(ghostObject, collisionShape, 0.25f);
+		
+		rigidBody = new btRigidBody(mass, motionState, collisionShape);
+		
+		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody);
+		Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
+		Vloxlands.world.getCollisionWorld().addAction(controller);
 	}
 	
 	public String getName()
@@ -78,16 +100,6 @@ public abstract class Entity implements Tickable
 	public void setName(String name)
 	{
 		this.name = name;
-	}
-	
-	public float getVelocity()
-	{
-		return velocity;
-	}
-	
-	public void setVelocity(float velocity)
-	{
-		this.velocity = velocity;
 	}
 	
 	public float getWeight()
@@ -110,32 +122,75 @@ public abstract class Entity implements Tickable
 		this.uplift = uplift;
 	}
 	
-	public Vector3 getPos()
+	public boolean isAirborne()
 	{
-		return pos;
+		return airborne;
 	}
 	
-	public Vector3 getSize()
+	public void setAirborne(boolean airborne)
 	{
-		return size;
+		this.airborne = airborne;
 	}
 	
-	public UUID getUUID()
+	public Matrix4 getTransform()
 	{
-		return uuid;
+		return transform;
 	}
 	
-	public Mesh getMesh()
+	public int getId()
 	{
-		if (meshData.size == 0)
-		{
-			getVertices(meshData);
-			verts = meshData.size / Chunk.VERTEX_SIZE / 4 * 6;
-			mesh.setVertices(meshData.items, 0, meshData.size);
-		}
-		
-		return mesh;
+		return id;
 	}
 	
-	protected abstract void getVertices(FloatArray f);
+	public boolean isMarkedForRemoval()
+	{
+		return markedForRemoval;
+	}
+	
+	@Override
+	public void tick(int tick)
+	{
+		// Vector3 from = transform.getTranslation(new Vector3());
+		// Vector3 to = from.cpy().set(from.x, -1, from.z);
+		// ClosestRayResultCallback crrc = new ClosestRayResultCallback(from, to);
+		// crrc.setCollisionFilterGroup(World.ENTITY_FLAG);
+		// crrc.setCollisionFilterMask(World.ALL_FLAG);
+		// Vloxlands.world.getCollisionWorld().rayTest(from, to, crrc);
+		//
+		// if (crrc.hasHit())
+		// {
+		// float distance = crrc.getHitPointWorld().distance(from);
+		//
+		// airborne = distance > 0;
+		// }
+		// else airborne = true;
+		//
+		// crrc.dispose();
+	}
+	
+	public void update()
+	{
+		// do translations, rotations here
+	}
+	
+	public void updateTransform()
+	{
+		ghostObject.getWorldTransform(transform);
+	}
+	
+	@Override
+	public void dispose()
+	{
+		rigidBody.dispose();
+		controller.dispose();
+		ghostObject.dispose();
+		collisionShape.dispose();
+	}
+	
+	// -- events -- //
+	
+	public void onSpawn()
+	{}
+	
+	// -- abstracts -- //
 }

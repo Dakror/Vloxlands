@@ -8,13 +8,13 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.util.Direction;
 
-public class VoxelFace
+public class Face
 {
-	public static class VoxelFaceKey implements Comparable<VoxelFaceKey>
+	public static class FaceKey implements Comparable<FaceKey>
 	{
 		public int x, y, z, d;
 		
-		public VoxelFaceKey(int x, int y, int z, int d)
+		public FaceKey(int x, int y, int z, int d)
 		{
 			this.x = x;
 			this.y = y;
@@ -22,7 +22,7 @@ public class VoxelFace
 			this.d = d;
 		}
 		
-		public VoxelFaceKey(VoxelFace vf)
+		public FaceKey(Face vf)
 		{
 			x = (int) vf.pos.x;
 			y = (int) vf.pos.y;
@@ -39,7 +39,7 @@ public class VoxelFace
 		@Override
 		public boolean equals(Object o)
 		{
-			if (!(o instanceof VoxelFaceKey)) return false;
+			if (!(o instanceof FaceKey)) return false;
 			
 			return hashCode() == o.hashCode();
 		}
@@ -51,7 +51,7 @@ public class VoxelFace
 		}
 		
 		@Override
-		public int compareTo(VoxelFaceKey o)
+		public int compareTo(FaceKey o)
 		{
 			if (x != o.x) return x - o.x;
 			else if (y != o.x) return y - o.y;
@@ -65,14 +65,17 @@ public class VoxelFace
 	public Vector3 pos, tl, tr, bl, br, n;
 	
 	public Vector2 tex;
-	public int sizeX, sizeY, sizeZ;
+	public float texWidth = Voxel.TEXSIZE;
+	public float texHeight = Voxel.TEXSIZE;
 	
-	public VoxelFace(Direction dir, Vector3 pos, Vector2 tex)
+	public float sizeX, sizeY, sizeZ;
+	
+	public Face(Direction dir, Vector3 pos, Vector2 tex)
 	{
 		this(dir, pos, tex, 1, 1, 1);
 	}
 	
-	public VoxelFace(VoxelFace o)
+	public Face(Face o)
 	{
 		sizeX = o.sizeX;
 		sizeY = o.sizeY;
@@ -84,7 +87,7 @@ public class VoxelFace
 		updateVertices();
 	}
 	
-	public VoxelFace(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
+	public Face(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
 	{
 		super();
 		this.dir = dir;
@@ -93,7 +96,7 @@ public class VoxelFace
 		setSize(sizeX, sizeY, sizeZ);
 	}
 	
-	public void setSize(int sizeX, int sizeY, int sizeZ)
+	public void setSize(float sizeX, float sizeY, float sizeZ)
 	{
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
@@ -174,8 +177,8 @@ public class VoxelFace
 		boolean zDir = dir == Direction.WEST || dir == Direction.EAST;
 		boolean yDir = dir == Direction.UP || dir == Direction.DOWN;
 		
-		int tx = zDir ? sizeX : yDir ? sizeX : sizeZ;
-		int ty = yDir ? sizeZ : sizeY;
+		float tx = (float) Math.ceil(zDir ? sizeX : yDir ? sizeX : sizeZ);
+		float ty = (float) Math.ceil(yDir ? sizeZ : sizeY);
 		
 		vert.add(tl.x + pos.x);
 		vert.add(tl.y + pos.y);
@@ -194,7 +197,7 @@ public class VoxelFace
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
-		vert.add(tex.x + Voxel.TEXSIZE);
+		vert.add(tex.x + texWidth);
 		vert.add(tex.y);
 		vert.add(tx);
 		vert.add(ty);
@@ -205,8 +208,8 @@ public class VoxelFace
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
-		vert.add(tex.x + Voxel.TEXSIZE);
-		vert.add(tex.y + Voxel.TEXSIZE);
+		vert.add(tex.x + texWidth);
+		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
 		
@@ -217,12 +220,12 @@ public class VoxelFace
 		vert.add(n.y);
 		vert.add(n.z);
 		vert.add(tex.x);
-		vert.add(tex.y + Voxel.TEXSIZE);
+		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
 	}
 	
-	public void increaseSize(int sizeX, int sizeY, int sizeZ)
+	public void increaseSize(float sizeX, float sizeY, float sizeZ)
 	{
 		setSize(this.sizeX + sizeX, this.sizeY + sizeY, this.sizeZ + sizeZ);
 	}

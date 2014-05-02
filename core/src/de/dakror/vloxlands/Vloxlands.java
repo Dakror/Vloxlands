@@ -1,12 +1,13 @@
 package de.dakror.vloxlands;
 
 import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -22,10 +23,12 @@ import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -34,14 +37,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import de.dakror.vloxlands.game.entity.Human;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
+import de.dakror.vloxlands.screen.LoadingScreen;
 import de.dakror.vloxlands.util.Direction;
 
-public class Vloxlands implements ApplicationListener, InputProcessor, GestureListener
+public class Vloxlands extends Game implements InputProcessor, GestureListener
 {
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
@@ -49,12 +54,13 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 	public static final float pickRayMaxDistance = 30f;
 	
 	public static Vloxlands currentGame;
+	public static World world;
+	public static AssetManager assets;
+	public static PerspectiveCamera camera;
 	
-	public PerspectiveCamera camera;
+	public Environment lights;
 	
-	World world;
 	ModelBatch modelBatch;
-	Environment lights;
 	FirstPersonCameraController controller;
 	SpriteBatch spriteBatch;
 	BitmapFont font;
@@ -62,6 +68,7 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 	Vector3 selectedVoxel;
 	Voxel selectedVoxelType;
 	Direction selectedVoxelFace;
+	int selectedIsland;
 	Voxel placeVoxelType;
 	int placeVoxelTypeScroll;
 	
@@ -77,7 +84,7 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 	long last;
 	int tick;
 	
-	public static boolean debug = true;
+	public static boolean debug;
 	public static boolean showChunkBorders;
 	boolean middleDown;
 	boolean leftDown;
@@ -101,25 +108,28 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 	BoundingBox bb = new BoundingBox();
 	public BoundingBox bb2 = new BoundingBox();
 	public BoundingBox bb3 = new BoundingBox();
+	public Matrix4 m4 = new Matrix4();
 	
 	@Override
 	public void create()
 	{
+		Bullet.init();
+		
 		currentGame = this;
-		Gdx.app.log("Seed", seed + "");
+		Gdx.app.log("Vloxlands.create", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
 		
 		Voxel.loadVoxels();
 		
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
+		assets = new AssetManager();
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
-		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.near = 0.5f;
-		camera.far = 1000;
+		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera.near = 0.001f;
+		camera.far = 100;
 		controller = new FirstPersonCameraController(camera)
 		{
-			
 			@Override
 			public boolean touchDragged(int screenX, int screenY, int pointer)
 			{
@@ -135,19 +145,14 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 		InputMultiplexer multiplexer = new InputMultiplexer();
 		
 		lights = new Environment();
-		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		world = new World(1, 1);
-		world.addIsland(0, 0);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
-		Vector3 p = world.getIslands()[0].pos;
-		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
-		
-		camera.position.set(worldMiddle);
-		camera.position.y -= Island.SIZE / 4;
-		camera.position.z += Island.SIZE / 2;
-		
+		world = new World(w, d);
+		Gdx.app.log("Vloxlands.create", "World size: " + w + "x" + d);
 		
 		// -- stage -- //
 		if (Gdx.app.getType() == ApplicationType.Android)
@@ -186,32 +191,68 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 		multiplexer.addProcessor(this);
 		multiplexer.addProcessor(controller);
 		Gdx.input.setInputProcessor(multiplexer);
+		
+		setScreen(new LoadingScreen());
+	}
+	
+	public void doneLoading()
+	{
+		Vector3 p = world.getIslands()[0].pos;
+		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 10 + p.y, Island.SIZE / 2));
+		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
+		
+		camera.position.set(worldMiddle);
+		camera.position.y -= Island.SIZE / 4;
+		camera.position.z += Island.SIZE / 2;
 	}
 	
 	@Override
 	public void render()
 	{
-		Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		modelBatch.begin(camera);
-		modelBatch.render(world, lights);
-		modelBatch.end();
-		
-		controller.update();
-		if (Gdx.app.getType() == ApplicationType.Android)
+		if (getScreen() != null)
 		{
-			camera2.update();
-			
-			stage.act(Gdx.graphics.getDeltaTime());
-			stage.draw();
+			super.render();
 		}
-		
-		if (last == 0) last = System.currentTimeMillis();
+		else
+		{
+			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+			controller.update();
+			
+			world.update();
+			modelBatch.begin(camera);
+			world.render(modelBatch, lights);
+			modelBatch.end();
+			
+			if (Gdx.app.getType() == ApplicationType.Android)
+			{
+				camera2.update();
+				
+				stage.act(Gdx.graphics.getDeltaTime());
+				stage.draw();
+			}
+			
+			if (last == 0) last = System.currentTimeMillis();
+			
+			if (System.currentTimeMillis() - last >= 16) // ~60 a sec
+			{
+				if (Gdx.app.getType() == ApplicationType.Android)
+				{
+					float delta = Gdx.graphics.getDeltaTime();
+					camera.position.add(camera.direction.cpy().nor().scl(delta * moveTouchpad.getKnobPercentY() * velocity));
+					camera.position.add(camera.direction.cpy().crs(camera.up).nor().scl(delta * moveTouchpad.getKnobPercentX() * velocity));
+				}
+				
+				world.tick(tick++);
+				last = System.currentTimeMillis();
+			}
+		}
 		
 		if (debug)
 		{
 			spriteBatch.begin();
+			
 			font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 			font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
 			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
@@ -221,19 +262,6 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 120);
 			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
 			spriteBatch.end();
-		}
-		
-		if (System.currentTimeMillis() - last >= 16) // ~60 a sec
-		{
-			if (Gdx.app.getType() == ApplicationType.Android)
-			{
-				float delta = Gdx.graphics.getDeltaTime();
-				camera.position.add(camera.direction.cpy().nor().scl(delta * moveTouchpad.getKnobPercentY() * velocity));
-				camera.position.add(camera.direction.cpy().crs(camera.up).nor().scl(delta * moveTouchpad.getKnobPercentX() * velocity));
-			}
-			
-			world.tick(tick++);
-			last = System.currentTimeMillis();
 		}
 	}
 	
@@ -264,77 +292,79 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 		Ray ray = camera.getPickRay(lastMouseTap.x, lastMouseTap.y);
 		selectedVoxelType = null;
 		selectedVoxel = null;
+		selectedIsland = -1;
 		
-		// for (Island island : world.getIslands())
-		// {
-		
-		Island island = world.getIslands()[0];
-		
-		float distance = 0;
-		Chunk chunk = null;
-		Vector3 voxel = null;
-		
-		for (Chunk c : island.getChunks())
+		for (int i = 0; i < world.getIslands().length; i++)
 		{
-			if (c.inFrustum && !c.isEmpty())
+			Island island = world.getIslands()[i];
+			if (island == null) continue;
+			
+			float distance = 0;
+			Chunk chunk = null;
+			Vector3 voxel = null;
+			
+			for (Chunk c : island.getChunks())
 			{
-				tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
-				tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
-				
-				bb.set(tmp1, tmp2);
-				c.selected = false;
-				c.selectedVoxel = null;
-				if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+				if (c.inFrustum && !c.isEmpty())
 				{
-					float dist = ray.origin.dst(tmp5);
-					if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
+					tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
+					tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
+					
+					bb.set(tmp1, tmp2);
+					c.selected = false;
+					c.selectedVoxel = null;
+					if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
 					{
-						intersection.set(tmp5);
-						distance = dist;
-						voxel = tmp6.cpy();
-						chunk = c;
-					}
-				}
-			}
-		}
-		
-		if (chunk != null)
-		{
-			chunk.selected = true;
-			chunk.selectedVoxel = voxel;
-			
-			selectedVoxelType = Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z));
-			selectedVoxel = voxel.cpy().add(chunk.pos);
-			
-			// -- determine selectedVoxelFace -- //
-			Direction dir = null;
-			float distanc = 0;
-			Vector3 is2 = new Vector3();
-			byte air = Voxel.get("AIR").getId();
-			
-			for (Direction d : Direction.values())
-			{
-				tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
-				tmp8.set(tmp7.cpy().add(1, 1, 1));
-				bb3.set(tmp7, tmp8);
-				
-				if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
-				
-				if (Intersector.intersectRayBounds(ray, bb3, is2))
-				{
-					float dist = ray.origin.dst(is2);
-					if (dir == null || dist < distanc)
-					{
-						intersection2.set(is2);
-						distanc = dist;
-						dir = d;
+						float dist = ray.origin.dst(tmp5);
+						if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
+						{
+							intersection.set(tmp5);
+							distance = dist;
+							voxel = tmp6.cpy();
+							chunk = c;
+						}
 					}
 				}
 			}
 			
-			selectedVoxelFace = dir;
+			if (chunk != null)
+			{
+				chunk.selected = true;
+				chunk.selectedVoxel = voxel;
+				
+				selectedVoxelType = Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z));
+				selectedVoxel = voxel.cpy().add(chunk.pos);
+				
+				// -- determine selectedVoxelFace -- //
+				Direction dir = null;
+				float distanc = 0;
+				Vector3 is2 = new Vector3();
+				byte air = Voxel.get("AIR").getId();
+				
+				for (Direction d : Direction.values())
+				{
+					tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
+					tmp8.set(tmp7.cpy().add(1, 1, 1));
+					bb3.set(tmp7, tmp8);
+					
+					if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
+					
+					if (Intersector.intersectRayBounds(ray, bb3, is2))
+					{
+						float dist = ray.origin.dst(is2);
+						if (dir == null || dist < distanc)
+						{
+							intersection2.set(is2);
+							distanc = dist;
+							dir = d;
+						}
+					}
+				}
+				
+				selectedVoxelFace = dir;
+				selectedIsland = i;
+			}
 		}
-		// }
 	}
 	
 	@Override
@@ -433,20 +463,20 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}
-		if (button == Buttons.RIGHT && selectedVoxel != null)
+		if (button == Buttons.RIGHT && selectedVoxel != null && selectedIsland > -1)
 		{
-			world.getIslands()[0].set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, Voxel.get("AIR").getId());
-			world.getIslands()[0].recalculate();
+			world.getIslands()[selectedIsland].set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, Voxel.get("AIR").getId());
+			world.getIslands()[selectedIsland].recalculate();
 			
 			selectedVoxel = null;
 			selectedVoxelType = null;
 			pickRay();
 		}
-		if (button == Buttons.LEFT && selectedVoxelFace != null && placeVoxelType != null)
+		if (button == Buttons.LEFT && selectedVoxelFace != null && placeVoxelType != null && selectedIsland > -1)
 		{
 			leftDown = true;
-			world.getIslands()[0].set(selectedVoxel.x + selectedVoxelFace.dir.x, selectedVoxel.y + selectedVoxelFace.dir.y, selectedVoxel.z + selectedVoxelFace.dir.z, placeVoxelType.getId());
-			world.getIslands()[0].recalculate();
+			world.getIslands()[selectedIsland].set(selectedVoxel.x + selectedVoxelFace.dir.x, selectedVoxel.y + selectedVoxelFace.dir.y, selectedVoxel.z + selectedVoxelFace.dir.z, placeVoxelType.getId());
+			world.getIslands()[selectedIsland].recalculate();
 			
 			pickRay();
 		}
@@ -468,13 +498,6 @@ public class Vloxlands implements ApplicationListener, InputProcessor, GestureLi
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		// if (leftDown && selectedVoxelFace != null && placeVoxelType != null)
-		// {
-		// world.getIslands()[0].set(selectedVoxel.x + selectedVoxelFace.dir.x, selectedVoxel.y + selectedVoxelFace.dir.y, selectedVoxel.z + selectedVoxelFace.dir.z, placeVoxelType.getId());
-		// world.getIslands()[0].recalculate();
-		//
-		// pickRay(false);
-		// }
 		return false;
 	}
 	

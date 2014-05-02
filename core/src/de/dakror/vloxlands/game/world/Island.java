@@ -39,14 +39,15 @@ public class Island implements RenderableProvider, Tickable
 	public Island()
 	{
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
+		
+		index = new Vector3();
+		pos = new Vector3();
+		
 		int l = 0;
 		for (int i = 0; i < CHUNKS; i++)
 			for (int j = 0; j < CHUNKS; j++)
 				for (int k = 0; k < CHUNKS; k++)
 					chunks[l++] = new Chunk(i, j, k, this);
-		
-		// opaqueMeshData = new float[Chunk.SIZE * Chunk.SIZE * Chunk.SIZE * Chunk.VERTEX_SIZE * 6];
-		// transpMeshData = new float[Chunk.SIZE * Chunk.SIZE * Chunk.SIZE * Chunk.VERTEX_SIZE * 6];
 	}
 	
 	public void setPos(Vector3 pos)
@@ -91,6 +92,9 @@ public class Island implements RenderableProvider, Tickable
 	{
 		float deltaY = (int) (((uplift * World.calculateUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
 		pos.y += deltaY;
+		
+		for (Chunk c : chunks)
+			c.tick(tick);
 	}
 	
 	public byte get(float x, float y, float z)
@@ -214,17 +218,21 @@ public class Island implements RenderableProvider, Tickable
 		float f = World.gap / 2;
 		int hs = Chunk.SIZE / 2;
 		
+		Renderable block = null;
+		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
-			if (chunk.inFrustum = Vloxlands.currentGame.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
+			if (!chunk.initialized) chunk.init();
+			
+			if (chunk.inFrustum = Vloxlands.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
-				if (chunk.updateMeshes() && !chunk.isEmpty()) visibleChunks++;
-				
 				if (chunk.isEmpty()) continue;
 				
+				if (chunk.updateMeshes()) visibleChunks++;
+				
 				Renderable opaque = pool.obtain();
-				opaque.worldTransform.setTranslation(pos.x, pos.y, pos.z);
+				opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 				opaque.material = World.opaque;
 				opaque.mesh = chunk.getOpaqueMesh();
 				opaque.meshPartOffset = 0;
@@ -232,7 +240,7 @@ public class Island implements RenderableProvider, Tickable
 				opaque.primitiveType = GL20.GL_TRIANGLES;
 				
 				Renderable transp = pool.obtain();
-				transp.worldTransform.setTranslation(pos.x, pos.y, pos.z);
+				transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 				transp.material = World.transp;
 				transp.mesh = chunk.getTransparentMesh();
 				transp.meshPartOffset = 0;
@@ -245,7 +253,7 @@ public class Island implements RenderableProvider, Tickable
 				if (Vloxlands.showChunkBorders)
 				{
 					Renderable highlight = pool.obtain();
-					highlight.worldTransform.setTranslation(pos.x + chunk.pos.x - f, pos.y + chunk.pos.y - f, pos.z + chunk.pos.z - f);
+					highlight.worldTransform.setToTranslation(pos.x + chunk.pos.x - f, pos.y + chunk.pos.y - f, pos.z + chunk.pos.z - f);
 					highlight.material = World.highlight;
 					highlight.mesh = World.chunkCube;
 					highlight.meshPartOffset = 0;
@@ -255,45 +263,16 @@ public class Island implements RenderableProvider, Tickable
 				}
 				if (chunk.selectedVoxel != null)
 				{
-					Renderable block = pool.obtain();
+					block = pool.obtain();
 					block.worldTransform.setTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - f, pos.y + chunk.pos.y + chunk.selectedVoxel.y - f, pos.z + chunk.pos.z + chunk.selectedVoxel.z - f);
 					block.material = World.highlight;
 					block.mesh = World.blockCube;
 					block.meshPartOffset = 0;
 					block.meshPartSize = 36;
 					block.primitiveType = GL20.GL_LINE_STRIP;
-					renderables.add(block);
 				}
 			}
 		}
-		
-		// -- debug -- //
-		
-		// Renderable point = pool.obtain();
-		// point.worldTransform.setTranslation(Vloxlands.currentGame.intersection.x, Vloxlands.currentGame.intersection.y, Vloxlands.currentGame.intersection.z);
-		// point.material = World.highlight;
-		// point.mesh = World.pointCube;
-		// point.meshPartOffset = 0;
-		// point.meshPartSize = 36;
-		// point.primitiveType = GL20.GL_LINE_STRIP;
-		// renderables.add(point);
-		//
-		// Renderable point2 = pool.obtain();
-		// point2.worldTransform.setTranslation(Vloxlands.currentGame.intersection2.x, Vloxlands.currentGame.intersection2.y, Vloxlands.currentGame.intersection2.z);
-		// point2.material = World.highlight;
-		// point2.mesh = World.pointCube;
-		// point2.meshPartOffset = 0;
-		// point2.meshPartSize = 36;
-		// point2.primitiveType = GL20.GL_LINE_STRIP;
-		// renderables.add(point2);
-		//
-		// Renderable qube = pool.obtain();
-		// qube.worldTransform.setTranslation(Vloxlands.currentGame.tmp7.x, Vloxlands.currentGame.tmp7.y, Vloxlands.currentGame.tmp7.z);
-		// qube.material = World.highlight;
-		// qube.mesh = World.blockCube;
-		// qube.meshPartOffset = 0;
-		// qube.meshPartSize = 36;
-		// qube.primitiveType = GL20.GL_LINE_STRIP;
-		// renderables.add(qube);
+		if (block != null) renderables.add(block);
 	}
 }

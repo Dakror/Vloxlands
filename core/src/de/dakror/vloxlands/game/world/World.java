@@ -1,20 +1,32 @@
 package de.dakror.vloxlands.game.world;
 
+import java.util.Iterator;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
+import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btGhostPairCallback;
+import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.generate.IslandGenerator;
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -27,6 +39,10 @@ public class World implements RenderableProvider, Tickable
 {
 	public static final int MAXHEIGHT = 512;
 	
+	public static final short GROUND_FLAG = 1 << 8;
+	public static final short ENTITY_FLAG = 1 << 9;
+	public static final short ALL_FLAG = -1;
+	
 	static Material opaque, transp, highlight;
 	
 	Island[] islands;
@@ -36,7 +52,16 @@ public class World implements RenderableProvider, Tickable
 	public int visibleChunks, chunks;
 	
 	public static Mesh chunkCube, blockCube, pointCube;
-	public static final float gap = 0.01f;
+	public static final float gap = 0.025f;
+	
+	Array<Entity> entities = new Array<Entity>();
+	
+	btCollisionConfiguration collisionConfiguration;
+	btBroadphaseInterface broadphaseInterface;
+	btCollisionDispatcher collisionDispatcher;
+	btDiscreteDynamicsWorld collisionWorld;
+	btSequentialImpulseConstraintSolver constraintSolver;
+	btGhostPairCallback ghostPairCallback;
 	
 	public World(int width, int depth)
 	{
@@ -54,6 +79,19 @@ public class World implements RenderableProvider, Tickable
 		chunkCube = Mesher.genCube(Chunk.SIZE + gap);
 		blockCube = Mesher.genCube(1 + gap);
 		pointCube = Mesher.genCube(0.05f);
+		
+		collisionConfiguration = new btDefaultCollisionConfiguration();
+		collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
+		
+		broadphaseInterface = new btDbvtBroadphase();
+		
+		ghostPairCallback = new btGhostPairCallback();
+		broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
+		
+		constraintSolver = new btSequentialImpulseConstraintSolver();
+		
+		collisionWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphaseInterface, constraintSolver, collisionConfiguration);
+		collisionWorld.setGravity(new Vector3(0, -9.81f, 0));
 	}
 	
 	/**
@@ -61,12 +99,27 @@ public class World implements RenderableProvider, Tickable
 	 * @param y in pos space
 	 * @param z in index space
 	 */
-	public void addIsland(int x, int z)
+	public void addIsland(int x, int z, Island island)
 	{
-		Island island = IslandGenerator.generate();
-		island.setPos(new Vector3(x * Island.SIZE, island.getPos().y, z * Island.SIZE));
 		islands[z * width + x] = island;
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
+	}
+	
+	public void update()
+	{
+		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
+		{
+			Entity e = iter.next();
+			e.update();
+		}
+		
+		collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
+		
+		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
+		{
+			Entity e = iter.next();
+			e.updateTransform();
+		}
 	}
 	
 	@Override
@@ -74,6 +127,17 @@ public class World implements RenderableProvider, Tickable
 	{
 		for (Island island : islands)
 			if (island != null) island.tick(tick);
+		
+		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
+		{
+			Entity e = iter.next();
+			if (e.isMarkedForRemoval())
+			{
+				e.dispose();
+				iter.remove();
+			}
+			else e.tick(tick);
+		}
 	}
 	
 	public Island[] getIslands()
@@ -91,6 +155,17 @@ public class World implements RenderableProvider, Tickable
 		return depth;
 	}
 	
+	public void addEntity(Entity e)
+	{
+		entities.add(e);
+		e.onSpawn();
+	}
+	
+	public btDiscreteDynamicsWorld getCollisionWorld()
+	{
+		return collisionWorld;
+	}
+	
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
@@ -103,8 +178,16 @@ public class World implements RenderableProvider, Tickable
 				visibleChunks += island.visibleChunks;
 			}
 		}
-		
-		// entities
+	}
+	
+	public void render(ModelBatch batch, Environment environment)
+	{
+		batch.render(this, environment);
+		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
+		{
+			Entity e = iter.next();
+			batch.render(e.modelInstance, environment);
+		}
 	}
 	
 	public static float calculateUplift(float height)

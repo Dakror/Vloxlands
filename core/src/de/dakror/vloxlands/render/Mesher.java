@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import de.dakror.vloxlands.game.world.Chunk;
-import de.dakror.vloxlands.render.VoxelFace.VoxelFaceKey;
+import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.util.Direction;
 
 /**
@@ -14,9 +14,10 @@ import de.dakror.vloxlands.util.Direction;
  */
 public class Mesher
 {
-	public static ObjectMap<VoxelFaceKey, VoxelFace> generateGreedyMesh(int cx, int cy, int cz, ObjectMap<VoxelFaceKey, VoxelFace> originalMap)
+	public static ObjectMap<FaceKey, Face> generateGreedyMesh(int cx, int cy, int cz, ObjectMap<FaceKey, Face> originalMap)
 	{
-		ObjectMap<VoxelFaceKey, VoxelFace> strips0 = new ObjectMap<VoxelFaceKey, VoxelFace>();
+		// TODO rework algorithm
+		ObjectMap<FaceKey, Face> strips0 = new ObjectMap<FaceKey, Face>();
 		
 		if (originalMap.size == 0) return originalMap;
 		
@@ -25,7 +26,7 @@ public class Mesher
 		{
 			for (int y = 0; y < Chunk.SIZE; y++)
 			{
-				VoxelFace[] activeStrips = new VoxelFace[Direction.values().length];
+				Face[] activeStrips = new Face[Direction.values().length];
 				for (int z = 0; z < Chunk.SIZE; z++)
 				{
 					for (int i = 0; i < activeStrips.length; i++)
@@ -35,14 +36,14 @@ public class Mesher
 						int posY = cy * Chunk.SIZE + y;
 						int posZ = cz * Chunk.SIZE + z;
 						
-						VoxelFaceKey key = new VoxelFaceKey(posX, posY, posZ, i);
-						VoxelFace val = originalMap.get(key);
+						FaceKey key = new FaceKey(posX, posY, posZ, i);
+						Face val = originalMap.get(key);
 						
 						if (activeStrips[i] != null)
 						{
 							if (val == null)
 							{
-								strips0.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+								strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 								activeStrips[i] = null;
 							}
 							else if (val.tex.equals(activeStrips[i].tex))
@@ -51,27 +52,27 @@ public class Mesher
 							}
 							else
 							{
-								strips0.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
-								activeStrips[i] = new VoxelFace(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
+								strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
+								activeStrips[i] = new Face(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
 							}
 						}
 						else if (val != null)
 						{
-							activeStrips[i] = new VoxelFace(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
+							activeStrips[i] = new Face(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
 						}
 					}
 				}
 				for (int i = 0; i < activeStrips.length; i++)
-					if (activeStrips[i] != null) strips0.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+					if (activeStrips[i] != null) strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 			}
 		}
 		
-		ObjectMap<VoxelFaceKey, VoxelFace> strips1 = new ObjectMap<VoxelFaceKey, VoxelFace>();
+		ObjectMap<FaceKey, Face> strips1 = new ObjectMap<FaceKey, Face>();
 		
 		// greedy-mode along X - axis
 		for (int y = 0; y < Chunk.SIZE; y++)
 		{
-			VoxelFace[] activeStrips = new VoxelFace[Direction.values().length];
+			Face[] activeStrips = new Face[Direction.values().length];
 			for (int z = 0; z < Chunk.SIZE; z++)
 			{
 				for (int x = 0; x < Chunk.SIZE; x++)
@@ -82,14 +83,14 @@ public class Mesher
 						int posY = cy * Chunk.SIZE + y;
 						int posZ = cz * Chunk.SIZE + z;
 						
-						VoxelFaceKey key = new VoxelFaceKey(posX, posY, posZ, i);
-						VoxelFace val = strips0.get(key);
+						FaceKey key = new FaceKey(posX, posY, posZ, i);
+						Face val = strips0.get(key);
 						
 						if (val != null)
 						{
 							if (activeStrips[i] == null)
 							{
-								activeStrips[i] = new VoxelFace(val);
+								activeStrips[i] = new Face(val);
 							}
 							else
 							{
@@ -99,30 +100,30 @@ public class Mesher
 								}
 								else
 								{
-									strips1.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+									strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 									
-									activeStrips[i] = new VoxelFace(val);
+									activeStrips[i] = new Face(val);
 								}
 							}
 						}
 						else if (activeStrips[i] != null)
 						{
-							strips1.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+							strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 							activeStrips[i] = null;
 						}
 					}
 				}
 			}
 			for (int i = 0; i < activeStrips.length; i++)
-				if (activeStrips[i] != null) strips1.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+				if (activeStrips[i] != null) strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 		}
 		
-		ObjectMap<VoxelFaceKey, VoxelFace> strips2 = new ObjectMap<VoxelFaceKey, VoxelFace>();
+		ObjectMap<FaceKey, Face> strips2 = new ObjectMap<FaceKey, Face>();
 		
 		// greedy-mode along Y - axis
 		for (int x = 0; x < Chunk.SIZE; x++)
 		{
-			VoxelFace[] activeStrips = new VoxelFace[Direction.values().length];
+			Face[] activeStrips = new Face[Direction.values().length];
 			for (int z = 0; z < Chunk.SIZE; z++)
 			{
 				for (int y = 0; y < Chunk.SIZE; y++)
@@ -133,14 +134,14 @@ public class Mesher
 						int posY = cy * Chunk.SIZE + y;
 						int posZ = cz * Chunk.SIZE + z;
 						
-						VoxelFaceKey key = new VoxelFaceKey(posX, posY, posZ, i);
-						VoxelFace val = strips1.get(key);
+						FaceKey key = new FaceKey(posX, posY, posZ, i);
+						Face val = strips1.get(key);
 						
 						if (val != null)
 						{
 							if (activeStrips[i] == null)
 							{
-								activeStrips[i] = new VoxelFace(val);
+								activeStrips[i] = new Face(val);
 							}
 							else
 							{
@@ -150,22 +151,22 @@ public class Mesher
 								}
 								else
 								{
-									strips2.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+									strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 									
-									activeStrips[i] = new VoxelFace(val);
+									activeStrips[i] = new Face(val);
 								}
 							}
 						}
 						else if (activeStrips[i] != null)
 						{
-							strips2.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+							strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 							activeStrips[i] = null;
 						}
 					}
 				}
 			}
 			for (int i = 0; i < activeStrips.length; i++)
-				if (activeStrips[i] != null) strips2.put(new VoxelFaceKey(activeStrips[i]), activeStrips[i]);
+				if (activeStrips[i] != null) strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 		}
 		
 		return strips2;
