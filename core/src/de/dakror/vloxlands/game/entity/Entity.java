@@ -6,10 +6,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
-import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
-import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Disposable;
@@ -60,36 +58,41 @@ public abstract class Entity implements Tickable, Disposable
 	
 	btConvexShape collisionShape;
 	btRigidBody rigidBody;
-	btPairCachingGhostObject ghostObject;
-	btKinematicCharacterController controller;
 	
 	MotionState motionState;
+	
+	// btPairCachingGhostObject ghostObject;
+	// btKinematicCharacterController controller;
+	//
+	// AnimationController animationController;
 	
 	public Entity(float x, float y, float z, Vector3 trn, String model)
 	{
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
+		// animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
+		transform = modelInstance.transform;
 	}
 	
 	protected void createPhysics(btConvexShape shape, float mass)
 	{
 		collisionShape = shape;
-		transform = modelInstance.transform;
+		
+		Vector3 localInertia = new Vector3();
+		collisionShape.calculateLocalInertia(mass, localInertia);
+		
 		motionState = new MotionState(modelInstance.transform);
-		
-		ghostObject = new btPairCachingGhostObject();
-		ghostObject.setWorldTransform(transform);
-		ghostObject.setCollisionShape(collisionShape);
-		ghostObject.setCollisionFlags(btCollisionObject.CollisionFlags.CF_CHARACTER_OBJECT);
-		
-		controller = new btKinematicCharacterController(ghostObject, collisionShape, 0.25f);
-		
-		rigidBody = new btRigidBody(mass, motionState, collisionShape);
-		
-		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody);
-		Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
-		Vloxlands.world.getCollisionWorld().addAction(controller);
+		rigidBody = new btRigidBody(mass, motionState, collisionShape, localInertia);
+		rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
+		// ghostObject = new btPairCachingGhostObject();
+		// ghostObject.setCollisionShape(collisionShape);
+		// ghostObject.setWorldTransform(transform);
+		// ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
+		// controller = new btKinematicCharacterController(ghostObject, collisionShape, 0.35f);
+		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
+		// Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
+		// Vloxlands.world.getCollisionWorld().addAction(controller);
 	}
 	
 	public String getName()
@@ -170,20 +173,20 @@ public abstract class Entity implements Tickable, Disposable
 	
 	public void update()
 	{
+		// animationController.update(Gdx.graphics.getDeltaTime());
 		// do translations, rotations here
 	}
 	
 	public void updateTransform()
 	{
-		ghostObject.getWorldTransform(transform);
+		// ghostObject.getWorldTransform(transform);
 	}
 	
 	@Override
 	public void dispose()
 	{
-		rigidBody.dispose();
-		controller.dispose();
-		ghostObject.dispose();
+		// controller.dispose();
+		// ghostObject.dispose();
 		collisionShape.dispose();
 	}
 	

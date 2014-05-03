@@ -148,8 +148,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		int w = MathUtils.random(1, 5);
-		int d = MathUtils.random(1, 5);
+		int w = MathUtils.random(1, 1);
+		int d = MathUtils.random(1, 1);
 		
 		world = new World(w, d);
 		Gdx.app.log("Vloxlands.create", "World size: " + w + "x" + d);
@@ -198,7 +198,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 10 + p.y, Island.SIZE / 2));
+		world.addEntity(new Human(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3 + 10 + p.y, Island.SIZE / 2 - 2));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);

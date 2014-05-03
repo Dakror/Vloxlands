@@ -42,7 +42,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public Vector3 pos;
 	
 	byte[] voxels;
-	int[] csIndices;
+	btBoxShape[] compoundChildren;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -87,12 +87,10 @@ public class Chunk implements Meshable, Tickable, Disposable
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
 		
-		csIndices = new int[SIZE * SIZE * SIZE];
-		for (int i = 0; i < csIndices.length; i++)
-			csIndices[i] = -1;
+		compoundChildren = new btBoxShape[SIZE * SIZE * SIZE];
 		
 		MeshingThread.register(this);
-		collisionShape = new btCompoundShape();
+		collisionShape = new btCompoundShape(false);
 		
 		collisionObject = new btCollisionObject();
 		collisionObject.setCollisionShape(collisionShape);
@@ -166,15 +164,15 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		if (id != air && voxels[index] == air) // new block placed
 		{
-			csIndices[index] = collisionShape.getNumChildShapes();
 			btBoxShape bs = new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f));
 			collisionShape.addChildShape(Vloxlands.currentGame.m4.setToTranslation(x, y, z), bs);
-			disposables.add(bs);
+			compoundChildren[index] = bs;
 		}
-		else if (id == air && voxels[index] != air && csIndices[index] != -1) // block removed
+		else if (id == air && voxels[index] != air && compoundChildren[index] != null) // block removed
 		{
-			collisionShape.removeChildShapeByIndex(csIndices[index]);
-			csIndices[index] = -1;
+			collisionShape.removeChildShape(compoundChildren[index]);
+			compoundChildren[index].dispose();
+			compoundChildren[index] = null;
 		}
 		
 		voxels[index] = id;
