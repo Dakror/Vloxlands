@@ -89,9 +89,6 @@ public abstract class Entity implements Tickable, Disposable
 		// ghostObject.setCollisionShape(collisionShape);
 		// ghostObject.setWorldTransform(transform);
 		// ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
-		
-		
-		
 		// controller = new btKinematicCharacterController(ghostObject, collisionShape, 0.35f);
 		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
 		// Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
