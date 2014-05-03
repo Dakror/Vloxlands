@@ -21,6 +21,8 @@ public class Creature extends Entity
 	boolean airborne;
 	float climbHeight;
 	float speed;
+	float rotateSpeed = 20;
+	float middleTranslate;
 	
 	public Creature(float x, float y, float z, Vector3 trn, String model)
 	{
@@ -53,8 +55,6 @@ public class Creature extends Entity
 	public void tick(int tick)
 	{
 		super.tick(tick);
-		
-		controller.setWalkDirection(new Vector3(0, 0, speed));
 		// Vector3 from = transform.getTranslation(new Vector3());
 		// Vector3 to = from.cpy().set(from.x, -1, from.z);
 		// ClosestRayResultCallback crrc = new ClosestRayResultCallback(from, to);

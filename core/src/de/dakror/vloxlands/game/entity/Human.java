@@ -17,6 +17,7 @@ public class Human extends Creature
 		
 		speed = 0.05f;
 		climbHeight = 1;
+		middleTranslate = -0.45f;
 		
 		BoundingBox bb = new BoundingBox();
 		modelInstance.calculateBoundingBox(bb);
