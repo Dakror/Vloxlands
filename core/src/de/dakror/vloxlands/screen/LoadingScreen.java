@@ -77,8 +77,12 @@ public class LoadingScreen implements Screen
 		
 		stage.addActor(logo);
 		
+		
+		// TODO: Add all models wanting to be loaded
 		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
+		Vloxlands.assets.load("models/humanblend/humanblend_nobones.g3db", Model.class);
 		Vloxlands.assets.load("models/test.g3db", Model.class);
+		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 	}
 	
 	@Override

@@ -198,7 +198,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3 + 10 + p.y, Island.SIZE / 2 - 2));
+		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);

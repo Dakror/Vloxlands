@@ -8,16 +8,19 @@ import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 /**
  * @author Dakror
  */
-public class Human extends Entity
+public class Human extends Creature
 {
 	public Human(float x, float y, float z)
 	{
-		super(x, y, z, new Vector3(), "models/humanblend/humanblend.g3db");
+		super(x, y, z, new Vector3(), "models/humanblend/humanblend_nobones.g3db");
 		name = "Mensch";
 		
+		speed = 0.05f;
+		climbHeight = 1;
+		
 		BoundingBox bb = new BoundingBox();
-		modelInstance.calculateTransforms();
 		modelInstance.calculateBoundingBox(bb);
+		modelInstance.calculateTransforms();
 		btBoxShape bt = new btBoxShape(bb.getDimensions().cpy().scl(0.5f));
 		createPhysics(bt, 2.5f);
 		// animationController.setAnimation("walk", -1);

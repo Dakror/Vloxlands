@@ -16,10 +16,7 @@ public class Face
 		
 		public FaceKey(int x, int y, int z, int d)
 		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.d = d;
+			set(x, y, z, d);
 		}
 		
 		public FaceKey(Face vf)
@@ -28,6 +25,26 @@ public class Face
 			y = (int) vf.pos.y;
 			z = (int) vf.pos.z;
 			d = vf.dir.ordinal();
+		}
+		
+		public FaceKey set(FaceKey k)
+		{
+			x = k.x;
+			y = k.y;
+			z = k.z;
+			d = k.d;
+			
+			return this;
+		}
+		
+		public FaceKey set(int x, int y, int z, int d)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.d = d;
+			
+			return this;
 		}
 		
 		@Override
@@ -225,15 +242,22 @@ public class Face
 		vert.add(ty);
 	}
 	
-	public void increaseSize(float sizeX, float sizeY, float sizeZ)
+	public void increaseSize(Vector3 direction)
 	{
-		setSize(this.sizeX + sizeX, this.sizeY + sizeY, this.sizeZ + sizeZ);
+		setSize(sizeX + direction.x, sizeY + direction.y, sizeZ + direction.z);
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "VoxelFace[pos=" + pos.toString() + ", DIR=" + dir + ", sizeX=" + sizeX + ", sizeY=" + sizeY + ", sizeZ=" + sizeZ + ", tl=" + tl + ", tr=" + tr + ", bl=" + bl + ", br=" + br + "]";
+	}
+	
+	public boolean isSameSize(Face o, Vector3 direction)
+	{
+		if (direction.x == 1) return sizeY == o.sizeY && sizeZ == o.sizeZ;
+		else if (direction.y == 1) return sizeX == o.sizeX && sizeZ == o.sizeZ;
+		else return sizeY == o.sizeY && sizeX == o.sizeX;
 	}
 	
 	@Override

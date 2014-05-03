@@ -45,7 +45,7 @@ public class World implements RenderableProvider, Tickable
 	public static final short ENTITY_FLAG = 1 << 9;
 	public static final short ALL_FLAG = -1;
 	
-	static Material opaque, transp, highlight;
+	static Material opaque, transp, highlight, wireframe;
 	
 	Island[] islands;
 	
@@ -75,10 +75,12 @@ public class World implements RenderableProvider, Tickable
 		islands = new Island[width * depth];
 		
 		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png"));
+		Texture tex2 = new Texture(Gdx.files.internal("img/transparent.png"));
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
-		highlight = new Material(TextureAttribute.createDiffuse(tex), ColorAttribute.createDiffuse(Color.ORANGE));
+		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(Color.ORANGE));
+		wireframe = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(Color.BLACK));
 		
 		chunkCube = Mesher.genCube(Chunk.SIZE + gap);
 		blockCube = Mesher.genCube(1 + gap);
@@ -89,8 +91,8 @@ public class World implements RenderableProvider, Tickable
 		
 		broadphaseInterface = new btDbvtBroadphase();
 		
-		// ghostPairCallback = new btGhostPairCallback();
-		// broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
+		ghostPairCallback = new btGhostPairCallback();
+		broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
 		
 		constraintSolver = new btSequentialImpulseConstraintSolver();
 		

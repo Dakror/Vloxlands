@@ -3,6 +3,7 @@ package de.dakror.vloxlands.render;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import de.dakror.vloxlands.game.world.Chunk;
@@ -14,162 +15,72 @@ import de.dakror.vloxlands.util.Direction;
  */
 public class Mesher
 {
-	public static ObjectMap<FaceKey, Face> generateGreedyMesh(int cx, int cy, int cz, ObjectMap<FaceKey, Face> originalMap)
+	public static final Vector3[] directions = { Vector3.X, Vector3.Y, Vector3.Z };
+	
+	public static void generateGreedyMesh(int cx, int cy, int cz, ObjectMap<FaceKey, Face> faces)
 	{
-		// TODO rework algorithm
-		ObjectMap<FaceKey, Face> strips0 = new ObjectMap<FaceKey, Face>();
+		if (faces.size == 0) return;
 		
-		if (originalMap.size == 0) return originalMap;
+		FaceKey faceKey = new FaceKey(0, 0, 0, 0);
 		
-		// greedy-mode along Z - axis
-		for (int x = 0; x < Chunk.SIZE; x++)
+		
+		for (Vector3 direction : directions)
 		{
-			for (int y = 0; y < Chunk.SIZE; y++)
+			Array<FaceKey> removedByMe = new Array<FaceKey>();
+			for (Direction dir : Direction.values())
 			{
-				Face[] activeStrips = new Face[Direction.values().length];
-				for (int z = 0; z < Chunk.SIZE; z++)
+				if (!canFace(dir, direction)) continue;
+				
+				Face activeFace = null;
+				int activeI = 0;
+				int activeJ = 0;
+				for (int i = 0; i < Chunk.SIZE; i++)
 				{
-					for (int i = 0; i < activeStrips.length; i++)
+					for (int j = 0; j < Chunk.SIZE; j++)
 					{
-						
-						int posX = cx * Chunk.SIZE + x;
-						int posY = cy * Chunk.SIZE + y;
-						int posZ = cz * Chunk.SIZE + z;
-						
-						FaceKey key = new FaceKey(posX, posY, posZ, i);
-						Face val = originalMap.get(key);
-						
-						if (activeStrips[i] != null)
+						for (int k = 0; k < Chunk.SIZE; k++)
 						{
-							if (val == null)
+							int x = direction.x == 1 ? k : direction.z == 1 ? i : j;
+							int y = direction.y == 1 ? k : direction.z == 1 ? j : i;
+							int z = direction.z == 1 ? k : direction.x == 1 ? j : i;
+							
+							Face face = faces.get(faceKey.set(x + cx * Chunk.SIZE, y + cy * Chunk.SIZE, z + cz * Chunk.SIZE, dir.ordinal()));
+							if (face == null)
 							{
-								strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-								activeStrips[i] = null;
+								if (!removedByMe.contains(faceKey, false))
+								{
+									activeI = -1;
+									activeJ = -1;
+									activeFace = null;
+								}
+								continue;
 							}
-							else if (val.tex.equals(activeStrips[i].tex))
+							
+							if (activeFace != null && i == activeI && j == activeJ && face.tex.equals(activeFace.tex) && face.isSameSize(activeFace, direction))
 							{
-								activeStrips[i].increaseSize(0, 0, 1);
+								// Gdx.app.log("", new Vector3(activeFace.sizeX, activeFace.sizeY, activeFace.sizeZ) + ", " + new Vector3(face.sizeX, face.sizeY, face.sizeZ) + ", " + direction);
+								activeFace.increaseSize(direction.cpy().scl(face.sizeX, face.sizeY, face.sizeZ));
+								removedByMe.add(new FaceKey(0, 0, 0, 0).set(faceKey));
+								faces.remove(faceKey);
 							}
 							else
 							{
-								strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-								activeStrips[i] = new Face(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
+								activeI = i;
+								activeJ = j;
+								activeFace = face;
 							}
-						}
-						else if (val != null)
-						{
-							activeStrips[i] = new Face(Direction.values()[i], new Vector3(posX, posY, posZ), val.tex.cpy());
-						}
-					}
-				}
-				for (int i = 0; i < activeStrips.length; i++)
-					if (activeStrips[i] != null) strips0.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-			}
-		}
-		
-		ObjectMap<FaceKey, Face> strips1 = new ObjectMap<FaceKey, Face>();
-		
-		// greedy-mode along X - axis
-		for (int y = 0; y < Chunk.SIZE; y++)
-		{
-			Face[] activeStrips = new Face[Direction.values().length];
-			for (int z = 0; z < Chunk.SIZE; z++)
-			{
-				for (int x = 0; x < Chunk.SIZE; x++)
-				{
-					for (int i = 0; i < activeStrips.length; i++)
-					{
-						int posX = cx * Chunk.SIZE + x;
-						int posY = cy * Chunk.SIZE + y;
-						int posZ = cz * Chunk.SIZE + z;
-						
-						FaceKey key = new FaceKey(posX, posY, posZ, i);
-						Face val = strips0.get(key);
-						
-						if (val != null)
-						{
-							if (activeStrips[i] == null)
-							{
-								activeStrips[i] = new Face(val);
-							}
-							else
-							{
-								if (val.tex.equals(activeStrips[i].tex) && val.sizeZ == activeStrips[i].sizeZ && val.pos.z == activeStrips[i].pos.z)
-								{
-									activeStrips[i].increaseSize(1, 0, 0);
-								}
-								else
-								{
-									strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-									
-									activeStrips[i] = new Face(val);
-								}
-							}
-						}
-						else if (activeStrips[i] != null)
-						{
-							strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-							activeStrips[i] = null;
 						}
 					}
 				}
 			}
-			for (int i = 0; i < activeStrips.length; i++)
-				if (activeStrips[i] != null) strips1.put(new FaceKey(activeStrips[i]), activeStrips[i]);
 		}
-		
-		ObjectMap<FaceKey, Face> strips2 = new ObjectMap<FaceKey, Face>();
-		
-		// greedy-mode along Y - axis
-		for (int x = 0; x < Chunk.SIZE; x++)
-		{
-			Face[] activeStrips = new Face[Direction.values().length];
-			for (int z = 0; z < Chunk.SIZE; z++)
-			{
-				for (int y = 0; y < Chunk.SIZE; y++)
-				{
-					for (int i = 0; i < activeStrips.length; i++)
-					{
-						int posX = cx * Chunk.SIZE + x;
-						int posY = cy * Chunk.SIZE + y;
-						int posZ = cz * Chunk.SIZE + z;
-						
-						FaceKey key = new FaceKey(posX, posY, posZ, i);
-						Face val = strips1.get(key);
-						
-						if (val != null)
-						{
-							if (activeStrips[i] == null)
-							{
-								activeStrips[i] = new Face(val);
-							}
-							else
-							{
-								if (val.tex.equals(activeStrips[i].tex) && val.sizeZ == activeStrips[i].sizeZ && val.sizeX == activeStrips[i].sizeX && val.pos.x == activeStrips[i].pos.x && val.pos.z == activeStrips[i].pos.z)
-								{
-									activeStrips[i].increaseSize(0, 1, 0);
-								}
-								else
-								{
-									strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-									
-									activeStrips[i] = new Face(val);
-								}
-							}
-						}
-						else if (activeStrips[i] != null)
-						{
-							strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-							activeStrips[i] = null;
-						}
-					}
-				}
-			}
-			for (int i = 0; i < activeStrips.length; i++)
-				if (activeStrips[i] != null) strips2.put(new FaceKey(activeStrips[i]), activeStrips[i]);
-		}
-		
-		return strips2;
+	}
+	
+	public static boolean canFace(Direction dir, Vector3 direction)
+	{
+		if (direction.x == 1) return dir.dir.x == 0;
+		else if (direction.y == 1) return dir.dir.y == 0;
+		else return dir.dir.z == 0;
 	}
 	
 	public static Mesh genCube(float size)

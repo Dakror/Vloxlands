@@ -233,19 +233,19 @@ public class Island implements RenderableProvider, Tickable
 				
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				opaque.material = World.opaque;
+				opaque.material = chunk.selected && Vloxlands.showChunkBorders ? World.wireframe : World.opaque;
 				opaque.mesh = chunk.getOpaqueMesh();
 				opaque.meshPartOffset = 0;
 				opaque.meshPartSize = chunk.opaqueVerts;
-				opaque.primitiveType = GL20.GL_TRIANGLES;
+				opaque.primitiveType = chunk.selected && Vloxlands.showChunkBorders ? GL20.GL_LINES : GL20.GL_TRIANGLES;
 				
 				Renderable transp = pool.obtain();
 				transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				transp.material = World.transp;
+				transp.material = chunk.selected && Vloxlands.showChunkBorders ? World.wireframe : World.transp;
 				transp.mesh = chunk.getTransparentMesh();
 				transp.meshPartOffset = 0;
 				transp.meshPartSize = chunk.transpVerts;
-				transp.primitiveType = GL20.GL_TRIANGLES;
+				transp.primitiveType = chunk.selected && Vloxlands.showChunkBorders ? GL20.GL_LINES : GL20.GL_TRIANGLES;
 				
 				renderables.add(opaque);
 				renderables.add(transp);
