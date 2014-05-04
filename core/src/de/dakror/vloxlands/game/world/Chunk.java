@@ -72,8 +72,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
-	// IntMap<Integer> requested
-	
 	public Chunk(Vector3 index, Island island)
 	{
 		this.index = index;
@@ -82,7 +80,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
 		for (int i = 0; i < voxels.length; i++)
-			voxels[i] = 0;
+			voxels[i] = Voxel.get("AIR").getId();
 		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
@@ -357,8 +355,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 			}
 		}
 		
-		faces = Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
-		transpFaces = Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
+		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
+		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
 		
 		for (Face vf : faces.values())
 			vf.getVertexData(opaqueMeshData);

@@ -37,7 +37,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import de.dakror.vloxlands.game.entity.Human;
+import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -148,8 +149,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		int w = MathUtils.random(1, 1);
-		int d = MathUtils.random(1, 1);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
 		world = new World(w, d);
 		Gdx.app.log("Vloxlands.create", "World size: " + w + "x" + d);
@@ -198,7 +199,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3 + 10 + p.y, Island.SIZE / 2 - 2));
+		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);
@@ -255,12 +256,13 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			
 			font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 			font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
-			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
-			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
-			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 100);
-			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 120);
-			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
+			font.draw(spriteBatch, "E: " + world.visibleEntities + " / " + world.getEntityCount(), 0, Gdx.graphics.getHeight() - 40);
+			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 60);
+			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
+			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
+			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 120);
+			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
+			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 160);
 			spriteBatch.end();
 		}
 	}
@@ -293,6 +295,17 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		selectedVoxelType = null;
 		selectedVoxel = null;
 		selectedIsland = -1;
+		
+		for (Entity entity : world.getEntities())
+		{
+			if (!entity.inFrustum) continue;
+			
+			bb.set(entity.boundingBox);
+			bb.mul(entity.getTransform());
+			
+			entity.selected = Intersector.intersectRayBounds(ray, bb, null);
+			if (entity.selected) return;
+		}
 		
 		for (int i = 0; i < world.getIslands().length; i++)
 		{

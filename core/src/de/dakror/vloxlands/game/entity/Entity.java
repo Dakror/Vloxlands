@@ -2,10 +2,13 @@ package de.dakror.vloxlands.game.entity;
 
 import java.util.UUID;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
@@ -43,34 +46,37 @@ public abstract class Entity implements Tickable, Disposable
 		}
 	}
 	
-	Matrix4 transform;
+	protected Matrix4 transform;
 	
 	public ModelInstance modelInstance;
 	
-	int id;
-	String name;
+	protected int id;
+	protected String name;
 	
-	float weight;
-	float uplift;
+	protected float weight;
+	protected float uplift;
 	
-	boolean markedForRemoval;
-	boolean airborne;
+	public boolean inFrustum;
+	public boolean selected;
 	
-	btConvexShape collisionShape;
-	btRigidBody rigidBody;
+	protected boolean markedForRemoval;
 	
-	MotionState motionState;
+	protected btConvexShape collisionShape;
+	protected btRigidBody rigidBody;
+	public BoundingBox boundingBox;
 	
-	// btPairCachingGhostObject ghostObject;
-	// btKinematicCharacterController controller;
-	//
-	// AnimationController animationController;
+	protected MotionState motionState;
+	
+	protected AnimationController animationController;
+	
+	final Vector3 posCache = new Vector3();
 	
 	public Entity(float x, float y, float z, Vector3 trn, String model)
 	{
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
-		// animationController = new AnimationController(modelInstance);
+		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
+		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
 	}
@@ -83,16 +89,9 @@ public abstract class Entity implements Tickable, Disposable
 		collisionShape.calculateLocalInertia(mass, localInertia);
 		
 		motionState = new MotionState(modelInstance.transform);
-		rigidBody = new btRigidBody(mass, motionState, collisionShape, localInertia);
+		rigidBody = new btRigidBody(mass, motionState, collisionShape);
 		rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
-		// ghostObject = new btPairCachingGhostObject();
-		// ghostObject.setCollisionShape(collisionShape);
-		// ghostObject.setWorldTransform(transform);
-		// ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
-		// controller = new btKinematicCharacterController(ghostObject, collisionShape, 0.35f);
 		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
-		// Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
-		// Vloxlands.world.getCollisionWorld().addAction(controller);
 	}
 	
 	public String getName()
@@ -125,16 +124,6 @@ public abstract class Entity implements Tickable, Disposable
 		this.uplift = uplift;
 	}
 	
-	public boolean isAirborne()
-	{
-		return airborne;
-	}
-	
-	public void setAirborne(boolean airborne)
-	{
-		this.airborne = airborne;
-	}
-	
 	public Matrix4 getTransform()
 	{
 		return transform;
@@ -153,40 +142,23 @@ public abstract class Entity implements Tickable, Disposable
 	@Override
 	public void tick(int tick)
 	{
-		// Vector3 from = transform.getTranslation(new Vector3());
-		// Vector3 to = from.cpy().set(from.x, -1, from.z);
-		// ClosestRayResultCallback crrc = new ClosestRayResultCallback(from, to);
-		// crrc.setCollisionFilterGroup(World.ENTITY_FLAG);
-		// crrc.setCollisionFilterMask(World.ALL_FLAG);
-		// Vloxlands.world.getCollisionWorld().rayTest(from, to, crrc);
-		//
-		// if (crrc.hasHit())
-		// {
-		// float distance = crrc.getHitPointWorld().distance(from);
-		//
-		// airborne = distance > 0;
-		// }
-		// else airborne = true;
-		//
-		// crrc.dispose();
+		transform.getTranslation(posCache);
+		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().cpy().add(posCache), boundingBox.getDimensions().cpy());
 	}
 	
 	public void update()
 	{
-		// animationController.update(Gdx.graphics.getDeltaTime());
+		animationController.update(Gdx.graphics.getDeltaTime());
 		// do translations, rotations here
 	}
 	
 	public void updateTransform()
-	{
-		// ghostObject.getWorldTransform(transform);
-	}
+	{}
 	
 	@Override
 	public void dispose()
 	{
-		// controller.dispose();
-		// ghostObject.dispose();
+		rigidBody.dispose();
 		collisionShape.dispose();
 	}
 	
