@@ -37,6 +37,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
@@ -148,8 +149,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		int w = MathUtils.random(1, 1);
-		int d = MathUtils.random(1, 1);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
 		world = new World(w, d);
 		Gdx.app.log("Vloxlands.create", "World size: " + w + "x" + d);
@@ -294,6 +295,17 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		selectedVoxelType = null;
 		selectedVoxel = null;
 		selectedIsland = -1;
+		
+		for (Entity entity : world.getEntities())
+		{
+			if (!entity.inFrustum) continue;
+			
+			bb.set(entity.boundingBox);
+			bb.mul(entity.getTransform());
+			
+			entity.selected = Intersector.intersectRayBounds(ray, bb, null);
+			if (entity.selected) return;
+		}
 		
 		for (int i = 0; i < world.getIslands().length; i++)
 		{

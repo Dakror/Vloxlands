@@ -63,7 +63,7 @@ public abstract class Entity implements Tickable, Disposable
 	
 	protected btConvexShape collisionShape;
 	protected btRigidBody rigidBody;
-	protected BoundingBox boundingBox;
+	public BoundingBox boundingBox;
 	
 	protected MotionState motionState;
 	
@@ -91,7 +91,6 @@ public abstract class Entity implements Tickable, Disposable
 		motionState = new MotionState(modelInstance.transform);
 		rigidBody = new btRigidBody(mass, motionState, collisionShape);
 		rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
-		
 		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
 	}
 	

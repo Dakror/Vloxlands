@@ -123,7 +123,7 @@ public class World implements RenderableProvider, Tickable
 			e.update();
 		}
 		
-		collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
+		// collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
 		
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
@@ -153,6 +153,11 @@ public class World implements RenderableProvider, Tickable
 	public Island[] getIslands()
 	{
 		return islands;
+	}
+	
+	public Array<Entity> getEntities()
+	{
+		return entities;
 	}
 	
 	public int getWidth()
@@ -197,14 +202,14 @@ public class World implements RenderableProvider, Tickable
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
-		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
-		// {
-		// debugDrawer.begin(batch.getCamera());
-		// collisionWorld.debugDrawWorld();
-		// debugDrawer.end();
-		// System.gc();
-		// }
-		batch.render(this, environment);
+		if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
+		{
+			debugDrawer.begin(batch.getCamera());
+			collisionWorld.debugDrawWorld();
+			debugDrawer.end();
+			System.gc();
+		}
+		// batch.render(this, environment);
 		
 		visibleEntities = 0;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
@@ -222,4 +227,6 @@ public class World implements RenderableProvider, Tickable
 	{
 		return (1 - height / MAXHEIGHT) * 4 + 0.1f;
 	}
+	
+	
 }
