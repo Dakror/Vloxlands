@@ -51,7 +51,7 @@ public class World implements RenderableProvider, Tickable
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks;
+	public int visibleChunks, chunks, visibleEntities;
 	
 	public static Mesh chunkCube, blockCube, pointCube;
 	public static final float gap = 0.025f;
@@ -165,6 +165,11 @@ public class World implements RenderableProvider, Tickable
 		return depth;
 	}
 	
+	public int getEntityCount()
+	{
+		return entities.size;
+	}
+	
 	public void addEntity(Entity e)
 	{
 		entities.add(e);
@@ -200,10 +205,16 @@ public class World implements RenderableProvider, Tickable
 		// System.gc();
 		// }
 		batch.render(this, environment);
+		
+		visibleEntities = 0;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
 			Entity e = iter.next();
-			batch.render(e.modelInstance, environment);
+			if (e.inFrustum)
+			{
+				batch.render(e.modelInstance, environment);
+				visibleEntities++;
+			}
 		}
 	}
 	

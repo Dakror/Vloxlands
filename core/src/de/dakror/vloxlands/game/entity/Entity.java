@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
@@ -55,19 +56,26 @@ public abstract class Entity implements Tickable, Disposable
 	float weight;
 	float uplift;
 	
+	public boolean inFrustum;
+	public boolean selected;
+	
 	boolean markedForRemoval;
 	
 	btConvexShape collisionShape;
 	btRigidBody rigidBody;
+	BoundingBox boundingBox;
 	
 	MotionState motionState;
 	
 	AnimationController animationController;
 	
+	final Vector3 posCache = new Vector3();
+	
 	public Entity(float x, float y, float z, Vector3 trn, String model)
 	{
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
+		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
@@ -134,7 +142,10 @@ public abstract class Entity implements Tickable, Disposable
 	
 	@Override
 	public void tick(int tick)
-	{}
+	{
+		transform.getTranslation(posCache);
+		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().cpy().add(posCache), boundingBox.getDimensions().cpy());
+	}
 	
 	public void update()
 	{

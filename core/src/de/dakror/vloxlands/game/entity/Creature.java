@@ -55,6 +55,10 @@ public class Creature extends Entity
 	public void tick(int tick)
 	{
 		super.tick(tick);
+		
+		// transform.translate(-middleTranslate, 0, -middleTranslate).rotate(0, 1, 0, 5).translate(middleTranslate, 0, middleTranslate);
+		// ghostObject.setWorldTransform(transform);
+		
 		// Vector3 from = transform.getTranslation(new Vector3());
 		// Vector3 to = from.cpy().set(from.x, -1, from.z);
 		// ClosestRayResultCallback crrc = new ClosestRayResultCallback(from, to);

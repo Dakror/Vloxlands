@@ -255,12 +255,13 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			
 			font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 			font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 40);
-			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 60);
-			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 80);
-			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 100);
-			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 120);
-			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
+			font.draw(spriteBatch, "E: " + world.visibleEntities + " / " + world.getEntityCount(), 0, Gdx.graphics.getHeight() - 40);
+			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 60);
+			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
+			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
+			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 120);
+			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
+			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 160);
 			spriteBatch.end();
 		}
 	}
