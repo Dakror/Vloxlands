@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.entity;
+package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.Collision;
@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
 import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.world.World;
 
 /**
@@ -15,14 +16,14 @@ import de.dakror.vloxlands.game.world.World;
  */
 public class Creature extends Entity
 {
-	btPairCachingGhostObject ghostObject;
-	btKinematicCharacterController controller;
+	protected btPairCachingGhostObject ghostObject;
+	protected btKinematicCharacterController controller;
 	
-	boolean airborne;
-	float climbHeight;
-	float speed;
-	float rotateSpeed = 20;
-	float middleTranslate;
+	protected boolean airborne;
+	protected float climbHeight;
+	protected float speed;
+	protected float rotateSpeed = 20;
+	protected float middleTranslate;
 	
 	public Creature(float x, float y, float z, Vector3 trn, String model)
 	{

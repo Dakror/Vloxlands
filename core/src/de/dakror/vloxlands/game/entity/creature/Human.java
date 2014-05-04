@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.entity;
+package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;

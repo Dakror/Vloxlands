@@ -37,7 +37,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import de.dakror.vloxlands.game.entity.Human;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;

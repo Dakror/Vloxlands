@@ -46,28 +46,28 @@ public abstract class Entity implements Tickable, Disposable
 		}
 	}
 	
-	Matrix4 transform;
+	protected Matrix4 transform;
 	
 	public ModelInstance modelInstance;
 	
-	int id;
-	String name;
+	protected int id;
+	protected String name;
 	
-	float weight;
-	float uplift;
+	protected float weight;
+	protected float uplift;
 	
 	public boolean inFrustum;
 	public boolean selected;
 	
-	boolean markedForRemoval;
+	protected boolean markedForRemoval;
 	
-	btConvexShape collisionShape;
-	btRigidBody rigidBody;
-	BoundingBox boundingBox;
+	protected btConvexShape collisionShape;
+	protected btRigidBody rigidBody;
+	protected BoundingBox boundingBox;
 	
-	MotionState motionState;
+	protected MotionState motionState;
 	
-	AnimationController animationController;
+	protected AnimationController animationController;
 	
 	final Vector3 posCache = new Vector3();
 	
