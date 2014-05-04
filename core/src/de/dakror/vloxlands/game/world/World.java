@@ -123,7 +123,7 @@ public class World implements RenderableProvider, Tickable
 			e.update();
 		}
 		
-		// collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
+		collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
 		
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
@@ -202,14 +202,14 @@ public class World implements RenderableProvider, Tickable
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
-		if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
-		{
-			debugDrawer.begin(batch.getCamera());
-			collisionWorld.debugDrawWorld();
-			debugDrawer.end();
-			System.gc();
-		}
-		// batch.render(this, environment);
+		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
+		// {
+		// debugDrawer.begin(batch.getCamera());
+		// collisionWorld.debugDrawWorld();
+		// debugDrawer.end();
+		// System.gc();
+		// }
+		batch.render(this, environment);
 		
 		visibleEntities = 0;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)

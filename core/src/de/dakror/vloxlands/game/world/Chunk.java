@@ -94,7 +94,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		collisionObject.setCollisionShape(collisionShape);
 		collisionObject.setUserValue((int) (index.z + index.y * Island.CHUNKS + index.x * Island.CHUNKS * Island.CHUNKS));
 		collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
-		// Vloxlands.world.getCollisionWorld().addCollisionObject(collisionObject, World.GROUND_FLAG, World.ENTITY_FLAG);
+		Vloxlands.world.getCollisionWorld().addCollisionObject(collisionObject, World.GROUND_FLAG, World.ENTITY_FLAG);
 	}
 	
 	public Chunk(int x, int y, int z, Island island)
