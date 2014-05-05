@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Intersector;
@@ -58,6 +59,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public static World world;
 	public static AssetManager assets;
 	public static PerspectiveCamera camera;
+	public static ShapeRenderer shapeRenderer;
 	
 	public Environment lights;
 	
@@ -141,6 +143,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		controller.setDegreesPerPixel(rotateSpeed);
 		controller.setVelocity(velocity);
 		
+		shapeRenderer = new ShapeRenderer();
+		
 		new MeshingThread();
 		
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -149,8 +153,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		int w = MathUtils.random(1, 5);
-		int d = MathUtils.random(1, 5);
+		int w = MathUtils.random(1, 1);
+		int d = MathUtils.random(1, 1);
 		
 		world = new World(w, d);
 		Gdx.app.log("Vloxlands.create", "World size: " + w + "x" + d);
@@ -204,7 +208,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		
 		camera.position.set(worldMiddle);
 		camera.position.y -= Island.SIZE / 4;
-		camera.position.z += Island.SIZE / 2;
+		camera.position.z -= Island.SIZE / 2;
+		camera.rotate(Vector3.Y, 180);
 	}
 	
 	@Override
