@@ -204,7 +204,10 @@ public class World implements RenderableProvider, Tickable
 	{
 		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
 		// {
+		// Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		// debugDrawer.begin(batch.getCamera());
+		// debugDrawer.shapeRenderer.identity();
+		// debugDrawer.shapeRenderer.translate(0.5f, 0.5f, 0.5f);
 		// collisionWorld.debugDrawWorld();
 		// debugDrawer.end();
 		// System.gc();
@@ -227,6 +230,4 @@ public class World implements RenderableProvider, Tickable
 	{
 		return (1 - height / MAXHEIGHT) * 4 + 0.1f;
 	}
-	
-	
 }

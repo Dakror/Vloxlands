@@ -58,7 +58,6 @@ public class Mesher
 							
 							if (activeFace != null && i == activeI && j == activeJ && face.tex.equals(activeFace.tex) && face.isSameSize(activeFace, direction))
 							{
-								// Gdx.app.log("", new Vector3(activeFace.sizeX, activeFace.sizeY, activeFace.sizeZ) + ", " + new Vector3(face.sizeX, face.sizeY, face.sizeZ) + ", " + direction);
 								activeFace.increaseSize(direction.cpy().scl(face.sizeX, face.sizeY, face.sizeZ));
 								removedByMe.add(new FaceKey(0, 0, 0, 0).set(faceKey));
 								faces.remove(faceKey);
