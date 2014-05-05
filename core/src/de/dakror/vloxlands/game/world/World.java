@@ -217,7 +217,7 @@ public class World implements RenderableProvider, Tickable
 			Entity e = iter.next();
 			if (e.inFrustum)
 			{
-				batch.render(e.modelInstance, environment);
+				e.render(batch, environment);
 				visibleEntities++;
 			}
 		}

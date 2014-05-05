@@ -3,9 +3,13 @@ package de.dakror.vloxlands.game.entity;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -144,6 +148,20 @@ public abstract class Entity implements Tickable, Disposable
 	{
 		transform.getTranslation(posCache);
 		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().cpy().add(posCache), boundingBox.getDimensions().cpy());
+	}
+	
+	public void render(ModelBatch batch, Environment environment)
+	{
+		batch.render(modelInstance, environment);
+		if (selected)
+		{
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.setColor(Color.ORANGE);
+			Vloxlands.shapeRenderer.setTransformMatrix(transform);
+			Vloxlands.shapeRenderer.rect(posCache.x, posCache.y, boundingBox.getDimensions().x, boundingBox.getDimensions().z);
+			Vloxlands.shapeRenderer.end();
+		}
 	}
 	
 	public void update()

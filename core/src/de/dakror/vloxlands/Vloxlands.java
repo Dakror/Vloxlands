@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Intersector;
@@ -58,6 +59,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public static World world;
 	public static AssetManager assets;
 	public static PerspectiveCamera camera;
+	public static ShapeRenderer shapeRenderer;
 	
 	public Environment lights;
 	
@@ -140,6 +142,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		};
 		controller.setDegreesPerPixel(rotateSpeed);
 		controller.setVelocity(velocity);
+		
+		shapeRenderer = new ShapeRenderer();
 		
 		new MeshingThread();
 		
