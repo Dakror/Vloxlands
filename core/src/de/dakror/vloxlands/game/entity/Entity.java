@@ -78,10 +78,10 @@ public abstract class Entity implements Tickable, Disposable
 	
 	public final Vector3 posCache = new Vector3();
 	
-	public Entity(float x, float y, float z, Vector3 trn, String model)
+	public Entity(float x, float y, float z, String model)
 	{
 		id = UUID.randomUUID().hashCode();
-		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
+		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
@@ -162,18 +162,21 @@ public abstract class Entity implements Tickable, Disposable
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(modelInstance, environment);
-		if (selected)
+		if (hovered || selected)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(4);
+			Gdx.gl.glLineWidth(selected ? 3 : 2);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
 			Vloxlands.shapeRenderer.identity();
 			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
 			Vloxlands.shapeRenderer.translate(0, 0, 0.325f);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
-			Vloxlands.shapeRenderer.setColor(Color.GREEN);
-			Vloxlands.shapeRenderer.rect(0, 0, 1, 1);
+			Vloxlands.shapeRenderer.setColor(Color.ORANGE);
+			
+			final float malus = 0.05f;
+			
+			Vloxlands.shapeRenderer.rect(size.x / 2 - malus, size.z + malus, size.x, size.z);
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}

@@ -11,7 +11,7 @@ public class Human extends Creature
 {
 	public Human(float x, float y, float z)
 	{
-		super(x, y, z, new Vector3(), "models/humanblend/humanblend.g3db");
+		super(x, y, z, "models/humanblend/humanblend.g3db");
 		name = "Mensch";
 		
 		speed = 0.05f;
