@@ -16,7 +16,6 @@ public class Human extends Creature
 		
 		speed = 0.05f;
 		climbHeight = 1;
-		middleTranslate = -0.45f;
 		
 		Vector3 v = boundingBox.getDimensions().cpy().scl(0.5f);
 		btBoxShape bt = new btBoxShape(new Vector3(v.x, v.z, v.y));

@@ -62,6 +62,7 @@ public abstract class Entity implements Tickable, Disposable
 	protected float uplift;
 	
 	public boolean inFrustum;
+	public boolean hovered;
 	public boolean selected;
 	
 	protected boolean markedForRemoval;
@@ -69,12 +70,13 @@ public abstract class Entity implements Tickable, Disposable
 	protected btConvexShape collisionShape;
 	protected btRigidBody rigidBody;
 	public BoundingBox boundingBox;
+	final Vector3 size = new Vector3();
 	
 	protected MotionState motionState;
 	
 	protected AnimationController animationController;
 	
-	final Vector3 posCache = new Vector3();
+	public final Vector3 posCache = new Vector3();
 	
 	public Entity(float x, float y, float z, Vector3 trn, String model)
 	{
@@ -148,7 +150,13 @@ public abstract class Entity implements Tickable, Disposable
 	public void tick(int tick)
 	{
 		transform.getTranslation(posCache);
-		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(posCache.cpy().add(boundingBox.getDimensions()), boundingBox.getDimensions());
+		size.set(boundingBox.getDimensions().x, boundingBox.getDimensions().z, boundingBox.getDimensions().y);
+		
+		collisionShape.getAabb(transform, boundingBox.min, boundingBox.max);
+		boundingBox.min.add(0.5f);
+		boundingBox.max.add(0.5f);
+		
+		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox);
 	}
 	
 	public void render(ModelBatch batch, Environment environment)

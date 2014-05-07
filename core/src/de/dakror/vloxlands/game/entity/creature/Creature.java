@@ -23,7 +23,6 @@ public class Creature extends Entity
 	protected float climbHeight;
 	protected float speed;
 	protected float rotateSpeed = 20;
-	protected float middleTranslate;
 	
 	public Creature(float x, float y, float z, Vector3 trn, String model)
 	{
