@@ -1,12 +1,10 @@
 package de.dakror.vloxlands;
 
 import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -21,10 +19,8 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.Bullet;
@@ -41,8 +37,9 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.screen.LoadingScreen;
+import de.dakror.vloxlands.util.GameBase;
 
-public class Vloxlands extends Game implements InputProcessor, GestureListener
+public class Vloxlands extends GameBase
 {
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
@@ -275,80 +272,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	}
 	
 	@Override
-	public void pause()
-	{}
-	
-	@Override
-	public void resume()
-	{}
-	
-	@Override
-	public void dispose()
-	{}
-	
-	
-	
-	@Override
-	public boolean mouseMoved(int screenX, int screenY)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean tap(float x, float y, int count, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean touchDown(float x, float y, int pointer, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean longPress(float x, float y)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean fling(float velocityX, float velocityY, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean pan(float x, float y, float deltaX, float deltaY)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean panStop(float x, float y, int pointer, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean zoom(float initialDistance, float distance)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean keyDown(int keycode)
-	{
-		return false;
-	}
-	
-	@Override
 	public boolean keyUp(int keycode)
 	{
 		if (keycode == Keys.F1) debug = !debug;
@@ -358,12 +281,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			if (Gdx.graphics.isFullscreen()) Gdx.graphics.setDisplayMode(1280, 720, false);
 			else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 		}
-		return false;
-	}
-	
-	@Override
-	public boolean keyTyped(char character)
-	{
 		return false;
 	}
 	
@@ -403,18 +320,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			middleDown = false;
 			Gdx.input.setCursorCatched(false);
 		}
-		return false;
-	}
-	
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean scrolled(int amount)
-	{
 		return false;
 	}
 }
