@@ -65,7 +65,6 @@ public class Vloxlands extends GameBase
 	SpriteBatch spriteBatch;
 	BitmapFont font;
 	
-	
 	// -- on screen controls -- //
 	Stage stage;
 	OrthographicCamera camera2;
@@ -328,8 +327,6 @@ public class Vloxlands extends GameBase
 						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
 						
 						bb.set(tmp1, tmp2);
-						c.selected = false;
-						c.selectedVoxel = null;
 						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
 						{
 							float dist = ray.origin.dst(tmp5);
@@ -346,9 +343,6 @@ public class Vloxlands extends GameBase
 				
 				if (chunk != null)
 				{
-					chunk.selected = true;
-					chunk.selectedVoxel = voxel;
-					
 					// -- determine selectedVoxelFace -- //
 					Direction dir = null;
 					float distanc = 0;

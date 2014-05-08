@@ -52,15 +52,12 @@ public class Chunk implements Meshable, Tickable, Disposable
 	Mesh opaque, transp;
 	
 	public boolean inFrustum;
-	public boolean selected;
 	
 	boolean updateRequired;
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
 	public boolean initialized = false;
-	
-	public Vector3 selectedVoxel;
 	
 	Vector2 tex;
 	Island island;
@@ -152,11 +149,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 		int index = z + y * SIZE + x * SIZE * SIZE;
 		
 		if (!force && voxels[index] != air) return false;
-		
-		if (selectedVoxel != null)
-		{
-			if (selectedVoxel.equals(new Vector3(x, y, z)) && id == air) selectedVoxel = null;
-		}
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
