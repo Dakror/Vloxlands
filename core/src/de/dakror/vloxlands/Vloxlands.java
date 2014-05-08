@@ -65,6 +65,7 @@ public class Vloxlands extends GameBase
 	SpriteBatch spriteBatch;
 	BitmapFont font;
 	
+	
 	// -- on screen controls -- //
 	Stage stage;
 	OrthographicCamera camera2;
