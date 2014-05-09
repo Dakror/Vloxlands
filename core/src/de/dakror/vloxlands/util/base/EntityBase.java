@@ -6,6 +6,9 @@ import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.EventListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
+/**
+ * @author Dakror
+ */
 public abstract class EntityBase implements Tickable, Disposable, EventListener
 {
 	@Override
