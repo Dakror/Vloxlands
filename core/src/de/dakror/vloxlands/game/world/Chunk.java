@@ -40,6 +40,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	public Vector3 index;
 	public Vector3 pos;
+	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
 	byte[] voxels;
 	btBoxShape[] compoundChildren;

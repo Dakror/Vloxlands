@@ -217,6 +217,8 @@ public class Island implements RenderableProvider, Tickable
 		visibleChunks = 0;
 		int hs = Chunk.SIZE / 2;
 		
+		Renderable block = null;
+		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
@@ -235,6 +237,7 @@ public class Island implements RenderableProvider, Tickable
 				opaque.meshPartOffset = 0;
 				opaque.meshPartSize = chunk.opaqueVerts;
 				opaque.primitiveType = GL20.GL_TRIANGLES;
+				renderables.add(opaque);
 				
 				Renderable transp = pool.obtain();
 				transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -243,10 +246,21 @@ public class Island implements RenderableProvider, Tickable
 				transp.meshPartOffset = 0;
 				transp.meshPartSize = chunk.transpVerts;
 				transp.primitiveType = GL20.GL_TRIANGLES;
-				
-				renderables.add(opaque);
 				renderables.add(transp);
+				
+				if (chunk.selectedVoxel.x > -1)
+				{
+					block = pool.obtain();
+					block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
+					block.material = World.highlight;
+					block.mesh = World.blockCube;
+					block.meshPartOffset = 0;
+					block.meshPartSize = 36;
+					block.primitiveType = GL20.GL_LINES;
+				}
 			}
 		}
+		
+		if (block != null) renderables.add(block);
 	}
 }

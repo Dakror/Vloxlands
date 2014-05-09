@@ -43,8 +43,8 @@ import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.screen.LoadingScreen;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.base.GameBase;
-import de.dakror.vloxlands.util.event.VoxelSelection;
 import de.dakror.vloxlands.util.event.EventDispatcher;
+import de.dakror.vloxlands.util.event.VoxelSelection;
 
 public class Vloxlands extends GameBase
 {
@@ -328,6 +328,7 @@ public class Vloxlands extends GameBase
 						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
 						
 						bb.set(tmp1, tmp2);
+						c.selectedVoxel.set(-1, 0, 0);
 						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
 						{
 							float dist = ray.origin.dst(tmp5);
@@ -370,6 +371,7 @@ public class Vloxlands extends GameBase
 						}
 					}
 					
+					chunk.selectedVoxel.set(voxel);
 					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir));
 				}
 			}

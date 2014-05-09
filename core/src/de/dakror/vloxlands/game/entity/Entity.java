@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.entity;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -171,7 +170,7 @@ public abstract class Entity extends EntityBase
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
 			Vloxlands.shapeRenderer.translate(0, 0, 0.325f);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
-			Vloxlands.shapeRenderer.setColor(Color.ORANGE);
+			Vloxlands.shapeRenderer.setColor(World.SELECTION);
 			
 			final float malus = 0.05f;
 			
