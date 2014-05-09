@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.entity;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -18,16 +17,15 @@ import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
-import com.badlogic.gdx.utils.Disposable;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
-import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.base.EntityBase;
 
 /**
  * @author Dakror
  */
-public abstract class Entity implements Tickable, Disposable
+public abstract class Entity extends EntityBase
 {
 	static class MotionState extends btMotionState
 	{
@@ -62,6 +60,7 @@ public abstract class Entity implements Tickable, Disposable
 	protected float uplift;
 	
 	public boolean inFrustum;
+	public boolean hovered;
 	public boolean selected;
 	
 	protected boolean markedForRemoval;
@@ -69,17 +68,18 @@ public abstract class Entity implements Tickable, Disposable
 	protected btConvexShape collisionShape;
 	protected btRigidBody rigidBody;
 	public BoundingBox boundingBox;
+	final Vector3 size = new Vector3();
 	
 	protected MotionState motionState;
 	
 	protected AnimationController animationController;
 	
-	final Vector3 posCache = new Vector3();
+	public final Vector3 posCache = new Vector3();
 	
-	public Entity(float x, float y, float z, Vector3 trn, String model)
+	public Entity(float x, float y, float z, String model)
 	{
 		id = UUID.randomUUID().hashCode();
-		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z).trn(trn));
+		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
@@ -148,24 +148,33 @@ public abstract class Entity implements Tickable, Disposable
 	public void tick(int tick)
 	{
 		transform.getTranslation(posCache);
-		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(posCache.cpy().add(boundingBox.getDimensions()), boundingBox.getDimensions());
+		size.set(boundingBox.getDimensions().x, boundingBox.getDimensions().z, boundingBox.getDimensions().y);
+		
+		collisionShape.getAabb(transform, boundingBox.min, boundingBox.max);
+		boundingBox.min.add(0.5f);
+		boundingBox.max.add(0.5f);
+		
+		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox);
 	}
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(modelInstance, environment);
-		if (selected)
+		if (hovered || selected)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(4);
+			Gdx.gl.glLineWidth(selected ? 3 : 2);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
 			Vloxlands.shapeRenderer.identity();
 			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
 			Vloxlands.shapeRenderer.translate(0, 0, 0.325f);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
-			Vloxlands.shapeRenderer.setColor(Color.GREEN);
-			Vloxlands.shapeRenderer.rect(0, 0, 1, 1);
+			Vloxlands.shapeRenderer.setColor(World.SELECTION);
+			
+			final float malus = 0.05f;
+			
+			Vloxlands.shapeRenderer.rect(size.x / 2 - malus, size.z + malus, size.x, size.z);
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}

@@ -215,7 +215,6 @@ public class Island implements RenderableProvider, Tickable
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
 		visibleChunks = 0;
-		float f = World.gap / 2;
 		int hs = Chunk.SIZE / 2;
 		
 		Renderable block = null;
@@ -233,46 +232,35 @@ public class Island implements RenderableProvider, Tickable
 				
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				opaque.material = chunk.selected && Vloxlands.showChunkBorders ? World.wireframe : World.opaque;
+				opaque.material = World.opaque;
 				opaque.mesh = chunk.getOpaqueMesh();
 				opaque.meshPartOffset = 0;
 				opaque.meshPartSize = chunk.opaqueVerts;
-				opaque.primitiveType = chunk.selected && Vloxlands.showChunkBorders ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+				opaque.primitiveType = GL20.GL_TRIANGLES;
+				renderables.add(opaque);
 				
 				Renderable transp = pool.obtain();
 				transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				transp.material = chunk.selected && Vloxlands.showChunkBorders ? World.wireframe : World.transp;
+				transp.material = World.transp;
 				transp.mesh = chunk.getTransparentMesh();
 				transp.meshPartOffset = 0;
 				transp.meshPartSize = chunk.transpVerts;
-				transp.primitiveType = chunk.selected && Vloxlands.showChunkBorders ? GL20.GL_LINES : GL20.GL_TRIANGLES;
-				
-				renderables.add(opaque);
+				transp.primitiveType = GL20.GL_TRIANGLES;
 				renderables.add(transp);
 				
-				if (Vloxlands.showChunkBorders)
-				{
-					Renderable highlight = pool.obtain();
-					highlight.worldTransform.setToTranslation(pos.x + chunk.pos.x - f, pos.y + chunk.pos.y - f, pos.z + chunk.pos.z - f);
-					highlight.material = World.highlight;
-					highlight.mesh = World.chunkCube;
-					highlight.meshPartOffset = 0;
-					highlight.meshPartSize = 36;
-					highlight.primitiveType = GL20.GL_LINE_STRIP;
-					renderables.add(highlight);
-				}
-				if (chunk.selectedVoxel != null)
+				if (chunk.selectedVoxel.x > -1)
 				{
 					block = pool.obtain();
-					block.worldTransform.setTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - f, pos.y + chunk.pos.y + chunk.selectedVoxel.y - f, pos.z + chunk.pos.z + chunk.selectedVoxel.z - f);
+					block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
 					block.material = World.highlight;
 					block.mesh = World.blockCube;
 					block.meshPartOffset = 0;
 					block.meshPartSize = 36;
-					block.primitiveType = GL20.GL_LINE_STRIP;
+					block.primitiveType = GL20.GL_LINES;
 				}
 			}
 		}
+		
 		if (block != null) renderables.add(block);
 	}
 }

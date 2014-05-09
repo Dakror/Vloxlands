@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject.CollisionFlags;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
@@ -23,11 +22,10 @@ public class Creature extends Entity
 	protected float climbHeight;
 	protected float speed;
 	protected float rotateSpeed = 20;
-	protected float middleTranslate;
 	
-	public Creature(float x, float y, float z, Vector3 trn, String model)
+	public Creature(float x, float y, float z, String model)
 	{
-		super(x, y, z, trn, model);
+		super(x, y, z, model);
 	}
 	
 	@Override

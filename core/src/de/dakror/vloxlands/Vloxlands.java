@@ -1,12 +1,10 @@
 package de.dakror.vloxlands;
 
 import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -21,11 +19,9 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -35,7 +31,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.game.entity.Entity;
@@ -47,8 +42,11 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.screen.LoadingScreen;
 import de.dakror.vloxlands.util.Direction;
+import de.dakror.vloxlands.util.base.GameBase;
+import de.dakror.vloxlands.util.event.EventDispatcher;
+import de.dakror.vloxlands.util.event.VoxelSelection;
 
-public class Vloxlands extends Game implements InputProcessor, GestureListener
+public class Vloxlands extends GameBase
 {
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
@@ -68,13 +66,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	SpriteBatch spriteBatch;
 	BitmapFont font;
 	
-	Vector3 selectedVoxel;
-	Voxel selectedVoxelType;
-	Direction selectedVoxelFace;
-	int selectedIsland;
-	Voxel placeVoxelType;
-	int placeVoxelTypeScroll;
-	
 	// -- on screen controls -- //
 	Stage stage;
 	OrthographicCamera camera2;
@@ -90,28 +81,26 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	public static boolean debug;
 	public static boolean showChunkBorders;
 	boolean middleDown;
-	boolean leftDown;
 	
 	Vector3 worldMiddle;
 	
 	public Vector3 intersection = new Vector3();
 	public Vector3 intersection2 = new Vector3();
 	
-	Vector2 lastMouseTap = new Vector2();
-	
 	// -- temp -- //
-	public Vector3 tmp1 = new Vector3();
-	Vector3 tmp2 = new Vector3();
-	public Vector3 tmp3 = new Vector3();
-	public Vector3 tmp4 = new Vector3();
-	Vector3 tmp5 = new Vector3();
-	Vector3 tmp6 = new Vector3();
-	public Vector3 tmp7 = new Vector3();
-	public Vector3 tmp8 = new Vector3();
-	BoundingBox bb = new BoundingBox();
-	public BoundingBox bb2 = new BoundingBox();
-	public BoundingBox bb3 = new BoundingBox();
-	public Matrix4 m4 = new Matrix4();
+	public final Vector3 tmp = new Vector3();
+	public final Vector3 tmp1 = new Vector3();
+	public final Vector3 tmp2 = new Vector3();
+	public final Vector3 tmp3 = new Vector3();
+	public final Vector3 tmp4 = new Vector3();
+	public final Vector3 tmp5 = new Vector3();
+	public final Vector3 tmp6 = new Vector3();
+	public final Vector3 tmp7 = new Vector3();
+	public final Vector3 tmp8 = new Vector3();
+	public final Matrix4 m4 = new Matrix4();
+	public final BoundingBox bb = new BoundingBox();
+	public final BoundingBox bb2 = new BoundingBox();
+	public final BoundingBox bb3 = new BoundingBox();
 	
 	@Override
 	public void create()
@@ -129,7 +118,7 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		assets = new AssetManager();
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.near = 0.001f;
+		camera.near = 0.1f;
 		camera.far = 100;
 		controller = new FirstPersonCameraController(camera)
 		{
@@ -266,8 +255,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
 			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
 			font.draw(spriteBatch, "Seed: " + seed, 0, Gdx.graphics.getHeight() - 120);
-			font.draw(spriteBatch, "Sel. Voxel: " + (selectedVoxelType != null ? selectedVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 140);
-			font.draw(spriteBatch, "Place: " + (placeVoxelType != null ? placeVoxelType.getName() : " N/A"), 0, Gdx.graphics.getHeight() - 160);
 			spriteBatch.end();
 		}
 	}
@@ -282,176 +269,113 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 		if (Gdx.app.getType() == ApplicationType.Android) camera2.update();
 	}
 	
-	@Override
-	public void pause()
-	{}
-	
-	@Override
-	public void resume()
-	{}
-	
-	@Override
-	public void dispose()
-	{}
-	
-	public void pickRay()
+	public void pickRay(boolean hover, boolean lmb, int x, int y)
 	{
-		Ray ray = camera.getPickRay(lastMouseTap.x, lastMouseTap.y);
-		selectedVoxelType = null;
-		selectedVoxel = null;
-		selectedIsland = -1;
+		Ray ray = camera.getPickRay(x, y);
 		
-		for (Entity entity : world.getEntities())
+		if (hover)
 		{
-			if (!entity.inFrustum) continue;
-			
-			bb.set(entity.boundingBox);
-			bb.mul(entity.getTransform());
-			
-			entity.selected = Intersector.intersectRayBounds(ray, bb, null);
-			if (entity.selected) return;
-		}
-		
-		for (int i = 0; i < world.getIslands().length; i++)
-		{
-			Island island = world.getIslands()[i];
-			if (island == null) continue;
-			
+			Entity hovered = null;
 			float distance = 0;
-			Chunk chunk = null;
-			Vector3 voxel = null;
 			
-			for (Chunk c : island.getChunks())
+			for (Entity entity : world.getEntities())
 			{
-				if (c.inFrustum && !c.isEmpty())
+				entity.hovered = false;
+				if (!entity.inFrustum) continue;
+				
+				if (Intersector.intersectRayBounds(ray, entity.boundingBox, tmp))
 				{
-					tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
-					tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
-					
-					bb.set(tmp1, tmp2);
-					c.selected = false;
-					c.selectedVoxel = null;
-					if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+					float dst = ray.origin.dst(tmp);
+					if (hovered == null || dst < distance)
 					{
-						float dist = ray.origin.dst(tmp5);
-						if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
-						{
-							intersection.set(tmp5);
-							distance = dist;
-							voxel = tmp6.cpy();
-							chunk = c;
-						}
+						hovered = entity;
+						distance = dst;
 					}
 				}
 			}
 			
-			if (chunk != null)
-			{
-				chunk.selected = true;
-				chunk.selectedVoxel = voxel;
-				
-				selectedVoxelType = Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z));
-				selectedVoxel = voxel.cpy().add(chunk.pos);
-				
-				// -- determine selectedVoxelFace -- //
-				Direction dir = null;
-				float distanc = 0;
-				Vector3 is2 = new Vector3();
-				byte air = Voxel.get("AIR").getId();
-				
-				for (Direction d : Direction.values())
-				{
-					tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
-					tmp8.set(tmp7.cpy().add(1, 1, 1));
-					bb3.set(tmp7, tmp8);
-					
-					if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
-					
-					if (Intersector.intersectRayBounds(ray, bb3, is2))
-					{
-						float dist = ray.origin.dst(is2);
-						if (dir == null || dist < distanc)
-						{
-							intersection2.set(is2);
-							distanc = dist;
-							dir = d;
-						}
-					}
-				}
-				
-				selectedVoxelFace = dir;
-				selectedIsland = i;
-			}
+			if (hovered != null) hovered.hovered = true;
 		}
-	}
-	
-	@Override
-	public boolean mouseMoved(int screenX, int screenY)
-	{
-		lastMouseTap.set(screenX, screenY);
-		pickRay();
-		
-		return false;
-	}
-	
-	@Override
-	public boolean tap(float x, float y, int count, int button)
-	{
-		if (Gdx.app.getType() == ApplicationType.Android)
+		else
 		{
-			lastMouseTap.set(x, y);
-			pickRay();
+			boolean entitySelected = false;
+			for (Entity entity : world.getEntities())
+			{
+				entity.selected = false;
+				if (entity.inFrustum && entity.hovered)
+				{
+					entity.selected = true;
+					entitySelected = true;
+				}
+			}
+			
+			if (entitySelected) return;
+			
+			for (int i = 0; i < world.getIslands().length; i++)
+			{
+				Island island = world.getIslands()[i];
+				if (island == null) continue;
+				
+				float distance = 0;
+				Chunk chunk = null;
+				Vector3 voxel = null;
+				
+				for (Chunk c : island.getChunks())
+				{
+					if (c.inFrustum && !c.isEmpty())
+					{
+						tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
+						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
+						
+						bb.set(tmp1, tmp2);
+						c.selectedVoxel.set(-1, 0, 0);
+						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+						{
+							float dist = ray.origin.dst(tmp5);
+							if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
+							{
+								intersection.set(tmp5);
+								distance = dist;
+								voxel = tmp6.cpy();
+								chunk = c;
+							}
+						}
+					}
+				}
+				
+				if (chunk != null)
+				{
+					// -- determine selectedVoxelFace -- //
+					Direction dir = null;
+					float distanc = 0;
+					Vector3 is2 = new Vector3();
+					byte air = Voxel.get("AIR").getId();
+					
+					for (Direction d : Direction.values())
+					{
+						tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
+						tmp8.set(tmp7.cpy().add(1, 1, 1));
+						bb3.set(tmp7, tmp8);
+						
+						if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
+						
+						if (Intersector.intersectRayBounds(ray, bb3, is2))
+						{
+							float dist = ray.origin.dst(is2);
+							if (dir == null || dist < distanc)
+							{
+								intersection2.set(is2);
+								distanc = dist;
+								dir = d;
+							}
+						}
+					}
+					
+					chunk.selectedVoxel.set(voxel);
+					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir));
+				}
+			}
 		}
-		
-		return false;
-	}
-	
-	@Override
-	public boolean touchDown(float x, float y, int pointer, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean longPress(float x, float y)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean fling(float velocityX, float velocityY, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean pan(float x, float y, float deltaX, float deltaY)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean panStop(float x, float y, int pointer, int button)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean zoom(float initialDistance, float distance)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean keyDown(int keycode)
-	{
-		return false;
 	}
 	
 	@Override
@@ -468,8 +392,9 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 	}
 	
 	@Override
-	public boolean keyTyped(char character)
+	public boolean mouseMoved(int screenX, int screenY)
 	{
+		pickRay(true, false, screenX, screenY);
 		return false;
 	}
 	
@@ -481,23 +406,8 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}
-		if (button == Buttons.RIGHT && selectedVoxel != null && selectedIsland > -1)
-		{
-			world.getIslands()[selectedIsland].set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, Voxel.get("AIR").getId());
-			world.getIslands()[selectedIsland].recalculate();
-			
-			selectedVoxel = null;
-			selectedVoxelType = null;
-			pickRay();
-		}
-		if (button == Buttons.LEFT && selectedVoxelFace != null && placeVoxelType != null && selectedIsland > -1)
-		{
-			leftDown = true;
-			world.getIslands()[selectedIsland].set(selectedVoxel.x + selectedVoxelFace.dir.x, selectedVoxel.y + selectedVoxelFace.dir.y, selectedVoxel.z + selectedVoxelFace.dir.z, placeVoxelType.getId());
-			world.getIslands()[selectedIsland].recalculate();
-			
-			pickRay();
-		}
+		else pickRay(false, button == Buttons.LEFT, screenX, screenY);
+		
 		return false;
 	}
 	
@@ -509,27 +419,6 @@ public class Vloxlands extends Game implements InputProcessor, GestureListener
 			middleDown = false;
 			Gdx.input.setCursorCatched(false);
 		}
-		if (button == Buttons.LEFT) leftDown = false;
-		return false;
-	}
-	
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean scrolled(int amount)
-	{
-		Array<?> v = Voxel.getAll();
-		
-		placeVoxelTypeScroll += amount;
-		placeVoxelTypeScroll %= v.size;
-		placeVoxelTypeScroll = placeVoxelTypeScroll < 0 ? v.size - 1 : placeVoxelTypeScroll;
-		
-		placeVoxelType = (Voxel) v.get(placeVoxelTypeScroll);
-		
 		return false;
 	}
 }

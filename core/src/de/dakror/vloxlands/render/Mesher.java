@@ -114,4 +114,30 @@ public class Mesher
 		
 		return mesh;
 	}
+	
+	public static Mesh genCubeWireframe(float size)
+	{
+		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		
+		float[] cubeVerts = { 0, 0, 0, 0, 0, size, 0, 0, size, 0, size, size, 0, size, size, 0, size, 0, 0, size, 0, 0, 0, 0, size, 0, 0, size, 0, size, size, 0, size, size, size, size, size, size, size, size, size, 0, size, size, 0, size, 0, 0, size, 0, 0, 0, 0, 0, size, size, 0, 0, size, 0, size, 0, size, 0, 0, size, size, size, size, 0, size, size, };
+		
+		float[] vertices = new float[cubeVerts.length / 3 * 10];
+		int pIdx = 0;
+		for (int i = 0; i < vertices.length;)
+		{
+			vertices[i++] = cubeVerts[pIdx++];
+			vertices[i++] = cubeVerts[pIdx++];
+			vertices[i++] = cubeVerts[pIdx++];
+			vertices[i++] = 0;
+			vertices[i++] = 1;
+			vertices[i++] = 0;
+			vertices[i++] = 0;
+			vertices[i++] = 0;
+			vertices[i++] = 1;
+			vertices[i++] = 1;
+		}
+		mesh.setVertices(vertices);
+		
+		return mesh;
+	}
 }

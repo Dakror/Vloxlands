@@ -39,13 +39,15 @@ import de.dakror.vloxlands.util.Tickable;
  */
 public class World implements RenderableProvider, Tickable
 {
+	public static final Color SELECTION = Color.valueOf("ff9900");
+	
 	public static final int MAXHEIGHT = 512;
 	
 	public static final short GROUND_FLAG = 1 << 8;
 	public static final short ENTITY_FLAG = 1 << 9;
 	public static final short ALL_FLAG = -1;
 	
-	static Material opaque, transp, highlight, wireframe;
+	static Material opaque, transp, highlight;
 	
 	Island[] islands;
 	
@@ -53,7 +55,7 @@ public class World implements RenderableProvider, Tickable
 	
 	public int visibleChunks, chunks, visibleEntities;
 	
-	public static Mesh chunkCube, blockCube, pointCube;
+	public static Mesh chunkCube, blockCube;
 	public static final float gap = 0.025f;
 	
 	Array<Entity> entities = new Array<Entity>();
@@ -79,12 +81,10 @@ public class World implements RenderableProvider, Tickable
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
-		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(Color.ORANGE));
-		wireframe = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(Color.BLACK));
+		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(SELECTION));
 		
-		chunkCube = Mesher.genCube(Chunk.SIZE + gap);
-		blockCube = Mesher.genCube(1 + gap);
-		pointCube = Mesher.genCube(0.05f);
+		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
+		blockCube = Mesher.genCubeWireframe(1 + gap);
 		
 		collisionConfiguration = new btDefaultCollisionConfiguration();
 		collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
