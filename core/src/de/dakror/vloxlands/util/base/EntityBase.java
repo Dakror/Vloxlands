@@ -12,7 +12,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public abstract class EntityBase implements Tickable, Disposable, EventListener
 {
 	@Override
-	public void onVoxelSelection(VoxelSelection vs)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{}
 	
 	@Override

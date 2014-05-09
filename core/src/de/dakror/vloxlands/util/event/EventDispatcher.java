@@ -19,9 +19,9 @@ public class EventDispatcher
 		return listeners.removeValue(value, false);
 	}
 	
-	public static void dispatchVoxelSelection(VoxelSelection vs)
+	public static void dispatchVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
 		for (EventListener l : listeners)
-			l.onVoxelSelection(vs);
+			l.onVoxelSelection(vs, lmb);
 	}
 }

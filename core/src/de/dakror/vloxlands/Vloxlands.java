@@ -372,7 +372,7 @@ public class Vloxlands extends GameBase
 					}
 					
 					chunk.selectedVoxel.set(voxel);
-					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir));
+					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir), lmb);
 				}
 			}
 		}
