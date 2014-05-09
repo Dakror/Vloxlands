@@ -18,16 +18,15 @@ import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
-import com.badlogic.gdx.utils.Disposable;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
-import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.base.EntityBase;
 
 /**
  * @author Dakror
  */
-public abstract class Entity implements Tickable, Disposable
+public abstract class Entity extends EntityBase
 {
 	static class MotionState extends btMotionState
 	{

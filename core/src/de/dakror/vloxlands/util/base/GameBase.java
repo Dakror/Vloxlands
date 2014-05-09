@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.util.base;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputProcessor;

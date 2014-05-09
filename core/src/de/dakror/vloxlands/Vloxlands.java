@@ -42,8 +42,9 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.screen.LoadingScreen;
 import de.dakror.vloxlands.util.Direction;
-import de.dakror.vloxlands.util.GameBase;
-import de.dakror.vloxlands.util.VoxelSelection;
+import de.dakror.vloxlands.util.base.GameBase;
+import de.dakror.vloxlands.util.event.VoxelSelection;
+import de.dakror.vloxlands.util.event.EventDispatcher;
 
 public class Vloxlands extends GameBase
 {
@@ -369,8 +370,7 @@ public class Vloxlands extends GameBase
 						}
 					}
 					
-					new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir);
-					// TODO use VoxelSelection
+					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir));
 				}
 			}
 		}

@@ -1,8 +1,9 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.util.event;
 
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.util.Direction;
 
 /**
  * @author Dakror
