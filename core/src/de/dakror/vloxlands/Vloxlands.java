@@ -117,7 +117,7 @@ public class Vloxlands extends GameBase
 		assets = new AssetManager();
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.near = 0.001f;
+		camera.near = 0.1f;
 		camera.far = 100;
 		controller = new FirstPersonCameraController(camera)
 		{
