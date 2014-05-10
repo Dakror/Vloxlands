@@ -1,22 +1,14 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.physics.bullet.collision.Collision;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject.CollisionFlags;
-import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
-import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
-import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
-
-import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.world.World;
 
 /**
  * @author Dakror
  */
 public class Creature extends Entity
 {
-	protected btPairCachingGhostObject ghostObject;
-	protected btKinematicCharacterController controller;
+	// protected btPairCachingGhostObject ghostObject;
+	// protected btKinematicCharacterController controller;
 	
 	protected boolean airborne;
 	protected float climbHeight;
@@ -28,31 +20,32 @@ public class Creature extends Entity
 		super(x, y, z, model);
 	}
 	
-	@Override
-	protected void createPhysics(btConvexShape shape, float mass)
-	{
-		super.createPhysics(shape, mass);
-		
-		ghostObject = new btPairCachingGhostObject();
-		ghostObject.setWorldTransform(transform);
-		ghostObject.setCollisionShape(collisionShape);
-		ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
-		ghostObject.setActivationState(Collision.DISABLE_DEACTIVATION);
-		controller = new btKinematicCharacterController(ghostObject, collisionShape, climbHeight);
-		
-		Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
-		Vloxlands.world.getCollisionWorld().addAction(controller);
-	}
-	
-	@Override
-	public void updateTransform()
-	{
-		ghostObject.getWorldTransform(transform);
-	}
+	// @Override
+	// protected void createPhysics(btConvexShape shape, float mass)
+	// {
+	// super.createPhysics(shape, mass);
+	//
+	// ghostObject = new btPairCachingGhostObject();
+	// ghostObject.setWorldTransform(transform);
+	// ghostObject.setCollisionShape(collisionShape);
+	// ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
+	// ghostObject.setActivationState(Collision.DISABLE_DEACTIVATION);
+	// controller = new btKinematicCharacterController(ghostObject, collisionShape, climbHeight);
+	//
+	// Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
+	// Vloxlands.world.getCollisionWorld().addAction(controller);
+	// }
+	//
+	// @Override
+	// public void updateTransform()
+	// {
+	// ghostObject.getWorldTransform(transform);
+	// }
 	
 	@Override
 	public void tick(int tick)
 	{
+		// ghostObject.getWorldTransform(transform);
 		super.tick(tick);
 		
 		// transform.translate(-middleTranslate, 0, -middleTranslate).rotate(0, 1, 0, 5).translate(middleTranslate, 0, middleTranslate);
@@ -96,7 +89,7 @@ public class Creature extends Entity
 	public void dispose()
 	{
 		super.dispose();
-		ghostObject.dispose();
-		controller.dispose();
+		// ghostObject.dispose();
+		// controller.dispose();
 	}
 }

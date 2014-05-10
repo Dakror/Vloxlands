@@ -9,9 +9,6 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCompoundShape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
@@ -43,7 +40,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
 	byte[] voxels;
-	btBoxShape[] compoundChildren;
+	// btBoxShape[] compoundChildren;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -65,8 +62,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	int[] resources;
 	
-	btCompoundShape collisionShape;
-	btCollisionObject collisionObject;
+	// btCompoundShape collisionShape;
+	// btCollisionObject collisionObject;
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
@@ -83,16 +80,16 @@ public class Chunk implements Meshable, Tickable, Disposable
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
 		
-		compoundChildren = new btBoxShape[SIZE * SIZE * SIZE];
+		// compoundChildren = new btBoxShape[SIZE * SIZE * SIZE];
 		
 		MeshingThread.register(this);
-		collisionShape = new btCompoundShape(false);
-		
-		collisionObject = new btCollisionObject();
-		collisionObject.setCollisionShape(collisionShape);
-		collisionObject.setUserValue((int) (index.z + index.y * Island.CHUNKS + index.x * Island.CHUNKS * Island.CHUNKS));
-		collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
-		Vloxlands.world.getCollisionWorld().addCollisionObject(collisionObject, World.GROUND_FLAG, World.ENTITY_FLAG);
+		// collisionShape = new btCompoundShape(false);
+		//
+		// collisionObject = new btCollisionObject();
+		// collisionObject.setCollisionShape(collisionShape);
+		// collisionObject.setUserValue((int) (index.z + index.y * Island.CHUNKS + index.x * Island.CHUNKS * Island.CHUNKS));
+		// collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
+		// Vloxlands.world.getCollisionWorld().addCollisionObject(collisionObject, World.GROUND_FLAG, World.ENTITY_FLAG);
 	}
 	
 	public Chunk(int x, int y, int z, Island island)
@@ -153,18 +150,18 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
-		if (id != air && voxels[index] == air) // new block placed
-		{
-			btBoxShape bs = new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f));
-			collisionShape.addChildShape(Vloxlands.currentGame.m4.setToTranslation(x, y, z), bs);
-			compoundChildren[index] = bs;
-		}
-		else if (id == air && voxels[index] != air && compoundChildren[index] != null) // block removed
-		{
-			collisionShape.removeChildShape(compoundChildren[index]);
-			compoundChildren[index].dispose();
-			compoundChildren[index] = null;
-		}
+		// if (id != air && voxels[index] == air) // new block placed
+		// {
+		// btBoxShape bs = new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f));
+		// collisionShape.addChildShape(Vloxlands.currentGame.m4.setToTranslation(x, y, z), bs);
+		// compoundChildren[index] = bs;
+		// }
+		// else if (id == air && voxels[index] != air && compoundChildren[index] != null) // block removed
+		// {
+		// collisionShape.removeChildShape(compoundChildren[index]);
+		// compoundChildren[index].dispose();
+		// compoundChildren[index] = null;
+		// }
 		
 		voxels[index] = id;
 		
@@ -374,20 +371,20 @@ public class Chunk implements Meshable, Tickable, Disposable
 			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
 	
-	public btCompoundShape getCollisionShape()
-	{
-		return collisionShape;
-	}
-	
-	public btCollisionObject getCollisionObject()
-	{
-		return collisionObject;
-	}
+	// public btCompoundShape getCollisionShape()
+	// {
+	// return collisionShape;
+	// }
+	//
+	// public btCollisionObject getCollisionObject()
+	// {
+	// return collisionObject;
+	// }
 	
 	@Override
 	public void tick(int tick)
 	{
-		collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
+		// collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
 	}
 	
 	@Override

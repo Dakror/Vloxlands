@@ -13,10 +13,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.physics.bullet.collision.Collision;
-import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
-import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
@@ -27,27 +23,27 @@ import de.dakror.vloxlands.util.base.EntityBase;
  */
 public abstract class Entity extends EntityBase
 {
-	static class MotionState extends btMotionState
-	{
-		private final Matrix4 transform;
-		
-		public MotionState(final Matrix4 transform)
-		{
-			this.transform = transform;
-		}
-		
-		@Override
-		public void getWorldTransform(final Matrix4 worldTrans)
-		{
-			worldTrans.set(transform);
-		}
-		
-		@Override
-		public void setWorldTransform(final Matrix4 worldTrans)
-		{
-			transform.set(worldTrans);
-		}
-	}
+	// static class MotionState extends btMotionState
+	// {
+	// private final Matrix4 transform;
+	//
+	// public MotionState(final Matrix4 transform)
+	// {
+	// this.transform = transform;
+	// }
+	//
+	// @Override
+	// public void getWorldTransform(final Matrix4 worldTrans)
+	// {
+	// worldTrans.set(transform);
+	// }
+	//
+	// @Override
+	// public void setWorldTransform(final Matrix4 worldTrans)
+	// {
+	// transform.set(worldTrans);
+	// }
+	// }
 	
 	protected Matrix4 transform;
 	
@@ -65,12 +61,12 @@ public abstract class Entity extends EntityBase
 	
 	protected boolean markedForRemoval;
 	
-	protected btConvexShape collisionShape;
-	protected btRigidBody rigidBody;
+	// protected btConvexShape collisionShape;
+	// protected btRigidBody rigidBody;
 	public BoundingBox boundingBox;
-	final Vector3 size = new Vector3();
+	public final Vector3 size = new Vector3();
 	
-	protected MotionState motionState;
+	// protected MotionState motionState;
 	
 	protected AnimationController animationController;
 	
@@ -80,24 +76,24 @@ public abstract class Entity extends EntityBase
 	{
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z));
-		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
+		boundingBox = new BoundingBox();
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
 	}
 	
-	protected void createPhysics(btConvexShape shape, float mass)
-	{
-		collisionShape = shape;
-		
-		Vector3 localInertia = new Vector3();
-		collisionShape.calculateLocalInertia(mass, localInertia);
-		
-		motionState = new MotionState(modelInstance.transform);
-		rigidBody = new btRigidBody(mass, motionState, collisionShape);
-		rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
-		Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
-	}
+	// protected void createPhysics(btConvexShape shape, float mass)
+	// {
+	// collisionShape = shape;
+	//
+	// Vector3 localInertia = new Vector3();
+	// collisionShape.calculateLocalInertia(mass, localInertia);
+	//
+	// motionState = new MotionState(modelInstance.transform);
+	// rigidBody = new btRigidBody(mass, motionState, collisionShape);
+	// rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
+	// Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
+	// }
 	
 	public String getName()
 	{
@@ -147,14 +143,12 @@ public abstract class Entity extends EntityBase
 	@Override
 	public void tick(int tick)
 	{
-		transform.getTranslation(posCache);
-		size.set(boundingBox.getDimensions().x, boundingBox.getDimensions().z, boundingBox.getDimensions().y);
-		
-		collisionShape.getAabb(transform, boundingBox.min, boundingBox.max);
-		boundingBox.min.add(0.5f);
-		boundingBox.max.add(0.5f);
-		
-		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox);
+		// transform.getTranslation(posCache);
+		// collisionShape.getAabb(rigidBody.getWorldTransform(), boundingBox.min, boundingBox.max);
+		// boundingBox.set(boundingBox.min, boundingBox.max);
+		// size.set(boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
+		//
+		// inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox);
 	}
 	
 	public void render(ModelBatch batch, Environment environment)
@@ -168,13 +162,10 @@ public abstract class Entity extends EntityBase
 			Vloxlands.shapeRenderer.identity();
 			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
-			Vloxlands.shapeRenderer.translate(0, 0, 0.325f);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
 			Vloxlands.shapeRenderer.setColor(World.SELECTION);
 			
-			final float malus = 0.05f;
-			
-			Vloxlands.shapeRenderer.rect(size.x / 2 - malus, size.z + malus, size.x, size.z);
+			Vloxlands.shapeRenderer.rect(-size.x / 2, -size.z / 2, size.x, size.z);
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
@@ -191,10 +182,7 @@ public abstract class Entity extends EntityBase
 	
 	@Override
 	public void dispose()
-	{
-		rigidBody.dispose();
-		collisionShape.dispose();
-	}
+	{}
 	
 	// -- events -- //
 	

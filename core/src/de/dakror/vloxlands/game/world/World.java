@@ -14,17 +14,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.DebugDrawer;
-import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
-import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
-import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
-import com.badlogic.gdx.physics.bullet.collision.btGhostPairCallback;
-import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
-import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
-import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw.DebugDrawModes;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -60,14 +49,16 @@ public class World implements RenderableProvider, Tickable
 	
 	Array<Entity> entities = new Array<Entity>();
 	
-	btCollisionConfiguration collisionConfiguration;
-	btBroadphaseInterface broadphaseInterface;
-	btCollisionDispatcher collisionDispatcher;
-	btDiscreteDynamicsWorld collisionWorld;
-	btSequentialImpulseConstraintSolver constraintSolver;
-	btGhostPairCallback ghostPairCallback;
-	
-	DebugDrawer debugDrawer;
+	// btCollisionConfiguration collisionConfiguration;
+	// btBroadphaseInterface broadphaseInterface;
+	// btCollisionDispatcher collisionDispatcher;
+	// btDiscreteDynamicsWorld collisionWorld;
+	// btSequentialImpulseConstraintSolver constraintSolver;
+	// btGhostPairCallback ghostPairCallback;
+	//
+	// DebugDrawer debugDrawer;
+	//
+	// public boolean debug;
 	
 	public World(int width, int depth)
 	{
@@ -86,22 +77,22 @@ public class World implements RenderableProvider, Tickable
 		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
 		blockCube = Mesher.genCubeWireframe(1 + gap);
 		
-		collisionConfiguration = new btDefaultCollisionConfiguration();
-		collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-		
-		broadphaseInterface = new btDbvtBroadphase();
-		
-		ghostPairCallback = new btGhostPairCallback();
-		broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
-		
-		constraintSolver = new btSequentialImpulseConstraintSolver();
-		
-		collisionWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphaseInterface, constraintSolver, collisionConfiguration);
-		collisionWorld.setGravity(new Vector3(0, -9.81f, 0));
-		
-		debugDrawer = new DebugDrawer();
-		debugDrawer.setDebugMode(DebugDrawModes.DBG_DrawAabb);
-		collisionWorld.setDebugDrawer(debugDrawer);
+		// collisionConfiguration = new btDefaultCollisionConfiguration();
+		// collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
+		//
+		// broadphaseInterface = new btDbvtBroadphase();
+		//
+		// ghostPairCallback = new btGhostPairCallback();
+		// broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
+		//
+		// constraintSolver = new btSequentialImpulseConstraintSolver();
+		//
+		// collisionWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphaseInterface, constraintSolver, collisionConfiguration);
+		// collisionWorld.setGravity(new Vector3(0, -9.81f, 0));
+		//
+		// debugDrawer = new DebugDrawer();
+		// debugDrawer.setDebugMode(DebugDrawModes.DBG_DrawAabb);
+		// collisionWorld.setDebugDrawer(debugDrawer);
 	}
 	
 	/**
@@ -123,7 +114,7 @@ public class World implements RenderableProvider, Tickable
 			e.update();
 		}
 		
-		collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
+		// collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
 		
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
@@ -181,10 +172,10 @@ public class World implements RenderableProvider, Tickable
 		e.onSpawn();
 	}
 	
-	public btDiscreteDynamicsWorld getCollisionWorld()
-	{
-		return collisionWorld;
-	}
+	// public btDiscreteDynamicsWorld getCollisionWorld()
+	// {
+	// return collisionWorld;
+	// }
 	
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -202,7 +193,7 @@ public class World implements RenderableProvider, Tickable
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
-		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0)
+		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0 && debug)
 		// {
 		// Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		// debugDrawer.begin(batch.getCamera());

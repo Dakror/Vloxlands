@@ -25,7 +25,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -35,6 +34,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -105,7 +105,7 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
-		Bullet.init();
+		// Bullet.init();
 		
 		currentGame = this;
 		Gdx.app.log("Vloxlands.create", "Seed: " + seed + "");
@@ -193,6 +193,7 @@ public class Vloxlands extends GameBase
 	{
 		Vector3 p = world.getIslands()[0].pos;
 		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2));
+		world.addEntity(new Structure(Island.SIZE / 2 + 8, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);
@@ -383,6 +384,7 @@ public class Vloxlands extends GameBase
 	{
 		if (keycode == Keys.F1) debug = !debug;
 		if (keycode == Keys.F2) showChunkBorders = !showChunkBorders;
+		// if (keycode == Keys.F3) world.debug = !world.debug;
 		if (keycode == Keys.F11)
 		{
 			if (Gdx.graphics.isFullscreen()) Gdx.graphics.setDisplayMode(1280, 720, false);

@@ -1,7 +1,5 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 
 
 /**
@@ -17,9 +15,8 @@ public class Human extends Creature
 		speed = 0.05f;
 		climbHeight = 1;
 		
-		Vector3 v = boundingBox.getDimensions().cpy().scl(0.5f);
-		btBoxShape bt = new btBoxShape(new Vector3(v.x, v.z, v.y));
-		createPhysics(bt, 2.5f);
+		// btBoxShape bt = new btBoxShape(new Vector3(0.5f, 1, 0.5f));
+		// createPhysics(bt, 2.5f);
 		// animationController.setAnimation("walk", -1);
 	}
 }
