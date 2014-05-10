@@ -45,7 +45,7 @@ public class World implements RenderableProvider, Tickable
 	public int visibleChunks, chunks, visibleEntities;
 	
 	public static Mesh chunkCube, blockCube;
-	public static final float gap = 0.025f;
+	public static final float gap = 0.01f;
 	
 	Array<Entity> entities = new Array<Entity>();
 	
