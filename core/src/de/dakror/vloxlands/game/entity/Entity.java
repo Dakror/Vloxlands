@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.entity;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -45,6 +46,8 @@ public abstract class Entity extends EntityBase
 	// }
 	// }
 	
+	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
+	
 	protected Matrix4 transform;
 	
 	public ModelInstance modelInstance;
@@ -64,7 +67,6 @@ public abstract class Entity extends EntityBase
 	// protected btConvexShape collisionShape;
 	// protected btRigidBody rigidBody;
 	public BoundingBox boundingBox;
-	public final Vector3 size = new Vector3();
 	
 	// protected MotionState motionState;
 	
@@ -75,8 +77,9 @@ public abstract class Entity extends EntityBase
 	public Entity(float x, float y, float z, String model)
 	{
 		id = UUID.randomUUID().hashCode();
-		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class), new Matrix4().translate(x, y, z));
-		boundingBox = new BoundingBox();
+		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
+		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
+		modelInstance.transform.translate(x, y, z);
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
@@ -143,12 +146,9 @@ public abstract class Entity extends EntityBase
 	@Override
 	public void tick(int tick)
 	{
-		// transform.getTranslation(posCache);
+		transform.getTranslation(posCache);
 		// collisionShape.getAabb(rigidBody.getWorldTransform(), boundingBox.min, boundingBox.max);
-		// boundingBox.set(boundingBox.min, boundingBox.max);
-		// size.set(boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
-		//
-		// inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox);
+		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
 	public void render(ModelBatch batch, Environment environment)
@@ -165,9 +165,27 @@ public abstract class Entity extends EntityBase
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
 			Vloxlands.shapeRenderer.setColor(World.SELECTION);
 			
-			Vloxlands.shapeRenderer.rect(-size.x / 2, -size.z / 2, size.x, size.z);
+			Vloxlands.shapeRenderer.rect(-boundingBox.getDimensions().x / 2, -boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().z);
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
+		}
+		
+		if (Vloxlands.debug)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.RED);
+			Vector3[] crn = boundingBox.getCorners();
+			for (int i = 0; i < LINES.length; i++)
+			{
+				Vector3 v = crn[LINES[i][0]];
+				Vector3 w = crn[LINES[i][1]];
+				Vloxlands.shapeRenderer.line(v.x, v.y, v.z, w.x, w.y, w.z, Color.RED, Color.RED);
+			}
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	

@@ -45,9 +45,9 @@ public class Creature extends Entity
 	@Override
 	public void tick(int tick)
 	{
-		// ghostObject.getWorldTransform(transform);
 		super.tick(tick);
 		
+		// ghostObject.getWorldTransform(transform);
 		// transform.translate(-middleTranslate, 0, -middleTranslate).rotate(0, 1, 0, 5).translate(middleTranslate, 0, middleTranslate);
 		// ghostObject.setWorldTransform(transform);
 		
