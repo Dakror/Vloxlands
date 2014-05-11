@@ -115,12 +115,6 @@ public class World implements RenderableProvider, Tickable
 		}
 		
 		// collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
-		
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
-		{
-			Entity e = iter.next();
-			e.updateTransform();
-		}
 	}
 	
 	@Override

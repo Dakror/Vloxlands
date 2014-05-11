@@ -192,8 +192,8 @@ public class Vloxlands extends GameBase
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2));
-		world.addEntity(new Structure(Island.SIZE / 2 + 8, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
+		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2));
+		world.addEntity(new Structure(Island.SIZE / 2 - 6, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);
@@ -284,7 +284,9 @@ public class Vloxlands extends GameBase
 				entity.hovered = false;
 				if (!entity.inFrustum) continue;
 				
-				if (Intersector.intersectRayBounds(ray, entity.boundingBox, tmp))
+				entity.getWorldBoundingBox(bb);
+				
+				if (Intersector.intersectRayBounds(ray, bb, tmp))
 				{
 					float dst = ray.origin.dst(tmp);
 					if (hovered == null || dst < distance)

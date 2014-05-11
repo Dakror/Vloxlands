@@ -63,10 +63,9 @@ public abstract class Entity extends EntityBase
 	public boolean selected;
 	
 	protected boolean markedForRemoval;
-	
 	// protected btConvexShape collisionShape;
 	// protected btRigidBody rigidBody;
-	public BoundingBox boundingBox;
+	protected BoundingBox boundingBox;
 	
 	// protected MotionState motionState;
 	
@@ -79,7 +78,13 @@ public abstract class Entity extends EntityBase
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
-		modelInstance.transform.translate(x, y, z);
+		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
+		
+		if (boundingBox.getCenter().len() < 0.1) // center is pretty much zero
+		{
+			modelInstance.transform.translate(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
+		}
+		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
@@ -151,6 +156,14 @@ public abstract class Entity extends EntityBase
 		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
+	public void getWorldBoundingBox(BoundingBox bb)
+	{
+		bb.min.set(boundingBox.min).add(posCache);
+		bb.max.set(boundingBox.max).add(posCache);
+		
+		bb.set(bb.min, bb.max);
+	}
+	
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(modelInstance, environment);
@@ -160,11 +173,10 @@ public abstract class Entity extends EntityBase
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
 			Vloxlands.shapeRenderer.identity();
-			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
 			Vloxlands.shapeRenderer.setColor(World.SELECTION);
-			
 			Vloxlands.shapeRenderer.rect(-boundingBox.getDimensions().x / 2, -boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().z);
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
@@ -194,9 +206,6 @@ public abstract class Entity extends EntityBase
 		animationController.update(Gdx.graphics.getDeltaTime());
 		// do translations, rotations here
 	}
-	
-	public void updateTransform()
-	{}
 	
 	@Override
 	public void dispose()
