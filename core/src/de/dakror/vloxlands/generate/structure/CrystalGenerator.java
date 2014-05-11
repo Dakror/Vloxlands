@@ -26,7 +26,7 @@ public class CrystalGenerator extends Generator
 	{
 		island.calculateWeight();
 		
-		float weightNeededToUplift = island.getWeight() / World.calculateUplift(y);
+		float weightNeededToUplift = island.getWeight() / World.calculateRelativeUplift(y);
 		
 		while (weightNeededToUplift > 100)
 		{

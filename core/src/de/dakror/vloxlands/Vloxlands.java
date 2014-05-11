@@ -105,8 +105,6 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
-		// Bullet.init();
-		
 		currentGame = this;
 		Gdx.app.log("Vloxlands.create", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
@@ -312,8 +310,6 @@ public class Vloxlands extends GameBase
 				}
 			}
 			
-			if (entitySelected) return;
-			
 			for (int i = 0; i < world.getIslands().length; i++)
 			{
 				Island island = world.getIslands()[i];
@@ -346,7 +342,7 @@ public class Vloxlands extends GameBase
 					}
 				}
 				
-				if (chunk != null)
+				if (chunk != null && !entitySelected)
 				{
 					// -- determine selectedVoxelFace -- //
 					Direction dir = null;
@@ -386,7 +382,6 @@ public class Vloxlands extends GameBase
 	{
 		if (keycode == Keys.F1) debug = !debug;
 		if (keycode == Keys.F2) showChunkBorders = !showChunkBorders;
-		// if (keycode == Keys.F3) world.debug = !world.debug;
 		if (keycode == Keys.F11)
 		{
 			if (Gdx.graphics.isFullscreen()) Gdx.graphics.setDisplayMode(1280, 720, false);

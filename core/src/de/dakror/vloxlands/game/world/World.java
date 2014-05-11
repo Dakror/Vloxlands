@@ -49,17 +49,6 @@ public class World implements RenderableProvider, Tickable
 	
 	Array<Entity> entities = new Array<Entity>();
 	
-	// btCollisionConfiguration collisionConfiguration;
-	// btBroadphaseInterface broadphaseInterface;
-	// btCollisionDispatcher collisionDispatcher;
-	// btDiscreteDynamicsWorld collisionWorld;
-	// btSequentialImpulseConstraintSolver constraintSolver;
-	// btGhostPairCallback ghostPairCallback;
-	//
-	// DebugDrawer debugDrawer;
-	//
-	// public boolean debug;
-	
 	public World(int width, int depth)
 	{
 		this.width = width;
@@ -76,23 +65,6 @@ public class World implements RenderableProvider, Tickable
 		
 		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
 		blockCube = Mesher.genCubeWireframe(1 + gap);
-		
-		// collisionConfiguration = new btDefaultCollisionConfiguration();
-		// collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-		//
-		// broadphaseInterface = new btDbvtBroadphase();
-		//
-		// ghostPairCallback = new btGhostPairCallback();
-		// broadphaseInterface.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
-		//
-		// constraintSolver = new btSequentialImpulseConstraintSolver();
-		//
-		// collisionWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphaseInterface, constraintSolver, collisionConfiguration);
-		// collisionWorld.setGravity(new Vector3(0, -9.81f, 0));
-		//
-		// debugDrawer = new DebugDrawer();
-		// debugDrawer.setDebugMode(DebugDrawModes.DBG_DrawAabb);
-		// collisionWorld.setDebugDrawer(debugDrawer);
 	}
 	
 	/**
@@ -113,8 +85,6 @@ public class World implements RenderableProvider, Tickable
 			Entity e = iter.next();
 			e.update();
 		}
-		
-		// collisionWorld.stepSimulation(Gdx.graphics.getDeltaTime(), 5, 1 / 60f);
 	}
 	
 	@Override
@@ -166,11 +136,6 @@ public class World implements RenderableProvider, Tickable
 		e.onSpawn();
 	}
 	
-	// public btDiscreteDynamicsWorld getCollisionWorld()
-	// {
-	// return collisionWorld;
-	// }
-	
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
@@ -187,16 +152,6 @@ public class World implements RenderableProvider, Tickable
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
-		// if (debugDrawer != null && debugDrawer.getDebugMode() > 0 && debug)
-		// {
-		// Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		// debugDrawer.begin(batch.getCamera());
-		// debugDrawer.shapeRenderer.identity();
-		// debugDrawer.shapeRenderer.translate(0.5f, 0.5f, 0.5f);
-		// collisionWorld.debugDrawWorld();
-		// debugDrawer.end();
-		// System.gc();
-		// }
 		batch.render(this, environment);
 		
 		visibleEntities = 0;
@@ -211,8 +166,8 @@ public class World implements RenderableProvider, Tickable
 		}
 	}
 	
-	public static float calculateUplift(float height)
+	public static float calculateRelativeUplift(float y)
 	{
-		return (1 - height / MAXHEIGHT) * 4 + 0.1f;
+		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
 }

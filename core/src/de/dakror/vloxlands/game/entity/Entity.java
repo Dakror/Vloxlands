@@ -24,28 +24,6 @@ import de.dakror.vloxlands.util.base.EntityBase;
  */
 public abstract class Entity extends EntityBase
 {
-	// static class MotionState extends btMotionState
-	// {
-	// private final Matrix4 transform;
-	//
-	// public MotionState(final Matrix4 transform)
-	// {
-	// this.transform = transform;
-	// }
-	//
-	// @Override
-	// public void getWorldTransform(final Matrix4 worldTrans)
-	// {
-	// worldTrans.set(transform);
-	// }
-	//
-	// @Override
-	// public void setWorldTransform(final Matrix4 worldTrans)
-	// {
-	// transform.set(worldTrans);
-	// }
-	// }
-	
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
 	protected Matrix4 transform;
@@ -63,11 +41,7 @@ public abstract class Entity extends EntityBase
 	public boolean selected;
 	
 	protected boolean markedForRemoval;
-	// protected btConvexShape collisionShape;
-	// protected btRigidBody rigidBody;
 	protected BoundingBox boundingBox;
-	
-	// protected MotionState motionState;
 	
 	protected AnimationController animationController;
 	
@@ -89,19 +63,6 @@ public abstract class Entity extends EntityBase
 		markedForRemoval = false;
 		transform = modelInstance.transform;
 	}
-	
-	// protected void createPhysics(btConvexShape shape, float mass)
-	// {
-	// collisionShape = shape;
-	//
-	// Vector3 localInertia = new Vector3();
-	// collisionShape.calculateLocalInertia(mass, localInertia);
-	//
-	// motionState = new MotionState(modelInstance.transform);
-	// rigidBody = new btRigidBody(mass, motionState, collisionShape);
-	// rigidBody.setActivationState(Collision.DISABLE_DEACTIVATION);
-	// Vloxlands.world.getCollisionWorld().addRigidBody(rigidBody, World.ENTITY_FLAG, World.ALL_FLAG);
-	// }
 	
 	public String getName()
 	{
@@ -152,7 +113,6 @@ public abstract class Entity extends EntityBase
 	public void tick(int tick)
 	{
 		transform.getTranslation(posCache);
-		// collisionShape.getAabb(rigidBody.getWorldTransform(), boundingBox.min, boundingBox.max);
 		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
