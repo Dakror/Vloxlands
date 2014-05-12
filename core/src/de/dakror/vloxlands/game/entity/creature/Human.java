@@ -1,7 +1,5 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-
-
 /**
  * @author Dakror
  */

@@ -65,7 +65,7 @@ public class Creature extends Entity
 			target = vs.voxel.cpy().add(Vloxlands.world.getIslands()[vs.island].getPos()).add(blockTrn);
 			transform.setToRotation(Vector3.Y, 0).translate(posCache);
 			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-			animationController.animate("walk", -1, 1, null, 0.2f);
+			animationController.animate("walk", -1, 1, null, 0);
 			selected = true;
 		}
 	}
@@ -74,6 +74,6 @@ public class Creature extends Entity
 	public void onReachTarget()
 	{
 		target = null;
-		animationController.animate(null, 0.2f);
+		animationController.animate(null, 0);
 	}
 }

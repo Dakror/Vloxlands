@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
@@ -87,6 +88,8 @@ public class Vloxlands extends GameBase
 	public Vector3 intersection = new Vector3();
 	public Vector3 intersection2 = new Vector3();
 	
+	ModelInstance sky;
+	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
 	public final Vector3 tmp1 = new Vector3();
@@ -117,7 +120,7 @@ public class Vloxlands extends GameBase
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
-		camera.far = 100;
+		camera.far = 10000;
 		controller = new FirstPersonCameraController(camera)
 		{
 			@Override
@@ -198,6 +201,8 @@ public class Vloxlands extends GameBase
 		camera.position.y -= Island.SIZE / 4;
 		camera.position.z -= Island.SIZE / 2;
 		camera.rotate(Vector3.Y, 180);
+		
+		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
 	@Override
@@ -217,6 +222,7 @@ public class Vloxlands extends GameBase
 			world.update();
 			modelBatch.begin(camera);
 			world.render(modelBatch, lights);
+			// modelBatch.render(sky, lights);
 			modelBatch.end();
 			
 			if (Gdx.app.getType() == ApplicationType.Android)
