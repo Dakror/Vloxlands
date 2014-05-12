@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.util.base.EntityBase;
+import de.dakror.vloxlands.util.event.EventDispatcher;
 
 /**
  * @author Dakror
@@ -38,6 +39,7 @@ public abstract class Entity extends EntityBase
 	
 	public boolean inFrustum;
 	public boolean hovered;
+	public boolean wasSelected;
 	public boolean selected;
 	
 	protected boolean markedForRemoval;
@@ -52,16 +54,14 @@ public abstract class Entity extends EntityBase
 		id = UUID.randomUUID().hashCode();
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
-		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
 		
-		if (boundingBox.getCenter().len() < 0.1) // center is pretty much zero
-		{
-			modelInstance.transform.translate(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
-		}
+		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
 		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
+		
+		EventDispatcher.addListener(this);
 	}
 	
 	public String getName()
@@ -164,12 +164,13 @@ public abstract class Entity extends EntityBase
 	public void update()
 	{
 		animationController.update(Gdx.graphics.getDeltaTime());
-		// do translations, rotations here
 	}
 	
 	@Override
 	public void dispose()
-	{}
+	{
+		EventDispatcher.removeListener(this);
+	}
 	
 	// -- events -- //
 	

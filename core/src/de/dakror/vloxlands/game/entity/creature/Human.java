@@ -12,8 +12,7 @@ public class Human extends Creature
 		super(x, y, z, "models/humanblend/humanblend.g3db");
 		name = "Mensch";
 		
-		speed = 0.05f;
+		speed = 0.025f;
 		climbHeight = 1;
-		// animationController.setAnimation("walk", -1);
 	}
 }

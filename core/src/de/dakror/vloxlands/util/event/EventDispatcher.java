@@ -14,7 +14,7 @@ public class EventDispatcher
 		listeners.add(value);
 	}
 	
-	public static boolean remove(EventListener value)
+	public static boolean removeListener(EventListener value)
 	{
 		return listeners.removeValue(value, false);
 	}

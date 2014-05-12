@@ -302,6 +302,7 @@ public class Vloxlands extends GameBase
 			boolean entitySelected = false;
 			for (Entity entity : world.getEntities())
 			{
+				entity.wasSelected = entity.selected;
 				entity.selected = false;
 				if (entity.inFrustum && entity.hovered)
 				{
