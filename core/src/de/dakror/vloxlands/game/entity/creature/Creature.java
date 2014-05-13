@@ -1,9 +1,10 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.Path;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -19,7 +20,7 @@ public class Creature extends Entity
 	protected float rotateSpeed = 20;
 	protected Vector3 blockTrn;
 	
-	public Vector3 target;
+	public Path path;
 	
 	public Creature(float x, float y, float z, String model)
 	{
@@ -36,15 +37,23 @@ public class Creature extends Entity
 	{
 		super.tick(tick);
 		
-		if (target != null)
+		if (path != null && !path.isDone())
 		{
-			Vector3 dif = target.cpy().sub(posCache);
+			Vector3 dif = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(boundingBox.getDimensions()).sub(posCache);
 			
 			if (dif.len() > speed) dif.limit(speed);
-			else if (dif.len() < 0.1f) onReachTarget();
+			else if (dif.len() < 0.1f)
+			{
+				// transform.setToRotation(Vector3.Y, 0).translate(posCache);
+				// transform.rotate(Vector3.Y, new Vector2(path.get().z - posCache.z, path.get().x - posCache.x).angle() - 180);
+				path.next();
+				if (path.isDone()) onReachTarget();
+			}
 			
 			transform.trn(dif);
 		}
+		
+		// Gdx.app.log("", "" + posCache);
 	}
 	
 	public boolean isAirborne()
@@ -62,10 +71,14 @@ public class Creature extends Entity
 	{
 		if (wasSelected && !lmb)
 		{
-			target = vs.voxel.cpy().add(Vloxlands.world.getIslands()[vs.island].getPos()).add(blockTrn);
-			transform.setToRotation(Vector3.Y, 0).translate(posCache);
-			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-			animationController.animate("walk", -1, 1, null, 0);
+			Vector3 target = vs.voxel.cpy().add(Vloxlands.world.getIslands()[vs.island].getPos()).add(blockTrn);
+			
+			Vector3 v = posCache.sub(Vloxlands.world.getIslands()[0].pos);
+			v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
+			path = AStar.findPath(v, vs.voxel, boundingBox.getDimensions());
+			// transform.setToRotation(Vector3.Y, 0).translate(posCache);
+			// transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+			// animationController.animate("walk", -1, 1, null, 0);
 			selected = true;
 		}
 	}
@@ -73,7 +86,7 @@ public class Creature extends Entity
 	// -- events -- //
 	public void onReachTarget()
 	{
-		target = null;
+		path = null;
 		animationController.animate(null, 0);
 	}
 }
