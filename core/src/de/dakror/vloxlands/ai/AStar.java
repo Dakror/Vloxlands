@@ -96,8 +96,6 @@ public class AStar
 					{
 						boolean free = true;
 						
-						// check above
-						
 						if (!isSpaceAbove(v.x, v.y, v.z, bodySize)) free = false;
 						
 						if (x != 0 && z != 0 && free)
