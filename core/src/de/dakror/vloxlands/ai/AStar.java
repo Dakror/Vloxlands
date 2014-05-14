@@ -1,11 +1,15 @@
 package de.dakror.vloxlands.ai;
 
 import java.util.Comparator;
+import java.util.Iterator;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
@@ -66,7 +70,10 @@ public class AStar
 	{
 		byte air = Voxel.get("AIR").getId();
 		
-		Vector3 v = new Vector3();
+		final Vector3 v = new Vector3();
+		final BoundingBox b = new BoundingBox();
+		final BoundingBox b2 = new BoundingBox();
+		final float malus = 0.01f;
 		
 		for (int x = -1; x < 2; x++)
 		{
@@ -103,6 +110,51 @@ public class AStar
 							if (!isSpaceAbove(selected.x, v.y, v.z, bodySize)) free = false;
 							else if (!isSpaceAbove(v.x, v.y, selected.z, bodySize)) free = false;
 						}
+						
+						if (free)
+						{
+							for (Iterator<Entity> iter = Vloxlands.world.getEntities().iterator(); iter.hasNext();)
+							{
+								Entity e = iter.next();
+								
+								if (!(e instanceof Structure)) continue;
+								
+								e.getWorldBoundingBox(b);
+								
+								b2.min.set(v).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+								b2.max.set(b2.min).add(1 - 2 * malus, bodySize.y, 1 - 2 * malus);
+								b2.set(b2.min, b2.max);
+								if (b.intersects(b2))
+								{
+									free = false;
+									break;
+								}
+								
+								if (x != 0 && z != 0 && free)
+								{
+									b2.min.set(selected.x, v.y, v.z).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.max.set(b2.min).add(1 - 2 * malus, bodySize.y, 1 - 2 * malus);
+									b2.set(b2.min, b2.max);
+									
+									if (b.intersects(b2))
+									{
+										free = false;
+										break;
+									}
+									
+									b2.min.set(v.x, v.y, selected.z).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.max.set(b2.min).add(1 - 2 * malus, bodySize.y, 1 - 2 * malus);
+									b2.set(b2.min, b2.max);
+									
+									if (b.intersects(b2))
+									{
+										free = false;
+										break;
+									}
+								}
+							}
+						}
+						
 						
 						if (free) openList.add(node);
 					}

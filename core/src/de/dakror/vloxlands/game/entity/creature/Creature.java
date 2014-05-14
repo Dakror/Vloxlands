@@ -40,18 +40,23 @@ public class Creature extends Entity
 		
 		if (path != null)
 		{
-			Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
-			Vector3 dif = target.cpy().sub(posCache);
-			transform.setToRotation(Vector3.Y, 0).translate(posCache);
-			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-			if (dif.len() > speed) dif.limit(speed);
-			else
+			try
 			{
-				if (path.isDone()) onReachTarget();
-				else path.next();
+				Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
+				Vector3 dif = target.cpy().sub(posCache);
+				transform.setToRotation(Vector3.Y, 0).translate(posCache);
+				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+				if (dif.len() > speed) dif.limit(speed);
+				else
+				{
+					if (path.isDone()) onReachTarget();
+					else path.next();
+				}
+				
+				transform.trn(dif);
 			}
-			
-			transform.trn(dif);
+			catch (Exception e)
+			{}
 		}
 	}
 	
