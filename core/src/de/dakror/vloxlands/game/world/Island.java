@@ -58,7 +58,7 @@ public class Island implements RenderableProvider, Tickable
 	public void calculateInitBalance()
 	{
 		recalculate();
-		initBalance = (uplift * World.calculateUplift(pos.y) - weight) / 100000f;
+		initBalance = (uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f;
 	}
 	
 	public void calculateWeight()
@@ -90,7 +90,7 @@ public class Island implements RenderableProvider, Tickable
 	@Override
 	public void tick(int tick)
 	{
-		float deltaY = (int) (((uplift * World.calculateUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
+		float deltaY = (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
 		pos.y += deltaY;
 		
 		for (Chunk c : chunks)

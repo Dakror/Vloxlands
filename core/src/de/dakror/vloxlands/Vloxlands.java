@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
@@ -25,7 +26,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -35,6 +35,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -87,6 +88,8 @@ public class Vloxlands extends GameBase
 	public Vector3 intersection = new Vector3();
 	public Vector3 intersection2 = new Vector3();
 	
+	ModelInstance sky;
+	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
 	public final Vector3 tmp1 = new Vector3();
@@ -105,8 +108,6 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
-		Bullet.init();
-		
 		currentGame = this;
 		Gdx.app.log("Vloxlands.create", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
@@ -119,7 +120,7 @@ public class Vloxlands extends GameBase
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
-		camera.far = 100;
+		camera.far = 10000;
 		controller = new FirstPersonCameraController(camera)
 		{
 			@Override
@@ -192,13 +193,16 @@ public class Vloxlands extends GameBase
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + 2 + p.y, Island.SIZE / 2));
+		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2));
+		world.addEntity(new Structure(Island.SIZE / 2 - 6, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);
 		camera.position.y -= Island.SIZE / 4;
 		camera.position.z -= Island.SIZE / 2;
 		camera.rotate(Vector3.Y, 180);
+		
+		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
 	@Override
@@ -218,6 +222,7 @@ public class Vloxlands extends GameBase
 			world.update();
 			modelBatch.begin(camera);
 			world.render(modelBatch, lights);
+			// modelBatch.render(sky, lights);
 			modelBatch.end();
 			
 			if (Gdx.app.getType() == ApplicationType.Android)
@@ -283,7 +288,9 @@ public class Vloxlands extends GameBase
 				entity.hovered = false;
 				if (!entity.inFrustum) continue;
 				
-				if (Intersector.intersectRayBounds(ray, entity.boundingBox, tmp))
+				entity.getWorldBoundingBox(bb);
+				
+				if (Intersector.intersectRayBounds(ray, bb, tmp))
 				{
 					float dst = ray.origin.dst(tmp);
 					if (hovered == null || dst < distance)
@@ -301,6 +308,7 @@ public class Vloxlands extends GameBase
 			boolean entitySelected = false;
 			for (Entity entity : world.getEntities())
 			{
+				entity.wasSelected = entity.selected;
 				entity.selected = false;
 				if (entity.inFrustum && entity.hovered)
 				{
@@ -308,8 +316,6 @@ public class Vloxlands extends GameBase
 					entitySelected = true;
 				}
 			}
-			
-			if (entitySelected) return;
 			
 			for (int i = 0; i < world.getIslands().length; i++)
 			{
@@ -343,7 +349,7 @@ public class Vloxlands extends GameBase
 					}
 				}
 				
-				if (chunk != null)
+				if (chunk != null && !entitySelected)
 				{
 					// -- determine selectedVoxelFace -- //
 					Direction dir = null;
@@ -372,7 +378,7 @@ public class Vloxlands extends GameBase
 					}
 					
 					chunk.selectedVoxel.set(voxel);
-					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir));
+					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir), lmb);
 				}
 			}
 		}

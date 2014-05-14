@@ -14,14 +14,14 @@ public class EventDispatcher
 		listeners.add(value);
 	}
 	
-	public static boolean remove(EventListener value)
+	public static boolean removeListener(EventListener value)
 	{
 		return listeners.removeValue(value, false);
 	}
 	
-	public static void dispatchVoxelSelection(VoxelSelection vs)
+	public static void dispatchVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
 		for (EventListener l : listeners)
-			l.onVoxelSelection(vs);
+			l.onVoxelSelection(vs, lmb);
 	}
 }

@@ -1,53 +1,36 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.physics.bullet.collision.Collision;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject.CollisionFlags;
-import com.badlogic.gdx.physics.bullet.collision.btConvexShape;
-import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
-import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.Path;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
 public class Creature extends Entity
 {
-	protected btPairCachingGhostObject ghostObject;
-	protected btKinematicCharacterController controller;
-	
 	protected boolean airborne;
 	protected float climbHeight;
 	protected float speed;
+	protected float speedAmp;
 	protected float rotateSpeed = 20;
+	protected Vector3 blockTrn;
+	
+	public Path path;
 	
 	public Creature(float x, float y, float z, String model)
 	{
 		super(x, y, z, model);
-	}
-	
-	@Override
-	protected void createPhysics(btConvexShape shape, float mass)
-	{
-		super.createPhysics(shape, mass);
 		
-		ghostObject = new btPairCachingGhostObject();
-		ghostObject.setWorldTransform(transform);
-		ghostObject.setCollisionShape(collisionShape);
-		ghostObject.setCollisionFlags(CollisionFlags.CF_CHARACTER_OBJECT);
-		ghostObject.setActivationState(Collision.DISABLE_DEACTIVATION);
-		controller = new btKinematicCharacterController(ghostObject, collisionShape, climbHeight);
-		
-		Vloxlands.world.getCollisionWorld().addCollisionObject(ghostObject, World.ENTITY_FLAG, World.ALL_FLAG);
-		Vloxlands.world.getCollisionWorld().addAction(controller);
-	}
-	
-	@Override
-	public void updateTransform()
-	{
-		ghostObject.getWorldTransform(transform);
+		speedAmp = 1;
+		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
+		modelInstance.transform.translate(blockTrn);
+		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
 	@Override
@@ -55,31 +38,21 @@ public class Creature extends Entity
 	{
 		super.tick(tick);
 		
-		// transform.translate(-middleTranslate, 0, -middleTranslate).rotate(0, 1, 0, 5).translate(middleTranslate, 0, middleTranslate);
-		// ghostObject.setWorldTransform(transform);
-		
-		// Vector3 from = transform.getTranslation(new Vector3());
-		// Vector3 to = from.cpy().set(from.x, -1, from.z);
-		// ClosestRayResultCallback crrc = new ClosestRayResultCallback(from, to);
-		// crrc.setCollisionFilterGroup(World.ENTITY_FLAG);
-		// crrc.setCollisionFilterMask(World.ALL_FLAG);
-		// Vloxlands.world.getCollisionWorld().rayTest(from, to, crrc);
-		//
-		// if (crrc.hasHit())
-		// {
-		// float distance = crrc.getHitPointWorld().distance(from);
-		//
-		// airborne = distance > 0;
-		// }
-		// else airborne = true;
-		//
-		// crrc.dispose();
-	}
-	
-	@Override
-	public void update()
-	{
-		super.update();
+		if (path != null)
+		{
+			Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
+			Vector3 dif = target.cpy().sub(posCache);
+			transform.setToRotation(Vector3.Y, 0).translate(posCache);
+			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+			if (dif.len() > speed) dif.limit(speed);
+			else
+			{
+				if (path.isDone()) onReachTarget();
+				else path.next();
+			}
+			
+			transform.trn(dif);
+		}
 	}
 	
 	public boolean isAirborne()
@@ -93,10 +66,30 @@ public class Creature extends Entity
 	}
 	
 	@Override
-	public void dispose()
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		super.dispose();
-		ghostObject.dispose();
-		controller.dispose();
+		if (wasSelected && !lmb)
+		{
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions().cpy());
+			
+			if (path != null) animationController.animate("walk", -1, 1, null, 0);
+			else animationController.animate(null, 0);
+			selected = true;
+		}
+	}
+	
+	public Vector3 getVoxelBelow()
+	{
+		Vector3 v = posCache.sub(Vloxlands.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
+		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
+		
+		return v;
+	}
+	
+	// -- events -- //
+	public void onReachTarget()
+	{
+		path = null;
+		animationController.animate(null, 0);
 	}
 }
