@@ -70,9 +70,10 @@ public class Creature extends Entity
 	{
 		if (wasSelected && !lmb)
 		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions());
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions().cpy());
 			
-			animationController.animate("walk", -1, 1, null, 0);
+			if (path != null) animationController.animate("walk", -1, 1, null, 0);
+			else animationController.animate(null, 0);
 			selected = true;
 		}
 	}

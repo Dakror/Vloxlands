@@ -26,6 +26,9 @@ public class AStar
 	
 	public static Path findPath(Vector3 from, Vector3 to, Vector3 bodySize)
 	{
+		bodySize.set((int) Math.ceil(bodySize.x), (int) Math.ceil(bodySize.y), (int) Math.ceil(bodySize.z)); // round up size
+		
+		
 		openList.clear();
 		closedList.clear();
 		
@@ -54,7 +57,7 @@ public class AStar
 		}
 		
 		v.reverse();
-		// v.removeIndex(0); // remove start vector
+		v.removeIndex(0); // remove start vector
 		
 		return new Path(v);
 	}
@@ -71,7 +74,7 @@ public class AStar
 			{
 				for (int z = -1; z < 2; z++)
 				{
-					if (Math.sqrt(x * x + y * y + z * z) != 1) continue;
+					if (Math.sqrt(x * x + y * y + z * z) == Math.sqrt(3)) continue;
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
@@ -81,21 +84,44 @@ public class AStar
 					
 					if (closedList.contains(node, false)) continue;
 					
-					int i = openList.indexOf(node, false);
+					int index = openList.indexOf(node, false);
 					boolean ctn = openList.contains(node, false);
 					
-					if (ctn && openList.get(i).G > node.G)
+					if (ctn && openList.get(index).G > node.G)
 					{
-						openList.get(i).G = node.G;
-						openList.get(i).parent = selected;
+						openList.get(index).G = node.G;
+						openList.get(index).parent = selected;
 					}
 					else if (!ctn)
 					{
-						// TODO check if model has enough space above this voxel to stand on it.
-						openList.add(node);
+						boolean free = true;
+						
+						// check above
+						
+						if (!isSpaceAbove(v.x, v.y, v.z, bodySize)) free = false;
+						
+						if (x != 0 && z != 0 && free)
+						{
+							if (!isSpaceAbove(selected.x, v.y, v.z, bodySize)) free = false;
+							else if (!isSpaceAbove(v.x, v.y, selected.z, bodySize)) free = false;
+						}
+						
+						if (free) openList.add(node);
 					}
 				}
 			}
 		}
+	}
+	
+	public static boolean isSpaceAbove(float x, float y, float z, Vector3 bodySize)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (int i = 0; i < bodySize.y; i++)
+		{
+			byte b = Vloxlands.world.getIslands()[0].get(x, y + i + 1, z);
+			if (b != 0 && b != air) return false;
+		}
+		
+		return true;
 	}
 }
