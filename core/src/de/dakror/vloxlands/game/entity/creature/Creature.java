@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.entity.creature;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
@@ -37,23 +38,21 @@ public class Creature extends Entity
 	{
 		super.tick(tick);
 		
-		if (path != null && !path.isDone())
+		if (path != null)
 		{
-			Vector3 dif = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(boundingBox.getDimensions()).sub(posCache);
-			
+			Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
+			Vector3 dif = target.cpy().sub(posCache);
+			transform.setToRotation(Vector3.Y, 0).translate(posCache);
+			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 			if (dif.len() > speed) dif.limit(speed);
-			else if (dif.len() < 0.1f)
+			else
 			{
-				// transform.setToRotation(Vector3.Y, 0).translate(posCache);
-				// transform.rotate(Vector3.Y, new Vector2(path.get().z - posCache.z, path.get().x - posCache.x).angle() - 180);
-				path.next();
 				if (path.isDone()) onReachTarget();
+				else path.next();
 			}
 			
 			transform.trn(dif);
 		}
-		
-		// Gdx.app.log("", "" + posCache);
 	}
 	
 	public boolean isAirborne()
@@ -71,16 +70,19 @@ public class Creature extends Entity
 	{
 		if (wasSelected && !lmb)
 		{
-			Vector3 target = vs.voxel.cpy().add(Vloxlands.world.getIslands()[vs.island].getPos()).add(blockTrn);
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions());
 			
-			Vector3 v = posCache.sub(Vloxlands.world.getIslands()[0].pos);
-			v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
-			path = AStar.findPath(v, vs.voxel, boundingBox.getDimensions());
-			// transform.setToRotation(Vector3.Y, 0).translate(posCache);
-			// transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-			// animationController.animate("walk", -1, 1, null, 0);
+			animationController.animate("walk", -1, 1, null, 0);
 			selected = true;
 		}
+	}
+	
+	public Vector3 getVoxelBelow()
+	{
+		Vector3 v = posCache.sub(Vloxlands.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
+		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
+		
+		return v;
 	}
 	
 	// -- events -- //

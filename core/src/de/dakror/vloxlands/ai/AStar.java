@@ -47,7 +47,6 @@ public class AStar
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
-		
 		while (selected != null)
 		{
 			v.add(new Vector3(selected.x, selected.y, selected.z));

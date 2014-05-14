@@ -20,7 +20,7 @@ public class Path
 	
 	public void next()
 	{
-		if (index < nodes.size - 1) index++;
+		index++;
 	}
 	
 	public Vector3 get()
