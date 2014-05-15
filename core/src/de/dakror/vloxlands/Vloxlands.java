@@ -201,7 +201,7 @@ public class Vloxlands extends GameBase
 		Vector3 p = world.getIslands()[0].pos;
 		
 		Human human = new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
-		human.setCarryingItemStack(new ItemStack(Item.get("CRYSTAL"), 1));
+		human.setCarryingItemStack(new ItemStack(Item.get("PICKAXE"), 1));
 		world.addEntity(human);
 		
 		world.addEntity(new Structure(Island.SIZE / 2 - 6, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));

@@ -20,7 +20,9 @@ public class Voxel
 		opaque,
 		weight,
 		uplift,
-		brightness
+		brightness,
+		mining,
+		custom,
 	}
 	
 	public static final int VOXELS = 256;
@@ -30,15 +32,18 @@ public class Voxel
 	
 	private static Voxel[] voxelList = new Voxel[VOXELS];
 	
-	private String name = "NA";
-	int textureX, textureY;
+	String name = "NA";
+	String custom;
 	boolean opaque = true;
 	boolean replaceable = false;
 	float smoothness = 0;
-	private byte id;
-	private float weight = 1f;
-	private float uplift = 0;
-	private float brightness;
+	byte id;
+	float weight = 1f;
+	float uplift = 0;
+	float brightness;
+	int textureX;
+	int textureY;
+	int mining;
 	
 	public void registerVoxel(int id)
 	{
@@ -66,17 +71,6 @@ public class Voxel
 		return false;
 	}
 	
-	public void setReplaceable(boolean replaceable)
-	{
-		this.replaceable = replaceable;
-	}
-	
-	public Voxel setName(String s)
-	{
-		name = s;
-		return this;
-	}
-	
 	public String getName()
 	{
 		return name;
@@ -92,22 +86,6 @@ public class Voxel
 		return getTexCoord(x, y, z, d).cpy().scl(TEXSIZE);
 	}
 	
-	public void setTextureY(int textureY)
-	{
-		this.textureY = textureY;
-	}
-	
-	public void setTextureX(int textureX)
-	{
-		this.textureX = textureX;
-	}
-	
-	public Voxel setOpaque(boolean b)
-	{
-		opaque = b;
-		return this;
-	}
-	
 	public boolean isOpaque()
 	{
 		return opaque;
@@ -116,12 +94,6 @@ public class Voxel
 	public float getSmoothness()
 	{
 		return smoothness;
-	}
-	
-	public Voxel setSmoothness(float smooth)
-	{
-		smoothness = smooth;
-		return this;
 	}
 	
 	public byte getId()
@@ -134,21 +106,9 @@ public class Voxel
 		return weight;
 	}
 	
-	public Voxel setWeight(float weight)
-	{
-		this.weight = weight;
-		return this;
-	}
-	
 	public float getUplift()
 	{
 		return uplift;
-	}
-	
-	public Voxel setUplift(float uplift)
-	{
-		this.uplift = uplift;
-		return this;
 	}
 	
 	public float getBrightness()
@@ -156,10 +116,14 @@ public class Voxel
 		return brightness;
 	}
 	
-	public Voxel setBrightness(float brightness)
+	public String getCustom()
 	{
-		this.brightness = brightness;
-		return this;
+		return custom;
+	}
+	
+	public int getMining()
+	{
+		return mining;
 	}
 	
 	@Override
@@ -224,43 +188,57 @@ public class Voxel
 				}
 				case textureX:
 				{
-					if (cell.length() > 0) voxel.setTextureX(Integer.parseInt(cell));
-					else voxel.setTextureX(Integer.parseInt(defaults[csv.getIndex()]));
+					if (cell.length() > 0) voxel.textureX = Integer.parseInt(cell);
+					else voxel.textureX = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case textureY:
 				{
-					if (cell.length() > 0) voxel.setTextureY(Integer.parseInt(cell));
-					else voxel.setTextureY(Integer.parseInt(defaults[csv.getIndex()]));
+					if (cell.length() > 0) voxel.textureY = Integer.parseInt(cell);
+					else voxel.textureY = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case name:
 				{
-					if (cell.length() > 0) voxel.setName(cell);
-					else voxel.setName(defaults[csv.getIndex()]);
+					if (cell.length() > 0) voxel.name = cell;
+					else voxel.name = defaults[csv.getIndex()];
 					voxels.put(voxel.getName().toUpperCase().replace(" ", "_"), voxel);
 					break;
 				}
 				case opaque:
 				{
-					if (cell.length() > 0) voxel.setOpaque(cell.equals("1"));
-					else voxel.setOpaque(defaults[csv.getIndex()].equals("1"));
+					if (cell.length() > 0) voxel.opaque = cell.equals("1");
+					else voxel.opaque = defaults[csv.getIndex()].equals("1");
 					break;
 				}
 				case weight:
+				{
+					if (cell.length() > 0) voxel.weight = Float.parseFloat(cell);
+					else voxel.weight = Float.parseFloat(defaults[csv.getIndex()]);
+					break;
+				}
 				case uplift:
+				{
+					if (cell.length() > 0) voxel.uplift = Float.parseFloat(cell);
+					else voxel.uplift = Float.parseFloat(defaults[csv.getIndex()]);
+					break;
+				}
 				case brightness:
 				{
-					try
-					{
-						if (cell.length() > 0) voxel.getClass().getMethod("set" + capitalizeFirstLetter(categories[csv.getIndex()]), Float.TYPE).invoke(voxel, Float.parseFloat(cell));
-						else voxel.getClass().getMethod("set" + capitalizeFirstLetter(categories[csv.getIndex()]), Float.TYPE).invoke(voxel, Float.parseFloat(defaults[csv.getIndex()]));
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-					}
-					
+					if (cell.length() > 0) voxel.brightness = Float.parseFloat(cell);
+					else voxel.brightness = Float.parseFloat(defaults[csv.getIndex()]);
+					break;
+				}
+				case mining:
+				{
+					if (cell.length() > 0) voxel.mining = Integer.parseInt(cell);
+					else voxel.mining = Integer.parseInt(defaults[csv.getIndex()]);
+					break;
+				}
+				case custom:
+				{
+					if (cell.length() > 0) voxel.custom = cell;
+					else voxel.custom = null;
 					break;
 				}
 				default:

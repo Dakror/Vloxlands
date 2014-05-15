@@ -21,6 +21,7 @@ public class Item
 		resource,
 		tool,
 		equipable,
+		custom,
 	}
 	
 	public static final int ITEMS = 256;
@@ -40,13 +41,14 @@ public class Item
 		this.id = (byte) id;
 	}
 	
-	private String name = "NA";
-	private String model;
-	private String description;
-	private byte id;
-	private boolean resource;
-	private boolean tool;
-	private boolean equipable;
+	String name = "NA";
+	String model;
+	String description;
+	String custom;
+	byte id;
+	boolean resource;
+	boolean tool;
+	boolean equipable;
 	
 	public String getName()
 	{
@@ -61,6 +63,11 @@ public class Item
 	public String getDescription()
 	{
 		return description;
+	}
+	
+	public String getCustom()
+	{
+		return custom;
 	}
 	
 	public byte getId()
@@ -188,6 +195,12 @@ public class Item
 				{
 					if (cell.length() > 0) item.equipable = cell.equals("1");
 					else item.equipable = defaults[csv.getIndex()].equals("1");
+					break;
+				}
+				case custom:
+				{
+					if (cell.length() > 0) item.custom = cell;
+					else item.custom = null;
 					break;
 				}
 				default:
