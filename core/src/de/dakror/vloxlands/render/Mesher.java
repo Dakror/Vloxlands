@@ -82,7 +82,7 @@ public class Mesher
 		else return dir.dir.z == 0;
 	}
 	
-	public static Mesh genCube(float size)
+	public static Mesh genCube(float size, float texX, float texY, float texSize)
 	{
 		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		
@@ -90,9 +90,12 @@ public class Mesher
 		
 		float[] cubeNormals = { 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, };
 		
+		float[] cubeTex = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, };
+		
 		float[] vertices = new float[24 * 10];
 		int pIdx = 0;
 		int nIdx = 0;
+		int tIdx = 0;
 		for (int i = 0; i < vertices.length;)
 		{
 			vertices[i++] = cubeVerts[pIdx++];
@@ -101,8 +104,8 @@ public class Mesher
 			vertices[i++] = cubeNormals[nIdx++];
 			vertices[i++] = cubeNormals[nIdx++];
 			vertices[i++] = cubeNormals[nIdx++];
-			vertices[i++] = 0;
-			vertices[i++] = 0;
+			vertices[i++] = cubeTex[tIdx++] * texSize + texX;
+			vertices[i++] = cubeTex[tIdx++] * texSize + texY;
 			vertices[i++] = 1;
 			vertices[i++] = 1;
 		}
