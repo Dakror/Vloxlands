@@ -21,6 +21,8 @@ public class Creature extends Entity
 	protected float rotateSpeed = 20;
 	protected Vector3 blockTrn;
 	
+	protected boolean canFly;
+	
 	public Path path;
 	
 	public Creature(float x, float y, float z, String model)
@@ -40,18 +42,23 @@ public class Creature extends Entity
 		
 		if (path != null)
 		{
-			Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
-			Vector3 dif = target.cpy().sub(posCache);
-			transform.setToRotation(Vector3.Y, 0).translate(posCache);
-			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-			if (dif.len() > speed) dif.limit(speed);
-			else
+			try
 			{
-				if (path.isDone()) onReachTarget();
-				else path.next();
+				Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
+				Vector3 dif = target.cpy().sub(posCache);
+				transform.setToRotation(Vector3.Y, 0).translate(posCache);
+				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+				if (dif.len() > speed) dif.limit(speed);
+				else
+				{
+					if (path.isDone()) onReachTarget();
+					else path.next();
+				}
+				
+				transform.trn(dif);
 			}
-			
-			transform.trn(dif);
+			catch (Exception e)
+			{}
 		}
 	}
 	
@@ -70,9 +77,9 @@ public class Creature extends Entity
 	{
 		if (wasSelected && !lmb)
 		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions().cpy());
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
 			
-			if (path != null) animationController.animate("walk", -1, 1, null, 0);
+			if (path != null && path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			else animationController.animate(null, 0);
 			selected = true;
 		}
@@ -84,6 +91,16 @@ public class Creature extends Entity
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;
+	}
+	
+	public boolean canFly()
+	{
+		return canFly;
+	}
+	
+	public int getHeight()
+	{
+		return (int) Math.ceil(boundingBox.getDimensions().y);
 	}
 	
 	// -- events -- //

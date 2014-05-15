@@ -61,6 +61,8 @@ public abstract class Entity extends EntityBase
 		markedForRemoval = false;
 		transform = modelInstance.transform;
 		
+		transform.getTranslation(posCache);
+		
 		EventDispatcher.addListener(this);
 	}
 	
