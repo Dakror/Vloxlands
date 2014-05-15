@@ -21,6 +21,8 @@ public class Creature extends Entity
 	protected float rotateSpeed = 20;
 	protected Vector3 blockTrn;
 	
+	protected boolean canFly;
+	
 	public Path path;
 	
 	public Creature(float x, float y, float z, String model)
@@ -75,9 +77,9 @@ public class Creature extends Entity
 	{
 		if (wasSelected && !lmb)
 		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, boundingBox.getDimensions().cpy());
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
 			
-			if (path != null) animationController.animate("walk", -1, 1, null, 0);
+			if (path != null && path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			else animationController.animate(null, 0);
 			selected = true;
 		}
@@ -89,6 +91,16 @@ public class Creature extends Entity
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;
+	}
+	
+	public boolean canFly()
+	{
+		return canFly;
+	}
+	
+	public int getHeight()
+	{
+		return (int) Math.ceil(boundingBox.getDimensions().y);
 	}
 	
 	// -- events -- //
