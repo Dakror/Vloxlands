@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
@@ -48,6 +49,7 @@ public abstract class Entity extends EntityBase
 	protected AnimationController animationController;
 	
 	public final Vector3 posCache = new Vector3();
+	public final Quaternion rotCache = new Quaternion();
 	
 	public Entity(float x, float y, float z, String model)
 	{
@@ -115,6 +117,7 @@ public abstract class Entity extends EntityBase
 	public void tick(int tick)
 	{
 		transform.getTranslation(posCache);
+		transform.getRotation(rotCache);
 		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
@@ -129,6 +132,9 @@ public abstract class Entity extends EntityBase
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(modelInstance, environment);
+		
+		renderAdditional(batch, environment);
+		
 		if (hovered || selected)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -162,6 +168,9 @@ public abstract class Entity extends EntityBase
 			Vloxlands.shapeRenderer.end();
 		}
 	}
+	
+	public void renderAdditional(ModelBatch batch, Environment environment)
+	{}
 	
 	public void update()
 	{

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
 
 /**
@@ -82,6 +83,8 @@ public class LoadingScreen implements Screen
 		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
 		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
+		for (Item item : Item.getAll())
+			Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
 	
 	@Override

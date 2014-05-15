@@ -45,7 +45,7 @@ public class Voxel
 		if (voxelList[id + 128] == null) voxelList[id + 128] = this;
 		else
 		{
-			Gdx.app.error("Voxel", "The ID " + id + " was already taken up by \"" + voxelList[id + 128].name + "\"");
+			Gdx.app.error("Voxel.registerVoxel", "The ID " + id + " was already taken up by \"" + voxelList[id + 128].name + "\"");
 			Gdx.app.exit();
 		}
 		this.id = (byte) id;
@@ -73,25 +73,13 @@ public class Voxel
 	
 	public Voxel setName(String s)
 	{
-		if (name.equals("NA")) name = s;
-		else System.err.println("[Voxel] [" + name + "] already has a name");
+		name = s;
 		return this;
 	}
 	
 	public String getName()
 	{
 		return name;
-	}
-	
-	public int getIdForName(String name)
-	{
-		for (int i = 0; i < voxelList.length; i++)
-		{
-			Voxel v = Voxel.getForId(i);
-			if (v.getName().equals(name)) return i;
-		}
-		System.err.println("[Voxel] [" + this.name + "] not found");
-		return -1;
 	}
 	
 	protected Vector2 getTexCoord(int x, int y, int z, Direction d)
@@ -180,12 +168,24 @@ public class Voxel
 		return getClass().getName() + "." + name.toUpperCase().replace(" ", "_");
 	}
 	
+	public static int getIdForName(String name)
+	{
+		for (int i = 0; i < voxelList.length; i++)
+		{
+			Voxel v = Voxel.getForId(i);
+			if (v.getName().equals(name)) return i;
+		}
+		
+		Gdx.app.error("Voxel.getIdForName", name + " not found");
+		return -1;
+	}
+	
 	public static Voxel get(String name)
 	{
 		return voxels.get(name);
 	}
 	
-	public static Array<?> getAll()
+	public static Array<Voxel> getAll()
 	{
 		return voxels.values().toArray();
 	}
@@ -215,6 +215,8 @@ public class Voxel
 			Categories c = Categories.valueOf(categories[csv.getIndex()]);
 			switch (c)
 			{
+				case classpath:
+					break;
 				case id:
 				{
 					voxel.registerVoxel(Integer.valueOf(cell) - 128);
@@ -268,6 +270,9 @@ public class Voxel
 		}
 		
 		voxels.put(voxel.getName().toUpperCase().replace(" ", "_"), voxel);
+		
+		Gdx.app.debug("Voxel.loadVoxels", voxels.size + " voxels loaded.");
+		
 	}
 	
 	public static String capitalizeFirstLetter(String string)

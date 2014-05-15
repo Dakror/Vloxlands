@@ -1,5 +1,6 @@
 package de.dakror.vloxlands;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
@@ -36,6 +37,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -108,11 +111,14 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
+		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		
 		currentGame = this;
 		Gdx.app.log("Vloxlands.create", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
 		
 		Voxel.loadVoxels();
+		Item.loadItems();
 		
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
@@ -193,7 +199,11 @@ public class Vloxlands extends GameBase
 	public void doneLoading()
 	{
 		Vector3 p = world.getIslands()[0].pos;
-		world.addEntity(new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2));
+		
+		Human human = new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
+		human.setCarryingItemStack(new ItemStack(Item.get("CRYSTAL"), 1));
+		world.addEntity(human);
+		
 		world.addEntity(new Structure(Island.SIZE / 2 - 6, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
