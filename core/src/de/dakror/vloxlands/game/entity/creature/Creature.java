@@ -103,6 +103,12 @@ public class Creature extends Entity
 		return (int) Math.ceil(boundingBox.getDimensions().y);
 	}
 	
+	public float getRotationPerpendicular()
+	{
+		float yaw = rotCache.getYawRad();
+		return (float) -Math.abs(Math.max(Math.sin(yaw), Math.cos(yaw)));
+	}
+	
 	// -- events -- //
 	public void onReachTarget()
 	{

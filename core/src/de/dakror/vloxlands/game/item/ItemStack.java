@@ -22,6 +22,8 @@ public class ItemStack
 	public void setAmount(int amount)
 	{
 		this.amount = amount;
+		if (amount > item.getStack()) this.amount = item.getStack();
+		if (amount < 1) this.amount = 1;
 	}
 	
 	public Item getItem()

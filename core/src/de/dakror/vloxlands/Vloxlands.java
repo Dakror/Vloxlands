@@ -198,6 +198,9 @@ public class Vloxlands extends GameBase
 	
 	public void doneLoading()
 	{
+		for (Item item : Item.getAll())
+			item.onLoaded();
+		
 		Vector3 p = world.getIslands()[0].pos;
 		
 		Human human = new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);

@@ -6,10 +6,10 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.item.tool.Tool;
 
 /**
  * @author Dakror
@@ -20,7 +20,6 @@ public class Human extends Creature
 	
 	ItemStack carryingItemStack;
 	ModelInstance carryingItemModelInstance;
-	BoundingBox carryingItemBoundingBox = new BoundingBox();
 	Matrix4 carryingItemTransform;
 	
 	public Human(float x, float y, float z)
@@ -44,7 +43,6 @@ public class Human extends Creature
 		else
 		{
 			carryingItemModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class), new Matrix4());
-			carryingItemModelInstance.calculateBoundingBox(carryingItemBoundingBox);
 			carryingItemTransform = carryingItemModelInstance.transform;
 		}
 	}
@@ -60,7 +58,9 @@ public class Human extends Creature
 		if (carryingItemStack.getItem().isResource()) carryingItemTransform.translate(resourceTrn);
 		else if (carryingItemStack.getItem().isTool())
 		{
-			carryingItemTransform.translate(0.2f, 0, -0.3f).rotate(Vector3.Y, 90).translate(0, carryingItemBoundingBox.getDimensions().y / 3 * 2, 0);
+			((Tool) carryingItemStack.getItem()).transformInHand(carryingItemTransform, this);
+			// carryingItemTransform.translate(0.2f, 0, -0.3f).rotate(Vector3.Y, 90).translate(0, carryingItemBoundingBox.getDimensions().y, 0);
+			
 			// pickaxe animation
 			// int t = tick * 2 % 120;
 			// float yaw = rotCache.getYawRad();

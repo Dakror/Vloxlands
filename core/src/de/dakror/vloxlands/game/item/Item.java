@@ -22,6 +22,7 @@ public class Item
 		tool,
 		equipable,
 		custom,
+		stack
 	}
 	
 	public static final int ITEMS = 256;
@@ -41,14 +42,15 @@ public class Item
 		this.id = (byte) id;
 	}
 	
-	String name = "NA";
-	String model;
-	String description;
-	String custom;
-	byte id;
-	boolean resource;
-	boolean tool;
-	boolean equipable;
+	protected String name = "NA";
+	protected String model;
+	protected String description;
+	protected String custom;
+	protected byte id;
+	protected int stack;
+	protected boolean resource;
+	protected boolean tool;
+	protected boolean equipable;
 	
 	public String getName()
 	{
@@ -89,6 +91,14 @@ public class Item
 	{
 		return equipable;
 	}
+	
+	public int getStack()
+	{
+		return stack;
+	}
+	
+	public void onLoaded()
+	{}
 	
 	@Override
 	public String toString()
@@ -195,6 +205,12 @@ public class Item
 				{
 					if (cell.length() > 0) item.equipable = cell.equals("1");
 					else item.equipable = defaults[csv.getIndex()].equals("1");
+					break;
+				}
+				case stack:
+				{
+					if (cell.length() > 0) item.stack = Integer.parseInt(cell);
+					else item.stack = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case custom:
