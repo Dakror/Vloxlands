@@ -42,6 +42,11 @@ public class ItemStack
 		return setAmount(this.amount - amount);
 	}
 	
+	public boolean isFull()
+	{
+		return amount == item.getStack();
+	}
+	
 	public Item getItem()
 	{
 		return item;

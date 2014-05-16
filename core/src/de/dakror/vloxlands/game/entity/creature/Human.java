@@ -126,14 +126,15 @@ public class Human extends Creature implements AnimationListener
 			
 			if (path != null && path.size() > 0)
 			{
-				if (tool != null && vs.type.getMining() > 0)
+				if (tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
 				{
-					gotoLastPathTarget = !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
-					useToolOnReachTarget = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+					gotoLastPathTarget = false;
+					useToolOnReachTarget = true;
 					toolTarget = vs;
 				}
 				else
 				{
+					gotoLastPathTarget = true;
 					useToolOnReachTarget = false;
 					toolTarget = null;
 				}
@@ -170,8 +171,11 @@ public class Human extends Creature implements AnimationListener
 		{
 			Vloxlands.world.getIslands()[toolTarget.island].set(toolTarget.voxel.x, toolTarget.voxel.y, toolTarget.voxel.z, Voxel.get("AIR").getId());
 			
-			if (carryingItemStack == null) setCarryingItemStack(new ItemStack(Item.get("CRYSTAL") /* for now */, 1));
-			else carryingItemStack.add(1);
+			if (toolTarget.type.getItemdrop() != -128)
+			{
+				if (carryingItemStack == null) setCarryingItemStack(new ItemStack(Item.getForId(toolTarget.type.getItemdrop()), 1));
+				else carryingItemStack.add(1);
+			}
 			
 			usingTool = false;
 			doneUsingTool = true;

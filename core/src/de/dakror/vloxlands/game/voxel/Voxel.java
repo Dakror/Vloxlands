@@ -22,6 +22,7 @@ public class Voxel
 		uplift,
 		brightness,
 		mining,
+		itemdrop,
 		custom,
 	}
 	
@@ -44,6 +45,7 @@ public class Voxel
 	int textureX;
 	int textureY;
 	int mining;
+	byte itemdrop;
 	
 	public void registerVoxel(int id)
 	{
@@ -124,6 +126,11 @@ public class Voxel
 	public int getMining()
 	{
 		return mining;
+	}
+	
+	public byte getItemdrop()
+	{
+		return itemdrop;
 	}
 	
 	@Override
@@ -233,6 +240,12 @@ public class Voxel
 				{
 					if (cell.length() > 0) voxel.mining = Integer.parseInt(cell);
 					else voxel.mining = Integer.parseInt(defaults[csv.getIndex()]);
+					break;
+				}
+				case itemdrop:
+				{
+					if (cell.length() > 0) voxel.itemdrop = (byte) (Integer.parseInt(cell) - 128);
+					else voxel.itemdrop = (byte) (Integer.parseInt(defaults[csv.getIndex()]) - 128);
 					break;
 				}
 				case custom:
