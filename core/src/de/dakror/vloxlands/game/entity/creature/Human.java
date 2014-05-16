@@ -1,7 +1,5 @@
 package de.dakror.vloxlands.game.entity.creature;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -12,7 +10,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
@@ -120,29 +117,30 @@ public class Human extends Creature implements AnimationListener
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if (wasSelected && !lmb)
-		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
-			
-			if (path != null && path.size() > 0)
-			{
-				if (tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-				{
-					gotoLastPathTarget = false;
-					useToolOnReachTarget = true;
-					toolTarget = vs;
-				}
-				else
-				{
-					gotoLastPathTarget = true;
-					useToolOnReachTarget = false;
-					toolTarget = null;
-				}
-				if (!(path.isLast() && !gotoLastPathTarget)) animationController.animate("walk", -1, 1, null, 0);
-			}
-			else animationController.animate(null, 0);
-			selected = true;
-		}
+		// if (wasSelected && !lmb)
+		// {
+		// path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
+		//
+		// if (path != null && path.size() > 0)
+		// {
+		// if (tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+		// {
+		// gotoLastPathTarget = false;
+		// useToolOnReachTarget = true;
+		// toolTarget = vs;
+		// }
+		// else
+		// {
+		// gotoLastPathTarget = true;
+		// useToolOnReachTarget = false;
+		// toolTarget = null;
+		// }
+		// if (!(path.isLast() && !gotoLastPathTarget)) animationController.animate("walk", -1, 1, null, 0);
+		// }
+		// else
+		// animationController.animate(null, 0);
+		// selected = true;
+		// }
 	}
 	
 	@Override

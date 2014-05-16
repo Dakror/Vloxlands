@@ -2,6 +2,9 @@ package de.dakror.vloxlands.game.world;
 
 import java.util.Iterator;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -43,9 +46,12 @@ public class Island implements RenderableProvider, Tickable
 	
 	Array<Structure> structures = new Array<Structure>();
 	
+	public SimpleWeightedGraph<Vector3, DefaultWeightedEdge> graph;
+	
 	public Island()
 	{
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
+		graph = new SimpleWeightedGraph<Vector3, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 		
 		index = new Vector3();
 		pos = new Vector3();
@@ -164,7 +170,14 @@ public class Island implements RenderableProvider, Tickable
 		int y1 = (int) y % Chunk.SIZE;
 		int z1 = (int) z % Chunk.SIZE;
 		
-		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force)) notifySurroundingChunks(chunkX, chunkY, chunkZ);
+		byte air = Voxel.get("AIR").getId();
+		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force))
+		{
+			if (id == air) graph.removeVertex(new Vector3(x, y, z));
+			else if (isWalkable(x, y, z)) graph.addVertex(new Vector3(x, y, z));
+			
+			notifySurroundingChunks(chunkX, chunkY, chunkZ);
+		}
 	}
 	
 	public void notifySurroundingChunks(int cx, int cy, int cz)
@@ -206,6 +219,16 @@ public class Island implements RenderableProvider, Tickable
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Is solid and has air above
+	 */
+	public boolean isWalkable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		byte above = get(x, y + 1, z);
+		return get(x, y, z) != air && (above == air || above == 0);
 	}
 	
 	public float getWeight()

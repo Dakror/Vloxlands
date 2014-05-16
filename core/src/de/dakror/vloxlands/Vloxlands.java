@@ -213,7 +213,6 @@ public class Vloxlands extends GameBase
 		camera.position.y -= Island.SIZE / 4;
 		camera.position.z -= Island.SIZE / 2;
 		camera.rotate(Vector3.Y, 180);
-		
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
