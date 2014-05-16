@@ -18,9 +18,24 @@ public class Path
 		index = 0;
 	}
 	
+	public void pop()
+	{
+		nodes.pop();
+	}
+	
+	public boolean isLast()
+	{
+		return index == nodes.size - 1;
+	}
+	
 	public void next()
 	{
 		index++;
+	}
+	
+	public Vector3 getLast()
+	{
+		return nodes.peek();
 	}
 	
 	public Vector3 get()

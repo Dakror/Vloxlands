@@ -4,10 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.Path;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
@@ -20,6 +18,8 @@ public class Creature extends Entity
 	protected float speedAmp;
 	protected float rotateSpeed = 20;
 	protected Vector3 blockTrn;
+	
+	boolean gotoLastPathTarget;
 	
 	protected boolean canFly;
 	
@@ -48,14 +48,32 @@ public class Creature extends Entity
 				Vector3 dif = target.cpy().sub(posCache);
 				transform.setToRotation(Vector3.Y, 0).translate(posCache);
 				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-				if (dif.len() > speed) dif.limit(speed);
+				
+				if (path.isLast() && !gotoLastPathTarget)
+				{
+					onReachTarget();
+				}
 				else
 				{
-					if (path.isDone()) onReachTarget();
-					else path.next();
+					if (dif.len() > speed) dif.limit(speed);
+					else
+					{
+						if (path.isDone()) onReachTarget();
+						else
+						{
+							path.next();
+							if (path.isLast() && !gotoLastPathTarget)
+							{
+								target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
+								transform.setToRotation(Vector3.Y, 0).translate(posCache);
+								transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+								onReachTarget();
+							}
+						}
+					}
+					transform.trn(dif);
 				}
 				
-				transform.trn(dif);
 			}
 			catch (Exception e)
 			{}
@@ -70,19 +88,6 @@ public class Creature extends Entity
 	public void setAirborne(boolean airborne)
 	{
 		this.airborne = airborne;
-	}
-	
-	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{
-		if (wasSelected && !lmb)
-		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
-			
-			if (path != null && path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-			else animationController.animate(null, 0);
-			selected = true;
-		}
 	}
 	
 	public Vector3 getVoxelBelow()
@@ -113,6 +118,6 @@ public class Creature extends Entity
 	public void onReachTarget()
 	{
 		path = null;
-		animationController.animate(null, 0);
+		animationController.setAnimation(null);
 	}
 }

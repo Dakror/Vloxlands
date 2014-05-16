@@ -40,7 +40,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
 	byte[] voxels;
-	// btBoxShape[] compoundChildren;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -61,9 +60,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	Island island;
 	
 	int[] resources;
-	
-	// btCompoundShape collisionShape;
-	// btCollisionObject collisionObject;
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
@@ -150,20 +146,12 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
-		// if (id != air && voxels[index] == air) // new block placed
-		// {
-		// btBoxShape bs = new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f));
-		// collisionShape.addChildShape(Vloxlands.currentGame.m4.setToTranslation(x, y, z), bs);
-		// compoundChildren[index] = bs;
-		// }
-		// else if (id == air && voxels[index] != air && compoundChildren[index] != null) // block removed
-		// {
-		// collisionShape.removeChildShape(compoundChildren[index]);
-		// compoundChildren[index].dispose();
-		// compoundChildren[index] = null;
-		// }
-		
 		voxels[index] = id;
+		
+		if (selectedVoxel.x == x && selectedVoxel.y == y && selectedVoxel.z == z)
+		{
+			selectedVoxel.set(-1, 0, 0);
+		}
 		
 		resources[id + 128]++;
 		

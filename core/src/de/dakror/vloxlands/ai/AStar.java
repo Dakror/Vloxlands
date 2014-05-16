@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
-import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
@@ -115,10 +114,8 @@ public class AStar
 						
 						if (free)
 						{
-							for (Entity e : Vloxlands.world.getEntities())
+							for (Entity e : Vloxlands.world.getIslands()[0].getStructures())
 							{
-								if (!(e instanceof Structure)) continue;
-								
 								e.getWorldBoundingBox(b);
 								
 								b2.min.set(v).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);

@@ -243,6 +243,11 @@ public class Island implements RenderableProvider, Tickable
 		return structures.size;
 	}
 	
+	public Array<Structure> getStructures()
+	{
+		return structures;
+	}
+	
 	public void grassify()
 	{
 		for (Chunk c : chunks)

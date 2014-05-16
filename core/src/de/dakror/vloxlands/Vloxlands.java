@@ -38,7 +38,6 @@ import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
-import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -203,7 +202,7 @@ public class Vloxlands extends GameBase
 		
 		Vector3 p = world.getIslands()[0].pos;
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
-		human.setCarryingItemStack(new ItemStack(Item.get("PICKAXE"), 1));
+		human.setTool(Item.get("PICKAXE"));
 		world.addEntity(human);
 		
 		world.getIslands()[0].addStructure(new Structure(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2, "models/tent/tent.g3db"), false);
