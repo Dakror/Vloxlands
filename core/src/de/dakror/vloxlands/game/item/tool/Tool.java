@@ -29,8 +29,6 @@ public abstract class Tool extends Item
 		return boundingBox;
 	}
 	
-	public abstract void animateTick(int tick, Matrix4 transform);
-	
 	public void transformInHand(Matrix4 transform, Creature c)
 	{
 		Matrix4 tr = c.modelInstance.getAnimation("walk").nodeAnimations.get(3).node.globalTransform; // right hand bone; currently right underarm tho
