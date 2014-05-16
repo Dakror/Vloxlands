@@ -145,7 +145,7 @@ public abstract class Entity extends EntityBase
 			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
 			Vloxlands.shapeRenderer.begin(ShapeType.Line);
 			Vloxlands.shapeRenderer.setColor(World.SELECTION);
-			Vloxlands.shapeRenderer.rect(-boundingBox.getDimensions().x / 2, -boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().z);
+			Vloxlands.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
 			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
