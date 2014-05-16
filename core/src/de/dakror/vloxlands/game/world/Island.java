@@ -1,6 +1,10 @@
 package de.dakror.vloxlands.game.world;
 
+import java.util.Iterator;
+
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Vector3;
@@ -8,6 +12,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
@@ -35,6 +40,8 @@ public class Island implements RenderableProvider, Tickable
 	public Vector3 index, pos;
 	
 	public Chunk[] chunks;
+	
+	Array<Structure> structures = new Array<Structure>();
 	
 	public Island()
 	{
@@ -69,6 +76,9 @@ public class Island implements RenderableProvider, Tickable
 			c.calculateWeight();
 			weight += c.weight;
 		}
+		
+		for (Structure s : structures)
+			weight += s.getWeight();
 	}
 	
 	public void calculateUplift()
@@ -79,6 +89,9 @@ public class Island implements RenderableProvider, Tickable
 			c.calculateUplift();
 			uplift += c.uplift;
 		}
+		
+		for (Structure s : structures)
+			uplift += s.getUplift();
 	}
 	
 	public void recalculate()
@@ -95,6 +108,26 @@ public class Island implements RenderableProvider, Tickable
 		
 		for (Chunk c : chunks)
 			c.tick(tick);
+		
+		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		{
+			Structure s = iter.next();
+			if (s.isMarkedForRemoval()) iter.remove();
+			else
+			{
+				s.tick(tick);
+				if (deltaY != 0) s.getTransform().translate(0, deltaY, 0);
+			}
+		}
+	}
+	
+	public void addStructure(Structure s, boolean user)
+	{
+		s.onSpawn();
+		s.getTransform().translate(pos);
+		structures.add(s);
+		
+		recalculate();
 	}
 	
 	public byte get(float x, float y, float z)
@@ -205,10 +238,28 @@ public class Island implements RenderableProvider, Tickable
 		return chunks[i];
 	}
 	
+	public int getStructureCount()
+	{
+		return structures.size;
+	}
+	
 	public void grassify()
 	{
 		for (Chunk c : chunks)
 			c.grassify(this);
+	}
+	
+	public void render(ModelBatch batch, Environment environment)
+	{
+		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		{
+			Structure s = iter.next();
+			if (s.inFrustum)
+			{
+				s.render(batch, environment);
+				Vloxlands.world.visibleEntities++;
+			}
+		}
 	}
 	
 	@Override

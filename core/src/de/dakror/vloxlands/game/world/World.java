@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -32,17 +33,13 @@ public class World implements RenderableProvider, Tickable
 	
 	public static final int MAXHEIGHT = 512;
 	
-	public static final short GROUND_FLAG = 1 << 8;
-	public static final short ENTITY_FLAG = 1 << 9;
-	public static final short ALL_FLAG = -1;
-	
 	static Material opaque, transp, highlight;
 	
 	Island[] islands;
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks, visibleEntities;
+	public int visibleChunks, chunks, visibleEntities, totalEntities;
 	
 	public static Mesh chunkCube, blockCube;
 	public static final float gap = 0.01f;
@@ -125,15 +122,11 @@ public class World implements RenderableProvider, Tickable
 		return depth;
 	}
 	
-	public int getEntityCount()
-	{
-		return entities.size;
-	}
-	
 	public void addEntity(Entity e)
 	{
-		entities.add(e);
+		if (e instanceof Structure) Gdx.app.debug("World.addEntity", "Discouraged! Structures should be added to a specific island!");
 		e.onSpawn();
+		entities.add(e);
 	}
 	
 	@Override
@@ -155,6 +148,7 @@ public class World implements RenderableProvider, Tickable
 		batch.render(this, environment);
 		
 		visibleEntities = 0;
+		totalEntities = entities.size;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
 			Entity e = iter.next();
@@ -163,6 +157,12 @@ public class World implements RenderableProvider, Tickable
 				e.render(batch, environment);
 				visibleEntities++;
 			}
+		}
+		
+		for (Island island : islands)
+		{
+			island.render(batch, environment);
+			totalEntities += island.getStructureCount();
 		}
 	}
 	

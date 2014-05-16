@@ -202,12 +202,12 @@ public class Vloxlands extends GameBase
 			item.onLoaded();
 		
 		Vector3 p = world.getIslands()[0].pos;
-		
-		Human human = new Human(Island.SIZE / 2, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
+		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
 		human.setCarryingItemStack(new ItemStack(Item.get("PICKAXE"), 1));
 		world.addEntity(human);
 		
-		world.addEntity(new Structure(Island.SIZE / 2 - 6, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2, "models/tent/tent.g3db"));
+		world.getIslands()[0].addStructure(new Structure(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2, "models/tent/tent.g3db"), false);
+		
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		camera.position.set(worldMiddle);
@@ -268,7 +268,7 @@ public class Vloxlands extends GameBase
 			
 			font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight());
 			font.draw(spriteBatch, "C: " + world.visibleChunks + " / " + world.chunks, 0, Gdx.graphics.getHeight() - 20);
-			font.draw(spriteBatch, "E: " + world.visibleEntities + " / " + world.getEntityCount(), 0, Gdx.graphics.getHeight() - 40);
+			font.draw(spriteBatch, "E: " + world.visibleEntities + " / " + world.totalEntities, 0, Gdx.graphics.getHeight() - 40);
 			font.draw(spriteBatch, "X: " + camera.position.x, 0, Gdx.graphics.getHeight() - 60);
 			font.draw(spriteBatch, "Y: " + camera.position.y, 0, Gdx.graphics.getHeight() - 80);
 			font.draw(spriteBatch, "Z: " + camera.position.z, 0, Gdx.graphics.getHeight() - 100);
