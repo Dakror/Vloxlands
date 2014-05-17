@@ -13,9 +13,9 @@ public abstract class Layer implements Screen, InputProcessor, GestureListener
 {
 	Stage stage;
 	
-	public Layer()
+	public Stage getStage()
 	{
-		stage = new Stage();
+		return stage;
 	}
 	
 	@Override
@@ -39,7 +39,9 @@ public abstract class Layer implements Screen, InputProcessor, GestureListener
 	
 	@Override
 	public void dispose()
-	{}
+	{
+		if (stage != null) stage.dispose();
+	}
 	
 	@Override
 	public boolean touchDown(float x, float y, int pointer, int button)
