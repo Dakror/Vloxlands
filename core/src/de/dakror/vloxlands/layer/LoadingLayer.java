@@ -1,7 +1,6 @@
-package de.dakror.vloxlands.screen;
+package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Interpolation;
@@ -15,7 +14,7 @@ import de.dakror.vloxlands.generate.WorldGenerator;
 /**
  * @author Dakror
  */
-public class LoadingScreen implements Screen
+public class LoadingLayer extends Layer
 {
 	Stage stage;
 	Image logo;
@@ -41,8 +40,8 @@ public class LoadingScreen implements Screen
 			}
 			else if (worldGenerator.done)
 			{
-				Vloxlands.currentGame.doneLoading();
-				Vloxlands.currentGame.setScreen(null);
+				Vloxlands.currentGame.removeLayer(this);
+				GameLayer.instance.doneLoading();
 			}
 		}
 		
@@ -86,20 +85,4 @@ public class LoadingScreen implements Screen
 		for (Item item : Item.getAll())
 			Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
-	
-	@Override
-	public void hide()
-	{}
-	
-	@Override
-	public void pause()
-	{}
-	
-	@Override
-	public void resume()
-	{}
-	
-	@Override
-	public void dispose()
-	{}
 }

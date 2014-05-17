@@ -1,93 +1,45 @@
-package de.dakror.vloxlands.util.base;
+package de.dakror.vloxlands.layer;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-
-import de.dakror.vloxlands.layer.Layer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 
 /**
  * @author Dakror
  */
-public abstract class GameBase extends ApplicationAdapter implements InputProcessor, GestureListener
+public abstract class Layer implements Screen, InputProcessor, GestureListener
 {
-	protected Array<Layer> layers = new Array<Layer>();
-	private InputMultiplexer multiplexer = new InputMultiplexer();
+	Stage stage;
 	
-	public void addLayer(Layer layer)
+	public Layer()
 	{
-		layer.show();
-		getMultiplexer().addProcessor(layer);
-		layers.add(layer);
-	}
-	
-	public void toggleLayer(Layer layer)
-	{
-		if (hasLayer(layer.getClass())) removeLayer(layer);
-		else addLayer(layer);
-	}
-	
-	public boolean removeLayer(Layer layer)
-	{
-		getMultiplexer().removeProcessor(layer);
-		layer.dispose();
-		return layers.removeValue(layer, true);
-	}
-	
-	public boolean removeLayer(Class<?> layerClass)
-	{
-		for (Layer layer : layers)
-		{
-			if (layer.getClass().equals(layerClass))
-			{
-				getMultiplexer().removeProcessor(layer);
-				layer.dispose();
-				return layers.removeValue(layer, true);
-			}
-		}
-		
-		return false;
-	}
-	
-	public boolean hasLayer(Class<?> layerClass)
-	{
-		for (Layer layer : layers)
-			if (layer.getClass().equals(layerClass)) return true;
-		
-		return false;
-	}
-	
-	public Layer getActiveLayer()
-	{
-		return layers.first();
-	}
-	
-	public void clearLayers()
-	{
-		for (Layer l : layers)
-			removeLayer(l);
-	}
-	
-	public void setLayer(Layer layer)
-	{
-		clearLayers();
-		addLayer(layer);
-	}
-	
-	public InputMultiplexer getMultiplexer()
-	{
-		return multiplexer;
+		stage = new Stage();
 	}
 	
 	@Override
 	public void resize(int width, int height)
-	{
-		for (Layer l : layers)
-			l.resize(width, height);
-	}
+	{}
+	
+	public void tick(int tick)
+	{}
+	
+	@Override
+	public void pause()
+	{}
+	
+	@Override
+	public void hide()
+	{}
+	
+	@Override
+	public void resume()
+	{}
+	
+	@Override
+	public void dispose()
+	{}
 	
 	@Override
 	public boolean touchDown(float x, float y, int pointer, int button)
@@ -184,5 +136,4 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	{
 		return false;
 	}
-	
 }

@@ -14,8 +14,8 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
 
-import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
@@ -231,11 +231,11 @@ public class Chunk implements Meshable, Tickable, Disposable
 					
 					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
 					
-					Vloxlands.currentGame.tmp3.set(Vloxlands.currentGame.tmp1.cpy().add(x, y, z));
-					Vloxlands.currentGame.tmp4.set(Vloxlands.currentGame.tmp3.cpy().add(1, 1, 1));
-					Vloxlands.currentGame.bb2.set(Vloxlands.currentGame.tmp3, Vloxlands.currentGame.tmp4);
+					GameLayer.instance.tmp3.set(GameLayer.instance.tmp1.cpy().add(x, y, z));
+					GameLayer.instance.tmp4.set(GameLayer.instance.tmp3.cpy().add(1, 1, 1));
+					GameLayer.instance.bb2.set(GameLayer.instance.tmp3, GameLayer.instance.tmp4);
 					
-					if (Intersector.intersectRayBounds(ray, Vloxlands.currentGame.bb2, is))
+					if (Intersector.intersectRayBounds(ray, GameLayer.instance.bb2, is))
 					{
 						float dist = ray.origin.dst(is);
 						if (voxel == null || (dist = ray.origin.dst(is)) < distance)

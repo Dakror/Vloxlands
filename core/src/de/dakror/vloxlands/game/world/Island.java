@@ -2,9 +2,6 @@ package de.dakror.vloxlands.game.world;
 
 import java.util.Iterator;
 
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -14,9 +11,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -46,12 +43,9 @@ public class Island implements RenderableProvider, Tickable
 	
 	Array<Structure> structures = new Array<Structure>();
 	
-	public SimpleWeightedGraph<Vector3, DefaultWeightedEdge> graph;
-	
 	public Island()
 	{
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
-		graph = new SimpleWeightedGraph<Vector3, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 		
 		index = new Vector3();
 		pos = new Vector3();
@@ -170,14 +164,7 @@ public class Island implements RenderableProvider, Tickable
 		int y1 = (int) y % Chunk.SIZE;
 		int z1 = (int) z % Chunk.SIZE;
 		
-		byte air = Voxel.get("AIR").getId();
-		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force))
-		{
-			if (id == air) graph.removeVertex(new Vector3(x, y, z));
-			else if (isWalkable(x, y, z)) graph.addVertex(new Vector3(x, y, z));
-			
-			notifySurroundingChunks(chunkX, chunkY, chunkZ);
-		}
+		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force)) notifySurroundingChunks(chunkX, chunkY, chunkZ);
 	}
 	
 	public void notifySurroundingChunks(int cx, int cy, int cz)
@@ -285,7 +272,7 @@ public class Island implements RenderableProvider, Tickable
 			if (s.inFrustum)
 			{
 				s.render(batch, environment);
-				Vloxlands.world.visibleEntities++;
+				GameLayer.world.visibleEntities++;
 			}
 		}
 	}
@@ -303,7 +290,7 @@ public class Island implements RenderableProvider, Tickable
 			Chunk chunk = chunks[i];
 			if (!chunk.initialized) chunk.init();
 			
-			if (chunk.inFrustum = Vloxlands.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
+			if (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
 				if (chunk.isEmpty()) continue;
 				

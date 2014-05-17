@@ -6,10 +6,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -24,8 +24,10 @@ public class AStar
 			return Float.compare(o1.F, o2.F);
 		}
 	};
-	static Array<Node> openList = new Array<Node>();
-	static Array<Node> closedList = new Array<Node>();
+	public static Array<Node> openList = new Array<Node>();
+	public static Array<Node> closedList = new Array<Node>();
+	
+	public static Array<Vector3> lastPath;
 	
 	public static Path findPath(Vector3 from, Vector3 to, Creature c)
 	{
@@ -48,7 +50,7 @@ public class AStar
 			
 			if (selected.H == 0) break;
 			
-			addNeighbors(selected, to, c);
+			addNeighbors(selected, from, to, c);
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
@@ -61,11 +63,14 @@ public class AStar
 		v.reverse();
 		v.removeIndex(0); // remove start vector
 		
+		lastPath = v;
+		
 		return new Path(v);
 	}
 	
-	public static void addNeighbors(Node selected, Vector3 to, Creature c)
+	public static void addNeighbors(Node selected, Vector3 from, Vector3 to, Creature c)
 	{
+		float maxDistance = from.dst(to);
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -85,10 +90,14 @@ public class AStar
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!Vloxlands.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) break;
-					if (Vloxlands.world.getIslands()[0].get(v.x, v.y, v.z) == air && !c.canFly()) continue;
+					if (!GameLayer.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) break;
+					if (GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air && !c.canFly()) continue;
 					
-					Node node = new Node(v.x, v.y, v.z, selected.G + 1, v.dst(to), selected);
+					if (from.dst(v) > maxDistance || to.dst(v) > maxDistance) continue;
+					
+					float g = GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air ? 1.5f : 1;
+					
+					Node node = new Node(v.x, v.y, v.z, selected.G + g, v.dst(to), selected);
 					
 					if (closedList.contains(node, false)) continue;
 					
@@ -112,13 +121,19 @@ public class AStar
 							else if (!isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
+						if (y != 0)
+						{
+							if (y < 0 && !isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
+							else if (y > 0 && !isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
+						}
+						
 						if (free)
 						{
-							for (Entity e : Vloxlands.world.getIslands()[0].getStructures())
+							for (Entity e : GameLayer.world.getIslands()[0].getStructures())
 							{
 								e.getWorldBoundingBox(b);
 								
-								b2.min.set(v).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+								b2.min.set(v).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
 								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 								b2.set(b2.min, b2.max);
 								if (b.intersects(b2))
@@ -129,7 +144,7 @@ public class AStar
 								
 								if (x != 0 && z != 0 && free)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.min.set(selected.x, v.y, v.z).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -139,7 +154,7 @@ public class AStar
 										break;
 									}
 									
-									b2.min.set(v.x, v.y, selected.z).add(Vloxlands.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.min.set(v.x, v.y, selected.z).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -164,7 +179,7 @@ public class AStar
 		byte air = Voxel.get("AIR").getId();
 		for (int i = 0; i < height; i++)
 		{
-			byte b = Vloxlands.world.getIslands()[0].get(x, y + i + 1, z);
+			byte b = GameLayer.world.getIslands()[0].get(x, y + i + 1, z);
 			if (b != 0 && b != air) return false;
 		}
 		
