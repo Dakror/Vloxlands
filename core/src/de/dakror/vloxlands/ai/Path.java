@@ -9,6 +9,10 @@ import com.badlogic.gdx.utils.Array;
 public class Path
 {
 	Array<Vector3> nodes;
+	/**
+	 * If the target is not walkable (e.g. a embeded resource in the ground) this is the actual target.
+	 */
+	Vector3 ghostTarget;
 	
 	int index;
 	
@@ -51,5 +55,15 @@ public class Path
 	public int size()
 	{
 		return nodes.size;
+	}
+	
+	public Vector3 getGhostTarget()
+	{
+		return ghostTarget;
+	}
+	
+	public void setGhostTarget(Vector3 ghostTarget)
+	{
+		this.ghostTarget = ghostTarget;
 	}
 }

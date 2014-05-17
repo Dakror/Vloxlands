@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.ai.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.voxel.Voxel;
@@ -16,29 +17,30 @@ import de.dakror.vloxlands.layer.GameLayer;
  */
 public class AStar
 {
-	public static final Comparator<Node> COMPARATOR = new Comparator<Node>()
+	public static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
 	{
 		@Override
-		public int compare(Node o1, Node o2)
+		public int compare(AStarNode o1, AStarNode o2)
 		{
 			return Float.compare(o1.F, o2.F);
 		}
 	};
-	public static Array<Node> openList = new Array<Node>();
-	public static Array<Node> closedList = new Array<Node>();
-	
+	public static Array<AStarNode> openList = new Array<AStarNode>();
+	public static Array<AStarNode> closedList = new Array<AStarNode>();
 	public static Array<Vector3> lastPath;
 	
-	public static Path findPath(Vector3 from, Vector3 to, Creature c)
+	// TODO: multi island support
+	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
-		if (!isSpaceAbove(to.x, to.y, to.z, c.getHeight())) return null;
+		if (!GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
 		
 		openList.clear();
 		closedList.clear();
 		
-		openList.add(new Node(from.x, from.y, from.z, 0, from.dst(to), null));
+		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
 		
-		Node selected = null;
+		AStarNode selected = null;
+		AStarNode ghostNode = null;
 		while (true)
 		{
 			if (openList.size == 0) return null; // no way
@@ -50,14 +52,14 @@ public class AStar
 			
 			if (selected.H == 0) break;
 			
-			addNeighbors(selected, from, to, c);
+			if ((ghostNode = addNeighbors(selected, from, to, c)) != null) break;
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
 		while (selected != null)
 		{
 			v.add(new Vector3(selected.x, selected.y, selected.z));
-			selected = selected.parent;
+			selected = (AStarNode) selected.parent;
 		}
 		
 		v.reverse();
@@ -65,10 +67,12 @@ public class AStar
 		
 		lastPath = v;
 		
-		return new Path(v);
+		Path p = new Path(v);
+		if (ghostNode != null) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
+		return p;
 	}
 	
-	public static void addNeighbors(Node selected, Vector3 from, Vector3 to, Creature c)
+	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c)
 	{
 		float maxDistance = from.dst(to);
 		int height = c.getHeight();
@@ -97,7 +101,7 @@ public class AStar
 					
 					float g = GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air ? 1.5f : 1;
 					
-					Node node = new Node(v.x, v.y, v.z, selected.G + g, v.dst(to), selected);
+					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g, v.dst(to), selected);
 					
 					if (closedList.contains(node, false)) continue;
 					
@@ -113,18 +117,18 @@ public class AStar
 					{
 						boolean free = true;
 						
-						if (!isSpaceAbove(v.x, v.y, v.z, height)) free = false;
+						if (!GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, v.z, height)) free = false;
 						
 						if (x != 0 && z != 0 && free)
 						{
-							if (!isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
-							else if (!isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
+							if (!GameLayer.world.getIslands()[0].isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
+							else if (!GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
 						if (y != 0)
 						{
-							if (y < 0 && !isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
-							else if (y > 0 && !isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
+							if (y < 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
+							else if (y > 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
 						}
 						
 						if (free)
@@ -168,21 +172,12 @@ public class AStar
 						}
 						
 						if (free) openList.add(node);
+						if (v.equals(to)) return node;
 					}
 				}
 			}
 		}
-	}
-	
-	public static boolean isSpaceAbove(float x, float y, float z, int height)
-	{
-		byte air = Voxel.get("AIR").getId();
-		for (int i = 0; i < height; i++)
-		{
-			byte b = GameLayer.world.getIslands()[0].get(x, y + i + 1, z);
-			if (b != 0 && b != air) return false;
-		}
 		
-		return true;
+		return null;
 	}
 }

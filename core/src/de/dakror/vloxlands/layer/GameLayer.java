@@ -23,7 +23,7 @@ import com.badlogic.gdx.math.collision.Ray;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.Node;
+import de.dakror.vloxlands.ai.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -48,7 +48,6 @@ public class GameLayer extends Layer
 	public static final float pickRayMaxDistance = 30f;
 	
 	public static GameLayer instance;
-	
 	
 	public static World world;
 	public static PerspectiveCamera camera;
@@ -165,7 +164,7 @@ public class GameLayer extends Layer
 	
 	public void renderPathDebug()
 	{
-		for (Node node : AStar.openList)
+		for (AStarNode node : AStar.openList)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(2);
@@ -179,7 +178,7 @@ public class GameLayer extends Layer
 			shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
-		for (Node node : AStar.closedList)
+		for (AStarNode node : AStar.closedList)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			shapeRenderer.setProjectionMatrix(camera.combined);

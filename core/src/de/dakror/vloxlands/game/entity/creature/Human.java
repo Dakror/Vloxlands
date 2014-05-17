@@ -123,7 +123,7 @@ public class Human extends Creature implements AnimationListener
 	{
 		if (wasSelected && !lmb)
 		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, true);
 			
 			if (path != null && path.size() > 0)
 			{

@@ -218,6 +218,18 @@ public class Island implements RenderableProvider, Tickable
 		return get(x, y, z) != air && (above == air || above == 0);
 	}
 	
+	public boolean isSpaceAbove(float x, float y, float z, int height)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (int i = 0; i < height; i++)
+		{
+			byte b = get(x, y + i + 1, z);
+			if (b != 0 && b != air) return false;
+		}
+		
+		return true;
+	}
+	
 	public float getWeight()
 	{
 		return weight;
