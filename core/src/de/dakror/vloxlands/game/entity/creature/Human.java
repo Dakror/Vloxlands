@@ -123,23 +123,23 @@ public class Human extends Creature implements AnimationListener
 	{
 		if (wasSelected && !lmb)
 		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, true);
+			boolean mineTarget = tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 			
-			if (path != null && path.size() > 0)
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
+			
+			if (path != null)
 			{
-				if (tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+				if (mineTarget)
 				{
-					gotoLastPathTarget = false;
 					useToolOnReachTarget = true;
 					toolTarget = vs;
 				}
 				else
 				{
-					gotoLastPathTarget = true;
 					useToolOnReachTarget = false;
 					toolTarget = null;
 				}
-				if (!(path.isLast() && !gotoLastPathTarget)) animationController.animate("walk", -1, 1, null, 0);
+				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			}
 			else animationController.animate(null, 0);
 			selected = true;
