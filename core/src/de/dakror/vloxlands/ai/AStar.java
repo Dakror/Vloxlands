@@ -74,7 +74,7 @@ public class AStar
 	
 	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c)
 	{
-		float maxDistance = from.dst(to);
+		float maxDistance = from.dst(to) * 5;
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -86,22 +86,22 @@ public class AStar
 		
 		for (int x = -1; x < 2; x++)
 		{
-			for (int y = -1; y < 2; y++)
+			for (int z = -1; z < 2; z++)
 			{
-				for (int z = -1; z < 2; z++)
+				for (int y = -1; y < 2; y++)
 				{
-					if (Math.sqrt(x * x + y * y + z * z) == Math.sqrt(3)) continue;
+					if (x != 0 && z != 0 && y != 0) continue;
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!GameLayer.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) break;
+					if (!GameLayer.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) continue;
 					if (GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air && !c.canFly()) continue;
 					
 					if (from.dst(v) > maxDistance || to.dst(v) > maxDistance) continue;
 					
 					float g = GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air ? 1.5f : 1;
 					
-					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g, v.dst(to), selected);
+					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g * v.dst(selected.x, selected.y, selected.z), v.dst(to), selected);
 					
 					if (closedList.contains(node, false)) continue;
 					
@@ -145,7 +145,6 @@ public class AStar
 									free = false;
 									break;
 								}
-								
 								if (x != 0 && z != 0 && free)
 								{
 									b2.min.set(selected.x, v.y, v.z).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
@@ -170,9 +169,15 @@ public class AStar
 								}
 							}
 						}
-						
+						if (v.equals(to))
+						{
+							boolean targetable = true;
+							if (selected.x == to.x && selected.z == to.z) targetable = false;
+							if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
+							if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
+							if (targetable) return node;
+						}
 						if (free) openList.add(node);
-						if (v.equals(to)) return node;
 					}
 				}
 			}

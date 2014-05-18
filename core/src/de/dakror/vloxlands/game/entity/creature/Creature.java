@@ -59,17 +59,7 @@ public class Creature extends Entity
 					else
 					{
 						if (path.isDone()) onReachTarget();
-						else
-						{
-							path.next();
-							if (path.isLast() && !gotoLastPathTarget)
-							{
-								target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
-								transform.setToRotation(Vector3.Y, 0).translate(posCache);
-								transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-								onReachTarget();
-							}
-						}
+						else path.next();
 					}
 					transform.trn(dif);
 				}
@@ -117,6 +107,12 @@ public class Creature extends Entity
 	// -- events -- //
 	public void onReachTarget()
 	{
+		if (path.getGhostTarget() != null)
+		{
+			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+			transform.setToRotation(Vector3.Y, 0).translate(posCache);
+			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+		}
 		path = null;
 		animationController.setAnimation(null);
 	}

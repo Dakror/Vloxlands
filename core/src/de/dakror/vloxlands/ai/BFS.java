@@ -54,7 +54,7 @@ public class BFS
 			{
 				for (int z = -1; z < 2; z++)
 				{
-					if (Math.sqrt(x * x + y * y + z * z) == Math.sqrt(3)) continue;
+					if (x != 0 && z != 0 && y != 0) continue;
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
