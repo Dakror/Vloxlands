@@ -2,6 +2,7 @@ package de.dakror.vloxlands.ai;
 
 import java.util.Comparator;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -50,9 +51,9 @@ public class AStar
 			openList.removeIndex(0);
 			closedList.add(selected);
 			
-			if (selected.H == 0) break;
+			if (selected.H == 0 && !useGhostTarget) break;
 			
-			if ((ghostNode = addNeighbors(selected, from, to, c)) != null) break;
+			if ((ghostNode = addNeighbors(selected, from, to, c, useGhostTarget)) != null) break;
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
@@ -72,9 +73,9 @@ public class AStar
 		return p;
 	}
 	
-	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c)
+	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
-		float maxDistance = from.dst(to) * 5;
+		float maxDistance = Math.max(from.dst(to), 1) * 5;
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -169,13 +170,17 @@ public class AStar
 								}
 							}
 						}
-						if (v.equals(to))
+						if (v.equals(to) && useGhostTarget)
 						{
 							boolean targetable = true;
-							if (selected.x == to.x && selected.z == to.z) targetable = false;
+							if (x == 0 && z == 0) targetable = false;
 							if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
 							if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
-							if (targetable) return node;
+							if (targetable)
+							{
+								Gdx.app.log("", "return");
+								return node;
+							}
 						}
 						if (free) openList.add(node);
 					}

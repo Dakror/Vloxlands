@@ -19,8 +19,6 @@ public class Creature extends Entity
 	protected float rotateSpeed = 20;
 	protected Vector3 blockTrn;
 	
-	boolean gotoLastPathTarget;
-	
 	protected boolean canFly;
 	
 	public Path path;
@@ -49,21 +47,13 @@ public class Creature extends Entity
 				transform.setToRotation(Vector3.Y, 0).translate(posCache);
 				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 				
-				if (path.isLast() && !gotoLastPathTarget)
-				{
-					onReachTarget();
-				}
+				if (dif.len() > speed) dif.limit(speed);
 				else
 				{
-					if (dif.len() > speed) dif.limit(speed);
-					else
-					{
-						if (path.isDone()) onReachTarget();
-						else path.next();
-					}
-					transform.trn(dif);
+					if (path.isDone()) onReachTarget();
+					else path.next();
 				}
-				
+				transform.trn(dif);
 			}
 			catch (Exception e)
 			{}
