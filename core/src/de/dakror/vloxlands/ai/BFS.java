@@ -15,7 +15,8 @@ import de.dakror.vloxlands.layer.GameLayer;
  */
 public class BFS
 {
-	static Array<BFSNode> queue = new Array<BFSNode>();
+	public static Array<BFSNode> queue = new Array<BFSNode>();
+	public static BFSNode lastTarget;
 	
 	// TODO: multi island support
 	public static Path findClosestVoxel(Vector3 pos, byte voxel, Creature c)
@@ -28,16 +29,19 @@ public class BFS
 			BFSNode v = queue.first();
 			queue.removeIndex(0);
 			
-			if (v.voxel == voxel) return AStar.findPath(pos, new Vector3(v.x, v.y, v.z), c, true);
+			if (v.voxel == voxel)
+			{
+				lastTarget = v;
+				return AStar.findPath(pos, new Vector3(v.x, v.y, v.z), c, true);
+			}
 			
-			BFSNode node = null;
-			if ((node = addNeighbors(v, voxel, c)) != null) return AStar.findPath(pos, new Vector3(node.x, node.y, node.z), c, true);
+			addNeighbors(v, voxel, c);
 		}
 		
 		return null;
 	}
 	
-	public static BFSNode addNeighbors(BFSNode selected, byte voxel, Creature c)
+	public static void addNeighbors(BFSNode selected, byte voxel, Creature c)
 	{
 		int height = c.getHeight();
 		
@@ -124,13 +128,11 @@ public class BFS
 						}
 					}
 					
-					if (vxl != voxel && free) queue.add(node);
+					// if (vxl == voxel && GameLayer.world.getIslands()[0].isWrapped(v.x, v.y, v.z)) free = false;
 					
-					if (vxl == voxel) return node;
+					if (free) queue.add(node);
 				}
 			}
 		}
-		
-		return null;
 	}
 }

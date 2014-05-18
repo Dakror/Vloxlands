@@ -2,7 +2,6 @@ package de.dakror.vloxlands.ai;
 
 import java.util.Comparator;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -176,11 +175,7 @@ public class AStar
 							if (x == 0 && z == 0) targetable = false;
 							if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
 							if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
-							if (targetable)
-							{
-								Gdx.app.log("", "return");
-								return node;
-							}
+							if (targetable) return node;
 						}
 						if (free) openList.add(node);
 					}

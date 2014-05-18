@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
@@ -39,6 +40,8 @@ public class Human extends Creature implements AnimationListener
 	
 	boolean doneUsingTool;
 	boolean usingTool;
+	
+	boolean automaticMining;
 	
 	public Human(float x, float y, float z)
 	{
@@ -102,6 +105,23 @@ public class Human extends Creature implements AnimationListener
 			{
 				animationController.animate(null, 0);
 				doneUsingTool = false;
+				
+				if (automaticMining)
+				{
+					path = BFS.findClosestVoxel(getVoxelBelow(), toolTarget.type.getId(), this);
+					if (path != null)
+					{
+						useToolOnReachTarget = true;
+						toolTarget.voxel = path.getGhostTarget();
+						if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+					}
+					else
+					{
+						Gdx.app.log("", "no more voxels to mine!");
+						animationController.animate(null, 0);
+						automaticMining = false;
+					}
+				}
 			}
 			
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
@@ -133,6 +153,7 @@ public class Human extends Creature implements AnimationListener
 				{
 					useToolOnReachTarget = true;
 					toolTarget = vs;
+					automaticMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
 				}
 				else
 				{

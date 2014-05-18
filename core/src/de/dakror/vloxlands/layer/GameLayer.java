@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.collision.Ray;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.ai.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -160,6 +161,21 @@ public class GameLayer extends Layer
 		modelBatch.end();
 		
 		if (Vloxlands.showPathDebug) renderPathDebug();
+		
+		if (BFS.lastTarget != null)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glLineWidth(2);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			shapeRenderer.identity();
+			shapeRenderer.translate(world.getIslands()[0].pos.x + BFS.lastTarget.x, world.getIslands()[0].pos.y + BFS.lastTarget.y + 1.01f, world.getIslands()[0].pos.z + BFS.lastTarget.z);
+			shapeRenderer.rotate(1, 0, 0, 90);
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.setColor(Color.GREEN);
+			shapeRenderer.x(0.5f, 0.5f, 0.49f);
+			shapeRenderer.end();
+			Gdx.gl.glLineWidth(1);
+		}
 	}
 	
 	public void renderPathDebug()
