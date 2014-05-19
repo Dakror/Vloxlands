@@ -128,13 +128,6 @@ public class Human extends Creature implements AnimationListener
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
 			
 			((Tool) tool).transformInHand(toolTransform, this);
-			
-			// pickaxe animation
-			// int t = tick * 2 % 120;
-			// float yaw = rotCache.getYawRad();
-			// float rot = (float) -Math.abs(Math.max(Math.sin(yaw), Math.cos(yaw)));
-			// carryingItemTransform.translate(0, 0.2f, -0.3f).rotate(Vector3.Y, 90).rotate(0, 0, rot, t - 25).translate(0, carryingItemBoundingBox.getDimensions().y, 0);
-			// }
 		}
 	}
 	
