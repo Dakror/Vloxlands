@@ -182,67 +182,6 @@ public class Island implements RenderableProvider, Tickable
 		}
 	}
 	
-	public boolean isSurrounded(float x, float y, float z, boolean opaque)
-	{
-		for (Direction d : Direction.values())
-		{
-			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
-			if (v.isOpaque() != opaque || v.getId() == 0) return false;
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Has atleast one air voxel adjacent
-	 */
-	public boolean isTargetable(float x, float y, float z)
-	{
-		byte air = Voxel.get("AIR").getId();
-		for (Direction d : Direction.values())
-		{
-			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
-			if (b == air) return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Is solid and has air above
-	 */
-	public boolean isWalkable(float x, float y, float z)
-	{
-		byte air = Voxel.get("AIR").getId();
-		byte above = get(x, y + 1, z);
-		return get(x, y, z) != air && (above == air || above == 0);
-	}
-	
-	public boolean isSpaceAbove(float x, float y, float z, int height)
-	{
-		byte air = Voxel.get("AIR").getId();
-		for (int i = 0; i < height; i++)
-		{
-			byte b = get(x, y + i + 1, z);
-			if (b != 0 && b != air) return false;
-		}
-		
-		return true;
-	}
-	
-	public boolean isWrapped(float x, float y, float z)
-	{
-		byte air = Voxel.get("AIR").getId();
-		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
-		for (Direction d : directions)
-		{
-			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
-			if (v.getId() == 0 || v.getId() == air) return false;
-		}
-		
-		return true;
-	}
-	
 	public float getWeight()
 	{
 		return weight;
@@ -353,5 +292,68 @@ public class Island implements RenderableProvider, Tickable
 		}
 		
 		if (block != null) renderables.add(block);
+	}
+	
+	// -- queries -- //
+	
+	public boolean isSurrounded(float x, float y, float z, boolean opaque)
+	{
+		for (Direction d : Direction.values())
+		{
+			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			if (v.isOpaque() != opaque || v.getId() == 0) return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Has atleast one air voxel adjacent
+	 */
+	public boolean isTargetable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (Direction d : Direction.values())
+		{
+			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
+			if (b == air) return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Is solid and has air above
+	 */
+	public boolean isWalkable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		byte above = get(x, y + 1, z);
+		return get(x, y, z) != air && (above == air || above == 0);
+	}
+	
+	public boolean isSpaceAbove(float x, float y, float z, int height)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (int i = 0; i < height; i++)
+		{
+			byte b = get(x, y + i + 1, z);
+			if (b != 0 && b != air) return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean isWrapped(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+		for (Direction d : directions)
+		{
+			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			if (v.getId() == 0 || v.getId() == air) return false;
+		}
+		
+		return true;
 	}
 }

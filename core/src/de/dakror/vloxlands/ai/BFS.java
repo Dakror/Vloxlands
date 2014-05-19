@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.ai;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -38,6 +39,7 @@ public class BFS
 			addNeighbors(v, voxel, c);
 		}
 		
+		Gdx.app.log("BFS.findClosestVoxel", "null");
 		return null;
 	}
 	
@@ -128,6 +130,7 @@ public class BFS
 						}
 					}
 					
+					if (vxl == voxel && GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z)) free = false;
 					// if (vxl == voxel && GameLayer.world.getIslands()[0].isWrapped(v.x, v.y, v.z)) free = false;
 					
 					if (free) queue.add(node);

@@ -38,7 +38,6 @@ public class AStar
 		closedList.clear();
 		
 		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
-		
 		AStarNode selected = null;
 		AStarNode ghostNode = null;
 		while (true)
@@ -169,12 +168,13 @@ public class AStar
 								}
 							}
 						}
+						
 						if (v.equals(to) && useGhostTarget)
 						{
 							boolean targetable = true;
-							if (x == 0 && z == 0) targetable = false;
-							if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
-							if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
+							// if (x == 0 && z == 0) targetable = false;
+							// if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
+							// if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
 							if (targetable) return node;
 						}
 						if (free) openList.add(node);

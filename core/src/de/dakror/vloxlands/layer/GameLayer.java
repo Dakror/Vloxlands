@@ -25,6 +25,7 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.ai.node.AStarNode;
+import de.dakror.vloxlands.ai.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -67,7 +68,6 @@ public class GameLayer extends Layer
 	public Vector3 intersection2 = new Vector3();
 	
 	ModelInstance sky;
-	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -160,7 +160,11 @@ public class GameLayer extends Layer
 		// modelBatch.render(sky, lights);
 		modelBatch.end();
 		
-		if (Vloxlands.showPathDebug) renderPathDebug();
+		if (Vloxlands.showPathDebug)
+		{
+			renderBFS();
+			renderAStar();
+		}
 		
 		if (BFS.lastTarget != null)
 		{
@@ -178,7 +182,7 @@ public class GameLayer extends Layer
 		}
 	}
 	
-	public void renderPathDebug()
+	public void renderAStar()
 	{
 		for (AStarNode node : AStar.openList)
 		{
@@ -222,6 +226,40 @@ public class GameLayer extends Layer
 			}
 		}
 	}
+	
+	public void renderBFS()
+	{
+		for (BFSNode node : BFS.queue)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glLineWidth(2);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			shapeRenderer.identity();
+			shapeRenderer.translate(world.getIslands()[0].pos.x + node.x, world.getIslands()[0].pos.y + node.y + 1.01f, world.getIslands()[0].pos.z + node.z);
+			shapeRenderer.rotate(1, 0, 0, 90);
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.setColor(Color.BLACK);
+			shapeRenderer.x(0.5f, 0.5f, 0.49f);
+			shapeRenderer.end();
+			Gdx.gl.glLineWidth(1);
+		}
+		
+		if (BFS.lastTarget != null)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glLineWidth(2);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			shapeRenderer.identity();
+			shapeRenderer.translate(world.getIslands()[0].pos.x + BFS.lastTarget.x, world.getIslands()[0].pos.y + BFS.lastTarget.y + 1.01f, world.getIslands()[0].pos.z + BFS.lastTarget.z);
+			shapeRenderer.rotate(1, 0, 0, 90);
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.setColor(Color.MAGENTA);
+			shapeRenderer.x(0.5f, 0.5f, 0.49f);
+			shapeRenderer.end();
+			Gdx.gl.glLineWidth(1);
+		}
+	}
+	
 	
 	@Override
 	public void tick(int tick)

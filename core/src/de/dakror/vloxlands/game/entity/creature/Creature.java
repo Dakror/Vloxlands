@@ -42,21 +42,27 @@ public class Creature extends Entity
 		{
 			try
 			{
-				Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
-				Vector3 dif = target.cpy().sub(posCache);
-				transform.setToRotation(Vector3.Y, 0).translate(posCache);
-				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-				
-				if (dif.len() > speed) dif.limit(speed);
-				else
+				if (path.size() > 0)
 				{
-					if (path.isDone()) onReachTarget();
-					else path.next();
+					Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+					Vector3 dif = target.cpy().sub(posCache);
+					transform.setToRotation(Vector3.Y, 0).translate(posCache);
+					transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+					
+					if (dif.len() > speed) dif.limit(speed);
+					else
+					{
+						if (path.isDone()) onReachTarget();
+						else path.next();
+					}
+					transform.trn(dif);
 				}
-				transform.trn(dif);
+				else onReachTarget();
 			}
 			catch (Exception e)
-			{}
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
