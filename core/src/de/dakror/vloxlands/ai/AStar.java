@@ -28,6 +28,8 @@ public class AStar
 	public static Array<AStarNode> openList = new Array<AStarNode>();
 	public static Array<AStarNode> closedList = new Array<AStarNode>();
 	public static Array<Vector3> lastPath;
+	static AStarNode target;
+	static Vector3 neighbor;
 	
 	// TODO: multi island support
 	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
@@ -36,8 +38,13 @@ public class AStar
 		
 		openList.clear();
 		closedList.clear();
+		target = null;
+		neighbor = null;
 		
 		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
+		
+		if (from.equals(to) && useGhostTarget) target = openList.get(0);
+		
 		AStarNode selected = null;
 		AStarNode ghostNode = null;
 		while (true)
@@ -63,6 +70,8 @@ public class AStar
 		
 		v.reverse();
 		v.removeIndex(0); // remove start vector
+		
+		if (neighbor != null) v.add(neighbor);
 		
 		lastPath = v;
 		
@@ -90,6 +99,7 @@ public class AStar
 				for (int y = -1; y < 2; y++)
 				{
 					if (x != 0 && z != 0 && y != 0) continue;
+					if (x == 0 && z == 0 && y == 0) continue;
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
@@ -169,13 +179,17 @@ public class AStar
 							}
 						}
 						
-						if (v.equals(to) && useGhostTarget)
+						if (useGhostTarget)
 						{
-							boolean targetable = true;
+							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3));
 							// if (x == 0 && z == 0) targetable = false;
 							// if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
-							// if (to.dst(selected.x, selected.y + 1, selected.z) > Math.sqrt(2)) targetable = false;
-							if (targetable) return node;
+							// if (selected.y + 1 < to.y) targetable = false;
+							if (targetable)
+							{
+								if (!v.equals(to)) neighbor = v;
+								return v.equals(to) ? node : target;
+							}
 						}
 						if (free) openList.add(node);
 					}
