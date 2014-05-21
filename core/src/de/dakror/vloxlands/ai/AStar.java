@@ -77,6 +77,7 @@ public class AStar
 		
 		Path p = new Path(v);
 		if (ghostNode != null) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
+		
 		return p;
 	}
 	
@@ -181,10 +182,10 @@ public class AStar
 						
 						if (useGhostTarget)
 						{
-							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3));
-							// if (x == 0 && z == 0) targetable = false;
+							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free);
+							if (x == 0 && z == 0) targetable = false;
 							// if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
-							// if (selected.y + 1 < to.y) targetable = false;
+							if (selected.y > to.y) targetable = false;
 							if (targetable)
 							{
 								if (!v.equals(to)) neighbor = v;
