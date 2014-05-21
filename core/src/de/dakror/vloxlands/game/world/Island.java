@@ -344,14 +344,14 @@ public class Island implements RenderableProvider, Tickable
 		return true;
 	}
 	
-	public boolean isWrapped(float x, float y, float z)
+	public boolean isWrapped(float x, float y, float z, int height)
 	{
 		byte air = Voxel.get("AIR").getId();
 		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
 		for (Direction d : directions)
 		{
 			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
-			if (v.getId() == 0 || v.getId() == air) return false;
+			if (v.getId() == 0 || (v.getId() == air && isSpaceAbove(x + d.dir.x, y + d.dir.y, z + d.dir.z, height - (int) d.dir.y))) return false;
 		}
 		
 		return true;

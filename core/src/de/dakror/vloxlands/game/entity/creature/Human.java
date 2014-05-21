@@ -175,8 +175,8 @@ public class Human extends Creature implements AnimationListener
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if (!usingTool && carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
-		if (usingTool && tool != null) batch.render(toolModelInstance, environment);
+		if (!(usingTool || useToolOnReachTarget) && carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
+		if ((usingTool || useToolOnReachTarget) && tool != null) batch.render(toolModelInstance, environment);
 	}
 	
 	@Override
