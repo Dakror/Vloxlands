@@ -12,11 +12,13 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.base.EntityBase;
 import de.dakror.vloxlands.util.event.EventDispatcher;
 
@@ -48,6 +50,7 @@ public abstract class Entity extends EntityBase
 	protected AnimationController animationController;
 	
 	public final Vector3 posCache = new Vector3();
+	public final Quaternion rotCache = new Quaternion();
 	
 	public Entity(float x, float y, float z, String model)
 	{
@@ -115,7 +118,8 @@ public abstract class Entity extends EntityBase
 	public void tick(int tick)
 	{
 		transform.getTranslation(posCache);
-		inFrustum = Vloxlands.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
+		transform.getRotation(rotCache);
+		inFrustum = GameLayer.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
 	public void getWorldBoundingBox(BoundingBox bb)
@@ -129,39 +133,45 @@ public abstract class Entity extends EntityBase
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(modelInstance, environment);
+		
+		renderAdditional(batch, environment);
+		
 		if (hovered || selected)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
-			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
-			Vloxlands.shapeRenderer.identity();
-			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
-			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
-			Vloxlands.shapeRenderer.begin(ShapeType.Line);
-			Vloxlands.shapeRenderer.setColor(World.SELECTION);
-			Vloxlands.shapeRenderer.rect(-boundingBox.getDimensions().x / 2, -boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().z);
-			Vloxlands.shapeRenderer.end();
+			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
+			GameLayer.shapeRenderer.identity();
+			GameLayer.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
+			GameLayer.shapeRenderer.rotate(1, 0, 0, 90);
+			GameLayer.shapeRenderer.begin(ShapeType.Line);
+			GameLayer.shapeRenderer.setColor(World.SELECTION);
+			GameLayer.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
+			GameLayer.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
 		
 		if (Vloxlands.debug)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Vloxlands.shapeRenderer.setProjectionMatrix(Vloxlands.camera.combined);
-			Vloxlands.shapeRenderer.identity();
-			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
-			Vloxlands.shapeRenderer.begin(ShapeType.Line);
-			Vloxlands.shapeRenderer.setColor(Color.RED);
+			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
+			GameLayer.shapeRenderer.identity();
+			GameLayer.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
+			GameLayer.shapeRenderer.begin(ShapeType.Line);
+			GameLayer.shapeRenderer.setColor(Color.RED);
 			Vector3[] crn = boundingBox.getCorners();
 			for (int i = 0; i < LINES.length; i++)
 			{
 				Vector3 v = crn[LINES[i][0]];
 				Vector3 w = crn[LINES[i][1]];
-				Vloxlands.shapeRenderer.line(v.x, v.y, v.z, w.x, w.y, w.z, Color.RED, Color.RED);
+				GameLayer.shapeRenderer.line(v.x, v.y, v.z, w.x, w.y, w.z, Color.RED, Color.RED);
 			}
-			Vloxlands.shapeRenderer.end();
+			GameLayer.shapeRenderer.end();
 		}
 	}
+	
+	public void renderAdditional(ModelBatch batch, Environment environment)
+	{}
 	
 	public void update()
 	{

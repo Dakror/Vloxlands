@@ -1,14 +1,19 @@
 package de.dakror.vloxlands.game.world;
 
+import java.util.Iterator;
+
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -35,6 +40,8 @@ public class Island implements RenderableProvider, Tickable
 	public Vector3 index, pos;
 	
 	public Chunk[] chunks;
+	
+	Array<Structure> structures = new Array<Structure>();
 	
 	public Island()
 	{
@@ -69,6 +76,9 @@ public class Island implements RenderableProvider, Tickable
 			c.calculateWeight();
 			weight += c.weight;
 		}
+		
+		for (Structure s : structures)
+			weight += s.getWeight();
 	}
 	
 	public void calculateUplift()
@@ -79,6 +89,9 @@ public class Island implements RenderableProvider, Tickable
 			c.calculateUplift();
 			uplift += c.uplift;
 		}
+		
+		for (Structure s : structures)
+			uplift += s.getUplift();
 	}
 	
 	public void recalculate()
@@ -95,6 +108,26 @@ public class Island implements RenderableProvider, Tickable
 		
 		for (Chunk c : chunks)
 			c.tick(tick);
+		
+		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		{
+			Structure s = iter.next();
+			if (s.isMarkedForRemoval()) iter.remove();
+			else
+			{
+				s.tick(tick);
+				if (deltaY != 0) s.getTransform().translate(0, deltaY, 0);
+			}
+		}
+	}
+	
+	public void addStructure(Structure s, boolean user)
+	{
+		s.onSpawn();
+		s.getTransform().translate(pos);
+		structures.add(s);
+		
+		recalculate();
 	}
 	
 	public byte get(float x, float y, float z)
@@ -149,32 +182,6 @@ public class Island implements RenderableProvider, Tickable
 		}
 	}
 	
-	public boolean isSurrounded(float x, float y, float z, boolean opaque)
-	{
-		for (Direction d : Direction.values())
-		{
-			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
-			if (v.isOpaque() != opaque || v.getId() == 0) return false;
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Has atleast one air voxel adjacent
-	 */
-	public boolean isTargetable(float x, float y, float z)
-	{
-		byte air = Voxel.get("AIR").getId();
-		for (Direction d : Direction.values())
-		{
-			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
-			if (b == air) return true;
-		}
-		
-		return false;
-	}
-	
 	public float getWeight()
 	{
 		return weight;
@@ -205,10 +212,33 @@ public class Island implements RenderableProvider, Tickable
 		return chunks[i];
 	}
 	
+	public int getStructureCount()
+	{
+		return structures.size;
+	}
+	
+	public Array<Structure> getStructures()
+	{
+		return structures;
+	}
+	
 	public void grassify()
 	{
 		for (Chunk c : chunks)
 			c.grassify(this);
+	}
+	
+	public void render(ModelBatch batch, Environment environment)
+	{
+		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		{
+			Structure s = iter.next();
+			if (s.inFrustum)
+			{
+				s.render(batch, environment);
+				GameLayer.world.visibleEntities++;
+			}
+		}
 	}
 	
 	@Override
@@ -224,7 +254,7 @@ public class Island implements RenderableProvider, Tickable
 			Chunk chunk = chunks[i];
 			if (!chunk.initialized) chunk.init();
 			
-			if (chunk.inFrustum = Vloxlands.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
+			if (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
 			{
 				if (chunk.isEmpty()) continue;
 				
@@ -262,5 +292,68 @@ public class Island implements RenderableProvider, Tickable
 		}
 		
 		if (block != null) renderables.add(block);
+	}
+	
+	// -- queries -- //
+	
+	public boolean isSurrounded(float x, float y, float z, boolean opaque)
+	{
+		for (Direction d : Direction.values())
+		{
+			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			if (v.isOpaque() != opaque || v.getId() == 0) return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Has atleast one air voxel adjacent
+	 */
+	public boolean isTargetable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (Direction d : Direction.values())
+		{
+			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
+			if (b == air) return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Is solid and has air above
+	 */
+	public boolean isWalkable(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		byte above = get(x, y + 1, z);
+		return get(x, y, z) != air && (above == air || above == 0);
+	}
+	
+	public boolean isSpaceAbove(float x, float y, float z, int height)
+	{
+		byte air = Voxel.get("AIR").getId();
+		for (int i = 0; i < height; i++)
+		{
+			byte b = get(x, y + i + 1, z);
+			if (b != 0 && b != air) return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean isWrapped(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+		for (Direction d : directions)
+		{
+			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
+			if (v.getId() == 0 || v.getId() == air) return false;
+		}
+		
+		return true;
 	}
 }

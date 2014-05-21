@@ -3,11 +3,9 @@ package de.dakror.vloxlands.game.entity.creature;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.Path;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.util.event.VoxelSelection;
+import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -44,21 +42,27 @@ public class Creature extends Entity
 		{
 			try
 			{
-				Vector3 target = path.get().cpy().add(Vloxlands.world.getIslands()[0].pos).add(blockTrn);
-				Vector3 dif = target.cpy().sub(posCache);
-				transform.setToRotation(Vector3.Y, 0).translate(posCache);
-				transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-				if (dif.len() > speed) dif.limit(speed);
-				else
+				if (path.size() > 0)
 				{
-					if (path.isDone()) onReachTarget();
-					else path.next();
+					Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+					Vector3 dif = target.cpy().sub(posCache);
+					transform.setToRotation(Vector3.Y, 0).translate(posCache);
+					transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+					
+					if (dif.len() > speed) dif.limit(speed);
+					else
+					{
+						if (path.isDone()) onReachTarget();
+						else path.next();
+					}
+					transform.trn(dif);
 				}
-				
-				transform.trn(dif);
+				else onReachTarget();
 			}
 			catch (Exception e)
-			{}
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -72,22 +76,9 @@ public class Creature extends Entity
 		this.airborne = airborne;
 	}
 	
-	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{
-		if (wasSelected && !lmb)
-		{
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this);
-			
-			if (path != null && path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-			else animationController.animate(null, 0);
-			selected = true;
-		}
-	}
-	
 	public Vector3 getVoxelBelow()
 	{
-		Vector3 v = posCache.sub(Vloxlands.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
+		Vector3 v = posCache.sub(GameLayer.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;
@@ -103,10 +94,22 @@ public class Creature extends Entity
 		return (int) Math.ceil(boundingBox.getDimensions().y);
 	}
 	
+	public float getRotationPerpendicular()
+	{
+		float yaw = rotCache.getYawRad();
+		return (float) -Math.abs(Math.max(Math.sin(yaw), Math.cos(yaw)));
+	}
+	
 	// -- events -- //
 	public void onReachTarget()
 	{
+		if (path.getGhostTarget() != null)
+		{
+			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+			transform.setToRotation(Vector3.Y, 0).translate(posCache);
+			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+		}
 		path = null;
-		animationController.animate(null, 0);
+		animationController.setAnimation(null);
 	}
 }

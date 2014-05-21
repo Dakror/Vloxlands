@@ -14,8 +14,8 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
 
-import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
@@ -40,7 +40,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
 	byte[] voxels;
-	// btBoxShape[] compoundChildren;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -61,9 +60,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	Island island;
 	
 	int[] resources;
-	
-	// btCompoundShape collisionShape;
-	// btCollisionObject collisionObject;
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
@@ -150,20 +146,12 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
-		// if (id != air && voxels[index] == air) // new block placed
-		// {
-		// btBoxShape bs = new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f));
-		// collisionShape.addChildShape(Vloxlands.currentGame.m4.setToTranslation(x, y, z), bs);
-		// compoundChildren[index] = bs;
-		// }
-		// else if (id == air && voxels[index] != air && compoundChildren[index] != null) // block removed
-		// {
-		// collisionShape.removeChildShape(compoundChildren[index]);
-		// compoundChildren[index].dispose();
-		// compoundChildren[index] = null;
-		// }
-		
 		voxels[index] = id;
+		
+		if (selectedVoxel.x == x && selectedVoxel.y == y && selectedVoxel.z == z)
+		{
+			selectedVoxel.set(-1, 0, 0);
+		}
 		
 		resources[id + 128]++;
 		
@@ -243,11 +231,11 @@ public class Chunk implements Meshable, Tickable, Disposable
 					
 					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
 					
-					Vloxlands.currentGame.tmp3.set(Vloxlands.currentGame.tmp1.cpy().add(x, y, z));
-					Vloxlands.currentGame.tmp4.set(Vloxlands.currentGame.tmp3.cpy().add(1, 1, 1));
-					Vloxlands.currentGame.bb2.set(Vloxlands.currentGame.tmp3, Vloxlands.currentGame.tmp4);
+					GameLayer.instance.tmp3.set(GameLayer.instance.tmp1.cpy().add(x, y, z));
+					GameLayer.instance.tmp4.set(GameLayer.instance.tmp3.cpy().add(1, 1, 1));
+					GameLayer.instance.bb2.set(GameLayer.instance.tmp3, GameLayer.instance.tmp4);
 					
-					if (Intersector.intersectRayBounds(ray, Vloxlands.currentGame.bb2, is))
+					if (Intersector.intersectRayBounds(ray, GameLayer.instance.bb2, is))
 					{
 						float dist = ray.origin.dst(is);
 						if (voxel == null || (dist = ray.origin.dst(is)) < distance)

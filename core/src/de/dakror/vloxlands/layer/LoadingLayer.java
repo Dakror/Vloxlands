@@ -1,7 +1,6 @@
-package de.dakror.vloxlands.screen;
+package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Interpolation;
@@ -9,12 +8,13 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
 
 /**
  * @author Dakror
  */
-public class LoadingScreen implements Screen
+public class LoadingLayer extends Layer
 {
 	Stage stage;
 	Image logo;
@@ -40,8 +40,8 @@ public class LoadingScreen implements Screen
 			}
 			else if (worldGenerator.done)
 			{
-				Vloxlands.currentGame.doneLoading();
-				Vloxlands.currentGame.setScreen(null);
+				Vloxlands.currentGame.removeLayer(this);
+				GameLayer.instance.doneLoading();
 			}
 		}
 		
@@ -82,21 +82,7 @@ public class LoadingScreen implements Screen
 		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
 		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
+		for (Item item : Item.getAll())
+			Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
-	
-	@Override
-	public void hide()
-	{}
-	
-	@Override
-	public void pause()
-	{}
-	
-	@Override
-	public void resume()
-	{}
-	
-	@Override
-	public void dispose()
-	{}
 }

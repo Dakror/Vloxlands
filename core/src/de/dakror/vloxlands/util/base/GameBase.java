@@ -1,15 +1,96 @@
 package de.dakror.vloxlands.util.base;
 
-import com.badlogic.gdx.Game;
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import de.dakror.vloxlands.layer.Layer;
 
 /**
  * @author Dakror
  */
-public abstract class GameBase extends Game implements InputProcessor, GestureListener
+public abstract class GameBase extends ApplicationAdapter implements InputProcessor, GestureListener
 {
+	protected Array<Layer> layers = new Array<Layer>();
+	private InputMultiplexer multiplexer = new InputMultiplexer();
+	
+	public void addLayer(Layer layer)
+	{
+		layer.show();
+		getMultiplexer().addProcessor(layer);
+		if (layer.getStage() != null) getMultiplexer().addProcessor(layer.getStage());
+		layers.add(layer);
+	}
+	
+	public void toggleLayer(Layer layer)
+	{
+		if (hasLayer(layer.getClass())) removeLayer(layer);
+		else addLayer(layer);
+	}
+	
+	public boolean removeLayer(Layer layer)
+	{
+		getMultiplexer().removeProcessor(layer);
+		if (layer.getStage() != null) getMultiplexer().removeProcessor(layer.getStage());
+		layer.dispose();
+		return layers.removeValue(layer, true);
+	}
+	
+	public boolean removeLayer(Class<?> layerClass)
+	{
+		for (Layer layer : layers)
+		{
+			if (layer.getClass().equals(layerClass))
+			{
+				getMultiplexer().removeProcessor(layer);
+				layer.dispose();
+				return layers.removeValue(layer, true);
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean hasLayer(Class<?> layerClass)
+	{
+		for (Layer layer : layers)
+			if (layer.getClass().equals(layerClass)) return true;
+		
+		return false;
+	}
+	
+	public Layer getActiveLayer()
+	{
+		return layers.peek();
+	}
+	
+	public void clearLayers()
+	{
+		for (Layer l : layers)
+			removeLayer(l);
+	}
+	
+	public void setLayer(Layer layer)
+	{
+		clearLayers();
+		addLayer(layer);
+	}
+	
+	public InputMultiplexer getMultiplexer()
+	{
+		return multiplexer;
+	}
+	
+	@Override
+	public void resize(int width, int height)
+	{
+		for (Layer l : layers)
+			l.resize(width, height);
+	}
+	
 	@Override
 	public boolean touchDown(float x, float y, int pointer, int button)
 	{
