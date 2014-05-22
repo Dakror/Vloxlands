@@ -99,6 +99,11 @@ public abstract class Entity extends EntityBase
 		this.uplift = uplift;
 	}
 	
+	public AnimationController getAnimationController()
+	{
+		return animationController;
+	}
+	
 	public Matrix4 getTransform()
 	{
 		return transform;

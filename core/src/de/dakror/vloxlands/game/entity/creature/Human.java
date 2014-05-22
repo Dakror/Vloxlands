@@ -7,39 +7,34 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
+import de.dakror.vloxlands.game.action.Action;
+import de.dakror.vloxlands.game.action.ToolAction;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class Human extends Creature implements AnimationListener
+public class Human extends Creature
 {
 	public static final Vector3 resourceTrn = new Vector3(0, 0.2f, -0.3f);
 	
 	ItemStack carryingItemStack;
-	Item tool;
 	ModelInstance carryingItemModelInstance;
 	Matrix4 carryingItemTransform;
+	
+	Item tool;
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
 	
-	boolean useToolOnReachTarget;
-	VoxelSelection toolTarget;
-	
-	boolean doneUsingTool;
-	boolean usingTool;
+	Action targetAction;
 	
 	boolean automaticMining;
 	
@@ -101,33 +96,20 @@ public class Human extends Creature implements AnimationListener
 		
 		if (tool != null)
 		{
-			if (doneUsingTool)
-			{
-				animationController.animate(null, 0);
-				doneUsingTool = false;
-				
-				if (automaticMining)
-				{
-					path = BFS.findClosestVoxel(getVoxelBelow(), toolTarget.type.getId(), this);
-					if (path != null)
-					{
-						useToolOnReachTarget = true;
-						toolTarget.voxel = path.getGhostTarget();
-						if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-					}
-					else
-					{
-						Gdx.app.log("", "no more voxels to mine!");
-						animationController.animate(null, 0);
-						automaticMining = false;
-					}
-				}
-			}
-			
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
 			
 			((Tool) tool).transformInHand(toolTransform, this);
+		}
+		
+		if (targetAction != null && targetAction.isActive())
+		{
+			if (targetAction.isDone())
+			{
+				targetAction.onEnd();
+				targetAction = null;
+			}
+			else targetAction.tick(tick);
 		}
 	}
 	
@@ -144,14 +126,8 @@ public class Human extends Creature implements AnimationListener
 			{
 				if (mineTarget)
 				{
-					useToolOnReachTarget = true;
-					toolTarget = vs;
+					targetAction = new ToolAction(this, vs);
 					automaticMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
-				}
-				else
-				{
-					useToolOnReachTarget = false;
-					toolTarget = null;
 				}
 				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			}
@@ -165,39 +141,19 @@ public class Human extends Creature implements AnimationListener
 	{
 		super.onReachTarget();
 		
-		if (useToolOnReachTarget)
-		{
-			animationController.animate("walk" /* mine */, toolTarget.type.getMining(), this, 0.2f); // WIP
-			usingTool = true;
-		}
+		if (targetAction != null) targetAction.trigger();
 	}
 	
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if (!(usingTool || useToolOnReachTarget) && carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
-		if ((usingTool || useToolOnReachTarget) && tool != null) batch.render(toolModelInstance, environment);
+		if (carryingItemStack != null && !(targetAction instanceof ToolAction)) batch.render(carryingItemModelInstance, environment);
+		if (targetAction instanceof ToolAction) batch.render(toolModelInstance, environment);
 	}
 	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
-		if (usingTool)
-		{
-			GameLayer.world.getIslands()[toolTarget.island].set(toolTarget.voxel.x, toolTarget.voxel.y, toolTarget.voxel.z, Voxel.get("AIR").getId());
-			
-			if (toolTarget.type.getItemdrop() != -128)
-			{
-				if (carryingItemStack == null) setCarryingItemStack(new ItemStack(Item.getForId(toolTarget.type.getItemdrop()), 1));
-				else carryingItemStack.add(1);
-			}
-			
-			usingTool = false;
-			doneUsingTool = true;
-		}
+		targetAction.setDone();
 	}
-	
-	@Override
-	public void onLoop(AnimationDesc animation)
-	{}
 }
