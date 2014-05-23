@@ -15,6 +15,7 @@ import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.game.action.Action;
 import de.dakror.vloxlands.game.action.ToolAction;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
@@ -155,6 +156,15 @@ public class Human extends Creature
 			}
 			else animationController.animate(null, 0);
 			selected = true;
+		}
+	}
+	
+	@Override
+	public void onStructureSelection(Structure structure, boolean lmb)
+	{
+		if (wasSelected && !lmb)
+		{
+			Gdx.app.log("", "hello");
 		}
 	}
 	

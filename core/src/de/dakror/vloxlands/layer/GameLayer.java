@@ -332,7 +332,7 @@ public class GameLayer extends Layer
 			for (Entity entity : world.getEntities())
 			{
 				entity.wasSelected = entity.selected;
-				entity.selected = false;
+				if (lmb) entity.selected = false;
 				if (entity.inFrustum && entity.hovered)
 				{
 					entity.selected = true;
@@ -346,11 +346,13 @@ public class GameLayer extends Layer
 				for (Structure structure : i.getStructures())
 				{
 					structure.wasSelected = structure.selected;
-					structure.selected = false;
+					if (lmb) structure.selected = false;
 					if (structure.inFrustum && structure.hovered)
 					{
 						structure.selected = true;
 						entitySelected = true;
+						
+						EventDispatcher.dispatchStructureSelection(structure, lmb);
 					}
 				}
 			}
