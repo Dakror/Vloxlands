@@ -260,7 +260,6 @@ public class GameLayer extends Layer
 		}
 	}
 	
-	
 	@Override
 	public void tick(int tick)
 	{
@@ -302,6 +301,28 @@ public class GameLayer extends Layer
 				}
 			}
 			
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.hovered = false;
+					if (!structure.inFrustum) continue;
+					
+					structure.getWorldBoundingBox(bb);
+					
+					if (Intersector.intersectRayBounds(ray, bb, tmp))
+					{
+						float dst = ray.origin.dst(tmp);
+						if (hovered == null || dst < distance)
+						{
+							hovered = structure;
+							distance = dst;
+						}
+					}
+				}
+			}
+			
 			if (hovered != null) hovered.hovered = true;
 		}
 		else
@@ -315,6 +336,21 @@ public class GameLayer extends Layer
 				{
 					entity.selected = true;
 					entitySelected = true;
+				}
+			}
+			
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.wasSelected = structure.selected;
+					structure.selected = false;
+					if (structure.inFrustum && structure.hovered)
+					{
+						structure.selected = true;
+						entitySelected = true;
+					}
 				}
 			}
 			
