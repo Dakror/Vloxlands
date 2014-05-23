@@ -16,6 +16,7 @@ import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.game.action.Action;
 import de.dakror.vloxlands.game.action.ToolAction;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
@@ -164,7 +165,10 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			Gdx.app.log("", "hello");
+			Vector3 v = structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos());
+			path = AStar.findPath(getVoxelBelow(), v, this, false);
+			if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+			else animationController.animate(null, 0);
 		}
 	}
 	

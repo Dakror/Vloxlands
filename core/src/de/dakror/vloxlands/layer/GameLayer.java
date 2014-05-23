@@ -340,6 +340,7 @@ public class GameLayer extends Layer
 				}
 			}
 			
+			Structure selectedStructure = null;
 			for (Island i : world.getIslands())
 			{
 				if (i == null) continue;
@@ -351,11 +352,12 @@ public class GameLayer extends Layer
 					{
 						structure.selected = true;
 						entitySelected = true;
-						
-						EventDispatcher.dispatchStructureSelection(structure, lmb);
+						selectedStructure = structure;
 					}
 				}
 			}
+			
+			if (selectedStructure != null) EventDispatcher.dispatchStructureSelection(selectedStructure, lmb);
 			
 			for (int i = 0; i < world.getIslands().length; i++)
 			{

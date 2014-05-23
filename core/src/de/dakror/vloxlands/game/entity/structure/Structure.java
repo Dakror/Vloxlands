@@ -13,13 +13,13 @@ public abstract class Structure extends Entity
 {
 	Array<StructureNode> nodes;
 	
+	Vector3 voxelPos;
 	final Vector3 tmp = new Vector3();
-	
 	
 	public Structure(float x, float y, float z, String model)
 	{
 		super(Math.round(x), Math.round(y), Math.round(z), model);
-		
+		voxelPos = new Vector3(x, y, z);
 		nodes = new Array<StructureNode>();
 		
 		int width = (int) Math.ceil(boundingBox.getDimensions().x);
@@ -27,8 +27,13 @@ public abstract class Structure extends Entity
 		
 		nodes.add(new StructureNode(NodeType.target, -1, 0, Math.round(depth / 2)));
 		nodes.add(new StructureNode(NodeType.target, width + 1, 0, Math.round(depth / 2)));
-		nodes.add(new StructureNode(NodeType.target, Math.round(weight / 2), 0, -1));
-		nodes.add(new StructureNode(NodeType.target, Math.round(weight / 2), 0, depth + 1));
+		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, -1));
+		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
+	}
+	
+	public Vector3 getVoxelPos()
+	{
+		return voxelPos;
 	}
 	
 	/**
