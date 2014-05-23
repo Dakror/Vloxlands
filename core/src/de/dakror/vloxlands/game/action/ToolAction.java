@@ -23,6 +23,11 @@ public class ToolAction extends Action
 		this.target = target;
 	}
 	
+	public VoxelSelection getTarget()
+	{
+		return target;
+	}
+	
 	@Override
 	public void tick(int tick)
 	{}
@@ -40,22 +45,5 @@ public class ToolAction extends Action
 			else human.getCarryingItemStack().add(1);
 		}
 		else Gdx.app.error("ToolAction.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
-		
-		// if (automaticMining)
-		// {
-		// path = BFS.findClosestVoxel(getVoxelBelow(), toolTarget.type.getId(), this);
-		// if (path != null)
-		// {
-		// useToolOnReachTarget = true;
-		// toolTarget.voxel = path.getGhostTarget();
-		// if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-		// }
-		// else
-		// {
-		// Gdx.app.log("", "no more voxels to mine!");
-		// animationController.animate(null, 0);
-		// automaticMining = false;
-		// }
-		// }
 	}
 }

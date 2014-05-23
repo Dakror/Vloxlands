@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.game.action.Action;
 import de.dakror.vloxlands.game.action.ToolAction;
 import de.dakror.vloxlands.game.item.Item;
@@ -107,7 +108,28 @@ public class Human extends Creature
 			if (targetAction.isDone())
 			{
 				targetAction.onEnd();
-				targetAction = null;
+				
+				boolean setNull = true;
+				
+				if (automaticMining && targetAction instanceof ToolAction)
+				{
+					path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
+					if (path != null)
+					{
+						((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
+						targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
+						setNull = false;
+						if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+					}
+					else
+					{
+						Gdx.app.log("", "no more voxels to mine!");
+						animationController.animate(null, 0);
+						automaticMining = false;
+					}
+				}
+				
+				if (setNull) targetAction = null;
 			}
 			else targetAction.tick(tick);
 		}
