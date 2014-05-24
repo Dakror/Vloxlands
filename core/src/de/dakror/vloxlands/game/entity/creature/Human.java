@@ -13,13 +13,16 @@ import com.badlogic.gdx.math.Vector3;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
+import de.dakror.vloxlands.ai.Path.PairPathStructure;
 import de.dakror.vloxlands.game.action.Action;
+import de.dakror.vloxlands.game.action.DumpAction;
 import de.dakror.vloxlands.game.action.ToolAction;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -115,19 +118,34 @@ public class Human extends Creature
 				
 				if (automaticMining && targetAction instanceof ToolAction)
 				{
-					path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
-					if (path != null)
+					if (carryingItemStack.isFull())
 					{
-						((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
-						targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
-						setNull = false;
-						if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+						PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+						if (pps != null)
+						{
+							path = pps.path;
+							targetAction = new DumpAction(this, pps.structure);
+							setNull = false;
+							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+						}
+						else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to deploy stuff");
 					}
 					else
 					{
-						Gdx.app.log("", "no more voxels to mine!");
-						animationController.animate(null, 0);
-						automaticMining = false;
+						path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
+						if (path != null)
+						{
+							((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
+							targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
+							setNull = false;
+							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+						}
+						else
+						{
+							Gdx.app.log("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
+							animationController.animate(null, 0);
+							automaticMining = false;
+						}
 					}
 				}
 				
@@ -166,7 +184,7 @@ public class Human extends Creature
 		if (wasSelected && !lmb)
 		{
 			Vector3 v = structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos());
-			path = AStar.findPath(getVoxelBelow(), v, this, false);
+			path = AStar.findPath(getVoxelBelow(), v, this, NodeType.target.useGhostTarget);
 			if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			else animationController.animate(null, 0);
 		}

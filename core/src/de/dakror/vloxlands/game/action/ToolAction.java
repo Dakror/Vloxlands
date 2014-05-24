@@ -14,7 +14,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
  */
 public class ToolAction extends Action
 {
-	VoxelSelection target;
+	private VoxelSelection target;
 	
 	public ToolAction(Human human, VoxelSelection target)
 	{

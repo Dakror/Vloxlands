@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.item.Inventory;
 
 /**
  * @author Dakror
@@ -12,8 +13,9 @@ import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 public abstract class Structure extends Entity
 {
 	Array<StructureNode> nodes;
-	
 	Vector3 voxelPos;
+	Inventory inventory;
+	
 	final Vector3 tmp = new Vector3();
 	
 	public Structure(float x, float y, float z, String model)
@@ -29,6 +31,8 @@ public abstract class Structure extends Entity
 		nodes.add(new StructureNode(NodeType.target, width + 1, 0, Math.round(depth / 2)));
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, -1));
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
+		
+		inventory = new Inventory();
 	}
 	
 	public Vector3 getVoxelPos()
@@ -72,5 +76,10 @@ public abstract class Structure extends Entity
 	public StructureNode getStructureNode(Vector3 from, NodeType type)
 	{
 		return getStructureNode(from, type, null);
+	}
+	
+	public Inventory getInventory()
+	{
+		return inventory;
 	}
 }

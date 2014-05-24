@@ -12,6 +12,8 @@ public class Warehouse extends Structure
 	{
 		super(x, y, z, "models/tent/tent.g3db");
 		
-		nodes.add(new StructureNode(NodeType.deploy, 0, 0, 1));
+		nodes.add(new StructureNode(NodeType.dump, 0, 0, 1));
+		
+		inventory.setCapacity(250);
 	}
 }

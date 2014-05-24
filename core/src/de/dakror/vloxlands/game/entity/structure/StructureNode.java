@@ -9,15 +9,22 @@ public class StructureNode
 {
 	public static enum NodeType
 	{
-		target,
-		entry,
-		exit,
-		deploy,
-		pickup,
+		target(false),
+		entry(true),
+		exit(true),
+		dump(true),
+		pickup(true);
+		
+		public boolean useGhostTarget;
+		
+		private NodeType(boolean useGhostTarget)
+		{
+			this.useGhostTarget = useGhostTarget;
+		}
 	}
 	
 	/**
-	 * An unique name
+	 * An unique name, should be name of a item
 	 */
 	public String name;
 	public Vector3 pos;
@@ -25,8 +32,7 @@ public class StructureNode
 	
 	public StructureNode(NodeType type, int x, int y, int z)
 	{
-		this.type = type;
-		pos = new Vector3(x, y, z);
+		this(type, "", x, y, z);
 	}
 	
 	public StructureNode(NodeType type, String name, int x, int y, int z)

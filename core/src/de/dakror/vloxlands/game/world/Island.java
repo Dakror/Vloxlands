@@ -11,7 +11,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.Path.PairPathStructure;
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.entity.structure.Warehouse;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
@@ -294,7 +301,7 @@ public class Island implements RenderableProvider, Tickable
 		if (block != null) renderables.add(block);
 	}
 	
-	// -- queries -- //
+	// -- voxel queries -- //
 	
 	public boolean isSurrounded(float x, float y, float z, boolean opaque)
 	{
@@ -355,5 +362,36 @@ public class Island implements RenderableProvider, Tickable
 		}
 		
 		return true;
+	}
+	
+	// -- structure queries -- //
+	
+	public PairPathStructure getClosestCapableWarehouse(Creature c, ItemStack stack, NodeType type, boolean spaceForFullAmount)
+	{
+		Structure structure = null;
+		Path path = null;
+		float pathDistance = 0;
+		
+		Vector3 voxel = c.getVoxelBelow();
+		
+		for (Structure s : structures)
+		{
+			if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity())) continue;
+			
+			Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
+			if (p == null) continue;
+			
+			float len = p.length();
+			if (structure == null || len < pathDistance)
+			{
+				structure = s;
+				path = p;
+				pathDistance = len;
+			}
+		}
+		
+		if (structure == null || path == null) return null;
+		
+		return new PairPathStructure(path, structure);
 	}
 }
