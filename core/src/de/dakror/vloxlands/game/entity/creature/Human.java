@@ -128,7 +128,7 @@ public class Human extends Creature
 							setNull = false;
 							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 						}
-						else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to deploy stuff");
+						else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to dump stuff");
 					}
 					else
 					{
@@ -142,7 +142,7 @@ public class Human extends Creature
 						}
 						else
 						{
-							Gdx.app.log("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
+							Gdx.app.error("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 							animationController.animate(null, 0);
 							automaticMining = false;
 						}
