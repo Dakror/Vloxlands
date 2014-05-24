@@ -40,9 +40,10 @@ public class Human extends Creature
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
 	
+	Action lastToolAction;
 	Action targetAction;
 	
-	boolean automaticMining;
+	boolean continuosMining;
 	
 	public Human(float x, float y, float z)
 	{
@@ -116,7 +117,7 @@ public class Human extends Creature
 				
 				boolean setNull = true;
 				
-				if (automaticMining && targetAction instanceof ToolAction)
+				if (continuosMining && targetAction instanceof ToolAction)
 				{
 					if (carryingItemStack.isFull())
 					{
@@ -124,6 +125,7 @@ public class Human extends Creature
 						if (pps != null)
 						{
 							path = pps.path;
+							lastToolAction = targetAction;
 							targetAction = new DumpAction(this, pps.structure);
 							setNull = false;
 							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
@@ -144,9 +146,14 @@ public class Human extends Creature
 						{
 							Gdx.app.error("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 							animationController.animate(null, 0);
-							automaticMining = false;
+							continuosMining = false;
 						}
 					}
+				}
+				else if (continuosMining && lastToolAction != null)
+				{
+					targetAction = lastToolAction;
+					lastToolAction = null;
 				}
 				
 				if (setNull) targetAction = null;
@@ -169,7 +176,7 @@ public class Human extends Creature
 				if (mineTarget)
 				{
 					targetAction = new ToolAction(this, vs);
-					automaticMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
+					continuosMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
 				}
 				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			}

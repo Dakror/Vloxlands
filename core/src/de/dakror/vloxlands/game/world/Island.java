@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.ai.AStar;
@@ -374,8 +375,9 @@ public class Island implements RenderableProvider, Tickable
 		
 		Vector3 voxel = c.getVoxelBelow();
 		
-		for (Structure s : structures)
+		for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
 		{
+			Structure s = iter.next();
 			if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity())) continue;
 			
 			Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
