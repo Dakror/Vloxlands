@@ -29,6 +29,7 @@ import de.dakror.vloxlands.ai.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
@@ -134,7 +135,7 @@ public class GameLayer extends Layer
 		human.setTool(Item.get("PICKAXE"));
 		world.addEntity(human);
 		
-		world.getIslands()[0].addStructure(new Structure(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2, "models/tent/tent.g3db"), false);
+		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false);
 		
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
@@ -260,7 +261,6 @@ public class GameLayer extends Layer
 		}
 	}
 	
-	
 	@Override
 	public void tick(int tick)
 	{
@@ -302,6 +302,28 @@ public class GameLayer extends Layer
 				}
 			}
 			
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.hovered = false;
+					if (!structure.inFrustum) continue;
+					
+					structure.getWorldBoundingBox(bb);
+					
+					if (Intersector.intersectRayBounds(ray, bb, tmp))
+					{
+						float dst = ray.origin.dst(tmp);
+						if (hovered == null || dst < distance)
+						{
+							hovered = structure;
+							distance = dst;
+						}
+					}
+				}
+			}
+			
 			if (hovered != null) hovered.hovered = true;
 		}
 		else
@@ -310,13 +332,32 @@ public class GameLayer extends Layer
 			for (Entity entity : world.getEntities())
 			{
 				entity.wasSelected = entity.selected;
-				entity.selected = false;
+				if (lmb) entity.selected = false;
 				if (entity.inFrustum && entity.hovered)
 				{
 					entity.selected = true;
 					entitySelected = true;
 				}
 			}
+			
+			Structure selectedStructure = null;
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.wasSelected = structure.selected;
+					if (lmb) structure.selected = false;
+					if (structure.inFrustum && structure.hovered)
+					{
+						structure.selected = true;
+						entitySelected = true;
+						selectedStructure = structure;
+					}
+				}
+			}
+			
+			if (selectedStructure != null) EventDispatcher.dispatchStructureSelection(selectedStructure, lmb);
 			
 			for (int i = 0; i < world.getIslands().length; i++)
 			{

@@ -7,41 +7,43 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
+import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.Path.PairPathStructure;
+import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.game.job.DumpJob;
+import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.job.ToolJob;
+import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class Human extends Creature implements AnimationListener
+public class Human extends Creature
 {
 	public static final Vector3 resourceTrn = new Vector3(0, 0.2f, -0.3f);
 	
 	ItemStack carryingItemStack;
-	Item tool;
 	ModelInstance carryingItemModelInstance;
 	Matrix4 carryingItemTransform;
+	
+	Item tool;
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
 	
-	boolean useToolOnReachTarget;
-	VoxelSelection toolTarget;
-	
-	boolean doneUsingTool;
-	boolean usingTool;
-	
-	boolean automaticMining;
+	Array<Job> jobQueue = new Array<Job>();
 	
 	public Human(float x, float y, float z)
 	{
@@ -101,34 +103,62 @@ public class Human extends Creature implements AnimationListener
 		
 		if (tool != null)
 		{
-			if (doneUsingTool)
-			{
-				animationController.animate(null, 0);
-				doneUsingTool = false;
-				
-				if (automaticMining)
-				{
-					path = BFS.findClosestVoxel(getVoxelBelow(), toolTarget.type.getId(), this);
-					if (path != null)
-					{
-						useToolOnReachTarget = true;
-						toolTarget.voxel = path.getGhostTarget();
-						if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-					}
-					else
-					{
-						Gdx.app.log("", "no more voxels to mine!");
-						animationController.animate(null, 0);
-						automaticMining = false;
-					}
-				}
-			}
-			
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
 			
 			((Tool) tool).transformInHand(toolTransform, this);
 		}
+		
+		if (jobQueue.size > 0)
+		{
+			Job j = firstJob();
+			if (j.isActive())
+			{
+				if (j instanceof WalkJob)
+				{
+					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
+				}
+				
+				if (j.isDone())
+				{
+					j.onEnd();
+					
+					jobQueue.removeIndex(0);
+					onJobDone(j);
+					
+					if (j.isPersistent())
+					{
+						j.resetState();
+						queueJob(null, j);
+					}
+				}
+				else j.tick(tick);
+			}
+			else j.trigger();
+		}
+	}
+	
+	@Override
+	public void renderAdditional(ModelBatch batch, Environment environment)
+	{
+		if ((firstJob() instanceof ToolJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof ToolJob)) batch.render(toolModelInstance, environment);
+		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
+	}
+	
+	public void queueJob(Path path, Job job)
+	{
+		if (job == null) jobQueue.add(new WalkJob(path, this));
+		else
+		{
+			if (path != null) jobQueue.add(new WalkJob(path, this));
+			jobQueue.add(job);
+		}
+	}
+	
+	public Job firstJob()
+	{
+		if (jobQueue.size == 0) return null;
+		return jobQueue.first();
 	}
 	
 	@Override
@@ -138,25 +168,26 @@ public class Human extends Creature implements AnimationListener
 		{
 			boolean mineTarget = tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 			
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
+			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
 			
 			if (path != null)
 			{
-				if (mineTarget)
-				{
-					useToolOnReachTarget = true;
-					toolTarget = vs;
-					automaticMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
-				}
-				else
-				{
-					useToolOnReachTarget = false;
-					toolTarget = null;
-				}
-				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+				if (mineTarget) queueJob(path, new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
+				else queueJob(path, null);
 			}
-			else animationController.animate(null, 0);
 			selected = true;
+		}
+	}
+	
+	@Override
+	public void onStructureSelection(Structure structure, boolean lmb)
+	{
+		if (wasSelected && !lmb)
+		{
+			Vector3 v = structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos());
+			path = AStar.findPath(getVoxelBelow(), v, this, NodeType.target.useGhostTarget);
+			if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+			else animationController.animate(null, 0);
 		}
 	}
 	
@@ -165,39 +196,41 @@ public class Human extends Creature implements AnimationListener
 	{
 		super.onReachTarget();
 		
-		if (useToolOnReachTarget)
-		{
-			animationController.animate("walk" /* mine */, toolTarget.type.getMining(), this, 0.2f); // WIP
-			usingTool = true;
-		}
+		if (firstJob() instanceof WalkJob) firstJob().setDone();
 	}
 	
-	@Override
-	public void renderAdditional(ModelBatch batch, Environment environment)
+	public void onJobDone(Job j)
 	{
-		if (!usingTool && carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
-		if (usingTool && tool != null) batch.render(toolModelInstance, environment);
+		if (j instanceof ToolJob)
+		{
+			PairPathStructure pps = null;
+			
+			if (carryingItemStack.isFull())
+			{
+				pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+				if (pps != null) queueJob(pps.path, new DumpJob(this, pps.structure, false));
+				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
+			}
+			if (j.isPersistent())
+			{
+				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((ToolJob) j).getTarget().type.getId(), this);
+				if (path != null)
+				{
+					((ToolJob) j).getTarget().voxel.set(path.getGhostTarget());
+					queueJob(path, null);
+				}
+				else
+				{
+					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
+					j.setPersistent(false);
+				}
+			}
+		}
 	}
 	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
-		if (usingTool)
-		{
-			GameLayer.world.getIslands()[toolTarget.island].set(toolTarget.voxel.x, toolTarget.voxel.y, toolTarget.voxel.z, Voxel.get("AIR").getId());
-			
-			if (toolTarget.type.getItemdrop() != -128)
-			{
-				if (carryingItemStack == null) setCarryingItemStack(new ItemStack(Item.getForId(toolTarget.type.getItemdrop()), 1));
-				else carryingItemStack.add(1);
-			}
-			
-			usingTool = false;
-			doneUsingTool = true;
-		}
+		if (jobQueue.size > 0) firstJob().setDone();
 	}
-	
-	@Override
-	public void onLoop(AnimationDesc animation)
-	{}
 }

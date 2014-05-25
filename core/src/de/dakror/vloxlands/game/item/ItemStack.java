@@ -5,8 +5,8 @@ package de.dakror.vloxlands.game.item;
  */
 public class ItemStack
 {
-	Item item;
-	int amount;
+	private Item item;
+	private int amount;
 	
 	public ItemStack(Item item, int amount)
 	{
@@ -50,5 +50,12 @@ public class ItemStack
 	public Item getItem()
 	{
 		return item;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof ItemStack)) return false;
+		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
 	}
 }

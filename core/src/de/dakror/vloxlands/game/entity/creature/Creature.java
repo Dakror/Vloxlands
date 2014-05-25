@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.entity.creature;
 
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -10,7 +12,7 @@ import de.dakror.vloxlands.layer.GameLayer;
 /**
  * @author Dakror
  */
-public class Creature extends Entity
+public abstract class Creature extends Entity implements AnimationListener
 {
 	protected boolean airborne;
 	protected float climbHeight;
@@ -112,4 +114,12 @@ public class Creature extends Entity
 		path = null;
 		animationController.setAnimation(null);
 	}
+	
+	@Override
+	public void onEnd(AnimationDesc animation)
+	{}
+	
+	@Override
+	public void onLoop(AnimationDesc animation)
+	{}
 }
