@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.action;
+package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -6,13 +6,13 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 /**
  * @author Dakror
  */
-public class DumpAction extends Action
+public class DumpJob extends Job
 {
 	private Structure target;
 	
-	public DumpAction(Human human, Structure target)
+	public DumpJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "walk" /* dump */, 1);
+		super(human, "walk" /* dump */, 1, persistent);
 		this.target = target;
 	}
 	

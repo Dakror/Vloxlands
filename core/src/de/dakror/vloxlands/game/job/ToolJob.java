@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.action;
+package de.dakror.vloxlands.game.job;
 
 import com.badlogic.gdx.Gdx;
 
@@ -12,13 +12,13 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class ToolAction extends Action
+public class ToolJob extends Job
 {
 	private VoxelSelection target;
 	
-	public ToolAction(Human human, VoxelSelection target)
+	public ToolJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, target.type.getMining());
+		super(human, "walk" /* mine */, target.type.getMining(), persistent);
 		
 		this.target = target;
 	}

@@ -9,20 +9,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
-import de.dakror.vloxlands.ai.Path.PairPathStructure;
-import de.dakror.vloxlands.game.action.Action;
-import de.dakror.vloxlands.game.action.DumpAction;
-import de.dakror.vloxlands.game.action.ToolAction;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.job.ToolJob;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -40,10 +37,7 @@ public class Human extends Creature
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
 	
-	Action lastToolAction;
-	Action targetAction;
-	
-	boolean continuosMining;
+	Array<Job> jobQueue = new Array<Job>();
 	
 	public Human(float x, float y, float z)
 	{
@@ -109,57 +103,69 @@ public class Human extends Creature
 			((Tool) tool).transformInHand(toolTransform, this);
 		}
 		
-		if (targetAction != null && targetAction.isActive())
-		{
-			if (targetAction.isDone())
-			{
-				targetAction.onEnd();
-				
-				boolean setNull = true;
-				
-				if (continuosMining && targetAction instanceof ToolAction)
-				{
-					if (carryingItemStack.isFull())
-					{
-						PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
-						if (pps != null)
-						{
-							path = pps.path;
-							lastToolAction = targetAction;
-							targetAction = new DumpAction(this, pps.structure);
-							setNull = false;
-							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-						}
-						else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to dump stuff");
-					}
-					else
-					{
-						path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
-						if (path != null)
-						{
-							((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
-							targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
-							setNull = false;
-							if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-						}
-						else
-						{
-							Gdx.app.error("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
-							animationController.animate(null, 0);
-							continuosMining = false;
-						}
-					}
-				}
-				else if (continuosMining && lastToolAction != null)
-				{
-					targetAction = lastToolAction;
-					lastToolAction = null;
-				}
-				
-				if (setNull) targetAction = null;
-			}
-			else targetAction.tick(tick);
-		}
+		// if (targetAction != null && targetAction.isActive())
+		// {
+		// if (targetAction.isDone())
+		// {
+		// targetAction.onEnd();
+		//
+		// boolean setNull = true;
+		//
+		// if (continuosMining && targetAction instanceof ToolAction)
+		// {
+		// if (carryingItemStack.isFull())
+		// {
+		// PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+		// if (pps != null)
+		// {
+		// path = pps.path;
+		// targetAction = new DumpAction(this, pps.structure);
+		// setNull = false;
+		// if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+		// }
+		// else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to dump stuff");
+		// }
+		// else
+		// {
+		// path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
+		// if (path != null)
+		// {
+		// ((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
+		// targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
+		// lastToolAction = targetAction;
+		// setNull = false;
+		// if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+		// }
+		// else
+		// {
+		// Gdx.app.error("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
+		// animationController.animate(null, 0);
+		// continuosMining = false;
+		// }
+		// }
+		// }
+		// else if (continuosMining && lastToolAction != null)
+		// {
+		// targetAction = lastToolAction;
+		// setNull = false;
+		// lastToolAction = null;
+		// }
+		//
+		// if (setNull) targetAction = null;
+		// }
+		// else targetAction.tick(tick);
+		// }
+	}
+	
+	public void queue(Job job)
+	{
+		jobQueue.add(job);
+	}
+	
+	public Job first()
+	{
+		if (jobQueue.size == 0) return null;
+		return jobQueue.first();
 	}
 	
 	@Override
@@ -173,11 +179,7 @@ public class Human extends Creature
 			
 			if (path != null)
 			{
-				if (mineTarget)
-				{
-					targetAction = new ToolAction(this, vs);
-					continuosMining = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT);
-				}
+				if (mineTarget) queue(new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
 				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
 			}
 			else animationController.animate(null, 0);
@@ -202,19 +204,19 @@ public class Human extends Creature
 	{
 		super.onReachTarget();
 		
-		if (targetAction != null) targetAction.trigger();
+		if (jobQueue.size > 0) first().trigger();
 	}
 	
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if (carryingItemStack != null && !(targetAction instanceof ToolAction)) batch.render(carryingItemModelInstance, environment);
-		if (targetAction instanceof ToolAction) batch.render(toolModelInstance, environment);
+		if (first() instanceof ToolJob) batch.render(toolModelInstance, environment);
+		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
-		targetAction.setDone();
+		if (jobQueue.size > 0) first().setDone();
 	}
 }

@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.action;
+package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
@@ -6,20 +6,22 @@ import de.dakror.vloxlands.util.Tickable;
 /**
  * @author Dakror
  */
-public abstract class Action implements Tickable
+public abstract class Job implements Tickable
 {
 	String animation;
 	int repeats;
 	boolean active;
 	boolean done;
+	boolean persistent;
 	
 	Human human;
 	
-	public Action(Human human, String animation, int repeats)
+	public Job(Human human, String animation, int repeats, boolean persistent)
 	{
 		this.human = human;
 		this.animation = animation;
 		this.repeats = repeats;
+		this.persistent = persistent;
 		
 		active = false;
 	}
@@ -48,5 +50,10 @@ public abstract class Action implements Tickable
 	public boolean isDone()
 	{
 		return done;
+	}
+	
+	public boolean isPersistent()
+	{
+		return persistent;
 	}
 }
