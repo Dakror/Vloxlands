@@ -13,13 +13,19 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.BFS;
+import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.Path.PairPathStructure;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
+import de.dakror.vloxlands.game.job.DumpJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.ToolJob;
+import de.dakror.vloxlands.game.job.WalkJob;
+import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -103,66 +109,53 @@ public class Human extends Creature
 			((Tool) tool).transformInHand(toolTransform, this);
 		}
 		
-		// if (targetAction != null && targetAction.isActive())
-		// {
-		// if (targetAction.isDone())
-		// {
-		// targetAction.onEnd();
-		//
-		// boolean setNull = true;
-		//
-		// if (continuosMining && targetAction instanceof ToolAction)
-		// {
-		// if (carryingItemStack.isFull())
-		// {
-		// PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
-		// if (pps != null)
-		// {
-		// path = pps.path;
-		// targetAction = new DumpAction(this, pps.structure);
-		// setNull = false;
-		// if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-		// }
-		// else Gdx.app.error("Human.tick", "Couldn't find a Warehouse to dump stuff");
-		// }
-		// else
-		// {
-		// path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolAction) targetAction).getTarget().type.getId(), this);
-		// if (path != null)
-		// {
-		// ((ToolAction) targetAction).getTarget().voxel.set(path.getGhostTarget());
-		// targetAction = new ToolAction(this, ((ToolAction) targetAction).getTarget());
-		// lastToolAction = targetAction;
-		// setNull = false;
-		// if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-		// }
-		// else
-		// {
-		// Gdx.app.error("Human.tick", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
-		// animationController.animate(null, 0);
-		// continuosMining = false;
-		// }
-		// }
-		// }
-		// else if (continuosMining && lastToolAction != null)
-		// {
-		// targetAction = lastToolAction;
-		// setNull = false;
-		// lastToolAction = null;
-		// }
-		//
-		// if (setNull) targetAction = null;
-		// }
-		// else targetAction.tick(tick);
-		// }
+		if (jobQueue.size > 0)
+		{
+			Job j = firstJob();
+			if (j.isActive())
+			{
+				if (j instanceof WalkJob)
+				{
+					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
+				}
+				
+				if (j.isDone())
+				{
+					j.onEnd();
+					onJobDone(j);
+					
+					jobQueue.removeIndex(0);
+					
+					if (j.isPersistent())
+					{
+						j.setDone(false);
+						queueJob(null, j);
+					}
+				}
+				else j.tick(tick);
+			}
+			else j.trigger();
+		}
 	}
 	
-	public void queue(Job job)
+	@Override
+	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		jobQueue.add(job);
+		if (firstJob() instanceof ToolJob) batch.render(toolModelInstance, environment);
+		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
-	public Job first()
+	public void queueJob(Path path, Job job)
+	{
+		if (job == null) jobQueue.add(new WalkJob(path, this));
+		else
+		{
+			if (path != null) jobQueue.add(new WalkJob(path, this));
+			jobQueue.add(job);
+		}
+	}
+	
+	public Job firstJob()
 	{
 		if (jobQueue.size == 0) return null;
 		return jobQueue.first();
@@ -175,14 +168,13 @@ public class Human extends Creature
 		{
 			boolean mineTarget = tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 			
-			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
+			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
 			
 			if (path != null)
 			{
-				if (mineTarget) queue(new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
-				if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
+				if (mineTarget) queueJob(path, new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
+				else queueJob(path, null);
 			}
-			else animationController.animate(null, 0);
 			selected = true;
 		}
 	}
@@ -204,19 +196,39 @@ public class Human extends Creature
 	{
 		super.onReachTarget();
 		
-		if (jobQueue.size > 0) first().trigger();
+		if (firstJob() instanceof WalkJob) firstJob().setDone(true);
 	}
 	
-	@Override
-	public void renderAdditional(ModelBatch batch, Environment environment)
+	public void onJobDone(Job j)
 	{
-		if (first() instanceof ToolJob) batch.render(toolModelInstance, environment);
-		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
+		if (j instanceof ToolJob)
+		{
+			if (carryingItemStack.isFull())
+			{
+				PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+				if (pps != null) queueJob(pps.path, new DumpJob(this, pps.structure, false));
+				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
+			}
+			else if (j.isPersistent())
+			{
+				Path path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolJob) j).getTarget().type.getId(), this);
+				if (path != null)
+				{
+					((ToolJob) j).getTarget().voxel.set(path.getGhostTarget());
+					queueJob(path, null);
+				}
+				else
+				{
+					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
+					j.setPersistent(false);
+				}
+			}
+		}
 	}
 	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
-		if (jobQueue.size > 0) first().setDone();
+		if (jobQueue.size > 0) firstJob().setDone(true);
 	}
 }

@@ -37,9 +37,9 @@ public abstract class Job implements Tickable
 		human.getAnimationController().animate(null, 0); // TODO: replace with idle animation
 	}
 	
-	public void setDone()
+	public void setDone(boolean done)
 	{
-		done = true;
+		this.done = done;
 	}
 	
 	public boolean isActive()
@@ -55,5 +55,10 @@ public abstract class Job implements Tickable
 	public boolean isPersistent()
 	{
 		return persistent;
+	}
+	
+	public void setPersistent(boolean b)
+	{
+		persistent = b;
 	}
 }
