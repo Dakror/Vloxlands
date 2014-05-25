@@ -1,4 +1,4 @@
 classpath;id;name;description;model;resource;tool;equipable;stack;custom
 Voxel;0;default;N/A;;0;0;0;1;
-;4;Crystal;A mystical and powerful crystal.;crystals/crystals.g3db;1;0;0;10;
+;4;Crystal;A mystical and powerful crystal.;crystals/crystals.g3db;1;0;0;5;
 tool.MiningTool;30;Pickaxe;A pickaxe with a metal head and a wooden handle;pickaxe/pickaxe.g3db;0;1;0;;

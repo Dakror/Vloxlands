@@ -122,13 +122,13 @@ public class Human extends Creature
 				if (j.isDone())
 				{
 					j.onEnd();
-					onJobDone(j);
 					
 					jobQueue.removeIndex(0);
+					onJobDone(j);
 					
 					if (j.isPersistent())
 					{
-						j.setDone(false);
+						j.resetState();
 						queueJob(null, j);
 					}
 				}
@@ -141,7 +141,7 @@ public class Human extends Creature
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if (firstJob() instanceof ToolJob) batch.render(toolModelInstance, environment);
+		if ((firstJob() instanceof ToolJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof ToolJob)) batch.render(toolModelInstance, environment);
 		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
@@ -196,22 +196,24 @@ public class Human extends Creature
 	{
 		super.onReachTarget();
 		
-		if (firstJob() instanceof WalkJob) firstJob().setDone(true);
+		if (firstJob() instanceof WalkJob) firstJob().setDone();
 	}
 	
 	public void onJobDone(Job j)
 	{
 		if (j instanceof ToolJob)
 		{
+			PairPathStructure pps = null;
+			
 			if (carryingItemStack.isFull())
 			{
-				PairPathStructure pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+				pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
 				if (pps != null) queueJob(pps.path, new DumpJob(this, pps.structure, false));
 				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 			}
-			else if (j.isPersistent())
+			if (j.isPersistent())
 			{
-				Path path = BFS.findClosestVoxel(getVoxelBelow(), ((ToolJob) j).getTarget().type.getId(), this);
+				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((ToolJob) j).getTarget().type.getId(), this);
 				if (path != null)
 				{
 					((ToolJob) j).getTarget().voxel.set(path.getGhostTarget());
@@ -229,6 +231,6 @@ public class Human extends Creature
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
-		if (jobQueue.size > 0) firstJob().setDone(true);
+		if (jobQueue.size > 0) firstJob().setDone();
 	}
 }
