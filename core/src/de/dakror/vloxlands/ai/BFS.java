@@ -71,7 +71,7 @@ public class BFS
 					
 					if (vxl == voxel)
 					{
-						if (GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false;
+						// if (GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false;
 						if (GameLayer.world.getIslands()[0].get(v.x, v.y + 1, v.z) == voxel && !GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false; // first mine available blocks above
 					}
 					

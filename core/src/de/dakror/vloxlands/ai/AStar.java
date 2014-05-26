@@ -43,8 +43,11 @@ public class AStar
 		
 		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
 		
-		if (from.equals(to) && useGhostTarget) target = openList.get(0);
-		
+		if (useGhostTarget)
+		{
+			if (from.equals(to)) target = openList.get(0);
+			else target = new AStarNode(to.x, to.y, to.z, 1, 0, null);
+		}
 		AStarNode selected = null;
 		AStarNode ghostNode = null;
 		while (true)
@@ -184,15 +187,13 @@ public class AStar
 						{
 							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free);
 							if (x == 0 && z == 0) targetable = false;
-							// if (y == 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, 1)) targetable = false;
-							if (selected.y > to.y) targetable = false;
 							if (targetable)
 							{
 								if (!v.equals(to)) neighbor = v;
 								return v.equals(to) ? node : target;
 							}
 						}
-						if (free) openList.add(node);
+						if (free && y < 2) openList.add(node);
 					}
 				}
 			}

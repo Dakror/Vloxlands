@@ -50,7 +50,7 @@ public class Human extends Creature
 		super(x, y, z, "models/humanblend/humanblend.g3db");
 		name = "Mensch";
 		
-		speed = 0.025f;
+		speed = 0.075f;
 		climbHeight = 1;
 	}
 	
