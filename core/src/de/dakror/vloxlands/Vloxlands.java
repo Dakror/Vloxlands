@@ -25,6 +25,7 @@ public class Vloxlands extends GameBase
 	long last;
 	int tick;
 	
+	
 	public static boolean debug;
 	public static boolean showPathDebug;
 	
