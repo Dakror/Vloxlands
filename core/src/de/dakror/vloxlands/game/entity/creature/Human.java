@@ -155,6 +155,12 @@ public class Human extends Creature
 		}
 	}
 	
+	public void setJob(Path path, Job job)
+	{
+		jobQueue.clear();
+		queueJob(path, job);
+	}
+	
 	public Job firstJob()
 	{
 		if (jobQueue.size == 0) return null;
@@ -172,8 +178,8 @@ public class Human extends Creature
 			
 			if (path != null)
 			{
-				if (mineTarget) queueJob(path, new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
-				else queueJob(path, null);
+				if (mineTarget) setJob(path, new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
+				else setJob(path, null);
 			}
 			selected = true;
 		}
@@ -185,9 +191,8 @@ public class Human extends Creature
 		if (wasSelected && !lmb)
 		{
 			Vector3 v = structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos());
-			path = AStar.findPath(getVoxelBelow(), v, this, NodeType.target.useGhostTarget);
-			if (path.size() > 0) animationController.animate("walk", -1, 1, null, 0);
-			else animationController.animate(null, 0);
+			Path path = AStar.findPath(getVoxelBelow(), v, this, NodeType.target.useGhostTarget);
+			if (path != null) setJob(path, null);
 		}
 	}
 	

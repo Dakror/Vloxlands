@@ -97,7 +97,7 @@ public class AStar
 		{
 			for (int z = -1; z < 2; z++)
 			{
-				for (int y = -1; y < 2; y++)
+				for (int y = -1; y < 3; y++)
 				{
 					if (x != 0 && z != 0 && y != 0) continue;
 					if (x == 0 && z == 0 && y == 0) continue;
