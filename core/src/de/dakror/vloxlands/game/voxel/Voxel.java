@@ -139,6 +139,10 @@ public class Voxel
 		return getClass().getName() + "." + name.toUpperCase().replace(" ", "_");
 	}
 	
+	public boolean hasItemdrop(){
+		return itemdrop != -128;
+	}
+	
 	public static int getIdForName(String name)
 	{
 		for (int i = 0; i < voxelList.length; i++)

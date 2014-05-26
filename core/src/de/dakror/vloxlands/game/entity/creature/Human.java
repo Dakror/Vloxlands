@@ -50,7 +50,7 @@ public class Human extends Creature
 		super(x, y, z, "models/humanblend/humanblend.g3db");
 		name = "Mensch";
 		
-		speed = 0.075f;
+		speed = 0.025f;
 		climbHeight = 1;
 	}
 	
@@ -172,7 +172,7 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			boolean mineTarget = tool != null && vs.type.getMining() > 0 && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+			boolean mineTarget = tool != null && vs.type.getMining() > 0 && vs.type.hasItemdrop()&& (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 			
 			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
 			
