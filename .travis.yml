@@ -1,6 +1,5 @@
 language: java
-script: 
-  - ./gradlew desktop:dist
+script: ./gradlew desktop:dist
 after_script: ant -file upload.xml
 branches:
   only:
