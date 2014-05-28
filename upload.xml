@@ -17,7 +17,6 @@
 	
 	<target name="upload">
 	    <copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
-	    <copy file="android/build/apk/android-release-unsigned.apk" tofile="${project.name}.apk" />
 	    
 		<echo message="starting FTP file upload" />
 		<java classname="de.dakror.dakrorbin.Uploader">
