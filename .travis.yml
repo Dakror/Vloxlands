@@ -1,10 +1,6 @@
 language: java
-before_install: 
-install: 
-before_script: 
-script: ./build.sh
-after_success: 
-after_failure: 
+before_install: chmod +x ./gradlew
+script: ./gradlew desktop:dist
 after_script: ant -file upload.xml
 branches:
   only:
