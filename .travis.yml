@@ -1,5 +1,10 @@
 language: java
-script: sudo bash ./build.sh
+before_install: 
+install: 
+before_script: 
+script: ./build.sh
+after_success: 
+after_failure: 
 after_script: ant -file upload.xml
 branches:
   only:
