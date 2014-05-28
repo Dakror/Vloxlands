@@ -50,9 +50,9 @@ public class LoadingLayer extends Layer
 		
 		stage.act();
 		stage.draw();
-		stage.getSpriteBatch().begin();
-		stage.getSpriteBatch().draw(blur, logo.getX(), logo.getY(), 0, height, 256, 256 - height);
-		stage.getSpriteBatch().end();
+		stage.getBatch().begin();
+		stage.getBatch().draw(blur, logo.getX(), logo.getY(), 0, height, 256, 256 - height);
+		stage.getBatch().end();
 	}
 	
 	@Override

@@ -112,7 +112,6 @@ public abstract class Creature extends Entity implements AnimationListener
 			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 		}
 		path = null;
-		animationController.setAnimation(null);
 	}
 	
 	@Override

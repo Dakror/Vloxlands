@@ -96,7 +96,7 @@ public class GameLayer extends Layer
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
-		camera.far = 10000;
+		camera.far = 200;
 		controller = new FirstPersonCameraController(camera)
 		{
 			@Override
@@ -118,8 +118,8 @@ public class GameLayer extends Layer
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		int w = MathUtils.random(1, 1);
-		int d = MathUtils.random(1, 1);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
 		world = new World(w, d);
 		Gdx.app.log("GameLayer.create", "World size: " + w + "x" + d);

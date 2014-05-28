@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.item.tool;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
@@ -31,9 +32,12 @@ public abstract class Tool extends Item
 	
 	public void transformInHand(Matrix4 transform, Creature c)
 	{
-		Matrix4 tr = c.modelInstance.getAnimation("walk").nodeAnimations.get(3).node.globalTransform; // right hand bone; currently right underarm tho
+		Matrix4 tr = c.modelInstance.getAnimation("walk").nodeAnimations.get(2).node.getChild("Bone_014", true, false).globalTransform; // right hand
 		Vector3 v = new Vector3();
 		tr.getTranslation(v);
-		transform.translate(v).rotate(Vector3.Y, 90).rotate(0, 0, c.getRotationPerpendicular(), 30).translate(0, boundingBox.getDimensions().y + boundingBox.getCenter().y, 0);
+		Quaternion q = new Quaternion();
+		tr.getRotation(q);
+		float f = q.getAngleAround(Vector3.Y) - 100;
+		transform.translate(v).rotate(Vector3.Y, 90).rotate(0, 0, c.getRotationPerpendicular(), f).translate(0, boundingBox.getDimensions().y + boundingBox.getCenter().y + 0.1f, -0.02f);
 	}
 }
