@@ -1,5 +1,5 @@
 language: java
-script: ./gradlew desktop:dist
+script: sudo bash ./build.sh
 after_script: ant -file upload.xml
 branches:
   only:
