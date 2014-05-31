@@ -39,7 +39,7 @@ public class Vloxlands extends GameBase
 		Item.loadItems();
 		
 		assets = new AssetManager();
-		skin = new Skin(Gdx.files.internal("default_skin/default.json"));
+		skin = new Skin(Gdx.files.internal("default_skin/uiskin.json"));
 		
 		getMultiplexer().addProcessor(new GestureDetector(this));
 		getMultiplexer().addProcessor(this);
