@@ -1,16 +1,15 @@
 package de.dakror.vloxlands;
 
 import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.AndroidHudLayer;
 import de.dakror.vloxlands.layer.DebugLayer;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.layer.Layer;
@@ -21,6 +20,7 @@ public class Vloxlands extends GameBase
 {
 	public static Vloxlands currentGame;
 	public static AssetManager assets;
+	public static Skin skin;
 	
 	long last;
 	int tick;
@@ -39,13 +39,13 @@ public class Vloxlands extends GameBase
 		Item.loadItems();
 		
 		assets = new AssetManager();
+		skin = new Skin(Gdx.files.internal("default_skin/default.json"));
 		
 		getMultiplexer().addProcessor(new GestureDetector(this));
 		getMultiplexer().addProcessor(this);
 		Gdx.input.setInputProcessor(getMultiplexer());
 		
 		addLayer(new GameLayer());
-		if (Gdx.app.getType() == ApplicationType.Android) addLayer(new AndroidHudLayer());
 		addLayer(new LoadingLayer());
 	}
 	
