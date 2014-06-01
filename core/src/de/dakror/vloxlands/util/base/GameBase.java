@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.layer.Layer;
+import de.dakror.vloxlands.util.event.EventDispatcher;
 
 /**
  * @author Dakror
@@ -20,8 +21,9 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	public void addLayer(Layer layer)
 	{
 		layer.show();
-		getMultiplexer().addProcessor(layer);
-		if (layer.getStage() != null) getMultiplexer().addProcessor(layer.getStage());
+		getMultiplexer().addProcessor(0, layer);
+		if (layer.getStage() != null) getMultiplexer().addProcessor(0, layer.getStage());
+		EventDispatcher.addListener(layer);
 		layers.add(layer);
 	}
 	
@@ -35,6 +37,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	{
 		getMultiplexer().removeProcessor(layer);
 		if (layer.getStage() != null) getMultiplexer().removeProcessor(layer.getStage());
+		EventDispatcher.removeListener(layer);
 		layer.dispose();
 		return layers.removeValue(layer, true);
 	}
@@ -45,9 +48,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 		{
 			if (layer.getClass().equals(layerClass))
 			{
-				getMultiplexer().removeProcessor(layer);
-				layer.dispose();
-				return layers.removeValue(layer, true);
+				removeLayer(layer);
 			}
 		}
 		

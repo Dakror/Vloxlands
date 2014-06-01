@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.voxel.Voxel;
@@ -20,6 +21,7 @@ public class Vloxlands extends GameBase
 {
 	public static Vloxlands currentGame;
 	public static AssetManager assets;
+	public static Skin skin;
 	
 	long last;
 	int tick;
@@ -38,9 +40,10 @@ public class Vloxlands extends GameBase
 		Item.loadItems();
 		
 		assets = new AssetManager();
+		skin = new Skin(Gdx.files.internal("skin/default/uiskin.json"));
 		
-		getMultiplexer().addProcessor(new GestureDetector(this));
-		getMultiplexer().addProcessor(this);
+		getMultiplexer().addProcessor(0, new GestureDetector(this));
+		getMultiplexer().addProcessor(0, this);
 		Gdx.input.setInputProcessor(getMultiplexer());
 		
 		addLayer(new GameLayer());

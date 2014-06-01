@@ -27,6 +27,7 @@ import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.ai.node.AStarNode;
 import de.dakror.vloxlands.ai.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
@@ -337,90 +338,97 @@ public class GameLayer extends Layer
 				{
 					entity.selected = true;
 					entitySelected = true;
+					
+					if (entity instanceof Creature) EventDispatcher.dispatchCreatureSelection((Creature) entity, lmb);
 				}
 			}
 			
-			Structure selectedStructure = null;
-			for (Island i : world.getIslands())
+			if (!entitySelected)
 			{
-				if (i == null) continue;
-				for (Structure structure : i.getStructures())
+				Structure selectedStructure = null;
+				for (Island i : world.getIslands())
 				{
-					structure.wasSelected = structure.selected;
-					if (lmb) structure.selected = false;
-					if (structure.inFrustum && structure.hovered)
+					if (i == null) continue;
+					for (Structure structure : i.getStructures())
 					{
-						structure.selected = true;
-						entitySelected = true;
-						selectedStructure = structure;
-					}
-				}
-			}
-			
-			if (selectedStructure != null) EventDispatcher.dispatchStructureSelection(selectedStructure, lmb);
-			
-			for (int i = 0; i < world.getIslands().length; i++)
-			{
-				Island island = world.getIslands()[i];
-				if (island == null) continue;
-				
-				float distance = 0;
-				Chunk chunk = null;
-				Vector3 voxel = null;
-				
-				for (Chunk c : island.getChunks())
-				{
-					if (c.inFrustum && !c.isEmpty())
-					{
-						tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
-						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
-						
-						bb.set(tmp1, tmp2);
-						c.selectedVoxel.set(-1, 0, 0);
-						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+						structure.wasSelected = structure.selected;
+						if (lmb) structure.selected = false;
+						if (structure.inFrustum && structure.hovered)
 						{
-							float dist = ray.origin.dst(tmp5);
-							if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
-							{
-								intersection.set(tmp5);
-								distance = dist;
-								voxel = tmp6.cpy();
-								chunk = c;
-							}
+							structure.selected = true;
+							entitySelected = true;
+							selectedStructure = structure;
 						}
 					}
 				}
 				
-				if (chunk != null && !entitySelected)
+				if (selectedStructure != null) EventDispatcher.dispatchStructureSelection(selectedStructure, lmb);
+				else
 				{
-					// -- determine selectedVoxelFace -- //
-					Direction dir = null;
-					float distanc = 0;
-					Vector3 is2 = new Vector3();
-					byte air = Voxel.get("AIR").getId();
-					
-					for (Direction d : Direction.values())
+					for (int i = 0; i < world.getIslands().length; i++)
 					{
-						tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
-						tmp8.set(tmp7.cpy().add(1, 1, 1));
-						bb3.set(tmp7, tmp8);
+						Island island = world.getIslands()[i];
+						if (island == null) continue;
 						
-						if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
+						float distance = 0;
+						Chunk chunk = null;
+						Vector3 voxel = null;
 						
-						if (Intersector.intersectRayBounds(ray, bb3, is2))
+						for (Chunk c : island.getChunks())
 						{
-							float dist = ray.origin.dst(is2);
-							if (dir == null || dist < distanc)
+							if (c.inFrustum && !c.isEmpty())
 							{
-								intersection2.set(is2);
-								distanc = dist;
-								dir = d;
+								tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
+								tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
+								
+								bb.set(tmp1, tmp2);
+								c.selectedVoxel.set(-1, 0, 0);
+								if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+								{
+									float dist = ray.origin.dst(tmp5);
+									if ((chunk == null || dist < distance) && dist <= pickRayMaxDistance)
+									{
+										intersection.set(tmp5);
+										distance = dist;
+										voxel = tmp6.cpy();
+										chunk = c;
+									}
+								}
 							}
 						}
+						
+						if (chunk != null && !entitySelected)
+						{
+							// -- determine selectedVoxelFace -- //
+							Direction dir = null;
+							float distanc = 0;
+							Vector3 is2 = new Vector3();
+							byte air = Voxel.get("AIR").getId();
+							
+							for (Direction d : Direction.values())
+							{
+								tmp7.set(island.pos.x + chunk.pos.x + voxel.x + d.dir.x, island.pos.y + chunk.pos.y + voxel.y + d.dir.y, island.pos.z + chunk.pos.z + voxel.z + d.dir.z);
+								tmp8.set(tmp7.cpy().add(1, 1, 1));
+								bb3.set(tmp7, tmp8);
+								
+								if (island.get(chunk.pos.x + voxel.x + d.dir.x, chunk.pos.y + voxel.y + d.dir.y, chunk.pos.z + voxel.z + d.dir.z) != air) continue;
+								
+								if (Intersector.intersectRayBounds(ray, bb3, is2))
+								{
+									float dist = ray.origin.dst(is2);
+									if (dir == null || dist < distanc)
+									{
+										intersection2.set(is2);
+										distanc = dist;
+										dir = d;
+									}
+								}
+							}
+							
+							chunk.selectedVoxel.set(voxel);
+							EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir), lmb);
+						}
 					}
-					
-					chunk.selectedVoxel.set(voxel);
-					EventDispatcher.dispatchVoxelSelection(new VoxelSelection(i, Voxel.getForId(chunk.get((int) voxel.x, (int) voxel.y, (int) voxel.z)), voxel.cpy().add(chunk.pos), dir), lmb);
 				}
 			}
 		}

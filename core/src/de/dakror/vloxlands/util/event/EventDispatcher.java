@@ -2,6 +2,7 @@ package de.dakror.vloxlands.util.event;
 
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 
 /**
@@ -13,12 +14,12 @@ public class EventDispatcher
 	
 	public static void addListener(EventListener value)
 	{
-		listeners.add(value);
+		listeners.insert(0, value);
 	}
 	
 	public static boolean removeListener(EventListener value)
 	{
-		return listeners.removeValue(value, false);
+		return listeners.removeValue(value, true);
 	}
 	
 	public static void dispatchVoxelSelection(VoxelSelection vs, boolean lmb)
@@ -31,5 +32,11 @@ public class EventDispatcher
 	{
 		for (EventListener l : listeners)
 			l.onStructureSelection(s, lmb);
+	}
+	
+	public static void dispatchCreatureSelection(Creature s, boolean lmb)
+	{
+		for (EventListener l : listeners)
+			l.onCreatureSelection(s, lmb);
 	}
 }

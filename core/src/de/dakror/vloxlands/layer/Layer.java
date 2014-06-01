@@ -6,10 +6,15 @@ import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
+import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.util.event.EventListener;
+import de.dakror.vloxlands.util.event.VoxelSelection;
+
 /**
  * @author Dakror
  */
-public abstract class Layer implements Screen, InputProcessor, GestureListener
+public abstract class Layer implements Screen, InputProcessor, GestureListener, EventListener
 {
 	Stage stage;
 	
@@ -138,4 +143,16 @@ public abstract class Layer implements Screen, InputProcessor, GestureListener
 	{
 		return false;
 	}
+	
+	@Override
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
+	{}
+	
+	@Override
+	public void onStructureSelection(Structure structure, boolean lmb)
+	{}
+	
+	@Override
+	public void onCreatureSelection(Creature creature, boolean lmb)
+	{}
 }
