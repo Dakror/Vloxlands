@@ -2,8 +2,10 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
@@ -29,15 +31,20 @@ public class HudLayer extends Layer
 		selectedEntityWindow.getButtonTable().add(x).height(selectedEntityWindow.getPadTop());
 		selectedEntityWindow.setSize(300, 100);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
+		selectedEntityWindow.setTitleAlignment(Align.left);
 		selectedEntityWindow.defaults().spaceBottom(10);
-		selectedEntityWindow.setVisible(false);
+		selectedEntityWindow.row().fill().expandX();
+		ImageButton ib = new ImageButton(Vloxlands.skin);
+		selectedEntityWindow.add(ib);
 		
+		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
 	}
 	
 	@Override
 	public void onCreatureSelection(Creature creature, boolean lmb)
 	{
+		selectedEntityWindow.setTitle(creature.getName());
 		selectedEntityWindow.setVisible(true);
 	}
 	
