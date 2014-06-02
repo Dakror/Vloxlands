@@ -17,6 +17,8 @@ public class Item
 		id,
 		name,
 		model,
+		textureX,
+		textureY,
 		description,
 		resource,
 		tool,
@@ -26,6 +28,7 @@ public class Item
 	}
 	
 	public static final int ITEMS = 256;
+	public static final int SIZE = 24;
 	
 	private static ObjectMap<String, Item> items = new ObjectMap<String, Item>();
 	
@@ -48,6 +51,8 @@ public class Item
 	protected String custom;
 	protected byte id;
 	protected int stack;
+	protected int textureX;
+	protected int textureY;
 	protected boolean resource;
 	protected boolean tool;
 	protected boolean equipable;
@@ -75,6 +80,16 @@ public class Item
 	public byte getId()
 	{
 		return id;
+	}
+	
+	public int getTextureX()
+	{
+		return textureX;
+	}
+	
+	public int getTextureY()
+	{
+		return textureY;
 	}
 	
 	public boolean isResource()
@@ -187,6 +202,18 @@ public class Item
 				{
 					if (cell.length() > 0) item.model = cell;
 					else item.model = defaults[csv.getIndex()];
+					break;
+				}
+				case textureX:
+				{
+					if (cell.length() > 0) item.textureX = Integer.parseInt(cell);
+					else item.textureX = Integer.parseInt(defaults[csv.getIndex()]);
+					break;
+				}
+				case textureY:
+				{
+					if (cell.length() > 0) item.textureY = Integer.parseInt(cell);
+					else item.textureY = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case resource:

@@ -67,6 +67,7 @@ public class LoadingLayer extends Layer
 	{
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
+		Vloxlands.assets.load("img/icons.png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
 		
