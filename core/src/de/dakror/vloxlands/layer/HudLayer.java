@@ -2,7 +2,6 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
@@ -10,8 +9,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.ui.HidingClickListener;
+import de.dakror.vloxlands.ui.ItemSlotActor;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -28,14 +29,11 @@ public class HudLayer extends Layer
 		selectedEntityWindow = new Window("", Vloxlands.skin);
 		TextButton x = new TextButton("X", Vloxlands.skin);
 		x.addListener(new HidingClickListener(selectedEntityWindow));
-		selectedEntityWindow.getButtonTable().add(x).height(selectedEntityWindow.getPadTop());
-		selectedEntityWindow.setSize(300, 100);
+		selectedEntityWindow.getButtonTable().add(x).height(selectedEntityWindow.getPadTop()).width(selectedEntityWindow.getPadTop());
+		selectedEntityWindow.setSize(300, 85);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
 		selectedEntityWindow.setTitleAlignment(Align.left);
 		selectedEntityWindow.defaults().spaceBottom(10);
-		selectedEntityWindow.row().fill().expandX();
-		ImageButton ib = new ImageButton(Vloxlands.skin);
-		selectedEntityWindow.add(ib);
 		
 		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
@@ -45,6 +43,15 @@ public class HudLayer extends Layer
 	public void onCreatureSelection(Creature creature, boolean lmb)
 	{
 		selectedEntityWindow.setTitle(creature.getName());
+		selectedEntityWindow.clearChildren();
+		selectedEntityWindow.add(selectedEntityWindow.getButtonTable());
+		
+		if (creature instanceof Human)
+		{
+			selectedEntityWindow.left().add(new ItemSlotActor(((Human) creature).getTool()));
+			selectedEntityWindow.add(new ItemSlotActor(((Human) creature).getCarryingItemStack()));
+		}
+		
 		selectedEntityWindow.setVisible(true);
 	}
 	

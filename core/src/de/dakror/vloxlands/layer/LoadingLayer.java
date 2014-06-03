@@ -35,11 +35,13 @@ public class LoadingLayer extends Layer
 		{
 			if (!worldGen)
 			{
+				Vloxlands.currentGame.addLayer(new GameLayer());
 				worldGenerator.start();
 				worldGen = true;
 			}
 			else if (worldGenerator.done)
 			{
+				Vloxlands.currentGame.addLayer(new HudLayer());
 				Vloxlands.currentGame.removeLayer(this);
 				GameLayer.instance.doneLoading();
 			}

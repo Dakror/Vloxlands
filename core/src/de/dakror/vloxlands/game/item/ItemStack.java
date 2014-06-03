@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.item;
 
+import de.dakror.vloxlands.ui.ItemSlotActor;
+
 /**
  * @author Dakror
  */
@@ -7,6 +9,7 @@ public class ItemStack
 {
 	private Item item;
 	private int amount;
+	public ItemSlotActor slot;
 	
 	public ItemStack(Item item, int amount)
 	{
@@ -21,6 +24,8 @@ public class ItemStack
 	
 	public int setAmount(int amount)
 	{
+		if (this.amount != amount && slot != null) slot.onStackChanged();
+		
 		this.amount = amount;
 		if (amount > item.getStack())
 		{
@@ -57,5 +62,15 @@ public class ItemStack
 	{
 		if (!(obj instanceof ItemStack)) return false;
 		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
+	}
+	
+	
+	public void set(ItemStack stack)
+	{
+		item = stack.item;
+		amount = stack.amount;
+		slot = stack.slot;
+		
+		if (slot != null) slot.onStackChanged();
 	}
 }

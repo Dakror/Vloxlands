@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.DebugLayer;
-import de.dakror.vloxlands.layer.GameLayer;
-import de.dakror.vloxlands.layer.HudLayer;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
 import de.dakror.vloxlands.util.base.GameBase;
@@ -46,8 +44,6 @@ public class Vloxlands extends GameBase
 		getMultiplexer().addProcessor(0, this);
 		Gdx.input.setInputProcessor(getMultiplexer());
 		
-		addLayer(new GameLayer());
-		addLayer(new HudLayer());
 		addLayer(new LoadingLayer());
 	}
 	

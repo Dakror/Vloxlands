@@ -39,7 +39,7 @@ public class Human extends Creature
 	ModelInstance carryingItemModelInstance;
 	Matrix4 carryingItemTransform;
 	
-	Item tool;
+	ItemStack tool;
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
 	
@@ -56,7 +56,7 @@ public class Human extends Creature
 	
 	public void setTool(Item tool)
 	{
-		this.tool = tool;
+		this.tool = new ItemStack(tool, 1);
 		if (tool == null)
 		{
 			toolModelInstance = null;
@@ -69,6 +69,11 @@ public class Human extends Creature
 		}
 	}
 	
+	public ItemStack getTool()
+	{
+		return tool;
+	}
+	
 	public ItemStack getCarryingItemStack()
 	{
 		return carryingItemStack;
@@ -76,7 +81,6 @@ public class Human extends Creature
 	
 	public void setCarryingItemStack(ItemStack carryingItemStack)
 	{
-		this.carryingItemStack = carryingItemStack;
 		if (carryingItemStack == null)
 		{
 			carryingItemModelInstance = null;
@@ -84,6 +88,8 @@ public class Human extends Creature
 		}
 		else
 		{
+			if (this.carryingItemStack == null) this.carryingItemStack = carryingItemStack;
+			this.carryingItemStack.set(carryingItemStack);
 			carryingItemModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class), new Matrix4());
 			carryingItemTransform = carryingItemModelInstance.transform;
 		}
@@ -106,7 +112,7 @@ public class Human extends Creature
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
 			
-			((Tool) tool).transformInHand(toolTransform, this);
+			((Tool) tool.getItem()).transformInHand(toolTransform, this);
 		}
 		
 		if (jobQueue.size > 0)
