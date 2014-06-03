@@ -81,6 +81,7 @@ public class Human extends Creature
 	
 	public void setCarryingItemStack(ItemStack carryingItemStack)
 	{
+		this.carryingItemStack = carryingItemStack;
 		if (carryingItemStack == null)
 		{
 			carryingItemModelInstance = null;
@@ -88,8 +89,6 @@ public class Human extends Creature
 		}
 		else
 		{
-			if (this.carryingItemStack == null) this.carryingItemStack = carryingItemStack;
-			this.carryingItemStack.set(carryingItemStack);
 			carryingItemModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class), new Matrix4());
 			carryingItemTransform = carryingItemModelInstance.transform;
 		}

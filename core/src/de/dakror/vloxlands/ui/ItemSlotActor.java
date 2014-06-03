@@ -52,7 +52,7 @@ public class ItemSlotActor extends ImageButton
 	{
 		this.stack = stack;
 		if (this.stack != null) this.stack.slot = this;
-		onStackChanged();
+		onStackChanged(stack);
 	}
 	
 	public ItemStack getItemStack()
@@ -60,8 +60,9 @@ public class ItemSlotActor extends ImageButton
 		return stack;
 	}
 	
-	public void onStackChanged()
+	public void onStackChanged(ItemStack stack)
 	{
+		this.stack = stack;
 		createStyle(stack);
 	}
 }

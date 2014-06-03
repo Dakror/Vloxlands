@@ -86,6 +86,6 @@ public class LoadingLayer extends Layer
 		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
 		for (Item item : Item.getAll())
-			Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
+			if (item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
 }

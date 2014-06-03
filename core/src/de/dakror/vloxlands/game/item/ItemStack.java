@@ -24,7 +24,7 @@ public class ItemStack
 	
 	public int setAmount(int amount)
 	{
-		if (this.amount != amount && slot != null) slot.onStackChanged();
+		if (this.amount != amount && slot != null) slot.onStackChanged(this);
 		
 		this.amount = amount;
 		if (amount > item.getStack())
@@ -62,15 +62,5 @@ public class ItemStack
 	{
 		if (!(obj instanceof ItemStack)) return false;
 		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
-	}
-	
-	
-	public void set(ItemStack stack)
-	{
-		item = stack.item;
-		amount = stack.amount;
-		slot = stack.slot;
-		
-		if (slot != null) slot.onStackChanged();
 	}
 }
