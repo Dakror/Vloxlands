@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.item;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.util.event.ItemStackListener;
@@ -13,7 +12,7 @@ public class ItemStack
 	Item item;
 	int amount;
 	
-	Array<ItemStackListener> listeners = new Array<ItemStackListener>();
+	public Array<ItemStackListener> listeners = new Array<ItemStackListener>();
 	
 	public ItemStack()
 	{
@@ -33,16 +32,17 @@ public class ItemStack
 	
 	public int setAmount(int amount)
 	{
-		if (this.amount != amount) dispatchStackChanged();
-		
 		this.amount = amount;
 		if (amount > item.getStack())
 		{
 			this.amount = item.getStack();
+			
+			dispatchStackChanged();
 			return amount - item.getStack();
 		}
 		if (amount < 1) this.amount = 1;
 		
+		dispatchStackChanged();
 		return 0;
 	}
 	
@@ -81,7 +81,6 @@ public class ItemStack
 		amount = o.amount;
 		item = o.item;
 		listeners.addAll(o.listeners);
-		Gdx.app.log("", item.getId() + ", " + listeners.size);
 		dispatchStackChanged();
 	}
 	
@@ -95,7 +94,7 @@ public class ItemStack
 	private void dispatchStackChanged()
 	{
 		for (ItemStackListener isl : listeners)
-			isl.onStackChanged(this);
+			isl.onStackChanged();
 	}
 	
 	public void addListener(ItemStackListener listener)

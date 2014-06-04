@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.ui;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
@@ -9,9 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  */
 public class HidingClickListener extends ClickListener
 {
-	Actor actor;
+	PinnableWindow actor;
 	
-	public HidingClickListener(Actor actor)
+	public HidingClickListener(PinnableWindow actor)
 	{
 		this.actor = actor;
 	}
@@ -19,6 +18,6 @@ public class HidingClickListener extends ClickListener
 	@Override
 	public void clicked(InputEvent event, float x, float y)
 	{
-		actor.setVisible(false);
+		actor.setVisibleForce(false);
 	}
 }

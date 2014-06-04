@@ -92,6 +92,7 @@ public class GameLayer extends Layer
 	@Override
 	public void show()
 	{
+		modal = true;
 		instance = this;
 		
 		Gdx.app.log("GameLayer.create", "Seed: " + seed + "");

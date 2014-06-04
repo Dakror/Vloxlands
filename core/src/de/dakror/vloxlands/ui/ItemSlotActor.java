@@ -2,7 +2,9 @@ package de.dakror.vloxlands.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
@@ -16,24 +18,23 @@ import de.dakror.vloxlands.util.event.ItemStackListener;
 public class ItemSlotActor extends ImageButton implements ItemStackListener
 {
 	ItemStack stack;
+	Label amount;
 	
 	public ItemSlotActor()
 	{
-		this(null);
+		this(new ItemStack());
 	}
 	
 	public ItemSlotActor(ItemStack stack)
 	{
 		super(createStyle(stack));
 		pad(5, 5, 5, 5);
+		amount = new Label("", Vloxlands.skin);
+		amount.setFontScale(1.15f);
+		amount.setZIndex(5);
+		addActor(amount);
+		
 		setItemStack(stack);
-	}
-	
-	@Override
-	public boolean remove()
-	{
-		stack.removeListener(this);
-		return super.remove();
 	}
 	
 	private static ImageButtonStyle createStyle(ItemStack stack)
@@ -60,7 +61,7 @@ public class ItemSlotActor extends ImageButton implements ItemStackListener
 	{
 		this.stack = stack;
 		this.stack.addListener(this);
-		onStackChanged(stack);
+		onStackChanged();
 	}
 	
 	public ItemStack getItemStack()
@@ -69,9 +70,18 @@ public class ItemSlotActor extends ImageButton implements ItemStackListener
 	}
 	
 	@Override
-	public void onStackChanged(ItemStack stack)
+	protected void setStage(Stage stage)
 	{
-		this.stack = stack;
-		createStyle(stack);
+		super.setStage(stage);
+		if (stage == null) stack.removeListener(this);
+	}
+	
+	@Override
+	public void onStackChanged()
+	{
+		setStyle(createStyle(stack));
+		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
+		else amount.setText("");
+		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);
 	}
 }

@@ -67,6 +67,7 @@ public class LoadingLayer extends Layer
 	@Override
 	public void show()
 	{
+		modal = true;
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
 		Vloxlands.assets.load("img/icons.png", Texture.class);
@@ -79,7 +80,6 @@ public class LoadingLayer extends Layer
 		worldGenerator = new WorldGenerator();
 		
 		stage.addActor(logo);
-		
 		
 		// TODO: Add all models wanting to be loaded
 		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
