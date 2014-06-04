@@ -10,7 +10,7 @@ import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.ui.ItemSlotActor;
+import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -55,10 +55,10 @@ public class HudLayer extends Layer implements SelectionListener
 		if (creature instanceof Human)
 		{
 			selectedEntityWindow.row();
-			selectedEntityWindow.left().add(new ItemSlotActor(((Human) creature).getTool()));
-			selectedEntityWindow.left().add(new ItemSlotActor(((Human) creature).getCarryingItemStack()));
-			selectedEntityWindow.left().add(new ItemSlotActor(new ItemStack())); // armor / jetpack
-			selectedEntityWindow.left().add(new ItemSlotActor(new ItemStack())); // armor / jetpack
+			selectedEntityWindow.left().add(new ItemSlot(((Human) creature).getTool()));
+			selectedEntityWindow.left().add(new ItemSlot(((Human) creature).getCarryingItemStack()));
+			selectedEntityWindow.left().add(new ItemSlot(new ItemStack())); // armor / jetpack
+			selectedEntityWindow.left().add(new ItemSlot(new ItemStack())); // armor / jetpack
 			selectedEntityWindow.pack();
 		}
 		

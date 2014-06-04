@@ -15,17 +15,17 @@ import de.dakror.vloxlands.util.event.ItemStackListener;
 /**
  * @author Dakror
  */
-public class ItemSlotActor extends ImageButton implements ItemStackListener
+public class ItemSlot extends ImageButton implements ItemStackListener
 {
 	ItemStack stack;
 	Label amount;
 	
-	public ItemSlotActor()
+	public ItemSlot()
 	{
 		this(new ItemStack());
 	}
 	
-	public ItemSlotActor(ItemStack stack)
+	public ItemSlot(ItemStack stack)
 	{
 		super(createStyle(stack));
 		pad(5, 5, 5, 5);
