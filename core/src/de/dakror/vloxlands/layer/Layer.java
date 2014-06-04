@@ -12,11 +12,21 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 public abstract class Layer implements Screen, InputProcessor, GestureListener
 {
 	Stage stage;
+	boolean modal;
+	
+	public boolean isModal()
+	{
+		return modal;
+	}
 	
 	public Stage getStage()
 	{
 		return stage;
 	}
+	
+	@Override
+	public void show()
+	{}
 	
 	@Override
 	public void resize(int width, int height)

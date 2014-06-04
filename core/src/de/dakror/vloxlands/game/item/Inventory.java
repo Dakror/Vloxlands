@@ -33,7 +33,7 @@ public class Inventory
 		else
 		{
 			addStack(stack, stack.getAmount());
-			return null;
+			return new ItemStack();
 		}
 	}
 	
@@ -74,7 +74,7 @@ public class Inventory
 		if (is.getAmount() == amount) return is;
 		
 		count += is.getAmount(); // undo-hack
-		return null;
+		return new ItemStack();
 	}
 	
 	private void addStack(ItemStack stack, int amount)

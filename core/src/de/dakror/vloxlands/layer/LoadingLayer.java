@@ -35,11 +35,13 @@ public class LoadingLayer extends Layer
 		{
 			if (!worldGen)
 			{
+				Vloxlands.currentGame.addLayer(new GameLayer());
 				worldGenerator.start();
 				worldGen = true;
 			}
 			else if (worldGenerator.done)
 			{
+				Vloxlands.currentGame.addLayer(new HudLayer());
 				Vloxlands.currentGame.removeLayer(this);
 				GameLayer.instance.doneLoading();
 			}
@@ -65,8 +67,10 @@ public class LoadingLayer extends Layer
 	@Override
 	public void show()
 	{
+		modal = true;
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
+		Vloxlands.assets.load("img/icons.png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
 		
@@ -77,12 +81,11 @@ public class LoadingLayer extends Layer
 		
 		stage.addActor(logo);
 		
-		
 		// TODO: Add all models wanting to be loaded
 		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
 		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
 		for (Item item : Item.getAll())
-			Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
+			if (item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
 }

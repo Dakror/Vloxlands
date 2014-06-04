@@ -20,7 +20,6 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.base.EntityBase;
-import de.dakror.vloxlands.util.event.EventDispatcher;
 
 /**
  * @author Dakror
@@ -66,7 +65,7 @@ public abstract class Entity extends EntityBase
 		
 		transform.getTranslation(posCache);
 		
-		EventDispatcher.addListener(this);
+		GameLayer.instance.addListener(this);
 	}
 	
 	public String getName()
@@ -186,7 +185,7 @@ public abstract class Entity extends EntityBase
 	@Override
 	public void dispose()
 	{
-		EventDispatcher.removeListener(this);
+		GameLayer.instance.removeListener(this);
 	}
 	
 	// -- events -- //
