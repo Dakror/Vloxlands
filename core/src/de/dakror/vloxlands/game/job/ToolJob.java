@@ -39,7 +39,7 @@ public class ToolJob extends Job
 		
 		if (target.type.getItemdrop() != -128)
 		{
-			if (human.getCarryingItemStack() == null) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));
+			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));
 			else human.getCarryingItemStack().add(1);
 		}
 		else Gdx.app.error("ToolAction.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");

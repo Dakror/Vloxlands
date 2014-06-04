@@ -1,6 +1,7 @@
 classpath;id;name;description;model;textureX;textureY;resource;tool;equipable;stack;custom
 Voxel;0;default;N/A;;5;1;0;0;0;1;
+;0;Nothing;;;;;;;;;
 ;4;Yellow Crystal;A mystical and weak crystal.;crystals/crystals.g3db;3;2;1;0;0;5;
-;5;Red Crystal;A mystical and strong crystal.;crystals/crystals.g3db;1;2;1;0;0;5;
-;6;Blue Crystal;A mystical and unyielding crystal.;crystals/crystals.g3db;2;2;1;0;0;5;
+;5;Red Crystal;A mystical and strong crystal.;crystals/crystals.g3db;2;2;1;0;0;5;
+;6;Blue Crystal;A mystical and unyielding crystal.;crystals/crystals.g3db;1;2;1;0;0;5;
 tool.MiningTool;30;Pickaxe;A pickaxe with a metal head and a wooden handle;pickaxe/pickaxe.g3db;2;0;0;1;0;;

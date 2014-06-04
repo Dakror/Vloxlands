@@ -473,7 +473,7 @@ public class GameLayer extends Layer
 	
 	public void addListener(SelectionListener value)
 	{
-		listeners.add(value);
+		listeners.insert(0, value);
 	}
 	
 	public boolean removeListener(SelectionListener value)

@@ -13,7 +13,7 @@ import de.dakror.vloxlands.generate.Generator;
  */
 public class CrystalGenerator extends Generator
 {
-	public static final Voxel[] CRYSTALS = { Voxel.get("STRONG_CRYSTAL"), Voxel.get("MEDIUM_CRYSTAL"), Voxel.get("WEAK_CRYSTAL") };
+	public static final Voxel[] CRYSTALS = { Voxel.get("BLUE_CRYSTAL"), Voxel.get("RED_CRYSTAL"), Voxel.get("YELLOW_CRYSTAL") };
 	float y;
 	
 	public CrystalGenerator(float y)

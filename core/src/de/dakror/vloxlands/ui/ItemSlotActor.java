@@ -8,11 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.util.event.ItemStackListener;
 
 /**
  * @author Dakror
  */
-public class ItemSlotActor extends ImageButton
+public class ItemSlotActor extends ImageButton implements ItemStackListener
 {
 	ItemStack stack;
 	
@@ -28,13 +29,20 @@ public class ItemSlotActor extends ImageButton
 		setItemStack(stack);
 	}
 	
+	@Override
+	public boolean remove()
+	{
+		stack.removeListener(this);
+		return super.remove();
+	}
+	
 	private static ImageButtonStyle createStyle(ItemStack stack)
 	{
 		int size = 48;
 		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = null;
-		if (stack != null) region = new TextureRegion(tex, stack.getItem().getTextureX() * Item.SIZE, stack.getItem().getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
+		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getTextureX() * Item.SIZE, stack.getItem().getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
 		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default transparent space
 		
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
@@ -51,7 +59,7 @@ public class ItemSlotActor extends ImageButton
 	public void setItemStack(ItemStack stack)
 	{
 		this.stack = stack;
-		if (this.stack != null) this.stack.slot = this;
+		this.stack.addListener(this);
 		onStackChanged(stack);
 	}
 	
@@ -60,6 +68,7 @@ public class ItemSlotActor extends ImageButton
 		return stack;
 	}
 	
+	@Override
 	public void onStackChanged(ItemStack stack)
 	{
 		this.stack = stack;

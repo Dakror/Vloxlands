@@ -52,11 +52,13 @@ public class Human extends Creature
 		
 		speed = 0.025f;
 		climbHeight = 1;
+		
+		tool = new ItemStack();
+		carryingItemStack = new ItemStack();
 	}
 	
 	public void setTool(Item tool)
 	{
-		this.tool = new ItemStack(tool, 1);
 		if (tool == null)
 		{
 			toolModelInstance = null;
@@ -64,6 +66,8 @@ public class Human extends Creature
 		}
 		else
 		{
+			this.tool.setItem(tool);
+			this.tool.setAmount(1);
 			toolModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + tool.getModel(), Model.class), new Matrix4());
 			toolTransform = toolModelInstance.transform;
 		}
@@ -81,8 +85,8 @@ public class Human extends Creature
 	
 	public void setCarryingItemStack(ItemStack carryingItemStack)
 	{
-		this.carryingItemStack = carryingItemStack;
-		if (carryingItemStack == null)
+		this.carryingItemStack.set(carryingItemStack);
+		if (carryingItemStack.isNull())
 		{
 			carryingItemModelInstance = null;
 			carryingItemTransform = null;
@@ -99,14 +103,14 @@ public class Human extends Creature
 	{
 		super.tick(tick);
 		
-		if (carryingItemStack != null)
+		if (!carryingItemStack.isNull())
 		{
 			carryingItemTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			carryingItemTransform.rotate(Vector3.Y, rotCache.getYaw());
 			carryingItemTransform.translate(resourceTrn);
 		}
 		
-		if (tool != null)
+		if (!tool.isNull())
 		{
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
@@ -147,7 +151,7 @@ public class Human extends Creature
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
 		if ((firstJob() instanceof ToolJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof ToolJob)) batch.render(toolModelInstance, environment);
-		else if (carryingItemStack != null) batch.render(carryingItemModelInstance, environment);
+		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
 	}
 	
 	public void queueJob(Path path, Job job)
@@ -177,7 +181,7 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			boolean mineTarget = tool != null && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack == null || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+			boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 			
 			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
 			
