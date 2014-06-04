@@ -6,7 +6,7 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 /**
  * @author Dakror
  */
-public interface EventListener
+public interface SelectionListener
 {
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb);
 	

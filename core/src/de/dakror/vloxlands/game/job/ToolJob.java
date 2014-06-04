@@ -6,7 +6,6 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -36,7 +35,7 @@ public class ToolJob extends Job
 	{
 		super.onEnd();
 		
-		GameLayer.world.getIslands()[target.island].set(target.voxel.x, target.voxel.y, target.voxel.z, Voxel.get("AIR").getId());
+		target.island.set(target.voxel.x, target.voxel.y, target.voxel.z, Voxel.get("AIR").getId());
 		
 		if (target.type.getItemdrop() != -128)
 		{

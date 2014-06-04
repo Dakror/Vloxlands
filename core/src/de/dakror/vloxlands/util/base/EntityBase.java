@@ -5,13 +5,13 @@ import com.badlogic.gdx.utils.Disposable;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.util.Tickable;
-import de.dakror.vloxlands.util.event.EventListener;
+import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public abstract class EntityBase implements Tickable, Disposable, EventListener
+public abstract class EntityBase implements Tickable, Disposable, SelectionListener
 {
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)

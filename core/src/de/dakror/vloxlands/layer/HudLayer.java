@@ -13,18 +13,21 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.ui.HidingClickListener;
 import de.dakror.vloxlands.ui.ItemSlotActor;
+import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class HudLayer extends Layer
+public class HudLayer extends Layer implements SelectionListener
 {
 	Window selectedEntityWindow;
 	
 	@Override
 	public void show()
 	{
+		GameLayer.instance.addListener(this);
+		
 		stage = new Stage(new ScreenViewport());
 		selectedEntityWindow = new Window("", Vloxlands.skin);
 		TextButton x = new TextButton("X", Vloxlands.skin);
@@ -37,6 +40,13 @@ public class HudLayer extends Layer
 		
 		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		GameLayer.instance.removeListener(this);
 	}
 	
 	@Override
