@@ -28,7 +28,6 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 	public ItemSlot(ItemStack stack)
 	{
 		super(createStyle(stack));
-		pad(5, 5, 5, 5);
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
 		amount.setZIndex(5);
@@ -48,7 +47,6 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 		
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
 		style.imageUp = new TextureRegionDrawable(region);
-		
 		style.imageUp.setMinWidth(size);
 		style.imageUp.setMinHeight(size);
 		style.imageDown = new TextureRegionDrawable(region);
@@ -80,6 +78,7 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 	public void onStackChanged()
 	{
 		setStyle(createStyle(stack));
+		pad(4);
 		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
 		else amount.setText("");
 		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);

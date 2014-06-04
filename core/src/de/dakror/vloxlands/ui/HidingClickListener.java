@@ -18,6 +18,6 @@ public class HidingClickListener extends ClickListener
 	@Override
 	public void clicked(InputEvent event, float x, float y)
 	{
-		actor.setVisibleForce(false);
+		actor.setVisible(false);
 	}
 }

@@ -28,13 +28,8 @@ public class PinnableWindow extends Window
 	public boolean setShown(boolean visible)
 	{
 		if (pin.isChecked() && !visible) return false;
-		setVisibleForce(visible);
+		setVisible(visible);
 		
 		return true;
-	}
-	
-	public void setVisibleForce(boolean visible)
-	{
-		super.setVisible(visible);
 	}
 }

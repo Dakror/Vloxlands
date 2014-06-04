@@ -56,9 +56,9 @@ public class HudLayer extends Layer implements SelectionListener
 		{
 			selectedEntityWindow.row();
 			selectedEntityWindow.left().add(new ItemSlot(((Human) creature).getTool()));
-			selectedEntityWindow.left().add(new ItemSlot(((Human) creature).getCarryingItemStack()));
-			selectedEntityWindow.left().add(new ItemSlot(new ItemStack())); // armor / jetpack
-			selectedEntityWindow.left().add(new ItemSlot(new ItemStack())); // armor / jetpack
+			selectedEntityWindow.add(new ItemSlot(((Human) creature).getCarryingItemStack()));
+			selectedEntityWindow.add(new ItemSlot(new ItemStack())); // armor / jetpack
+			selectedEntityWindow.add(new ItemSlot(new ItemStack())); // armor / jetpack
 			selectedEntityWindow.pack();
 		}
 		
