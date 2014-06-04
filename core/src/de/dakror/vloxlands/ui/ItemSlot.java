@@ -19,19 +19,22 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 {
 	ItemStack stack;
 	Label amount;
+	Tooltip tooltip;
 	
-	public ItemSlot()
+	public ItemSlot(Stage stage)
 	{
-		this(new ItemStack());
+		this(stage, new ItemStack());
 	}
 	
-	public ItemSlot(ItemStack stack)
+	public ItemSlot(Stage stage, ItemStack stack)
 	{
 		super(createStyle(stack));
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
-		amount.setZIndex(5);
+		amount.setZIndex(1);
 		addActor(amount);
+		tooltip = new Tooltip("", "", this);
+		stage.addActor(tooltip);
 		
 		setItemStack(stack);
 	}
@@ -82,5 +85,12 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
 		else amount.setText("");
 		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);
+		
+		if (!stack.isNull())
+		{
+			tooltip.setTitle((stack.getAmount() > 1 ? stack.getAmount() + "x " : "") + stack.getItem().getName());
+			tooltip.setDescription(stack.getItem().getDescription());
+		}
+		else tooltip.setTitle("");
 	}
 }
