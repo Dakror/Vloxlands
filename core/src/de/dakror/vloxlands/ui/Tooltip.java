@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.esotericsoftware.tablelayout.BaseTableLayout;
 
 import de.dakror.vloxlands.Vloxlands;
 
@@ -21,6 +22,7 @@ public class Tooltip extends Window
 	public Tooltip(String title, String description, final Actor parent)
 	{
 		super(title, Vloxlands.skin);
+		setTitleAlignment(BaseTableLayout.LEFT);
 		setDescription(description);
 		setVisible(false);
 		
