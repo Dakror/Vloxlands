@@ -40,9 +40,6 @@ public class Island implements RenderableProvider, Tickable
 	
 	float weight, uplift;
 	
-	/**
-	 * Used to balance after generating. Smaller than 1
-	 */
 	public float initBalance = 0;
 	
 	public Vector3 index, pos;
@@ -129,11 +126,21 @@ public class Island implements RenderableProvider, Tickable
 		}
 	}
 	
-	public void addStructure(Structure s, boolean user)
+	public void addStructure(Structure s, boolean user, boolean clearArea)
 	{
 		s.onSpawn();
 		s.getTransform().translate(pos);
 		structures.add(s);
+		
+		if (!user && clearArea)
+		{
+			byte air = Voxel.get("AIR").getId();
+			
+			for (int i = 0; i < Math.ceil(s.getBoundingBox().getDimensions().x); i++)
+				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().z); j++)
+					for (int k = 0; k < Math.ceil(s.getBoundingBox().getDimensions().y); k++)
+						set(i + s.getVoxelPos().x, k + s.getVoxelPos().y + 1, j + s.getVoxelPos().z, air);
+		}
 		
 		recalculate();
 	}
