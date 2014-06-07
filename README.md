@@ -11,3 +11,4 @@ If you want to check out the first one, look here: [Ichmed/Vloxlands](https://gi
 Branches: `Master` is always stable, while nightlies can be built from the `develop` branch.
 
 Powered by [libGDX](https://github.com/libgdx/libgdx).
+Using IntervalTree API by Kevin Dolan
