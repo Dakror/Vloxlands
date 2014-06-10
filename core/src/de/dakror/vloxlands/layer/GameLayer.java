@@ -140,7 +140,8 @@ public class GameLayer extends Layer
 		human.setTool(Item.get("PICKAXE"));
 		world.addEntity(human);
 		
-		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false);
+		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
+		world.getIslands()[0].calculateInitBalance();
 		
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		

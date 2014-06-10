@@ -98,6 +98,11 @@ public abstract class Entity extends EntityBase
 		this.uplift = uplift;
 	}
 	
+	public BoundingBox getBoundingBox()
+	{
+		return boundingBox;
+	}
+	
 	public AnimationController getAnimationController()
 	{
 		return animationController;

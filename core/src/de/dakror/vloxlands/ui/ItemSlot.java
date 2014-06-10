@@ -15,24 +15,26 @@ import de.dakror.vloxlands.util.event.ItemStackListener;
 /**
  * @author Dakror
  */
-public class ItemSlotActor extends ImageButton implements ItemStackListener
+public class ItemSlot extends ImageButton implements ItemStackListener
 {
 	ItemStack stack;
 	Label amount;
+	Tooltip tooltip;
 	
-	public ItemSlotActor()
+	public ItemSlot(Stage stage)
 	{
-		this(new ItemStack());
+		this(stage, new ItemStack());
 	}
 	
-	public ItemSlotActor(ItemStack stack)
+	public ItemSlot(Stage stage, ItemStack stack)
 	{
 		super(createStyle(stack));
-		pad(5, 5, 5, 5);
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
-		amount.setZIndex(5);
+		amount.setZIndex(1);
 		addActor(amount);
+		tooltip = new Tooltip("", "", this);
+		stage.addActor(tooltip);
 		
 		setItemStack(stack);
 	}
@@ -48,7 +50,6 @@ public class ItemSlotActor extends ImageButton implements ItemStackListener
 		
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
 		style.imageUp = new TextureRegionDrawable(region);
-		
 		style.imageUp.setMinWidth(size);
 		style.imageUp.setMinHeight(size);
 		style.imageDown = new TextureRegionDrawable(region);
@@ -80,8 +81,16 @@ public class ItemSlotActor extends ImageButton implements ItemStackListener
 	public void onStackChanged()
 	{
 		setStyle(createStyle(stack));
+		pad(4);
 		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
 		else amount.setText("");
 		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);
+		
+		if (!stack.isNull())
+		{
+			tooltip.setTitle((stack.getAmount() > 1 ? stack.getAmount() + "x " : "") + stack.getItem().getName());
+			tooltip.setDescription(stack.getItem().getDescription());
+		}
+		else tooltip.setTitle("");
 	}
 }
