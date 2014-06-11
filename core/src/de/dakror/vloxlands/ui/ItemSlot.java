@@ -17,6 +17,7 @@ import de.dakror.vloxlands.util.event.ItemStackListener;
  */
 public class ItemSlot extends ImageButton implements ItemStackListener
 {
+	public static int size = 48;
 	ItemStack stack;
 	Label amount;
 	Tooltip tooltip;
@@ -41,8 +42,6 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 	
 	private static ImageButtonStyle createStyle(ItemStack stack)
 	{
-		int size = 48;
-		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = null;
 		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getTextureX() * Item.SIZE, stack.getItem().getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);

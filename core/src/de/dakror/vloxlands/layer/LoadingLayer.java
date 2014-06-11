@@ -71,8 +71,11 @@ public class LoadingLayer extends Layer
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
 		Vloxlands.assets.load("img/icons.png", Texture.class);
+		Vloxlands.assets.load("img/gui/gears.png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
+		
+		Vloxlands.skin.add("gears", Vloxlands.assets.get("img/gui/gears.png", Texture.class));
 		
 		stage = new Stage();
 		logo = new Image(Vloxlands.assets.get("img/logo/logo256.png", Texture.class));

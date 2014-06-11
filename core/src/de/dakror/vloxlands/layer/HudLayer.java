@@ -2,6 +2,9 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -56,9 +59,22 @@ public class HudLayer extends Layer implements SelectionListener
 		{
 			selectedEntityWindow.row();
 			selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
-			selectedEntityWindow.add(new ItemSlot(stage, ((Human) creature).getCarryingItemStack()));
+			
+			ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
+			selectedEntityWindow.add(slot);
 			selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
-			selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
+			
+			ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("gears");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageDown = Vloxlands.skin.getDrawable("gears");
+			style.imageDown.setMinWidth(ItemSlot.size);
+			style.imageDown.setMinHeight(ItemSlot.size);
+			ImageButton job = new ImageButton(style);
+			job.pad(4);
+			selectedEntityWindow.add(job); // armor / jetpack
+			
 			selectedEntityWindow.pack();
 		}
 		
