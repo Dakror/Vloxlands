@@ -30,7 +30,9 @@ public abstract class Layer implements Screen, InputProcessor, GestureListener
 	
 	@Override
 	public void resize(int width, int height)
-	{}
+	{
+		if (stage != null) stage.getViewport().update(width, height, true);
+	}
 	
 	public void tick(int tick)
 	{}

@@ -24,6 +24,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public class HudLayer extends Layer implements SelectionListener
 {
 	PinnableWindow selectedEntityWindow;
+	boolean jobsLayoutEnabled;
 	
 	@Override
 	public void show()
@@ -35,7 +36,7 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedEntityWindow = new PinnableWindow("", Vloxlands.skin);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
 		selectedEntityWindow.setTitleAlignment(Align.left);
-		selectedEntityWindow.defaults().spaceBottom(10);
+		// selectedEntityWindow.defaults().spaceBottom(10);
 		
 		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
@@ -59,7 +60,6 @@ public class HudLayer extends Layer implements SelectionListener
 		{
 			selectedEntityWindow.row();
 			selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
-			
 			ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
 			selectedEntityWindow.add(slot);
 			selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
@@ -71,7 +71,7 @@ public class HudLayer extends Layer implements SelectionListener
 			style.imageDown = Vloxlands.skin.getDrawable("gears");
 			style.imageDown.setMinWidth(ItemSlot.size);
 			style.imageDown.setMinHeight(ItemSlot.size);
-			ImageButton job = new ImageButton(style);
+			final ImageButton job = new ImageButton(style);
 			job.pad(4);
 			selectedEntityWindow.add(job); // armor / jetpack
 			
