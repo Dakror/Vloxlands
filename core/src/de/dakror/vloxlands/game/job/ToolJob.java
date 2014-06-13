@@ -17,7 +17,7 @@ public class ToolJob extends Job
 	
 	public ToolJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, target.type.getMining(), persistent);
+		super(human, "walk" /* mine */, "Mining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
 	}
 	

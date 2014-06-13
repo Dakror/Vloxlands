@@ -12,7 +12,7 @@ public class DumpJob extends Job
 	
 	public DumpJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "ablegen", 1, persistent);
+		super(human, "ablegen", "Dumping carried items", 1, persistent);
 		this.target = target;
 	}
 	

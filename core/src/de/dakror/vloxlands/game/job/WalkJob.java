@@ -12,7 +12,7 @@ public class WalkJob extends Job
 	
 	public WalkJob(Path path, Human human)
 	{
-		super(human, "walk", -1, false);
+		super(human, "walk", "Walking", -1, false);
 		this.path = path;
 	}
 	

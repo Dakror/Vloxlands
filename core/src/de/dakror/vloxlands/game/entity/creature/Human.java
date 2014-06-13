@@ -242,6 +242,11 @@ public class Human extends Creature
 		}
 	}
 	
+	public Array<Job> getJobQueue()
+	{
+		return jobQueue;
+	}
+	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
