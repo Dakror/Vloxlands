@@ -35,13 +35,13 @@ public class Tooltip extends Window
 				
 				Actor a = event.getListenerActor();
 				
-				float x1 = a.getWidth() + 5;
+				float x1 = a.getWidth() + 10;
 				tmp.set(x1, a.getHeight() - getHeight());
 				a.localToStageCoordinates(tmp);
 				
 				if (tmp.x + getWidth() > getStage().getWidth())
 				{
-					x1 = -getWidth() - 5;
+					x1 = -getWidth() - 10;
 					tmp.set(x1, a.getHeight() - getHeight());
 					a.localToStageCoordinates(tmp);
 				}

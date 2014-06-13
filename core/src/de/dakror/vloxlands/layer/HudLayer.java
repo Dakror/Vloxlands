@@ -23,6 +23,7 @@ import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.Tooltip;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -59,7 +60,8 @@ public class HudLayer extends Layer implements SelectionListener
 	public void onCreatureSelection(final Creature creature, boolean lmb)
 	{
 		selectedEntityWindow.setTitle(creature.getName());
-		selectedEntityWindow.clear();
+		selectedEntityWindow.clearChildren();
+		selectedEntityWindow.clearActions();
 		selectedEntityWindow.addActor(selectedEntityWindow.getButtonTable());
 		
 		if (creature instanceof Human)
@@ -118,7 +120,8 @@ public class HudLayer extends Layer implements SelectionListener
 				}
 			});
 			job.pad(4);
-			selectedEntityWindow.add(job); // armor / jetpack
+			selectedEntityWindow.add(job);
+			stage.addActor(new Tooltip("Job Queue", "Toggle Job Queue display", job));
 			
 			selectedEntityWindow.pack();
 		}
@@ -129,13 +132,21 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if (selectedEntityWindow.setShown(false)) selectedEntityWindow.clear();
+		if (selectedEntityWindow.setShown(false))
+		{
+			selectedEntityWindow.clearChildren();
+			selectedEntityWindow.clearActions();
+		}
 	}
 	
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (selectedEntityWindow.setShown(false)) selectedEntityWindow.clear();
+		if (selectedEntityWindow.setShown(false))
+		{
+			selectedEntityWindow.clearChildren();
+			selectedEntityWindow.clearActions();
+		}
 	}
 	
 	@Override
