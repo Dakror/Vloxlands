@@ -76,10 +76,11 @@ public class HudLayer extends Layer implements SelectionListener
 				{
 					if (((Human) creature).getJobQueue().size == 0 && selectedEntityJobs.getItems().get(0) instanceof IdleJob) return false;
 					
-					if (((Human) creature).getJobQueue().size != selectedEntityJobs.getItems().size || selectedEntityJobs.getItems().get(0) instanceof IdleJob)
+					if (!((Human) creature).getJobQueue().equals(selectedEntityJobs.getItems()))
 					{
 						if (((Human) creature).getJobQueue().size > 0) selectedEntityJobs.setItems(((Human) creature).getJobQueue());
 						else selectedEntityJobs.setItems(new IdleJob((Human) creature));
+						
 						selectedEntityJobs.getSelection().setDisabled(true);
 						selectedEntityJobs.setSelectedIndex(-1);
 						selectedEntityWindow.pack();
