@@ -66,6 +66,12 @@ public class Tooltip extends Window
 		});
 	}
 	
+	public void set(String title, String description)
+	{
+		setTitle(title);
+		setDescription(description);
+	}
+	
 	public void setDescription(String s)
 	{
 		clear();

@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -18,12 +17,13 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
-import de.dakror.vloxlands.ui.Tooltip;
+import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -33,6 +33,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public class HudLayer extends Layer implements SelectionListener
 {
 	PinnableWindow selectedEntityWindow;
+	PinnableWindow selectedStructureWindow;
 	
 	@Override
 	public void show()
@@ -41,12 +42,18 @@ public class HudLayer extends Layer implements SelectionListener
 		GameLayer.instance.addListener(this);
 		
 		stage = new Stage(new ScreenViewport());
+		
 		selectedEntityWindow = new PinnableWindow("", Vloxlands.skin);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
 		selectedEntityWindow.setTitleAlignment(Align.left);
-		
 		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
+		
+		selectedStructureWindow = new PinnableWindow("", Vloxlands.skin);
+		selectedStructureWindow.setPosition(Gdx.graphics.getWidth() - selectedStructureWindow.getWidth(), 0);
+		selectedStructureWindow.setTitleAlignment(Align.left);
+		selectedStructureWindow.setVisible(false);
+		// stage.addActor(selectedStructureWindow);
 	}
 	
 	@Override
@@ -59,6 +66,12 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public void onCreatureSelection(final Creature creature, boolean lmb)
 	{
+		if (selectedStructureWindow.setShown(false))
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
+		
 		selectedEntityWindow.setTitle(creature.getName());
 		selectedEntityWindow.clearChildren();
 		selectedEntityWindow.clearActions();
@@ -109,7 +122,7 @@ public class HudLayer extends Layer implements SelectionListener
 			style.imageDown = Vloxlands.skin.getDrawable("gears");
 			style.imageDown.setMinWidth(ItemSlot.size);
 			style.imageDown.setMinHeight(ItemSlot.size);
-			final ImageButton job = new ImageButton(style);
+			final TooltipImageButton job = new TooltipImageButton(stage, style);
 			job.addListener(new ClickListener()
 			{
 				@Override
@@ -121,8 +134,8 @@ public class HudLayer extends Layer implements SelectionListener
 				}
 			});
 			job.pad(4);
+			job.getTooltip().set("Job Queue", "Toggle Job Queue display");
 			selectedEntityWindow.add(job);
-			stage.addActor(new Tooltip("Job Queue", "Toggle Job Queue display", job));
 			
 			selectedEntityWindow.pack();
 		}
@@ -138,6 +151,11 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
+		if (selectedStructureWindow.setShown(false))
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
 	}
 	
 	@Override
@@ -146,8 +164,21 @@ public class HudLayer extends Layer implements SelectionListener
 		if (selectedEntityWindow.setShown(false))
 		{
 			selectedEntityWindow.clearChildren();
-			selectedEntityWindow.clearActions();
+			// selectedEntityWindow.clearActions();
 		}
+		
+		selectedStructureWindow.setTitle(structure.getName());
+		selectedStructureWindow.clearChildren();
+		selectedStructureWindow.clearActions();
+		selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
+		
+		if (structure instanceof Warehouse)
+		{	
+			
+		}
+		
+		selectedStructureWindow.pack();
+		selectedStructureWindow.setVisible(true);
 	}
 	
 	@Override
