@@ -117,7 +117,11 @@ public class Island implements RenderableProvider, Tickable
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
 		{
 			Structure s = iter.next();
-			if (s.isMarkedForRemoval()) iter.remove();
+			if (s.isMarkedForRemoval())
+			{
+				s.dispose();
+				iter.remove();
+			}
 			else
 			{
 				s.tick(tick);
@@ -385,7 +389,7 @@ public class Island implements RenderableProvider, Tickable
 		for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
 		{
 			Structure s = iter.next();
-			if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity())) continue;
+			if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity()) || !s.isWorking()) continue;
 			
 			Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
 			if (p == null) continue;

@@ -23,7 +23,7 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
 import de.dakror.vloxlands.game.job.DumpJob;
 import de.dakror.vloxlands.game.job.Job;
-import de.dakror.vloxlands.game.job.ToolJob;
+import de.dakror.vloxlands.game.job.MineJob;
 import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -150,16 +150,19 @@ public class Human extends Creature
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if ((firstJob() instanceof ToolJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof ToolJob)) batch.render(toolModelInstance, environment);
+		if ((firstJob() instanceof MineJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof MineJob)) batch.render(toolModelInstance, environment);
 		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
 	}
 	
 	public void queueJob(Path path, Job job)
 	{
-		if (job == null) jobQueue.add(new WalkJob(path, this));
+		if (job == null)
+		{
+			if (path.size() > 0) jobQueue.add(new WalkJob(path, this));
+		}
 		else
 		{
-			if (path != null) jobQueue.add(new WalkJob(path, this));
+			if (path != null && path.size() > 0) jobQueue.add(new WalkJob(path, this));
 			jobQueue.add(job);
 		}
 	}
@@ -187,7 +190,7 @@ public class Human extends Creature
 			
 			if (path != null)
 			{
-				if (mineTarget) setJob(path, new ToolJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
+				if (mineTarget) setJob(path, new MineJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
 				else setJob(path, null);
 			}
 			selected = true;
@@ -199,9 +202,17 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			Vector3 v = structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos());
-			Path path = AStar.findPath(getVoxelBelow(), v, this, NodeType.target.useGhostTarget);
-			if (path != null) setJob(path, null);
+			Job job = null;
+			NodeType type = NodeType.target;
+			if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) && !carryingItemStack.isNull() && structure.isWorking())
+			{
+				job = new DumpJob(this, structure, false);
+				type = NodeType.dump;
+			}
+			
+			Vector3 v = structure.getStructureNode(posCache, type).pos.cpy().add(structure.getVoxelPos());
+			Path path = AStar.findPath(getVoxelBelow(), v, this, type.useGhostTarget);
+			if (path != null || job != null) setJob(path, job);
 		}
 	}
 	
@@ -215,7 +226,7 @@ public class Human extends Creature
 	
 	public void onJobDone(Job j)
 	{
-		if (j instanceof ToolJob)
+		if (j instanceof MineJob)
 		{
 			PairPathStructure pps = null;
 			
@@ -227,10 +238,10 @@ public class Human extends Creature
 			}
 			if (j.isPersistent())
 			{
-				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((ToolJob) j).getTarget().type.getId(), this);
+				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
 				if (path != null)
 				{
-					((ToolJob) j).getTarget().voxel.set(path.getGhostTarget());
+					((MineJob) j).getTarget().voxel.set(path.getGhostTarget());
 					queueJob(path, null);
 				}
 				else

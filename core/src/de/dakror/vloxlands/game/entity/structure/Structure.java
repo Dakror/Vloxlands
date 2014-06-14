@@ -15,6 +15,7 @@ public abstract class Structure extends Entity
 	Array<StructureNode> nodes;
 	Vector3 voxelPos;
 	Inventory inventory;
+	boolean working;
 	
 	final Vector3 tmp = new Vector3();
 	
@@ -33,6 +34,7 @@ public abstract class Structure extends Entity
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
 		
 		inventory = new Inventory();
+		working = true;
 	}
 	
 	public Vector3 getVoxelPos()
@@ -81,5 +83,15 @@ public abstract class Structure extends Entity
 	public Inventory getInventory()
 	{
 		return inventory;
+	}
+	
+	public boolean isWorking()
+	{
+		return working;
+	}
+	
+	public void setWorking(boolean working)
+	{
+		this.working = working;
 	}
 }

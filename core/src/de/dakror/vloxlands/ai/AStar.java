@@ -72,13 +72,14 @@ public class AStar
 		}
 		
 		v.reverse();
-		v.removeIndex(0); // remove start vector
+		Vector3 firstNode = v.removeIndex(0); // remove start vector
 		
 		if (neighbor != null) v.add(neighbor);
 		
 		lastPath = v;
 		
 		Path p = new Path(v);
+		p.removedFirstNode = firstNode;
 		if (ghostNode != null) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
 		
 		return p;

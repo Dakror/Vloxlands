@@ -7,9 +7,9 @@ import com.badlogic.gdx.utils.Array;
  */
 public class Inventory
 {
-	private Array<ItemStack> stacks;
-	private int capacity;
-	private int count;
+	protected Array<ItemStack> stacks;
+	protected int capacity;
+	protected int count;
 	
 	public Inventory(int capacity)
 	{
@@ -77,7 +77,7 @@ public class Inventory
 		return new ItemStack();
 	}
 	
-	private void addStack(ItemStack stack, int amount)
+	protected void addStack(ItemStack stack, int amount)
 	{
 		for (ItemStack s : stacks)
 		{

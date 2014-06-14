@@ -17,10 +17,12 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.ui.ItemSlot;
+import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.event.SelectionListener;
@@ -32,8 +34,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public class HudLayer extends Layer implements SelectionListener
 {
 	PinnableWindow selectedEntityWindow;
-	
-	// PinnableWindow selectedStructureWindow;
+	PinnableWindow selectedStructureWindow;
 	
 	@Override
 	public void show()
@@ -49,11 +50,11 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedEntityWindow.setVisible(false);
 		stage.addActor(selectedEntityWindow);
 		
-		// selectedStructureWindow = new PinnableWindow("", Vloxlands.skin);
-		// selectedStructureWindow.setPosition(Gdx.graphics.getWidth() - selectedStructureWindow.getWidth(), 0);
-		// selectedStructureWindow.setTitleAlignment(Align.left);
-		// selectedStructureWindow.setVisible(false);
-		// stage.addActor(selectedStructureWindow);
+		selectedStructureWindow = new PinnableWindow("", Vloxlands.skin);
+		selectedStructureWindow.setPosition(Gdx.graphics.getWidth() - selectedStructureWindow.getWidth(), 0);
+		selectedStructureWindow.setTitleAlignment(Align.left);
+		selectedStructureWindow.setVisible(false);
+		stage.addActor(selectedStructureWindow);
 	}
 	
 	@Override
@@ -66,11 +67,11 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public void onCreatureSelection(final Creature creature, boolean lmb)
 	{
-		// if (selectedStructureWindow.setShown(false))
-		// {
-		// selectedStructureWindow.clearChildren();
-		// selectedStructureWindow.clearActions();
-		// }
+		if (lmb && selectedStructureWindow.setShown(false))
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
 		
 		selectedEntityWindow.setTitle(creature.getName());
 		selectedEntityWindow.clearChildren();
@@ -82,7 +83,7 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.row().pad(0).colspan(4).width(220);
 			final List<Job> selectedEntityJobs = new List<Job>(Vloxlands.skin);
 			selectedEntityJobs.setItems(new IdleJob((Human) creature));
-			selectedEntityWindow.addAction(new Action()
+			selectedEntityJobs.addAction(new Action()
 			{
 				@Override
 				public boolean act(float delta)
@@ -148,39 +149,47 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if (selectedEntityWindow.setShown(false))
+		if (lmb && selectedEntityWindow.setShown(false))
 		{
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
-		// if (selectedStructureWindow.setShown(false))
-		// {
-		// selectedStructureWindow.clearChildren();
-		// selectedStructureWindow.clearActions();
-		// }
+		if (lmb && selectedStructureWindow.setShown(false))
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
 	}
 	
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (selectedEntityWindow.setShown(false))
+		if (lmb && selectedEntityWindow.setShown(false))
 		{
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
 		
-		// selectedStructureWindow.setTitle(structure.getName());
-		// selectedStructureWindow.clearChildren();
-		// selectedStructureWindow.clearActions();
-		// selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
-		//
-		// if (structure instanceof Warehouse)
-		// {
-		//
-		// }
-		//
-		// selectedStructureWindow.pack();
-		// selectedStructureWindow.setVisible(true);
+		selectedStructureWindow.setTitle(structure.getName());
+		selectedStructureWindow.clearChildren();
+		selectedStructureWindow.clearActions();
+		selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
+		
+		if (structure instanceof Warehouse)
+		{
+			List<NonStackingInventoryListItem> items = new List<NonStackingInventoryListItem>(Vloxlands.skin);
+			items.addAction(new Action()
+			{
+				@Override
+				public boolean act(float delta)
+				{
+					return false;
+				}
+			});
+		}
+		
+		selectedStructureWindow.pack();
+		selectedStructureWindow.setVisible(true);
 	}
 	
 	@Override

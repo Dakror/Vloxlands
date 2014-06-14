@@ -11,11 +11,11 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class ToolJob extends Job
+public class MineJob extends Job
 {
 	private VoxelSelection target;
 	
-	public ToolJob(Human human, VoxelSelection target, boolean persistent)
+	public MineJob(Human human, VoxelSelection target, boolean persistent)
 	{
 		super(human, "walk" /* mine */, "Mining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
