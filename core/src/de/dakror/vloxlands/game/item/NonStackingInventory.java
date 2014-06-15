@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.item;
 
+import java.util.Arrays;
 
 /**
  * @author Dakror
@@ -27,7 +28,19 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public ItemStack get(Item item, int amount)
+	public int hashCode()
+	{
+		return Arrays.hashCode(storage);
+	}
+	
+	@Override
+	public int get(Item item)
+	{
+		return storage[item.getId() + 128];
+	}
+	
+	@Override
+	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
 		int am = Math.min(amount, storage[item.getId() + 128]);

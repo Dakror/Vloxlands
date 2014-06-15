@@ -91,6 +91,13 @@ public class ItemStack
 		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
 	}
 	
+	@Override
+	public String toString()
+	{
+		if (isNull()) return "Null";
+		return amount + "x " + item.getName();
+	}
+	
 	private void dispatchStackChanged()
 	{
 		for (ItemStackListener isl : listeners)

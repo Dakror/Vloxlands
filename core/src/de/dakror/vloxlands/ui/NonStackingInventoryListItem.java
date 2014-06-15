@@ -3,8 +3,9 @@ package de.dakror.vloxlands.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
@@ -13,62 +14,66 @@ import de.dakror.vloxlands.game.item.Item;
 /**
  * @author Dakror
  */
-public class NonStackingInventoryListItem extends TextButton
+public class NonStackingInventoryListItem extends HorizontalGroup
 {
 	Tooltip tooltip;
-	
+	Label label;
 	Image image;
 	Item item;
 	int amount;
 	
 	public NonStackingInventoryListItem(Stage stage, Item item, int amount)
 	{
-		super(amount + "x " + item.getName(), Vloxlands.skin);
+		setName((item.getId() + 128) + "");
+		this.item = item;
+		this.amount = amount;
 		
 		tooltip = new Tooltip(amount + "x " + item.getName(), item.getDescription(), this);
 		stage.addActor(tooltip);
 		image = new Image();
 		addActor(image);
 		
-		onChange();
-	}
-	
-	private void onChange()
-	{
-		tooltip.set(amount + "x " + item.getName(), item.getDescription());
+		label = new Label(amount + "x " + item.getName(), Vloxlands.skin);
+		addActor(label);
 		
-		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
-		TextureRegion region = new TextureRegion(tex, item.getTextureX() * Item.SIZE, item.getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
-		image.setDrawable(new TextureRegionDrawable(region));
-		image.setSize(24, 24);
-	}
-	
-	@Override
-	protected void setStage(Stage stage)
-	{
-		super.setStage(stage);
-		if (stage == null) tooltip.remove();
-	}
-	
-	public Item getItem()
-	{
-		return item;
-	}
-	
-	public void setItem(Item item)
-	{
-		this.item = item;
 		onChange();
-	}
-	
-	public int getAmount()
-	{
-		return amount;
 	}
 	
 	public void setAmount(int amount)
 	{
 		this.amount = amount;
 		onChange();
+	}
+	
+	@Override
+	public float getHeight()
+	{
+		if (!isVisible()) return 0;
+		return super.getHeight();
+	}
+	
+	@Override
+	public float getPrefHeight()
+	{
+		if (!isVisible()) return 0;
+		return super.getPrefHeight();
+	}
+	
+	@Override
+	public float getWidth()
+	{
+		return 200;
+	}
+	
+	private void onChange()
+	{
+		tooltip.set(amount + "x " + item.getName(), item.getDescription());
+		label.setText(amount + "x " + item.getName());
+		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
+		TextureRegion region = new TextureRegion(tex, item.getTextureX() * Item.SIZE, item.getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
+		image.setDrawable(new TextureRegionDrawable(region));
+		image.setSize(24, 24);
+		
+		setVisible(amount > 0);
 	}
 }

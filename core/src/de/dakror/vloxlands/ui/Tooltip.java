@@ -31,7 +31,7 @@ public class Tooltip extends Window
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor)
 			{
-				if (Tooltip.this.getTitle().length() == 0 || fromActor != parent) return;
+				if (Tooltip.this.getTitle().length() == 0) return;
 				
 				Actor a = event.getListenerActor();
 				

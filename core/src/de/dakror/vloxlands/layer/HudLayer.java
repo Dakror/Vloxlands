@@ -2,12 +2,14 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -18,6 +20,7 @@ import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
+import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
@@ -73,77 +76,79 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.clearActions();
 		}
 		
-		selectedEntityWindow.setTitle(creature.getName());
-		selectedEntityWindow.clearChildren();
-		selectedEntityWindow.clearActions();
-		selectedEntityWindow.addActor(selectedEntityWindow.getButtonTable());
-		
-		if (creature instanceof Human)
+		if (lmb)
 		{
-			selectedEntityWindow.row().pad(0).colspan(4).width(220);
-			final List<Job> selectedEntityJobs = new List<Job>(Vloxlands.skin);
-			selectedEntityJobs.setItems(new IdleJob((Human) creature));
-			selectedEntityJobs.addAction(new Action()
+			selectedEntityWindow.setTitle(creature.getName());
+			selectedEntityWindow.clearChildren();
+			selectedEntityWindow.clearActions();
+			selectedEntityWindow.addActor(selectedEntityWindow.getButtonTable());
+			
+			if (creature instanceof Human)
 			{
-				@Override
-				public boolean act(float delta)
+				selectedEntityWindow.row().pad(0).colspan(4).width(220);
+				final List<Job> selectedEntityJobs = new List<Job>(Vloxlands.skin);
+				selectedEntityJobs.setItems(new IdleJob((Human) creature));
+				selectedEntityJobs.addAction(new Action()
 				{
-					if (((Human) creature).getJobQueue().size == 0 && selectedEntityJobs.getItems().get(0) instanceof IdleJob) return false;
-					
-					if (!((Human) creature).getJobQueue().equals(selectedEntityJobs.getItems()))
+					@Override
+					public boolean act(float delta)
 					{
-						if (((Human) creature).getJobQueue().size > 0) selectedEntityJobs.setItems(((Human) creature).getJobQueue());
-						else selectedEntityJobs.setItems(new IdleJob((Human) creature));
+						if (((Human) creature).getJobQueue().size == 0 && selectedEntityJobs.getItems().get(0) instanceof IdleJob) return false;
 						
-						selectedEntityJobs.getSelection().setDisabled(true);
-						selectedEntityJobs.setSelectedIndex(-1);
+						if (!((Human) creature).getJobQueue().equals(selectedEntityJobs.getItems()))
+						{
+							if (((Human) creature).getJobQueue().size > 0) selectedEntityJobs.setItems(((Human) creature).getJobQueue());
+							else selectedEntityJobs.setItems(new IdleJob((Human) creature));
+							
+							selectedEntityJobs.getSelection().setDisabled(true);
+							selectedEntityJobs.setSelectedIndex(-1);
+							selectedEntityWindow.pack();
+						}
+						
+						return false;
+					}
+				});
+				selectedEntityJobs.getSelection().setDisabled(true);
+				selectedEntityJobs.setSelectedIndex(-1);
+				final ScrollPane jobsWrap = new ScrollPane(selectedEntityJobs, Vloxlands.skin);
+				jobsWrap.setVisible(false);
+				jobsWrap.setScrollbarsOnTop(false);
+				jobsWrap.setFadeScrollBars(false);
+				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).maxHeight(100).ignore();
+				
+				selectedEntityWindow.row();
+				selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
+				ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
+				selectedEntityWindow.add(slot);
+				selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
+				
+				ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+				style.imageUp = Vloxlands.skin.getDrawable("gears");
+				style.imageUp.setMinWidth(ItemSlot.size);
+				style.imageUp.setMinHeight(ItemSlot.size);
+				style.imageDown = Vloxlands.skin.getDrawable("gears");
+				style.imageDown.setMinWidth(ItemSlot.size);
+				style.imageDown.setMinHeight(ItemSlot.size);
+				final TooltipImageButton job = new TooltipImageButton(stage, style);
+				job.addListener(new ClickListener()
+				{
+					@Override
+					public void clicked(InputEvent event, float x, float y)
+					{
+						cell.ignore(!cell.getIgnore());
+						jobsWrap.setVisible(!jobsWrap.isVisible());
+						selectedEntityWindow.invalidateHierarchy();
 						selectedEntityWindow.pack();
 					}
-					
-					return false;
-				}
-			});
-			selectedEntityJobs.getSelection().setDisabled(true);
-			selectedEntityJobs.setSelectedIndex(-1);
-			final ScrollPane jobsWrap = new ScrollPane(selectedEntityJobs, Vloxlands.skin);
-			jobsWrap.setVisible(false);
-			jobsWrap.setScrollbarsOnTop(false);
-			jobsWrap.setFadeScrollBars(false);
-			final Cell<?> cell = selectedEntityWindow.add(jobsWrap).maxHeight(100).ignore();
-			
-			selectedEntityWindow.row();
-			selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
-			ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
-			selectedEntityWindow.add(slot);
-			selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
-			
-			ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
-			style.imageUp = Vloxlands.skin.getDrawable("gears");
-			style.imageUp.setMinWidth(ItemSlot.size);
-			style.imageUp.setMinHeight(ItemSlot.size);
-			style.imageDown = Vloxlands.skin.getDrawable("gears");
-			style.imageDown.setMinWidth(ItemSlot.size);
-			style.imageDown.setMinHeight(ItemSlot.size);
-			final TooltipImageButton job = new TooltipImageButton(stage, style);
-			job.addListener(new ClickListener()
-			{
-				@Override
-				public void clicked(InputEvent event, float x, float y)
-				{
-					cell.ignore(!cell.getIgnore());
-					jobsWrap.setVisible(!jobsWrap.isVisible());
-					selectedEntityWindow.invalidateHierarchy();
-					selectedEntityWindow.pack();
-				}
-			});
-			job.pad(4);
-			job.getTooltip().set("Job Queue", "Toggle Job Queue display");
-			selectedEntityWindow.add(job);
+				});
+				job.pad(4);
+				job.getTooltip().set("Job Queue", "Toggle Job Queue display");
+				selectedEntityWindow.add(job);
+			}
 			
 			selectedEntityWindow.pack();
+			selectedEntityWindow.setVisible(true);
 		}
-		
-		selectedEntityWindow.setVisible(true);
 	}
 	
 	@Override
@@ -162,7 +167,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb)
+	public void onStructureSelection(final Structure structure, boolean lmb)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -170,26 +175,54 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearActions();
 		}
 		
-		selectedStructureWindow.setTitle(structure.getName());
-		selectedStructureWindow.clearChildren();
-		selectedStructureWindow.clearActions();
-		selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
-		
-		if (structure instanceof Warehouse)
+		if (lmb)
 		{
-			List<NonStackingInventoryListItem> items = new List<NonStackingInventoryListItem>(Vloxlands.skin);
-			items.addAction(new Action()
+			selectedStructureWindow.setTitle(structure.getName());
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+			selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
+			
+			if (structure instanceof Warehouse)
 			{
-				@Override
-				public boolean act(float delta)
+				final VerticalGroup items = new VerticalGroup();
+				items.left();
+				items.addAction(new Action()
 				{
-					return false;
-				}
-			});
+					int hashCode = 0;
+					
+					@Override
+					public boolean act(float delta)
+					{
+						int hc = structure.getInventory().hashCode();
+						if (hc != hashCode)
+						{
+							hashCode = hc;
+							
+							for (int i = 0; i < Item.ITEMS; i++)
+							{
+								Item item = Item.getForId(i);
+								if (item == null) continue;
+								
+								Actor a = items.findActor(i + "");
+								if (a != null) ((NonStackingInventoryListItem) a).setAmount(structure.getInventory().get(item));
+								else items.addActor(new NonStackingInventoryListItem(stage, item, structure.getInventory().get(item)));
+							}
+							
+						}
+						return false;
+					}
+				});
+				
+				selectedStructureWindow.row().pad(0).colspan(4).width(400);
+				final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
+				itemsWrap.setScrollbarsOnTop(false);
+				itemsWrap.setFadeScrollBars(false);
+				selectedStructureWindow.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
+			}
+			
+			selectedStructureWindow.pack();
+			selectedStructureWindow.setVisible(true);
 		}
-		
-		selectedStructureWindow.pack();
-		selectedStructureWindow.setVisible(true);
 	}
 	
 	@Override
