@@ -7,9 +7,9 @@ import com.badlogic.gdx.utils.Array;
  */
 public class Inventory
 {
-	private Array<ItemStack> stacks;
-	private int capacity;
-	private int count;
+	protected Array<ItemStack> stacks;
+	protected int capacity;
+	protected int count;
 	
 	public Inventory(int capacity)
 	{
@@ -37,7 +37,15 @@ public class Inventory
 		}
 	}
 	
-	public ItemStack get(Item item, int amount)
+	public int get(Item item)
+	{
+		int amount = 0;
+		for (ItemStack stack : stacks)
+			if (stack.getItem().getId() == item.getId()) amount += stack.amount;
+		return amount;
+	}
+	
+	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
 		ItemStack is = new ItemStack(item, 0);
@@ -68,16 +76,16 @@ public class Inventory
 	 * @param amount amount to get
 	 * @return only if at least <code>amount</code> items of type <code>item</code> are inside the inventory a stack, otherwise <code>null</code>
 	 */
-	public ItemStack getIfHas(Item item, int amount)
+	public ItemStack takeIfHas(Item item, int amount)
 	{
-		ItemStack is = get(item, amount);
+		ItemStack is = take(item, amount);
 		if (is.getAmount() == amount) return is;
 		
 		count += is.getAmount(); // undo-hack
 		return new ItemStack();
 	}
 	
-	private void addStack(ItemStack stack, int amount)
+	protected void addStack(ItemStack stack, int amount)
 	{
 		for (ItemStack s : stacks)
 		{

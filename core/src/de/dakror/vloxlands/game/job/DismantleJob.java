@@ -6,19 +6,14 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 /**
  * @author Dakror
  */
-public class DumpJob extends Job
+public class DismantleJob extends Job
 {
 	private Structure target;
 	
-	public DumpJob(Human human, Structure target, boolean persistent)
+	public DismantleJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "ablegen", "Dumping carried items", 1, persistent);
+		super(human, "mine", "Dismantling " + target.getName(), 10, persistent);
 		this.target = target;
-	}
-	
-	public Structure getTarget()
-	{
-		return target;
 	}
 	
 	@Override
@@ -29,7 +24,6 @@ public class DumpJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
-		
-		human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
+		target.kill();
 	}
 }

@@ -9,6 +9,7 @@ import de.dakror.vloxlands.util.Tickable;
 public abstract class Job implements Tickable
 {
 	String animation;
+	String text;
 	int repeats;
 	boolean active;
 	boolean done;
@@ -16,9 +17,10 @@ public abstract class Job implements Tickable
 	
 	Human human;
 	
-	public Job(Human human, String animation, int repeats, boolean persistent)
+	public Job(Human human, String animation, String text, int repeats, boolean persistent)
 	{
 		this.human = human;
+		this.text = text;
 		this.animation = animation;
 		this.repeats = repeats;
 		this.persistent = persistent;
@@ -66,5 +68,16 @@ public abstract class Job implements Tickable
 	public void setPersistent(boolean b)
 	{
 		persistent = b;
+	}
+	
+	public String getText()
+	{
+		return text;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return text;
 	}
 }

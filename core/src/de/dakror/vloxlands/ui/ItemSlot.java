@@ -3,7 +3,6 @@ package de.dakror.vloxlands.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
@@ -15,11 +14,11 @@ import de.dakror.vloxlands.util.event.ItemStackListener;
 /**
  * @author Dakror
  */
-public class ItemSlot extends ImageButton implements ItemStackListener
+public class ItemSlot extends TooltipImageButton implements ItemStackListener
 {
+	public static int size = 48;
 	ItemStack stack;
 	Label amount;
-	Tooltip tooltip;
 	
 	public ItemSlot(Stage stage)
 	{
@@ -28,21 +27,17 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 	
 	public ItemSlot(Stage stage, ItemStack stack)
 	{
-		super(createStyle(stack));
+		super(stage, createStyle(stack));
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
 		amount.setZIndex(1);
 		addActor(amount);
-		tooltip = new Tooltip("", "", this);
-		stage.addActor(tooltip);
 		
 		setItemStack(stack);
 	}
 	
 	private static ImageButtonStyle createStyle(ItemStack stack)
 	{
-		int size = 48;
-		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = null;
 		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getTextureX() * Item.SIZE, stack.getItem().getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
@@ -71,10 +66,9 @@ public class ItemSlot extends ImageButton implements ItemStackListener
 	}
 	
 	@Override
-	protected void setStage(Stage stage)
+	protected void onRemove()
 	{
-		super.setStage(stage);
-		if (stage == null) stack.removeListener(this);
+		stack.removeListener(this);
 	}
 	
 	@Override

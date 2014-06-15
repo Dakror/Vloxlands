@@ -193,6 +193,11 @@ public abstract class Entity extends EntityBase
 		GameLayer.instance.removeListener(this);
 	}
 	
+	public void kill()
+	{
+		markedForRemoval = true;
+	}
+	
 	// -- events -- //
 	
 	public void onSpawn()

@@ -1,6 +1,7 @@
 package de.dakror.vloxlands.game.entity.structure;
 
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.item.NonStackingInventory;
 
 
 /**
@@ -14,6 +15,7 @@ public class Warehouse extends Structure
 		
 		nodes.add(new StructureNode(NodeType.dump, 0, 0, 1));
 		name = "Warehouse";
-		inventory.setCapacity(250);
+		
+		inventory = new NonStackingInventory(250);
 	}
 }

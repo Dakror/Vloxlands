@@ -31,17 +31,17 @@ public class Tooltip extends Window
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor)
 			{
-				if (Tooltip.this.getTitle().length() == 0 || fromActor != parent) return;
+				if (Tooltip.this.getTitle().length() == 0) return;
 				
 				Actor a = event.getListenerActor();
 				
-				float x1 = a.getWidth() + 5;
+				float x1 = a.getWidth() + 10;
 				tmp.set(x1, a.getHeight() - getHeight());
 				a.localToStageCoordinates(tmp);
 				
 				if (tmp.x + getWidth() > getStage().getWidth())
 				{
-					x1 = -getWidth() - 5;
+					x1 = -getWidth() - 10;
 					tmp.set(x1, a.getHeight() - getHeight());
 					a.localToStageCoordinates(tmp);
 				}
@@ -64,6 +64,12 @@ public class Tooltip extends Window
 				return false;
 			}
 		});
+	}
+	
+	public void set(String title, String description)
+	{
+		setTitle(title);
+		setDescription(description);
 	}
 	
 	public void setDescription(String s)

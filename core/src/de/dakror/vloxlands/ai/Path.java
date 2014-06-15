@@ -22,6 +22,7 @@ public class Path
 		}
 	}
 	
+	public Vector3 removedFirstNode;
 	Array<Vector3> nodes;
 	/**
 	 * If the target is not walkable (e.g. a embeded resource in the ground) this is the actual target.
@@ -74,6 +75,7 @@ public class Path
 	public float length()
 	{
 		float length = 0;
+		if (removedFirstNode != null && nodes.size > 0) length = nodes.get(0).dst(removedFirstNode);
 		
 		for (int i = 1; i < nodes.size; i++)
 		{
