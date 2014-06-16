@@ -17,7 +17,7 @@ public class MineJob extends Job
 	
 	public MineJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, "Mining " + target.type.getName(), target.type.getMining(), persistent);
+		super(human, "walk" /* mine */, (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
 	}
 	

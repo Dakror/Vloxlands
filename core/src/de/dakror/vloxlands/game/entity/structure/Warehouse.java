@@ -16,6 +16,6 @@ public class Warehouse extends Structure
 		nodes.add(new StructureNode(NodeType.dump, 0, 0, 1));
 		name = "Warehouse";
 		
-		inventory = new NonStackingInventory(250);
+		inventory = new NonStackingInventory(100);
 	}
 }
