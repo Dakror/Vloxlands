@@ -80,7 +80,7 @@ public abstract class Creature extends Entity implements AnimationListener
 	
 	public Vector3 getVoxelBelow()
 	{
-		Vector3 v = posCache.sub(GameLayer.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
+		Vector3 v = posCache.sub(GameLayer.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2); // TODO: multi island support
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;

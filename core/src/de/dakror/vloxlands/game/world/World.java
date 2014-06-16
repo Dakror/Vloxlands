@@ -17,6 +17,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.ai.Path.PathBundle;
+import de.dakror.vloxlands.game.Query;
+import de.dakror.vloxlands.game.Query.Queryable;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.render.Mesher;
@@ -27,7 +30,7 @@ import de.dakror.vloxlands.util.Tickable;
 /**
  * @author Dakror
  */
-public class World implements RenderableProvider, Tickable
+public class World implements RenderableProvider, Tickable, Queryable
 {
 	public static final Color SELECTION = Color.valueOf("ff9900");
 	
@@ -164,6 +167,20 @@ public class World implements RenderableProvider, Tickable
 			island.render(batch, environment);
 			totalEntities += island.getStructureCount();
 		}
+	}
+	
+	@Override
+	public PathBundle query(Query query)
+	{
+		if (query.island == -1)
+		{
+			Gdx.app.error("World.query", "Should specify an island index thus they can't be connected yet! Return null.");
+			return null;
+		}
+		
+		
+		
+		return null;
 	}
 	
 	public static float calculateRelativeUplift(float y)

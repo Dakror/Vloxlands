@@ -3,6 +3,7 @@ package de.dakror.vloxlands.ai;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 
 /**
@@ -10,15 +11,17 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
  */
 public class Path
 {
-	public static class PairPathStructure
+	public static class PathBundle
 	{
 		public Path path;
 		public Structure structure;
+		public Creature creature;
 		
-		public PairPathStructure(Path path, Structure structure)
+		public PathBundle(Path path, Structure structure, Creature creature)
 		{
 			this.path = path;
 			this.structure = structure;
+			this.creature = creature;
 		}
 	}
 	

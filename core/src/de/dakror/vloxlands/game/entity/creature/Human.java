@@ -15,9 +15,11 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
 import de.dakror.vloxlands.ai.Path;
-import de.dakror.vloxlands.ai.Path.PairPathStructure;
+import de.dakror.vloxlands.ai.Path.PathBundle;
+import de.dakror.vloxlands.game.Query;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
@@ -228,11 +230,11 @@ public class Human extends Creature
 	{
 		if (j instanceof MineJob)
 		{
-			PairPathStructure pps = null;
+			PathBundle pps = null;
 			
 			if (carryingItemStack.isFull())
 			{
-				pps = GameLayer.world.getIslands()[0].getClosestCapableWarehouse(this, carryingItemStack, NodeType.dump, false);
+				pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.dump).island(0));
 				if (pps != null) queueJob(pps.path, new DumpJob(this, pps.structure, false));
 				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 			}
