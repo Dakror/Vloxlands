@@ -18,8 +18,12 @@ public class Query
 	
 	// -- searched -- //
 	public Class<?> searchedClass;
+	/**
+	 * If amount == 0, then everything gets checked against the item type
+	 */
 	public ItemStack searchedItemStack;
 	public NodeType searchedNodeType;
+	public String searchedNodeName;
 	
 	// -- mode -- //
 	public boolean searchingStructure;
@@ -27,6 +31,7 @@ public class Query
 	
 	// -- flags -- //
 	public boolean mustWork;
+	public boolean mustIdle;
 	public boolean mustHaveCapacity;
 	public boolean mustHaveCapacityForTransportedItemStack;
 	public boolean mustBeFull;
@@ -80,6 +85,12 @@ public class Query
 		return this;
 	}
 	
+	public Query node(String searchedNodeName)
+	{
+		this.searchedNodeName = searchedNodeName;
+		return this;
+	}
+	
 	public Query structure(boolean searchingStructure)
 	{
 		this.searchingStructure = searchingStructure;
@@ -89,6 +100,12 @@ public class Query
 	public Query closest(boolean takeClosest)
 	{
 		this.takeClosest = takeClosest;
+		return this;
+	}
+	
+	public Query idle(boolean mustIdle)
+	{
+		this.mustIdle = mustIdle;
 		return this;
 	}
 	

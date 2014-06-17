@@ -100,6 +100,23 @@ public class Inventory
 		count += amount;
 	}
 	
+	/**
+	 * If amount == 0, then everything gets checked against the item type
+	 */
+	public boolean contains(ItemStack stack)
+	{
+		for (ItemStack s : stacks)
+		{
+			if (stack.getAmount() == 0)
+			{
+				if (s.getItem().getId() == stack.getItem().getId()) return true;
+			}
+			else if (s.equals(stack)) return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean isFull()
 	{
 		return count == capacity;

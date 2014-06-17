@@ -40,6 +40,13 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
+	public boolean contains(ItemStack stack)
+	{
+		if (stack.getAmount() == 0) return get(stack.getItem()) > 0;
+		else return get(stack.getItem()) == stack.getAmount();
+	}
+	
+	@Override
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
