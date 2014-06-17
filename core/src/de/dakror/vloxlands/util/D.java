@@ -17,7 +17,7 @@ public class D
 		else
 		{
 			double dif = System.nanoTime() - last;
-			Gdx.app.log("D.u", dif + "ns = " + r(dif /= 1000.0) + "µs  = " + r(dif /= 1000.0) + "ms = " + r(dif /= 1000.0) + "s = " + r(dif /= 60.0) + "m = " + r(dif /= 60.0) + "h");
+			Gdx.app.log("D.u", dif + "ns = " + r(dif /= 1000.0) + "µs = " + r(dif /= 1000.0) + "ms = " + r(dif /= 1000.0) + "s = " + r(dif /= 60.0) + "m = " + r(dif /= 60.0) + "h");
 			last = 0;
 		}
 	}
