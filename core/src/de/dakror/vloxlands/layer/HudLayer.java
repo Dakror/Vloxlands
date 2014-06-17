@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
@@ -86,35 +87,35 @@ public class HudLayer extends Layer implements SelectionListener
 			if (creature instanceof Human)
 			{
 				selectedEntityWindow.row().pad(0).colspan(4).width(220);
-				final List<Job> selectedEntityJobs = new List<Job>(Vloxlands.skin);
-				selectedEntityJobs.setItems(new IdleJob((Human) creature));
-				selectedEntityJobs.addAction(new Action()
+				final List<Job> jobs = new List<Job>(Vloxlands.skin);
+				jobs.setItems(new IdleJob((Human) creature));
+				jobs.addAction(new Action()
 				{
 					@Override
 					public boolean act(float delta)
 					{
-						if (((Human) creature).getJobQueue().size == 0 && selectedEntityJobs.getItems().get(0) instanceof IdleJob) return false;
+						if (((Human) creature).getJobQueue().size == 0 && jobs.getItems().get(0) instanceof IdleJob) return false;
 						
-						if (!((Human) creature).getJobQueue().equals(selectedEntityJobs.getItems()))
+						if (!((Human) creature).getJobQueue().equals(jobs.getItems()))
 						{
-							if (((Human) creature).getJobQueue().size > 0) selectedEntityJobs.setItems(((Human) creature).getJobQueue());
-							else selectedEntityJobs.setItems(new IdleJob((Human) creature));
+							if (((Human) creature).getJobQueue().size > 0) jobs.setItems(((Human) creature).getJobQueue());
+							else jobs.setItems(new IdleJob((Human) creature));
 							
-							selectedEntityJobs.getSelection().setDisabled(true);
-							selectedEntityJobs.setSelectedIndex(-1);
+							jobs.getSelection().setDisabled(true);
+							jobs.setSelectedIndex(-1);
 							selectedEntityWindow.pack();
 						}
 						
 						return false;
 					}
 				});
-				selectedEntityJobs.getSelection().setDisabled(true);
-				selectedEntityJobs.setSelectedIndex(-1);
-				final ScrollPane jobsWrap = new ScrollPane(selectedEntityJobs, Vloxlands.skin);
+				jobs.getSelection().setDisabled(true);
+				jobs.setSelectedIndex(-1);
+				final ScrollPane jobsWrap = new ScrollPane(jobs, Vloxlands.skin);
 				jobsWrap.setVisible(false);
 				jobsWrap.setScrollbarsOnTop(false);
 				jobsWrap.setFadeScrollBars(false);
-				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).maxHeight(100).ignore();
+				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).height(100).ignore();
 				
 				selectedEntityWindow.row();
 				selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
@@ -130,6 +131,7 @@ public class HudLayer extends Layer implements SelectionListener
 				style.imageDown.setMinWidth(ItemSlot.size);
 				style.imageDown.setMinHeight(ItemSlot.size);
 				final TooltipImageButton job = new TooltipImageButton(stage, style);
+				job.getStyle().checked = Vloxlands.skin.getDrawable("default-round-down");
 				job.addListener(new ClickListener()
 				{
 					@Override
@@ -148,6 +150,7 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			selectedEntityWindow.pack();
 			selectedEntityWindow.setVisible(true);
+			selectedEntityWindow.toFront();
 		}
 	}
 	
@@ -207,7 +210,6 @@ public class HudLayer extends Layer implements SelectionListener
 								if (a != null) ((NonStackingInventoryListItem) a).setAmount(structure.getInventory().get(item));
 								else items.addActor(new NonStackingInventoryListItem(stage, item, structure.getInventory().get(item)));
 							}
-							
 						}
 						return false;
 					}
@@ -218,10 +220,32 @@ public class HudLayer extends Layer implements SelectionListener
 				itemsWrap.setScrollbarsOnTop(false);
 				itemsWrap.setFadeScrollBars(false);
 				selectedStructureWindow.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
+				
+				final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
+				capacity.setAlignment(Align.center, Align.center);
+				capacity.addAction(new Action()
+				{
+					@Override
+					public boolean act(float delta)
+					{
+						capacity.setText("Capacity: " + structure.getInventory().getCount() + " / " + structure.getInventory().getCapacity() + " Items");
+						
+						float percent = structure.getInventory().getCount() / (float) structure.getInventory().getCapacity();
+						
+						if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
+						else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
+						else if (percent == 1) capacity.setColor(1, 0, 0, 1);
+						else capacity.setColor(1, 1, 1, 1);
+						
+						return false;
+					}
+				});
+				selectedStructureWindow.add(capacity).top().width(200);
 			}
 			
 			selectedStructureWindow.pack();
 			selectedStructureWindow.setVisible(true);
+			selectedStructureWindow.toFront();
 		}
 	}
 	

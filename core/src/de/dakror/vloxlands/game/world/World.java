@@ -14,20 +14,27 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.Path.PathBundle;
+import de.dakror.vloxlands.game.Query;
+import de.dakror.vloxlands.game.Query.Queryable;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Tickable;
-
-
 
 /**
  * @author Dakror
  */
-public class World implements RenderableProvider, Tickable
+public class World implements RenderableProvider, Tickable, Queryable
 {
 	public static final Color SELECTION = Color.valueOf("ff9900");
 	
@@ -164,6 +171,64 @@ public class World implements RenderableProvider, Tickable
 			island.render(batch, environment);
 			totalEntities += island.getStructureCount();
 		}
+	}
+	
+	@Override
+	public PathBundle query(Query query)
+	{
+		if (query.island == -1)
+		{
+			Gdx.app.error("World.query", "You should specify an island index because they can't be connected yet! Return null.");
+			return null;
+		}
+		
+		Structure structure = query.sourceStructure;
+		Creature creature = query.sourceCreature;
+		Path path = null;
+		float distance = 0;
+		
+		
+		if (query.searchingStructure)
+		{
+			if (query.sourceCreature == null)
+			{
+				Gdx.app.error("World.query", "You should specify a source Creature when querying a Structure! Return null.");
+				return null;
+			}
+			Vector3 v = query.sourceCreature.getVoxelBelow();
+			
+			for (Iterator<Structure> iter = new ArrayIterator<Structure>(islands[query.island].structures); iter.hasNext();)
+			{
+				Structure s = iter.next();
+				if (s == query.sourceStructure) continue;
+				if (!s.getClass().equals(query.searchedClass)) continue;
+				if (query.mustWork && !s.isWorking()) continue;
+				if (query.mustBeEmpty && s.getInventory().getCount() > 0) continue;
+				if (query.mustBeFull && !s.getInventory().isFull()) continue;
+				if (query.mustHaveCapacity && s.getInventory().isFull()) continue;
+				if (query.mustHaveCapacityForTransportedItemStack && query.transportedItemStack != null && s.getInventory().getCount() + query.transportedItemStack.getAmount() > s.getInventory().getCapacity()) continue;
+				if (query.searchedNodeType != null && !s.hasStructureNode(query.searchedNodeType)) continue;
+				if (query.searchedNodeName != null && !s.hasStructureNode(query.searchedNodeName)) continue;
+				if (query.searchedItemStack != null && !s.getInventory().contains(query.searchedItemStack)) continue;
+				
+				NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
+				Path p = AStar.findPath(v, s.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(s.getVoxelPos()), query.sourceCreature, type.useGhostTarget);
+				if (p == null) continue;
+				
+				float dist = p.length();
+				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
+				{
+					distance = dist;
+					path = p;
+					structure = s;
+				}
+			}
+		}
+		else
+		{}
+		
+		if (path == null) return null;
+		return new PathBundle(path, structure, creature);
 	}
 	
 	public static float calculateRelativeUplift(float y)

@@ -72,6 +72,23 @@ public abstract class Structure extends Entity
 		return node;
 	}
 	
+	public boolean hasStructureNode(NodeType type)
+	{
+		for (StructureNode sn : nodes)
+			if (sn.type == type) return true;
+		
+		return false;
+	}
+	
+	
+	public boolean hasStructureNode(String name)
+	{
+		for (StructureNode sn : nodes)
+			if (sn.name.equals(name)) return true;
+		
+		return false;
+	}
+	
 	/**
 	 * @param from expected to be in world space
 	 */

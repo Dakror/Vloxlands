@@ -9,17 +9,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.Path;
-import de.dakror.vloxlands.ai.Path.PairPathStructure;
-import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
-import de.dakror.vloxlands.game.entity.structure.Warehouse;
-import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
@@ -377,34 +369,34 @@ public class Island implements RenderableProvider, Tickable
 	}
 	
 	// -- structure queries -- //
-	
-	public PairPathStructure getClosestCapableWarehouse(Creature c, ItemStack stack, NodeType type, boolean spaceForFullAmount)
-	{
-		Structure structure = null;
-		Path path = null;
-		float pathDistance = 0;
-		
-		Vector3 voxel = c.getVoxelBelow();
-		
-		for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
-		{
-			Structure s = iter.next();
-			if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity()) || !s.isWorking()) continue;
-			
-			Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
-			if (p == null) continue;
-			
-			float len = p.length();
-			if (structure == null || len < pathDistance)
-			{
-				structure = s;
-				path = p;
-				pathDistance = len;
-			}
-		}
-		
-		if (structure == null || path == null) return null;
-		
-		return new PairPathStructure(path, structure);
-	}
+	//
+	// public PathBundle getClosestCapableWarehouse(Creature c, ItemStack stack, NodeType type, boolean spaceForFullAmount)
+	// {
+	// Structure structure = null;
+	// Path path = null;
+	// float pathDistance = 0;
+	//
+	// Vector3 voxel = c.getVoxelBelow();
+	//
+	// for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
+	// {
+	// Structure s = iter.next();
+	// if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity()) || !s.isWorking()) continue;
+	//
+	// Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
+	// if (p == null) continue;
+	//
+	// float len = p.length();
+	// if (structure == null || len < pathDistance)
+	// {
+	// structure = s;
+	// path = p;
+	// pathDistance = len;
+	// }
+	// }
+	//
+	// if (structure == null || path == null) return null;
+	//
+	// return new PathBundle(path, structure, c);
+	// }
 }
