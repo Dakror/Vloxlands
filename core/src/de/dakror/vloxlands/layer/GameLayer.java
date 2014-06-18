@@ -60,7 +60,7 @@ public class GameLayer extends Layer
 	
 	public Environment lights;
 	
-	Array<SelectionListener> listeners = new Array<SelectionListener>();
+	public Array<SelectionListener> listeners = new Array<SelectionListener>();
 	
 	ModelBatch modelBatch;
 	FirstPersonCameraController controller;

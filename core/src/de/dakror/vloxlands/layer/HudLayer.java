@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -77,7 +78,13 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.clearActions();
 		}
 		
-		if (lmb)
+		if (lmb && selectedEntityWindow.setShown(false) && creature == null)
+		{
+			selectedEntityWindow.clearChildren();
+			selectedEntityWindow.clearActions();
+		}
+		
+		if (lmb && creature != null)
 		{
 			selectedEntityWindow.setTitle(creature.getName());
 			selectedEntityWindow.clearChildren();
@@ -178,12 +185,37 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearActions();
 		}
 		
-		if (lmb)
+		if (lmb && selectedStructureWindow.setShown(false) && structure == null)
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
+		
+		if (lmb && structure != null)
 		{
 			selectedStructureWindow.setTitle(structure.getName());
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 			selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
+			
+			ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("bomb");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageDown = Vloxlands.skin.getDrawable("bomb");
+			style.imageDown.setMinWidth(ItemSlot.size);
+			style.imageDown.setMinHeight(ItemSlot.size);
+			final TooltipImageButton dismantle = new TooltipImageButton(stage, style);
+			dismantle.addListener(new ClickListener()
+			{
+				@Override
+				public void clicked(InputEvent event, float x, float y)
+				{
+					structure.requestDismantle();
+				}
+			});
+			dismantle.pad(4);
+			dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
 			
 			if (structure instanceof Warehouse)
 			{
@@ -215,7 +247,7 @@ public class HudLayer extends Layer implements SelectionListener
 					}
 				});
 				
-				selectedStructureWindow.row().pad(0).colspan(4).width(400);
+				selectedStructureWindow.row().pad(0).width(400);
 				final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
 				itemsWrap.setScrollbarsOnTop(false);
 				itemsWrap.setFadeScrollBars(false);
@@ -240,7 +272,13 @@ public class HudLayer extends Layer implements SelectionListener
 						return false;
 					}
 				});
-				selectedStructureWindow.add(capacity).top().width(200);
+				
+				Table rightSide = new Table(Vloxlands.skin);
+				rightSide.row();
+				rightSide.add(capacity);
+				rightSide.row();
+				rightSide.add(dismantle).spaceTop(5).left();
+				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			
 			selectedStructureWindow.pack();

@@ -18,22 +18,8 @@ public class TooltipImageButton extends ImageButton
 		stage.addActor(tooltip);
 	}
 	
-	@Override
-	protected void setStage(Stage stage)
-	{
-		super.setStage(stage);
-		if (stage == null)
-		{
-			onRemove();
-			tooltip.remove();
-		}
-	}
-	
 	public Tooltip getTooltip()
 	{
 		return tooltip;
 	}
-	
-	protected void onRemove()
-	{}
 }
