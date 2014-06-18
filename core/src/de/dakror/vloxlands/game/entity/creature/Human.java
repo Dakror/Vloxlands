@@ -240,7 +240,7 @@ public class Human extends Creature
 			}
 			if (j.isPersistent())
 			{
-				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
+				Path path = BFS.findClosestVoxel(pps != null && pps.path.size() > 0 ? pps.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
 				if (path != null)
 				{
 					((MineJob) j).getTarget().voxel.set(path.getGhostTarget());
