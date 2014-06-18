@@ -50,7 +50,7 @@ public class GameLayer extends Layer
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 30f;
+	public static final float pickRayMaxDistance = 150f;
 	
 	public static GameLayer instance;
 	
@@ -101,7 +101,7 @@ public class GameLayer extends Layer
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
-		camera.far = 150;
+		camera.far = pickRayMaxDistance;
 		controller = new FirstPersonCameraController(camera)
 		{
 			@Override
