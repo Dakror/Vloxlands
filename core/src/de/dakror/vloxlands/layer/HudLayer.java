@@ -217,6 +217,25 @@ public class HudLayer extends Layer implements SelectionListener
 			dismantle.pad(4);
 			dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
 			
+			style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("gears");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageDown = Vloxlands.skin.getDrawable("gears");
+			style.imageDown.setMinWidth(ItemSlot.size);
+			style.imageDown.setMinHeight(ItemSlot.size);
+			final TooltipImageButton sleep = new TooltipImageButton(stage, style);
+			sleep.addListener(new ClickListener()
+			{
+				@Override
+				public void clicked(InputEvent event, float x, float y)
+				{
+					structure.setWorking(!structure.isWorking());
+				}
+			});
+			sleep.pad(4);
+			sleep.getTooltip().set("En-/Disable building", "Toggle the building's working state.");
+			
 			if (structure instanceof Warehouse)
 			{
 				final VerticalGroup items = new VerticalGroup();
@@ -275,9 +294,10 @@ public class HudLayer extends Layer implements SelectionListener
 				
 				Table rightSide = new Table(Vloxlands.skin);
 				rightSide.row();
-				rightSide.add(capacity);
-				rightSide.row();
-				rightSide.add(dismantle).spaceTop(5).left();
+				rightSide.add(capacity).colspan(2);
+				rightSide.row().left().spaceTop(5);
+				rightSide.add(dismantle).left();
+				rightSide.add(sleep).right();
 				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			
