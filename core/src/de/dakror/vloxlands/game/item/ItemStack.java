@@ -91,6 +91,12 @@ public class ItemStack
 		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
 	}
 	
+	public boolean canAdd(ItemStack stack)
+	{
+		if (stack.getItem().getId() != item.getId()) return false;
+		return amount + stack.getAmount() <= item.getStack();
+	}
+	
 	@Override
 	public String toString()
 	{

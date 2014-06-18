@@ -42,6 +42,11 @@ public abstract class Structure extends Entity
 		return voxelPos;
 	}
 	
+	public Vector3 getCenter()
+	{
+		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
+	}
+	
 	/**
 	 * @param from expected to be in world space
 	 */
@@ -79,7 +84,6 @@ public abstract class Structure extends Entity
 		
 		return false;
 	}
-	
 	
 	public boolean hasStructureNode(String name)
 	{

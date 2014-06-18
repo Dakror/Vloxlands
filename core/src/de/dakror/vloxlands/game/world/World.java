@@ -26,6 +26,7 @@ import de.dakror.vloxlands.game.Query;
 import de.dakror.vloxlands.game.Query.Queryable;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.render.Mesher;
@@ -187,6 +188,11 @@ public class World implements RenderableProvider, Tickable, Queryable
 		Path path = null;
 		float distance = 0;
 		
+		if (structure == null && creature == null)
+		{
+			Gdx.app.error("World.query", "You have to specify either a source Creature or Structure when querying! Return null.");
+			return null;
+		}
 		
 		if (query.searchingStructure)
 		{
@@ -225,7 +231,36 @@ public class World implements RenderableProvider, Tickable, Queryable
 			}
 		}
 		else
-		{}
+		{
+			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
+			
+			for (Iterator<Entity> iter = new ArrayIterator<Entity>(entities); iter.hasNext();)
+			{
+				Entity e = iter.next();
+				if (!(e instanceof Creature)) continue;
+				if (e == query.sourceCreature) continue;
+				if (!e.getClass().equals(query.searchedClass)) continue;
+				if (query.searchedClass.equals(Human.class))
+				{
+					if (query.mustIdle && !((Human) e).isIdle()) continue;
+					if (query.mustBeFull && !((Human) e).getCarryingItemStack().isFull()) continue;
+					if (query.mustBeEmpty && !((Human) e).getCarryingItemStack().isNull()) continue;
+					if (query.mustHaveCapacity && ((Human) e).getCarryingItemStack().isFull()) continue;
+					if (query.mustHaveCapacityForTransportedItemStack && !((Human) e).getCarryingItemStack().canAdd(query.transportedItemStack)) continue;
+				}
+				
+				Path p = AStar.findPath(((Creature) e).getVoxelBelow(), query.sourceCreature != null ? query.sourceCreature.getVoxelBelow() : query.sourceStructure.getStructureNode(((Creature) e).getVoxelBelow(), type, query.searchedNodeName).pos.cpy().add(query.sourceStructure.getVoxelPos()), query.sourceCreature != null ? query.sourceCreature : (Creature) e, query.sourceCreature != null ? true : type.useGhostTarget);
+				if (p == null) continue;
+				
+				float dist = p.length();
+				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
+				{
+					distance = dist;
+					path = p;
+					creature = (Creature) e;
+				}
+			}
+		}
 		
 		if (path == null) return null;
 		return new PathBundle(path, structure, creature);

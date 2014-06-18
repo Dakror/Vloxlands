@@ -30,12 +30,16 @@ public class Query
 	public boolean takeClosest;
 	
 	// -- flags -- //
-	public boolean mustWork;
-	public boolean mustIdle;
+	public boolean mustBeEmpty;
+	public boolean mustBeFull;
 	public boolean mustHaveCapacity;
 	public boolean mustHaveCapacityForTransportedItemStack;
-	public boolean mustBeFull;
-	public boolean mustBeEmpty;
+	
+	// - structure flags - //
+	public boolean mustWork;
+	
+	// - human flags - //
+	public boolean mustIdle;
 	
 	// -- transport -- //
 	public ItemStack transportedItemStack;

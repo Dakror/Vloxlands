@@ -260,6 +260,11 @@ public class Human extends Creature
 		return jobQueue;
 	}
 	
+	public boolean isIdle()
+	{
+		return jobQueue.size == 0;
+	}
+	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{
