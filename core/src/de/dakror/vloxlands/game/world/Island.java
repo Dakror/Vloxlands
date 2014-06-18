@@ -16,6 +16,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.event.SelectionListener;
 
 /**
  * @author Dakror
@@ -111,6 +112,9 @@ public class Island implements RenderableProvider, Tickable
 			Structure s = iter.next();
 			if (s.isMarkedForRemoval())
 			{
+				s.selected = false;
+				for (SelectionListener sl : GameLayer.instance.listeners)
+					sl.onStructureSelection(null, true);
 				s.dispose();
 				iter.remove();
 			}
@@ -367,36 +371,4 @@ public class Island implements RenderableProvider, Tickable
 		
 		return true;
 	}
-	
-	// -- structure queries -- //
-	//
-	// public PathBundle getClosestCapableWarehouse(Creature c, ItemStack stack, NodeType type, boolean spaceForFullAmount)
-	// {
-	// Structure structure = null;
-	// Path path = null;
-	// float pathDistance = 0;
-	//
-	// Vector3 voxel = c.getVoxelBelow();
-	//
-	// for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
-	// {
-	// Structure s = iter.next();
-	// if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity()) || !s.isWorking()) continue;
-	//
-	// Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
-	// if (p == null) continue;
-	//
-	// float len = p.length();
-	// if (structure == null || len < pathDistance)
-	// {
-	// structure = s;
-	// path = p;
-	// pathDistance = len;
-	// }
-	// }
-	//
-	// if (structure == null || path == null) return null;
-	//
-	// return new PathBundle(path, structure, c);
-	// }
 }

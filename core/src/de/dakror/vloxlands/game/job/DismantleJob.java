@@ -12,7 +12,7 @@ public class DismantleJob extends Job
 	
 	public DismantleJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "mine", "Dismantling " + target.getName(), 10, persistent);
+		super(human, "walk", "Dismantling " + target.getName(), 10, persistent);
 		this.target = target;
 	}
 	
