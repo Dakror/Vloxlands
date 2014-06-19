@@ -111,7 +111,7 @@ public abstract class Creature extends Entity implements AnimationListener
 	
 	protected void rotateTowardsGhostTarget(Path path)
 	{
-		if (path.getGhostTarget() != null)
+		if (path != null && path.getGhostTarget() != null)
 		{
 			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
 			transform.setToRotation(Vector3.Y, 0).translate(posCache);
