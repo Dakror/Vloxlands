@@ -103,8 +103,8 @@ public class GameLayer extends Layer
 		camera.far = pickRayMaxDistance;
 		controller = new CameraInputController(camera);
 		controller.translateUnits = 20;
-		// controller.rotateLeftKey = -1;
-		// controller.rotateRightKey = -1;
+		controller.rotateLeftKey = -1;
+		controller.rotateRightKey = -1;
 		controller.translateButton = Buttons.RIGHT;
 		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
