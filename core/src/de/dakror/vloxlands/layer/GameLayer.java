@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.layer;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Intersector;
@@ -50,7 +49,7 @@ public class GameLayer extends Layer
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 150f;
+	public static final float pickRayMaxDistance = 100f;
 	
 	public static GameLayer instance;
 	
@@ -63,7 +62,7 @@ public class GameLayer extends Layer
 	public Array<SelectionListener> listeners = new Array<SelectionListener>();
 	
 	ModelBatch modelBatch;
-	FirstPersonCameraController controller;
+	CameraInputController controller;
 	Vector3 worldMiddle;
 	
 	boolean middleDown;
@@ -102,17 +101,14 @@ public class GameLayer extends Layer
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
-		controller = new FirstPersonCameraController(camera)
-		{
-			@Override
-			public boolean touchDragged(int screenX, int screenY, int pointer)
-			{
-				if (middleDown || Gdx.app.getType() == ApplicationType.Android) super.touchDragged(screenX, screenY, pointer);
-				return false;
-			}
-		};
-		controller.setDegreesPerPixel(rotateSpeed);
-		controller.setVelocity(velocity);
+		controller = new CameraInputController(camera);
+		controller.translateUnits = 20;
+		controller.rotateLeftKey = -1;
+		controller.rotateRightKey = -1;
+		controller.forwardKey = -1;
+		controller.backwardKey = -1;
+		controller.translateButton = -1;
+		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
 		
 		shapeRenderer = new ShapeRenderer();
@@ -123,11 +119,11 @@ public class GameLayer extends Layer
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		// int w = MathUtils.random(1, 5);
-		// int d = MathUtils.random(1, 5);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
-		world = new World(1, 1);
-		// Gdx.app.log("GameLayer.create", "World size: " + w + "x" + d);
+		world = new World(w, d);
+		Gdx.app.log("GameLayer.create", "World size: " + w + "x" + d);
 	}
 	
 	public void doneLoading()
@@ -145,10 +141,15 @@ public class GameLayer extends Layer
 		
 		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
 		
+		controller.target.set(worldMiddle);
+		
 		camera.position.set(worldMiddle);
 		camera.position.y -= Island.SIZE / 4;
 		camera.position.z -= Island.SIZE / 2;
 		camera.rotate(Vector3.Y, 180);
+		
+		controller.update();
+		camera.update();
 		
 		doneLoading = true;
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
