@@ -218,23 +218,25 @@ public class HudLayer extends Layer implements SelectionListener
 			dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
 			
 			style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
-			style.imageUp = Vloxlands.skin.getDrawable("gears");
+			style.imageUp = Vloxlands.skin.getDrawable("sleep");
 			style.imageUp.setMinWidth(ItemSlot.size);
 			style.imageUp.setMinHeight(ItemSlot.size);
-			style.imageDown = Vloxlands.skin.getDrawable("gears");
-			style.imageDown.setMinWidth(ItemSlot.size);
-			style.imageDown.setMinHeight(ItemSlot.size);
+			style.imageChecked = Vloxlands.skin.getDrawable("gears");
+			style.imageChecked.setMinWidth(ItemSlot.size);
+			style.imageChecked.setMinHeight(ItemSlot.size);
 			final TooltipImageButton sleep = new TooltipImageButton(stage, style);
+			sleep.setChecked(structure.isWorking());
 			sleep.addListener(new ClickListener()
 			{
 				@Override
 				public void clicked(InputEvent event, float x, float y)
 				{
 					structure.setWorking(!structure.isWorking());
+					sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
 				}
 			});
 			sleep.pad(4);
-			sleep.getTooltip().set("En-/Disable building", "Toggle the building's working state.");
+			sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
 			
 			if (structure instanceof Warehouse)
 			{
