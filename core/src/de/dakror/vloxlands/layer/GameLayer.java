@@ -105,7 +105,9 @@ public class GameLayer extends Layer
 		controller.translateUnits = 20;
 		controller.rotateLeftKey = -1;
 		controller.rotateRightKey = -1;
-		controller.translateButton = Buttons.RIGHT;
+		controller.forwardKey = -1;
+		controller.backwardKey = -1;
+		controller.translateButton = -1;
 		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
 		
