@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -40,6 +41,7 @@ import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
+import de.dakror.vloxlands.util.math.CustomizableFrustum;
 
 /**
  * @author Dakror
@@ -67,9 +69,6 @@ public class GameLayer extends Layer
 	
 	boolean middleDown;
 	boolean doneLoading;
-	
-	public Vector3 intersection = new Vector3();
-	public Vector3 intersection2 = new Vector3();
 	
 	ModelInstance sky;
 	
@@ -384,7 +383,6 @@ public class GameLayer extends Layer
 							float dst = ray.origin.dst(tmp5);
 							if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
 							{
-								intersection.set(tmp5);
 								distance = dst;
 								selectedVoxel.set(tmp6);
 								selectedChunk = c;
@@ -416,7 +414,6 @@ public class GameLayer extends Layer
 						float dist = ray.origin.dst(is2);
 						if (dir == null || dist < distanc)
 						{
-							intersection2.set(is2);
 							distanc = dist;
 							dir = d;
 						}
@@ -443,6 +440,48 @@ public class GameLayer extends Layer
 		}
 	}
 	
+	public void selectionBox(Rectangle rectangle)
+	{
+		CustomizableFrustum frustum = new CustomizableFrustum(rectangle);
+		camera.update();
+		frustum.update(camera.invProjectionView);
+		Vector3 origin = camera.unproject(new Vector3(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		boolean anyEntitySelected = false;
+		
+		for (Entity entity : world.getEntities())
+		{
+			entity.wasSelected = entity.selected;
+			entity.selected = false;
+			entity.getWorldBoundingBox(bb);
+			
+			float dst = origin.dst(entity.posCache);
+			if (entity.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance)
+			{
+				entity.selected = true;
+				anyEntitySelected = true;
+				break;
+			}
+		}
+		
+		if (!anyEntitySelected)
+		{
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.wasSelected = structure.selected;
+					structure.selected = false;
+					structure.getWorldBoundingBox(bb);
+					
+					float dst = origin.dst(structure.posCache);
+					if (structure.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance) structure.selected = true;
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
@@ -458,8 +497,13 @@ public class GameLayer extends Layer
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}
-		else pickRay(false, button == Buttons.LEFT, screenX, screenY);
-		
+		return false;
+	}
+	
+	@Override
+	public boolean tap(float x, float y, int count, int button)
+	{
+		if (button != Buttons.MIDDLE) pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
 		return false;
 	}
 	

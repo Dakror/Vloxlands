@@ -2,6 +2,7 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -11,8 +12,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
  */
 public abstract class Layer implements Screen, InputProcessor, GestureListener
 {
+	public GestureDetector gestureDetector;
 	Stage stage;
 	boolean modal;
+	
+	public Layer()
+	{
+		gestureDetector = new GestureDetector(this);
+	}
 	
 	public boolean isModal()
 	{

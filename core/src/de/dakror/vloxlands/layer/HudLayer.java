@@ -1,6 +1,12 @@
 package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -41,6 +47,13 @@ public class HudLayer extends Layer implements SelectionListener
 	PinnableWindow selectedEntityWindow;
 	PinnableWindow selectedStructureWindow;
 	
+	ShapeRenderer shapeRenderer;
+	
+	int buttonDown = -1;
+	
+	final Vector2 dragStart = new Vector2(-1, -1);
+	final Vector2 dragEnd = new Vector2(-1, -1);
+	
 	@Override
 	public void show()
 	{
@@ -48,6 +61,7 @@ public class HudLayer extends Layer implements SelectionListener
 		GameLayer.instance.addListener(this);
 		
 		stage = new Stage(new ScreenViewport());
+		shapeRenderer = new ShapeRenderer();
 		
 		selectedEntityWindow = new PinnableWindow("", Vloxlands.skin);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
@@ -310,9 +324,65 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button)
+	{
+		if (button == Buttons.LEFT)
+		{
+			if (dragEnd.x > -1)
+			{
+				float x = Math.min(dragStart.x, dragEnd.x) / Gdx.graphics.getWidth();
+				float y = Math.min(dragStart.y, dragEnd.y) / Gdx.graphics.getHeight();
+				float width = Math.abs(dragStart.x - dragEnd.x) / Gdx.graphics.getWidth();
+				float height = Math.abs(dragStart.y - dragEnd.y) / Gdx.graphics.getHeight();
+				
+				GameLayer.instance.selectionBox(new Rectangle(x, y, width, height));
+			}
+			dragStart.set(-1, -1);
+			dragEnd.set(-1, -1);
+		}
+		buttonDown = -1;
+		return false;
+	}
+	
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button)
+	{
+		buttonDown = button;
+		return false;
+	}
+	
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer)
+	{
+		if (buttonDown == Buttons.LEFT)
+		{
+			if (dragStart.x == -1)
+			{
+				dragStart.set(screenX, Gdx.graphics.getHeight() - screenY);
+				dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
+			}
+			else dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
+			
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
 	public void render(float delta)
 	{
 		stage.act();
-		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal()) stage.draw();
+		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
+		{
+			stage.draw();
+			if (dragStart.x > -1)
+			{
+				shapeRenderer.begin(ShapeType.Line);
+				shapeRenderer.identity();
+				shapeRenderer.setColor(Color.WHITE);
+				shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
+				shapeRenderer.end();
+			}
+		}
 	}
 }
