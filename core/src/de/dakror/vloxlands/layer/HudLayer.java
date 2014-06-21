@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.tablelayout.Cell;
 
@@ -389,7 +390,7 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
 			
-			int containerSize = 300;
+			int containerSize = 250;
 			
 			float w1 = containerSize / ((GameLayer.world.getWidth() + GameLayer.world.getDepth())) * 2;
 			
@@ -400,6 +401,8 @@ public class HudLayer extends Layer implements SelectionListener
 			float mapHeight = height / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
 			
 			stage.getBatch().begin();
+			Drawable bg = Vloxlands.skin.getDrawable("default-rect");
+			bg.draw(stage.getBatch(), Gdx.graphics.getWidth() - containerSize, Gdx.graphics.getHeight() - containerSize, containerSize, containerSize);
 			
 			for (Island island : GameLayer.world.getIslands())
 			{
@@ -413,12 +416,6 @@ public class HudLayer extends Layer implements SelectionListener
 				}
 			}
 			stage.getBatch().end();
-			
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.identity();
-			shapeRenderer.setColor(Color.WHITE);
-			shapeRenderer.rect(Gdx.graphics.getWidth() - containerSize, Gdx.graphics.getHeight() - containerSize, containerSize, containerSize);
-			shapeRenderer.end();
 		}
 	}
 }
