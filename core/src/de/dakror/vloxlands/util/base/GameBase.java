@@ -22,7 +22,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 		layer.show();
 		getMultiplexer().addProcessor(0, layer);
 		getMultiplexer().addProcessor(1, layer.gestureDetector);
-		if (layer.getStage() != null) getMultiplexer().addProcessor(2, layer.getStage());
+		if (layer.getStage() != null) getMultiplexer().addProcessor(0, layer.getStage());
 		layers.add(layer);
 	}
 	
