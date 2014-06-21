@@ -389,15 +389,15 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
 			
-			int containerSize = 400;
+			int containerSize = 300;
 			
-			float w1 = containerSize / ((GameLayer.world.getWidth() + GameLayer.world.getDepth()) * (float) Math.sqrt(3) / 2) * 2;
+			float w1 = containerSize / ((GameLayer.world.getWidth() + GameLayer.world.getDepth())) * 2;
 			
 			float width = w1;
 			float height = width / aspect;
 			
-			float mapWidth = width * (GameLayer.world.getWidth() + GameLayer.world.getDepth()) * (float) Math.sqrt(3) / 2;
-			float mapHeight = height * (GameLayer.world.getWidth() + GameLayer.world.getDepth()) / 2;
+			float mapWidth = width / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
+			float mapHeight = height / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
 			
 			stage.getBatch().begin();
 			
@@ -407,9 +407,9 @@ public class HudLayer extends Layer implements SelectionListener
 				{
 					Texture fboTex = island.fbo.getColorBufferTexture();
 					
-					float x = island.index.x * width / 2 + island.index.z * width / 2;
-					float y = island.index.x * height / 2 - island.index.z * height / 2;
-					stage.getBatch().draw(fboTex, Gdx.graphics.getWidth() - containerSize + x, Gdx.graphics.getHeight() - containerSize + y + (containerSize - mapHeight) / 2, width, height, 0, 0, fboTex.getWidth(), fboTex.getHeight(), false, true);
+					float x = width / 2 * (island.index.x + island.index.z);
+					float y = height / 2 * (island.index.x - island.index.z);
+					stage.getBatch().draw(fboTex, Gdx.graphics.getWidth() - containerSize + x + (containerSize - mapWidth) / 2, Gdx.graphics.getHeight() - containerSize - y + height / 2 * (GameLayer.world.getWidth() - 1) + (containerSize - mapHeight) / 2, width, height, 0, 0, fboTex.getWidth(), fboTex.getHeight(), false, true);
 				}
 			}
 			stage.getBatch().end();
