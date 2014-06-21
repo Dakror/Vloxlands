@@ -3,6 +3,7 @@ package de.dakror.vloxlands.layer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -32,6 +33,7 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
@@ -61,6 +63,7 @@ public class HudLayer extends Layer implements SelectionListener
 		GameLayer.instance.addListener(this);
 		
 		stage = new Stage(new ScreenViewport());
+		
 		shapeRenderer = new ShapeRenderer();
 		
 		selectedEntityWindow = new PinnableWindow("", Vloxlands.skin);
@@ -383,6 +386,39 @@ public class HudLayer extends Layer implements SelectionListener
 				shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
 				shapeRenderer.end();
 			}
+			
+			float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
+			
+			int containerSize = 400;
+			
+			float w1 = containerSize / ((GameLayer.world.getWidth() + GameLayer.world.getDepth()) * (float) Math.sqrt(3) / 2) * 2;
+			
+			float width = w1;
+			float height = width / aspect;
+			
+			float mapWidth = width * (GameLayer.world.getWidth() + GameLayer.world.getDepth()) * (float) Math.sqrt(3) / 2;
+			float mapHeight = height * (GameLayer.world.getWidth() + GameLayer.world.getDepth()) / 2;
+			
+			stage.getBatch().begin();
+			
+			for (Island island : GameLayer.world.getIslands())
+			{
+				if (island != null && island.fbo != null)
+				{
+					Texture fboTex = island.fbo.getColorBufferTexture();
+					
+					float x = island.index.x * width / 2 + island.index.z * width / 2;
+					float y = island.index.x * height / 2 - island.index.z * height / 2;
+					stage.getBatch().draw(fboTex, Gdx.graphics.getWidth() - containerSize + x, Gdx.graphics.getHeight() - containerSize + y + (containerSize - mapHeight) / 2, width, height, 0, 0, fboTex.getWidth(), fboTex.getHeight(), false, true);
+				}
+			}
+			stage.getBatch().end();
+			
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.identity();
+			shapeRenderer.setColor(Color.WHITE);
+			shapeRenderer.rect(Gdx.graphics.getWidth() - containerSize, Gdx.graphics.getHeight() - containerSize, containerSize, containerSize);
+			shapeRenderer.end();
 		}
 	}
 }

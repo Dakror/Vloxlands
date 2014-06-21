@@ -74,12 +74,15 @@ public class Vloxlands extends GameBase
 		{
 			debug = !debug;
 			toggleLayer(new DebugLayer());
+			return true;
 		}
 		if (keycode == Keys.F2) showPathDebug = !showPathDebug;
 		if (keycode == Keys.F11)
 		{
 			if (Gdx.graphics.isFullscreen()) Gdx.graphics.setDisplayMode(1280, 720, false);
 			else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
+			
+			return true;
 		}
 		return false;
 	}

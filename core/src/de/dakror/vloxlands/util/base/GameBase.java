@@ -28,7 +28,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	
 	public void toggleLayer(Layer layer)
 	{
-		if (hasLayer(layer.getClass())) removeLayer(layer);
+		if (hasLayer(layer.getClass())) removeLayer(layer.getClass());
 		else addLayer(layer);
 	}
 	
@@ -44,12 +44,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	public boolean removeLayer(Class<?> layerClass)
 	{
 		for (Layer layer : layers)
-		{
-			if (layer.getClass().equals(layerClass))
-			{
-				removeLayer(layer);
-			}
-		}
+			if (layer.getClass().equals(layerClass)) removeLayer(layer);
 		
 		return false;
 	}

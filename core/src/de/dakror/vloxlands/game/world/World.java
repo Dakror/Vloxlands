@@ -80,6 +80,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 	public void addIsland(int x, int z, Island island)
 	{
 		islands[z * width + x] = island;
+		island.index.set(x, 0, z);
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
 	
@@ -154,7 +155,6 @@ public class World implements RenderableProvider, Tickable, Queryable
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(this, environment);
-		
 		visibleEntities = 0;
 		totalEntities = entities.size;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)

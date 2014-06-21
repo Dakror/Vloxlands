@@ -2,8 +2,10 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -56,12 +58,16 @@ public class GameLayer extends Layer
 	public static GameLayer instance;
 	
 	public static World world;
-	public static PerspectiveCamera camera;
+	public static Camera camera;
 	public static ShapeRenderer shapeRenderer;
 	
-	public Environment lights;
+	public Environment env;
 	
 	public Array<SelectionListener> listeners = new Array<SelectionListener>();
+	
+	public Environment minimapEnv;
+	public Camera minimapCamera;
+	public ModelBatch minimapBatch;
 	
 	ModelBatch modelBatch;
 	CameraInputController controller;
@@ -96,7 +102,16 @@ public class GameLayer extends Layer
 		Gdx.app.log("GameLayer.create", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
 		
+		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
+		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		minimapCamera.near = 0.1f;
+		minimapCamera.far = pickRayMaxDistance;
+		minimapEnv = new Environment();
+		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+		minimapEnv.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
+		
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
@@ -114,9 +129,9 @@ public class GameLayer extends Layer
 		
 		new MeshingThread();
 		
-		lights = new Environment();
-		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		env = new Environment();
+		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
+		env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
@@ -138,14 +153,12 @@ public class GameLayer extends Layer
 		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
 		world.getIslands()[0].calculateInitBalance();
 		
-		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
+		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE / 4 * 3, p.z * Island.SIZE + Island.SIZE / 2);
 		
 		controller.target.set(worldMiddle);
 		
-		camera.position.set(worldMiddle);
-		camera.position.y -= Island.SIZE / 4;
-		camera.position.z -= Island.SIZE / 2;
-		camera.rotate(Vector3.Y, 180);
+		camera.position.set(worldMiddle).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+		camera.lookAt(worldMiddle);
 		
 		controller.update();
 		camera.update();
@@ -163,7 +176,7 @@ public class GameLayer extends Layer
 		
 		world.update();
 		modelBatch.begin(camera);
-		world.render(modelBatch, lights);
+		world.render(modelBatch, env);
 		// modelBatch.render(sky, lights);
 		modelBatch.end();
 		
@@ -279,6 +292,10 @@ public class GameLayer extends Layer
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();
+		
+		minimapCamera.viewportWidth = width;
+		minimapCamera.viewportHeight = height;
+		minimapCamera.update();
 	}
 	
 	public void pickRay(boolean hover, boolean lmb, int x, int y)
