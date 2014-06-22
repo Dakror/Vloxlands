@@ -26,7 +26,7 @@ public class MinimapIsland extends Actor
 			@Override
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
 			{
-				boolean reallyHit = x >= getWidth() / 4 && x <= getWidth();
+				boolean reallyHit = x >= getWidth() / 4;
 				if (reallyHit)
 				{
 					for (Actor a : getParent().getChildren())

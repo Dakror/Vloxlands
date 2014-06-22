@@ -33,10 +33,12 @@ public class Minimap extends Group
 		{
 			if (island != null)
 			{
-				float x = width / 2 * (island.index.x + island.index.z);
-				float y = height / 2 * (island.index.x - island.index.z);
+				int ix = (int) (GameLayer.world.getWidth() - island.index.x);
+				
+				float x = width / 2 * (ix + island.index.z);
+				float y = height / 2 * (ix - island.index.z);
 				MinimapIsland mi = new MinimapIsland(island);
-				mi.setBounds(x + (getWidth() - mapWidth) / 2, -y + height / 2 * (GameLayer.world.getWidth() - 1) + (getHeight() - mapHeight) / 2, width, height);
+				mi.setBounds(x + (getWidth() - mapWidth) / 2 - width / 2, -y + height / 2 * GameLayer.world.getWidth() + (getHeight() - mapHeight) / 2, width, height);
 				addActor(mi);
 			}
 		}
