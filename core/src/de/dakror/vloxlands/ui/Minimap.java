@@ -68,8 +68,10 @@ public class Minimap extends Group
 	@Override
 	public void draw(Batch batch, float parentAlpha)
 	{
+		setPosition(Gdx.graphics.getWidth() - getWidth(), Gdx.graphics.getHeight() - getHeight());
+		
 		Drawable bg = Vloxlands.skin.getDrawable("default-rect");
-		bg.draw(batch, Gdx.graphics.getWidth() - getWidth(), Gdx.graphics.getHeight() - getHeight(), getWidth(), getHeight());
+		bg.draw(batch, getX(), getY(), getWidth(), getHeight());
 		super.draw(batch, parentAlpha);
 	}
 }

@@ -376,17 +376,17 @@ public class HudLayer extends Layer implements SelectionListener
 	public void render(float delta)
 	{
 		stage.act();
-		 if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
-		 {
-		stage.draw();
-		if (dragStart.x > -1)
+		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
 		{
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.identity();
-			shapeRenderer.setColor(Color.WHITE);
-			shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
-			shapeRenderer.end();
+			stage.draw();
+			if (dragStart.x > -1)
+			{
+				shapeRenderer.begin(ShapeType.Line);
+				shapeRenderer.identity();
+				shapeRenderer.setColor(Color.WHITE);
+				shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
+				shapeRenderer.end();
+			}
 		}
-		 }
 	}
 }
