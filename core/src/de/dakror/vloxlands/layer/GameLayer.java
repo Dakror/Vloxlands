@@ -81,6 +81,8 @@ public class GameLayer extends Layer
 	int ticksForTravel;
 	int startTick;
 	Vector3 target = new Vector3();
+	Vector3 targetDirection = new Vector3();
+	Vector3 targetUp = new Vector3();
 	Island targetIsland;
 	
 	// -- temp -- //
@@ -173,6 +175,21 @@ public class GameLayer extends Layer
 			target.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
 			ticksForTravel = (int) camera.position.dst(target);
 			targetIsland = island;
+			
+			Vector3 pos = camera.position.cpy();
+			Vector3 dir = camera.direction.cpy();
+			Vector3 up = camera.up.cpy();
+			
+			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			controller.target.set(islandCenter);
+			camera.lookAt(islandCenter);
+			
+			targetDirection.set(camera.direction);
+			targetUp.set(camera.up);
+			
+			camera.position.set(pos);
+			camera.direction.set(dir);
+			camera.up.set(up);
 		}
 		else
 		{
@@ -307,6 +324,8 @@ public class GameLayer extends Layer
 			if (startTick == 0) startTick = tick;
 			
 			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			
 			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 1)
 			{
@@ -314,7 +333,6 @@ public class GameLayer extends Layer
 				controller.target.set(islandCenter);
 				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
 				camera.lookAt(islandCenter);
-				
 				targetIsland = null;
 				startTick = 0;
 			}
