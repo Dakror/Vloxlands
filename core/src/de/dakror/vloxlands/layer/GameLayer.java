@@ -173,6 +173,17 @@ public class GameLayer extends Layer
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			if (target.equals(camera.position))
+			{
+				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				controller.target.set(islandCenter);
+				camera.lookAt(islandCenter);
+				
+				controller.update();
+				camera.update();
+				return;
+			}
+			
 			ticksForTravel = (int) camera.position.dst(target);
 			targetIsland = island;
 			
