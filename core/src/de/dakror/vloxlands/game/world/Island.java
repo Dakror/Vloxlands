@@ -47,6 +47,9 @@ public class Island implements RenderableProvider, Tickable
 	public FrameBuffer fbo;
 	
 	boolean minimapMode;
+	boolean inFrustum;
+	boolean fullyLoaded;
+	
 	public boolean initFBO;
 	int tick;
 	
@@ -136,6 +139,8 @@ public class Island implements RenderableProvider, Tickable
 				if (deltaY != 0) s.getTransform().translate(0, deltaY, 0);
 			}
 		}
+		
+		inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
 	}
 	
 	public void addStructure(Structure s, boolean user, boolean clearArea)
@@ -272,7 +277,7 @@ public class Island implements RenderableProvider, Tickable
 	{
 		renderStructures(batch, environment, false);
 		
-		if (tick % 60 == 0 || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
+		if ((tick % 60 == 0 && fullyLoaded) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 			
@@ -306,47 +311,58 @@ public class Island implements RenderableProvider, Tickable
 		int hs = Chunk.SIZE / 2;
 		Renderable block = null;
 		
+		boolean fullyLoaded = true;
+		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
-			if (!chunk.initialized) chunk.init();
+			if (chunk.isEmpty()) continue;
+			
+			if (!chunk.onceLoaded) chunk.load();
 			
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
-				if (chunk.isEmpty()) continue;
+				if (!chunk.loaded && chunk.onceLoaded && !minimapMode) chunk.load();
+				//
+				// if (!chunk.loaded && minimapMode) fullyLoaded = false;
 				
 				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
 				
-				Renderable opaque = pool.obtain();
-				opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				opaque.material = World.opaque;
-				opaque.mesh = chunk.getOpaqueMesh();
-				opaque.meshPartOffset = 0;
-				opaque.meshPartSize = chunk.opaqueVerts;
-				opaque.primitiveType = GL20.GL_TRIANGLES;
-				renderables.add(opaque);
-				
-				Renderable transp = pool.obtain();
-				transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-				transp.material = World.transp;
-				transp.mesh = chunk.getTransparentMesh();
-				transp.meshPartOffset = 0;
-				transp.meshPartSize = chunk.transpVerts;
-				transp.primitiveType = GL20.GL_TRIANGLES;
-				renderables.add(transp);
-				
-				if (chunk.selectedVoxel.x > -1 && !minimapMode)
+				if (!minimapMode || (minimapMode && chunk.loaded))
 				{
-					block = pool.obtain();
-					block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
-					block.material = World.highlight;
-					block.mesh = World.blockCube;
-					block.meshPartOffset = 0;
-					block.meshPartSize = 36;
-					block.primitiveType = GL20.GL_LINES;
+					Renderable opaque = pool.obtain();
+					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+					opaque.material = World.opaque;
+					opaque.mesh = chunk.getOpaqueMesh();
+					opaque.meshPartOffset = 0;
+					opaque.meshPartSize = chunk.opaqueVerts;
+					opaque.primitiveType = GL20.GL_TRIANGLES;
+					renderables.add(opaque);
+					
+					Renderable transp = pool.obtain();
+					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+					transp.material = World.transp;
+					transp.mesh = chunk.getTransparentMesh();
+					transp.meshPartOffset = 0;
+					transp.meshPartSize = chunk.transpVerts;
+					transp.primitiveType = GL20.GL_TRIANGLES;
+					renderables.add(transp);
+					
+					if (chunk.selectedVoxel.x > -1 && !minimapMode)
+					{
+						block = pool.obtain();
+						block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
+						block.material = World.highlight;
+						block.mesh = World.blockCube;
+						block.meshPartOffset = 0;
+						block.meshPartSize = 36;
+						block.primitiveType = GL20.GL_LINES;
+					}
 				}
 			}
 		}
+		
+		this.fullyLoaded = fullyLoaded;
 		
 		if (block != null && !minimapMode) renderables.add(block);
 	}

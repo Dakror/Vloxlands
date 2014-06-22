@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.D;
 
 /**
  * @author Dakror
@@ -62,6 +63,7 @@ public class Minimap extends Group
 				{
 					((MinimapIsland) actor).active = true;
 					GameLayer.instance.focusIsland(((MinimapIsland) actor).island, false);
+					D.p("Selecting Island", ((MinimapIsland) actor).island.index);
 				}
 				return false;
 			}
