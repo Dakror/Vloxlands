@@ -1,6 +1,7 @@
 package de.dakror.vloxlands.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -51,6 +52,8 @@ public class Minimap extends Group
 			@Override
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
 			{
+				if (button != Buttons.LEFT) return false;
+				
 				for (Actor a : getChildren())
 					if (a instanceof MinimapIsland) ((MinimapIsland) a).active = false;
 				

@@ -260,10 +260,10 @@ public class Island implements RenderableProvider, Tickable
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
 		{
 			Structure s = iter.next();
-			if (s.inFrustum)
+			if (s.inFrustum || minimapMode)
 			{
-				s.render(batch, environment);
-				GameLayer.world.visibleEntities++;
+				s.render(batch, environment, minimapMode);
+				if (!minimapMode) GameLayer.world.visibleEntities++;
 			}
 		}
 	}
@@ -290,7 +290,7 @@ public class Island implements RenderableProvider, Tickable
 			minimapMode = true;
 			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
 			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-			// renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
+			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
 			GameLayer.instance.minimapBatch.end();
 			fbo.end();
 			initFBO = true;

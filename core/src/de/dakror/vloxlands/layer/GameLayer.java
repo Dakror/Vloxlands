@@ -54,7 +54,7 @@ public class GameLayer extends Layer
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 100f;
+	public static final float pickRayMaxDistance = 150f;
 	
 	public static GameLayer instance;
 	
