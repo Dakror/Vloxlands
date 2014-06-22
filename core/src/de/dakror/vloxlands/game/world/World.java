@@ -162,7 +162,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 			Entity e = iter.next();
 			if (e.inFrustum)
 			{
-				e.render(batch, environment);
+				e.render(batch, environment, false);
 				visibleEntities++;
 			}
 		}

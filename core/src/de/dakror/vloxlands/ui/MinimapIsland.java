@@ -2,13 +2,11 @@ package de.dakror.vloxlands.ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -21,27 +19,13 @@ public class MinimapIsland extends Actor
 	public MinimapIsland(Island island)
 	{
 		this.island = island;
-		addListener(new InputListener()
-		{
-			@Override
-			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
-			{
-				boolean reallyHit = x >= getWidth() / 4;
-				if (reallyHit)
-				{
-					for (Actor a : getParent().getChildren())
-					{
-						if (a instanceof MinimapIsland) ((MinimapIsland) a).active = false;
-					}
-				}
-				active = reallyHit;
-				if (active)
-				{
-					GameLayer.instance.focusIsland(MinimapIsland.this.island, false);
-				}
-				return reallyHit;
-			}
-		});
+	}
+	
+	@Override
+	public Actor hit(float x, float y, boolean touchable)
+	{
+		if (touchable && getTouchable() != Touchable.enabled) return null;
+		return x >= getWidth() / 4 && x < getWidth() / 4 * 3 && y >= 0 && y < getHeight() ? this : null;
 	}
 	
 	@Override

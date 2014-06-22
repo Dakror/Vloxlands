@@ -139,13 +139,13 @@ public abstract class Entity extends EntityBase
 		bb.set(bb.min, bb.max);
 	}
 	
-	public void render(ModelBatch batch, Environment environment)
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
 		batch.render(modelInstance, environment);
 		
 		renderAdditional(batch, environment);
 		
-		if (hovered || selected)
+		if ((hovered || selected) && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
@@ -160,7 +160,7 @@ public abstract class Entity extends EntityBase
 			Gdx.gl.glLineWidth(1);
 		}
 		
-		if (Vloxlands.debug)
+		if (Vloxlands.debug && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
