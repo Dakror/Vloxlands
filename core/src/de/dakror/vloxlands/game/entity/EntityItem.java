@@ -9,7 +9,7 @@ public class EntityItem extends Entity
 
 	public EntityItem(float x, float y, float z, Item i)
 	{
-		super(x, y, z, i.getModel());
+		super(x, y, z, "models/item/" + i.getModel());
 		item = i;
 		this.name = "entity." + i.getName();
 	}
