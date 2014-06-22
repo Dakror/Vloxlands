@@ -66,9 +66,11 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	}
 	
 	@Override
-	protected void onRemove()
+	protected void setStage(Stage stage)
 	{
-		stack.removeListener(this);
+		super.setStage(stage);
+		
+		if (stage == null) stack.removeListener(this);
 	}
 	
 	@Override

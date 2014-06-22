@@ -1,6 +1,12 @@
 package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -10,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -26,6 +33,7 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.ui.ItemSlot;
+import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.TooltipImageButton;
@@ -40,6 +48,13 @@ public class HudLayer extends Layer implements SelectionListener
 	PinnableWindow selectedEntityWindow;
 	PinnableWindow selectedStructureWindow;
 	
+	ShapeRenderer shapeRenderer;
+	
+	int buttonDown = -1;
+	
+	final Vector2 dragStart = new Vector2(-1, -1);
+	final Vector2 dragEnd = new Vector2(-1, -1);
+	
 	@Override
 	public void show()
 	{
@@ -47,6 +62,8 @@ public class HudLayer extends Layer implements SelectionListener
 		GameLayer.instance.addListener(this);
 		
 		stage = new Stage(new ScreenViewport());
+		
+		shapeRenderer = new ShapeRenderer();
 		
 		selectedEntityWindow = new PinnableWindow("", Vloxlands.skin);
 		selectedEntityWindow.setPosition(Gdx.graphics.getWidth() - selectedEntityWindow.getWidth(), 0);
@@ -59,6 +76,8 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedStructureWindow.setTitleAlignment(Align.left);
 		selectedStructureWindow.setVisible(false);
 		stage.addActor(selectedStructureWindow);
+		
+		stage.addActor(new Minimap());
 	}
 	
 	@Override
@@ -77,7 +96,13 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.clearActions();
 		}
 		
-		if (lmb)
+		if (lmb && selectedEntityWindow.setShown(false) && creature == null)
+		{
+			selectedEntityWindow.clearChildren();
+			selectedEntityWindow.clearActions();
+		}
+		
+		if (lmb && creature != null)
 		{
 			selectedEntityWindow.setTitle(creature.getName());
 			selectedEntityWindow.clearChildren();
@@ -178,12 +203,58 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearActions();
 		}
 		
-		if (lmb)
+		if (lmb && selectedStructureWindow.setShown(false) && structure == null)
+		{
+			selectedStructureWindow.clearChildren();
+			selectedStructureWindow.clearActions();
+		}
+		
+		if (lmb && structure != null)
 		{
 			selectedStructureWindow.setTitle(structure.getName());
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 			selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
+			
+			ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("bomb");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageDown = Vloxlands.skin.getDrawable("bomb");
+			style.imageDown.setMinWidth(ItemSlot.size);
+			style.imageDown.setMinHeight(ItemSlot.size);
+			final TooltipImageButton dismantle = new TooltipImageButton(stage, style);
+			dismantle.addListener(new ClickListener()
+			{
+				@Override
+				public void clicked(InputEvent event, float x, float y)
+				{
+					structure.requestDismantle();
+				}
+			});
+			dismantle.pad(4);
+			dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
+			
+			style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("sleep");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageChecked = Vloxlands.skin.getDrawable("gears");
+			style.imageChecked.setMinWidth(ItemSlot.size);
+			style.imageChecked.setMinHeight(ItemSlot.size);
+			final TooltipImageButton sleep = new TooltipImageButton(stage, style);
+			sleep.setChecked(structure.isWorking());
+			sleep.addListener(new ClickListener()
+			{
+				@Override
+				public void clicked(InputEvent event, float x, float y)
+				{
+					structure.setWorking(!structure.isWorking());
+					sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
+				}
+			});
+			sleep.pad(4);
+			sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
 			
 			if (structure instanceof Warehouse)
 			{
@@ -215,7 +286,7 @@ public class HudLayer extends Layer implements SelectionListener
 					}
 				});
 				
-				selectedStructureWindow.row().pad(0).colspan(4).width(400);
+				selectedStructureWindow.row().pad(0).width(400);
 				final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
 				itemsWrap.setScrollbarsOnTop(false);
 				itemsWrap.setFadeScrollBars(false);
@@ -240,7 +311,14 @@ public class HudLayer extends Layer implements SelectionListener
 						return false;
 					}
 				});
-				selectedStructureWindow.add(capacity).top().width(200);
+				
+				Table rightSide = new Table(Vloxlands.skin);
+				rightSide.row();
+				rightSide.add(capacity).colspan(2);
+				rightSide.row().left().spaceTop(5);
+				rightSide.add(dismantle).left();
+				rightSide.add(sleep).right();
+				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			
 			selectedStructureWindow.pack();
@@ -250,9 +328,65 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button)
+	{
+		if (button == Buttons.LEFT)
+		{
+			if (dragEnd.x > -1)
+			{
+				float x = Math.min(dragStart.x, dragEnd.x) / Gdx.graphics.getWidth();
+				float y = Math.min(dragStart.y, dragEnd.y) / Gdx.graphics.getHeight();
+				float width = Math.abs(dragStart.x - dragEnd.x) / Gdx.graphics.getWidth();
+				float height = Math.abs(dragStart.y - dragEnd.y) / Gdx.graphics.getHeight();
+				
+				GameLayer.instance.selectionBox(new Rectangle(x, y, width, height));
+			}
+			dragStart.set(-1, -1);
+			dragEnd.set(-1, -1);
+		}
+		buttonDown = -1;
+		return false;
+	}
+	
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button)
+	{
+		buttonDown = button;
+		return false;
+	}
+	
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer)
+	{
+		if (buttonDown == Buttons.LEFT)
+		{
+			if (dragStart.x == -1)
+			{
+				dragStart.set(screenX, Gdx.graphics.getHeight() - screenY);
+				dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
+			}
+			else dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
+			
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
 	public void render(float delta)
 	{
 		stage.act();
-		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal()) stage.draw();
+		 if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
+		 {
+		stage.draw();
+		if (dragStart.x > -1)
+		{
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.identity();
+			shapeRenderer.setColor(Color.WHITE);
+			shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
+			shapeRenderer.end();
+		}
+		 }
 	}
 }

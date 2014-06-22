@@ -21,19 +21,21 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	{
 		layer.show();
 		getMultiplexer().addProcessor(0, layer);
+		getMultiplexer().addProcessor(1, layer.gestureDetector);
 		if (layer.getStage() != null) getMultiplexer().addProcessor(0, layer.getStage());
 		layers.add(layer);
 	}
 	
 	public void toggleLayer(Layer layer)
 	{
-		if (hasLayer(layer.getClass())) removeLayer(layer);
+		if (hasLayer(layer.getClass())) removeLayer(layer.getClass());
 		else addLayer(layer);
 	}
 	
 	public boolean removeLayer(Layer layer)
 	{
 		getMultiplexer().removeProcessor(layer);
+		getMultiplexer().removeProcessor(layer.gestureDetector);
 		if (layer.getStage() != null) getMultiplexer().removeProcessor(layer.getStage());
 		layer.dispose();
 		return layers.removeValue(layer, true);
@@ -42,12 +44,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	public boolean removeLayer(Class<?> layerClass)
 	{
 		for (Layer layer : layers)
-		{
-			if (layer.getClass().equals(layerClass))
-			{
-				removeLayer(layer);
-			}
-		}
+			if (layer.getClass().equals(layerClass)) removeLayer(layer);
 		
 		return false;
 	}

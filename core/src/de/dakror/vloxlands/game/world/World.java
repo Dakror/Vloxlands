@@ -80,6 +80,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 	public void addIsland(int x, int z, Island island)
 	{
 		islands[z * width + x] = island;
+		island.index.set(x, 0, z);
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
 	
@@ -154,7 +155,6 @@ public class World implements RenderableProvider, Tickable, Queryable
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(this, environment);
-		
 		visibleEntities = 0;
 		totalEntities = entities.size;
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
@@ -249,7 +249,9 @@ public class World implements RenderableProvider, Tickable, Queryable
 					if (query.mustHaveCapacityForTransportedItemStack && !((Human) e).getCarryingItemStack().canAdd(query.transportedItemStack)) continue;
 				}
 				
-				Path p = AStar.findPath(((Creature) e).getVoxelBelow(), query.sourceCreature != null ? query.sourceCreature.getVoxelBelow() : query.sourceStructure.getStructureNode(((Creature) e).getVoxelBelow(), type, query.searchedNodeName).pos.cpy().add(query.sourceStructure.getVoxelPos()), query.sourceCreature != null ? query.sourceCreature : (Creature) e, query.sourceCreature != null ? true : type.useGhostTarget);
+				Vector3 v = ((Creature) e).getVoxelBelow();
+				Vector3 to = query.sourceStructure.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(query.sourceStructure.getVoxelPos());
+				Path p = AStar.findPath(v, query.sourceCreature != null ? query.sourceCreature.getVoxelBelow() : to, query.sourceCreature != null ? query.sourceCreature : (Creature) e, query.sourceCreature != null ? true : type.useGhostTarget);
 				if (p == null) continue;
 				
 				float dist = p.length();

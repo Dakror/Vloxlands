@@ -165,6 +165,7 @@ public class Human extends Creature
 		else
 		{
 			if (path != null && path.size() > 0) jobQueue.add(new WalkJob(path, this));
+			else rotateTowardsGhostTarget(path);
 			jobQueue.add(job);
 		}
 	}
@@ -250,6 +251,9 @@ public class Human extends Creature
 				{
 					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 					j.setPersistent(false);
+					if(pps == null)pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.dump).island(0));
+					if (pps != null) queueJob(pps.path, new DumpJob(this, pps.structure, false));
+					else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 				}
 			}
 		}

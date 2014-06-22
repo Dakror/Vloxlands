@@ -3,9 +3,14 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.ai.Path.PathBundle;
+import de.dakror.vloxlands.game.Query;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
+import de.dakror.vloxlands.game.job.DismantleJob;
+import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -16,6 +21,8 @@ public abstract class Structure extends Entity
 	Vector3 voxelPos;
 	Inventory inventory;
 	boolean working;
+	
+	boolean dismantleRequested;
 	
 	final Vector3 tmp = new Vector3();
 	
@@ -109,6 +116,17 @@ public abstract class Structure extends Entity
 	public boolean isWorking()
 	{
 		return working;
+	}
+	
+	public boolean requestDismantle()
+	{
+		if (dismantleRequested) return false;
+		PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.target).island(0));
+		if (pb == null || pb.creature == null) return false;
+		
+		((Human) pb.creature).queueJob(pb.path, new DismantleJob((Human) pb.creature, this, false));
+		dismantleRequested = true;
+		return true;
 	}
 	
 	public void setWorking(boolean working)

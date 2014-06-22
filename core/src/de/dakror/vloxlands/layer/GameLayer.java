@@ -1,22 +1,25 @@
 package de.dakror.vloxlands.layer;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -41,6 +44,7 @@ import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
+import de.dakror.vloxlands.util.math.CustomizableFrustum;
 
 /**
  * @author Dakror
@@ -50,29 +54,36 @@ public class GameLayer extends Layer
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 150f;
+	public static final float pickRayMaxDistance = 100f;
 	
 	public static GameLayer instance;
 	
 	public static World world;
-	public static PerspectiveCamera camera;
+	public static Camera camera;
 	public static ShapeRenderer shapeRenderer;
 	
-	public Environment lights;
+	public Environment env;
 	
-	Array<SelectionListener> listeners = new Array<SelectionListener>();
+	public Array<SelectionListener> listeners = new Array<SelectionListener>();
+	
+	public Environment minimapEnv;
+	public Camera minimapCamera;
+	public ModelBatch minimapBatch;
 	
 	ModelBatch modelBatch;
-	FirstPersonCameraController controller;
-	Vector3 worldMiddle;
+	CameraInputController controller;
 	
 	boolean middleDown;
 	boolean doneLoading;
 	
-	public Vector3 intersection = new Vector3();
-	public Vector3 intersection2 = new Vector3();
-	
 	ModelInstance sky;
+	
+	int ticksForTravel;
+	int startTick;
+	Vector3 target = new Vector3();
+	Vector3 targetDirection = new Vector3();
+	Vector3 targetUp = new Vector3();
+	Island targetIsland;
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -95,39 +106,45 @@ public class GameLayer extends Layer
 		modal = true;
 		instance = this;
 		
-		Gdx.app.log("GameLayer.create", "Seed: " + seed + "");
+		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
 		
+		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
+		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		minimapCamera.near = 0.1f;
+		minimapCamera.far = pickRayMaxDistance;
+		minimapEnv = new Environment();
+		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+		minimapEnv.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
+		
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
-		controller = new FirstPersonCameraController(camera)
-		{
-			@Override
-			public boolean touchDragged(int screenX, int screenY, int pointer)
-			{
-				if (middleDown || Gdx.app.getType() == ApplicationType.Android) super.touchDragged(screenX, screenY, pointer);
-				return false;
-			}
-		};
-		controller.setDegreesPerPixel(rotateSpeed);
-		controller.setVelocity(velocity);
+		controller = new CameraInputController(camera);
+		controller.translateUnits = 20;
+		controller.rotateLeftKey = -1;
+		controller.rotateRightKey = -1;
+		controller.forwardKey = -1;
+		controller.backwardKey = -1;
+		controller.translateButton = -1;
+		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
 		
 		shapeRenderer = new ShapeRenderer();
 		
 		new MeshingThread();
 		
-		lights = new Environment();
-		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		lights.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		env = new Environment();
+		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
+		env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		
-		// int w = MathUtils.random(1, 5);
-		// int d = MathUtils.random(1, 5);
+		int w = MathUtils.random(1, 5);
+		int d = MathUtils.random(1, 5);
 		
-		world = new World(1, 1);
-		// Gdx.app.log("GameLayer.create", "World size: " + w + "x" + d);
+		world = new World(w, d);
+		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
 	public void doneLoading()
@@ -143,15 +160,57 @@ public class GameLayer extends Layer
 		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
 		world.getIslands()[0].calculateInitBalance();
 		
-		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE, p.z * Island.SIZE + Island.SIZE / 2);
-		
-		camera.position.set(worldMiddle);
-		camera.position.y -= Island.SIZE / 4;
-		camera.position.z -= Island.SIZE / 2;
-		camera.rotate(Vector3.Y, 180);
+		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
+	}
+	
+	public void focusIsland(Island island, boolean initial)
+	{
+		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
+		
+		if (!initial)
+		{
+			target.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			if (target.equals(camera.position))
+			{
+				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				controller.target.set(islandCenter);
+				camera.lookAt(islandCenter);
+				
+				controller.update();
+				camera.update();
+				return;
+			}
+			
+			ticksForTravel = (int) camera.position.dst(target);
+			targetIsland = island;
+			
+			Vector3 pos = camera.position.cpy();
+			Vector3 dir = camera.direction.cpy();
+			Vector3 up = camera.up.cpy();
+			
+			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			controller.target.set(islandCenter);
+			camera.lookAt(islandCenter);
+			
+			targetDirection.set(camera.direction);
+			targetUp.set(camera.up);
+			
+			camera.position.set(pos);
+			camera.direction.set(dir);
+			camera.up.set(up);
+		}
+		else
+		{
+			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			controller.target.set(islandCenter);
+			camera.lookAt(islandCenter);
+			
+			controller.update();
+			camera.update();
+		}
 	}
 	
 	@Override
@@ -163,7 +222,7 @@ public class GameLayer extends Layer
 		
 		world.update();
 		modelBatch.begin(camera);
-		world.render(modelBatch, lights);
+		world.render(modelBatch, env);
 		// modelBatch.render(sky, lights);
 		modelBatch.end();
 		
@@ -271,6 +330,27 @@ public class GameLayer extends Layer
 	public void tick(int tick)
 	{
 		world.tick(tick++);
+		if (targetIsland != null)
+		{
+			if (startTick == 0) startTick = tick;
+			
+			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			
+			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 1)
+			{
+				Vector3 islandCenter = new Vector3(targetIsland.pos.x + Island.SIZE / 2, targetIsland.pos.y + Island.SIZE / 4 * 3, targetIsland.pos.z + Island.SIZE / 2);
+				controller.target.set(islandCenter);
+				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				camera.lookAt(islandCenter);
+				targetIsland = null;
+				startTick = 0;
+			}
+			
+			controller.update();
+			camera.update();
+		}
 	}
 	
 	@Override
@@ -279,6 +359,10 @@ public class GameLayer extends Layer
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();
+		
+		minimapCamera.viewportWidth = width;
+		minimapCamera.viewportHeight = height;
+		minimapCamera.update();
 	}
 	
 	public void pickRay(boolean hover, boolean lmb, int x, int y)
@@ -383,7 +467,6 @@ public class GameLayer extends Layer
 							float dst = ray.origin.dst(tmp5);
 							if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
 							{
-								intersection.set(tmp5);
 								distance = dst;
 								selectedVoxel.set(tmp6);
 								selectedChunk = c;
@@ -415,7 +498,6 @@ public class GameLayer extends Layer
 						float dist = ray.origin.dst(is2);
 						if (dir == null || dist < distanc)
 						{
-							intersection2.set(is2);
 							distanc = dist;
 							dir = d;
 						}
@@ -442,6 +524,48 @@ public class GameLayer extends Layer
 		}
 	}
 	
+	public void selectionBox(Rectangle rectangle)
+	{
+		CustomizableFrustum frustum = new CustomizableFrustum(rectangle);
+		camera.update();
+		frustum.update(camera.invProjectionView);
+		Vector3 origin = camera.unproject(new Vector3(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		boolean anyEntitySelected = false;
+		
+		for (Entity entity : world.getEntities())
+		{
+			entity.wasSelected = entity.selected;
+			entity.selected = false;
+			entity.getWorldBoundingBox(bb);
+			
+			float dst = origin.dst(entity.posCache);
+			if (entity.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance)
+			{
+				entity.selected = true;
+				anyEntitySelected = true;
+				break;
+			}
+		}
+		
+		if (!anyEntitySelected)
+		{
+			for (Island i : world.getIslands())
+			{
+				if (i == null) continue;
+				for (Structure structure : i.getStructures())
+				{
+					structure.wasSelected = structure.selected;
+					structure.selected = false;
+					structure.getWorldBoundingBox(bb);
+					
+					float dst = origin.dst(structure.posCache);
+					if (structure.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance) structure.selected = true;
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
@@ -457,8 +581,13 @@ public class GameLayer extends Layer
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}
-		else pickRay(false, button == Buttons.LEFT, screenX, screenY);
-		
+		return false;
+	}
+	
+	@Override
+	public boolean tap(float x, float y, int count, int button)
+	{
+		if (button != Buttons.MIDDLE) pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
 		return false;
 	}
 	

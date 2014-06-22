@@ -2,11 +2,15 @@ package de.dakror.vloxlands.game.world;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -16,6 +20,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.event.SelectionListener;
 
 /**
  * @author Dakror
@@ -39,11 +44,17 @@ public class Island implements RenderableProvider, Tickable
 	public Chunk[] chunks;
 	
 	Array<Structure> structures = new Array<Structure>();
+	public FrameBuffer fbo;
+	
+	boolean minimapMode;
+	public boolean initFBO;
+	int tick;
 	
 	public Island()
 	{
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
-		
+		initFBO = false;
+		minimapMode = false;
 		index = new Vector3();
 		pos = new Vector3();
 		
@@ -100,6 +111,8 @@ public class Island implements RenderableProvider, Tickable
 	@Override
 	public void tick(int tick)
 	{
+		this.tick = tick;
+		
 		float deltaY = (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
 		pos.y += deltaY;
 		
@@ -111,6 +124,9 @@ public class Island implements RenderableProvider, Tickable
 			Structure s = iter.next();
 			if (s.isMarkedForRemoval())
 			{
+				s.selected = false;
+				for (SelectionListener sl : GameLayer.instance.listeners)
+					sl.onStructureSelection(null, true);
 				s.dispose();
 				iter.remove();
 			}
@@ -239,7 +255,7 @@ public class Island implements RenderableProvider, Tickable
 			c.grassify(this);
 	}
 	
-	public void render(ModelBatch batch, Environment environment)
+	protected void renderStructures(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
 		{
@@ -252,12 +268,42 @@ public class Island implements RenderableProvider, Tickable
 		}
 	}
 	
+	public void render(ModelBatch batch, Environment environment)
+	{
+		renderStructures(batch, environment, false);
+		
+		if (tick % 60 == 0 || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
+		{
+			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+			
+			fbo.begin();
+			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+			
+			GameLayer.instance.minimapCamera.position.set(pos);
+			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f / (Gdx.graphics.getWidth() / 1920f);
+			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
+			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
+			GameLayer.instance.minimapCamera.translate(0, 5, 0);
+			GameLayer.instance.minimapCamera.update();
+			
+			minimapMode = true;
+			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
+			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
+			// renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
+			GameLayer.instance.minimapBatch.end();
+			fbo.end();
+			initFBO = true;
+			minimapMode = false;
+			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+		}
+	}
+	
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
-		visibleChunks = 0;
+		if (!minimapMode) visibleChunks = 0;
 		int hs = Chunk.SIZE / 2;
-		
 		Renderable block = null;
 		
 		for (int i = 0; i < chunks.length; i++)
@@ -265,11 +311,11 @@ public class Island implements RenderableProvider, Tickable
 			Chunk chunk = chunks[i];
 			if (!chunk.initialized) chunk.init();
 			
-			if (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs))
+			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
 				if (chunk.isEmpty()) continue;
 				
-				if (chunk.updateMeshes()) visibleChunks++;
+				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
 				
 				Renderable opaque = pool.obtain();
 				opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -289,7 +335,7 @@ public class Island implements RenderableProvider, Tickable
 				transp.primitiveType = GL20.GL_TRIANGLES;
 				renderables.add(transp);
 				
-				if (chunk.selectedVoxel.x > -1)
+				if (chunk.selectedVoxel.x > -1 && !minimapMode)
 				{
 					block = pool.obtain();
 					block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
@@ -302,7 +348,7 @@ public class Island implements RenderableProvider, Tickable
 			}
 		}
 		
-		if (block != null) renderables.add(block);
+		if (block != null && !minimapMode) renderables.add(block);
 	}
 	
 	// -- voxel queries -- //
@@ -368,35 +414,4 @@ public class Island implements RenderableProvider, Tickable
 		return true;
 	}
 	
-	// -- structure queries -- //
-	//
-	// public PathBundle getClosestCapableWarehouse(Creature c, ItemStack stack, NodeType type, boolean spaceForFullAmount)
-	// {
-	// Structure structure = null;
-	// Path path = null;
-	// float pathDistance = 0;
-	//
-	// Vector3 voxel = c.getVoxelBelow();
-	//
-	// for (Iterator<Structure> iter = new ArrayIterator<Structure>(structures); iter.hasNext();)
-	// {
-	// Structure s = iter.next();
-	// if (!(s instanceof Warehouse) || s.getInventory().isFull() || (spaceForFullAmount && s.getInventory().getCount() + stack.getAmount() >= s.getInventory().getCapacity()) || !s.isWorking()) continue;
-	//
-	// Path p = AStar.findPath(voxel, s.getStructureNode(voxel, type, stack.getItem().getName()).pos.cpy().add(s.getVoxelPos()), c, type.useGhostTarget);
-	// if (p == null) continue;
-	//
-	// float len = p.length();
-	// if (structure == null || len < pathDistance)
-	// {
-	// structure = s;
-	// path = p;
-	// pathDistance = len;
-	// }
-	// }
-	//
-	// if (structure == null || path == null) return null;
-	//
-	// return new PathBundle(path, structure, c);
-	// }
 }
