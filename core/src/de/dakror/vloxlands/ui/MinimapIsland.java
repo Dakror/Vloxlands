@@ -37,7 +37,7 @@ public class MinimapIsland extends Actor
 				active = reallyHit;
 				if (active)
 				{
-					GameLayer.instance.focusIsland(MinimapIsland.this.island);
+					GameLayer.instance.focusIsland(MinimapIsland.this.island, false);
 				}
 				return reallyHit;
 			}

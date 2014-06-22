@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
@@ -76,6 +77,11 @@ public class GameLayer extends Layer
 	boolean doneLoading;
 	
 	ModelInstance sky;
+	
+	int ticksForTravel;
+	int startTick;
+	Vector3 target = new Vector3();
+	Island targetIsland;
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -152,21 +158,31 @@ public class GameLayer extends Layer
 		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
 		world.getIslands()[0].calculateInitBalance();
 		
-		focusIsland(world.getIslands()[0]);
+		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
-	public void focusIsland(Island island)
+	public void focusIsland(Island island, boolean initial)
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
-		controller.target.set(islandCenter);
-		camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
-		camera.lookAt(islandCenter);
 		
-		controller.update();
-		camera.update();
+		if (!initial)
+		{
+			target.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			ticksForTravel = (int) camera.position.dst(target);
+			targetIsland = island;
+		}
+		else
+		{
+			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			controller.target.set(islandCenter);
+			camera.lookAt(islandCenter);
+			
+			controller.update();
+			camera.update();
+		}
 	}
 	
 	@Override
@@ -286,6 +302,26 @@ public class GameLayer extends Layer
 	public void tick(int tick)
 	{
 		world.tick(tick++);
+		if (targetIsland != null)
+		{
+			if (startTick == 0) startTick = tick;
+			
+			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			
+			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 1)
+			{
+				Vector3 islandCenter = new Vector3(targetIsland.pos.x + Island.SIZE / 2, targetIsland.pos.y + Island.SIZE / 4 * 3, targetIsland.pos.z + Island.SIZE / 2);
+				controller.target.set(islandCenter);
+				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				camera.lookAt(islandCenter);
+				
+				targetIsland = null;
+				startTick = 0;
+			}
+			
+			controller.update();
+			camera.update();
+		}
 	}
 	
 	@Override
