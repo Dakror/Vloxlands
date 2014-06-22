@@ -71,7 +71,6 @@ public class GameLayer extends Layer
 	
 	ModelBatch modelBatch;
 	CameraInputController controller;
-	Vector3 worldMiddle;
 	
 	boolean middleDown;
 	boolean doneLoading;
@@ -99,7 +98,7 @@ public class GameLayer extends Layer
 		modal = true;
 		instance = this;
 		
-		Gdx.app.log("GameLayer.create", "Seed: " + seed + "");
+		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
 		MathUtils.random.setSeed(seed);
 		
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
@@ -137,7 +136,7 @@ public class GameLayer extends Layer
 		int d = MathUtils.random(1, 5);
 		
 		world = new World(w, d);
-		Gdx.app.log("GameLayer.create", "World size: " + w + "x" + d);
+		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
 	public void doneLoading()
@@ -153,18 +152,21 @@ public class GameLayer extends Layer
 		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
 		world.getIslands()[0].calculateInitBalance();
 		
-		worldMiddle = new Vector3(p.x * Island.SIZE + Island.SIZE / 2, p.y + Island.SIZE / 4 * 3, p.z * Island.SIZE + Island.SIZE / 2);
-		
-		controller.target.set(worldMiddle);
-		
-		camera.position.set(worldMiddle).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
-		camera.lookAt(worldMiddle);
-		
-		controller.update();
-		camera.update();
+		focusIsland(world.getIslands()[0]);
 		
 		doneLoading = true;
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
+	}
+	
+	public void focusIsland(Island island)
+	{
+		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
+		controller.target.set(islandCenter);
+		camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+		camera.lookAt(islandCenter);
+		
+		controller.update();
+		camera.update();
 	}
 	
 	@Override

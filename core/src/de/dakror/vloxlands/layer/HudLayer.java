@@ -3,7 +3,6 @@ package de.dakror.vloxlands.layer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -21,7 +20,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.tablelayout.Cell;
 
@@ -34,8 +32,8 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
-import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.ItemSlot;
+import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.TooltipImageButton;
@@ -78,6 +76,8 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedStructureWindow.setTitleAlignment(Align.left);
 		selectedStructureWindow.setVisible(false);
 		stage.addActor(selectedStructureWindow);
+		
+		stage.addActor(new Minimap());
 	}
 	
 	@Override
@@ -376,46 +376,17 @@ public class HudLayer extends Layer implements SelectionListener
 	public void render(float delta)
 	{
 		stage.act();
-		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
+		 if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
+		 {
+		stage.draw();
+		if (dragStart.x > -1)
 		{
-			stage.draw();
-			if (dragStart.x > -1)
-			{
-				shapeRenderer.begin(ShapeType.Line);
-				shapeRenderer.identity();
-				shapeRenderer.setColor(Color.WHITE);
-				shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
-				shapeRenderer.end();
-			}
-			
-			float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
-			
-			int containerSize = 250;
-			
-			float w1 = containerSize / ((GameLayer.world.getWidth() + GameLayer.world.getDepth())) * 2;
-			
-			float width = w1;
-			float height = width / aspect;
-			
-			float mapWidth = width / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
-			float mapHeight = height / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
-			
-			stage.getBatch().begin();
-			Drawable bg = Vloxlands.skin.getDrawable("default-rect");
-			bg.draw(stage.getBatch(), Gdx.graphics.getWidth() - containerSize, Gdx.graphics.getHeight() - containerSize, containerSize, containerSize);
-			
-			for (Island island : GameLayer.world.getIslands())
-			{
-				if (island != null && island.fbo != null)
-				{
-					Texture fboTex = island.fbo.getColorBufferTexture();
-					
-					float x = width / 2 * (island.index.x + island.index.z);
-					float y = height / 2 * (island.index.x - island.index.z);
-					stage.getBatch().draw(fboTex, Gdx.graphics.getWidth() - containerSize + x + (containerSize - mapWidth) / 2, Gdx.graphics.getHeight() - containerSize - y + height / 2 * (GameLayer.world.getWidth() - 1) + (containerSize - mapHeight) / 2, width, height, 0, 0, fboTex.getWidth(), fboTex.getHeight(), false, true);
-				}
-			}
-			stage.getBatch().end();
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.identity();
+			shapeRenderer.setColor(Color.WHITE);
+			shapeRenderer.rect(Math.min(dragStart.x, dragEnd.x), Math.min(dragStart.y, dragEnd.y), Math.abs(dragStart.x - dragEnd.x), Math.abs(dragStart.y - dragEnd.y));
+			shapeRenderer.end();
 		}
+		 }
 	}
 }

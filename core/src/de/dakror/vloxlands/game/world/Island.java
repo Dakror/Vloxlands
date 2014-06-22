@@ -47,7 +47,7 @@ public class Island implements RenderableProvider, Tickable
 	public FrameBuffer fbo;
 	
 	boolean minimapMode;
-	boolean initFBO;
+	public boolean initFBO;
 	int tick;
 	
 	public Island()
