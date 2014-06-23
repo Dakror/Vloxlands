@@ -14,7 +14,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'Vloxlands'
-        gdxVersion = '1.1.0'
+        gdxVersion = '1.2.1-SNAPSHOT'
         roboVMVersion = '0.0.13'
     }
 

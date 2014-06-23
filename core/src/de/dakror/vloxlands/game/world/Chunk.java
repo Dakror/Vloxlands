@@ -32,6 +32,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public static short[] indices;
 	public static final int SIZE = 8;
 	public static final int VERTEX_SIZE = 10;
+	public static final int UNLOAD_TICKS = 300;
 	
 	public int opaqueVerts, transpVerts;
 	
@@ -54,12 +55,14 @@ public class Chunk implements Meshable, Tickable, Disposable
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
-	public boolean initialized = false;
+	public boolean onceLoaded = false;
+	public boolean loaded = false;
 	
 	Vector2 tex;
 	Island island;
 	
 	int[] resources;
+	int ticksInvisible;
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
@@ -84,7 +87,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		this(new Vector3(x, y, z), island);
 	}
 	
-	public void init()
+	public void load()
 	{
 		if (indices == null)
 		{
@@ -110,7 +113,27 @@ public class Chunk implements Meshable, Tickable, Disposable
 		opaqueMeshData = new FloatArray();
 		transpMeshData = new FloatArray();
 		
-		initialized = true;
+		loaded = true;
+		onceLoaded = true;
+	}
+	
+	public void unload()
+	{
+		updateRequired = true;
+		doneMeshing = false;
+		meshing = false;
+		loaded = false;
+		
+		opaque.dispose();
+		opaque = null;
+		transp.dispose();
+		transp = null;
+		
+		opaqueMeshData.clear();
+		opaqueMeshData = null;
+		
+		transpMeshData.clear();
+		transpMeshData = null;
 	}
 	
 	public void add(int x, int y, int z, byte id)
@@ -172,6 +195,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	public boolean updateMeshes()
 	{
+		if (!loaded) return false;
+		
 		if (doneMeshing)
 		{
 			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
@@ -350,20 +375,18 @@ public class Chunk implements Meshable, Tickable, Disposable
 			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
 	
-	// public btCompoundShape getCollisionShape()
-	// {
-	// return collisionShape;
-	// }
-	//
-	// public btCollisionObject getCollisionObject()
-	// {
-	// return collisionObject;
-	// }
-	
 	@Override
 	public void tick(int tick)
 	{
-		// collisionObject.setWorldTransform(Vloxlands.currentGame.m4.setToTranslation(pos.cpy().add(island.pos)));
+		if (!inFrustum && loaded)
+		{
+			ticksInvisible++;
+			if (ticksInvisible > UNLOAD_TICKS)
+			{
+				// unload();
+			}
+		}
+		else ticksInvisible = 0;
 	}
 	
 	@Override
@@ -371,6 +394,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	{
 		if (meshRequest && !meshing)
 		{
+			if (!loaded) return;
 			meshing = true;
 			opaqueMeshData.clear();
 			transpMeshData.clear();

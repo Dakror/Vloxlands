@@ -54,7 +54,7 @@ public class GameLayer extends Layer
 	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 100f;
+	public static final float pickRayMaxDistance = 150f;
 	
 	public static GameLayer instance;
 	
@@ -78,6 +78,7 @@ public class GameLayer extends Layer
 	
 	ModelInstance sky;
 	
+	int tick;
 	int ticksForTravel;
 	int startTick;
 	Vector3 target = new Vector3();
@@ -201,6 +202,8 @@ public class GameLayer extends Layer
 			camera.position.set(pos);
 			camera.direction.set(dir);
 			camera.up.set(up);
+			
+			startTick = tick;
 		}
 		else
 		{
@@ -329,16 +332,16 @@ public class GameLayer extends Layer
 	@Override
 	public void tick(int tick)
 	{
-		world.tick(tick++);
+		this.tick = tick;
+		world.tick(tick);
+		
 		if (targetIsland != null)
 		{
-			if (startTick == 0) startTick = tick;
-			
 			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			
-			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 1)
+			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
 			{
 				Vector3 islandCenter = new Vector3(targetIsland.pos.x + Island.SIZE / 2, targetIsland.pos.y + Island.SIZE / 4 * 3, targetIsland.pos.z + Island.SIZE / 2);
 				controller.target.set(islandCenter);

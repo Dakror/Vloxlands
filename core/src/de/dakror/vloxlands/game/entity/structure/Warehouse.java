@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.entity.structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.NonStackingInventory;
 
-
 /**
  * @author Dakror
  */
