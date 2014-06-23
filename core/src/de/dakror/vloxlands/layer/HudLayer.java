@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
@@ -21,7 +22,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.esotericsoftware.tablelayout.Cell;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.creature.Creature;
@@ -140,7 +140,7 @@ public class HudLayer extends Layer implements SelectionListener
 				jobsWrap.setVisible(false);
 				jobsWrap.setScrollbarsOnTop(false);
 				jobsWrap.setFadeScrollBars(false);
-				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).height(100).ignore();
+				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).height(0);
 				
 				selectedEntityWindow.row();
 				selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
@@ -162,7 +162,7 @@ public class HudLayer extends Layer implements SelectionListener
 					@Override
 					public void clicked(InputEvent event, float x, float y)
 					{
-						cell.ignore(!cell.getIgnore());
+						cell.height(cell.getMinHeight() == 100 ? 0 : 100);
 						jobsWrap.setVisible(!jobsWrap.isVisible());
 						selectedEntityWindow.invalidateHierarchy();
 						selectedEntityWindow.pack();
