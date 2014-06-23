@@ -32,7 +32,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public static short[] indices;
 	public static final int SIZE = 8;
 	public static final int VERTEX_SIZE = 10;
-	public static final int UNLOAD_TICKS = 120;
+	public static final int UNLOAD_TICKS = 300;
 	
 	public int opaqueVerts, transpVerts;
 	
@@ -119,19 +119,21 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	public void unload()
 	{
-		// updateRequired = true;
+		updateRequired = true;
+		doneMeshing = false;
+		meshing = false;
 		loaded = false;
 		
-		// opaque.dispose();
-		// opaque = null;
-		// transp.dispose();
-		// transp = null;
-		//
-		// opaqueMeshData.clear();
-		// opaqueMeshData = null;
-		//
-		// transpMeshData.clear();
-		// transpMeshData = null;
+		opaque.dispose();
+		opaque = null;
+		transp.dispose();
+		transp = null;
+		
+		opaqueMeshData.clear();
+		opaqueMeshData = null;
+		
+		transpMeshData.clear();
+		transpMeshData = null;
 	}
 	
 	public void add(int x, int y, int z, byte id)
@@ -392,6 +394,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	{
 		if (meshRequest && !meshing)
 		{
+			if (!loaded) return;
 			meshing = true;
 			opaqueMeshData.clear();
 			transpMeshData.clear();

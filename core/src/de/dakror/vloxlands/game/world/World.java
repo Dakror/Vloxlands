@@ -47,7 +47,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 	
 	int width, depth;
 	
-	public int visibleChunks, chunks, visibleEntities, totalEntities;
+	public int visibleChunks, loadedChunks, chunks, visibleEntities, totalEntities;
 	
 	public static Mesh chunkCube, blockCube;
 	public static final float gap = 0.01f;
@@ -142,12 +142,14 @@ public class World implements RenderableProvider, Tickable, Queryable
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
 		visibleChunks = 0;
+		loadedChunks = 0;
 		for (Island island : islands)
 		{
 			if (island != null)
 			{
 				island.getRenderables(renderables, pool);
 				visibleChunks += island.visibleChunks;
+				loadedChunks += island.loadedChunks;
 			}
 		}
 	}
