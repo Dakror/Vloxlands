@@ -126,14 +126,19 @@ public class GameLayer extends Layer
 		controller = new CameraInputController(camera)
 		{
 			private final Vector3 tmpV1 = new Vector3();
+			private final Vector3 tmpV2 = new Vector3();
 			
 			@Override
 			public boolean zoom(float amount)
 			{
 				if (!alwaysScroll && activateKey != 0 && !activatePressed) return false;
-				if (camera.position.dst(target) > 10)
+				
+				tmpV1.set(camera.direction).scl(amount);
+				tmpV2.set(camera.position).add(tmpV1);
+				
+				if (tmpV2.dst(target) > 5)
 				{
-					camera.translate(tmpV1.set(camera.direction).scl(amount));
+					camera.translate(tmpV1);
 					if (scrollTarget) target.add(tmpV1);
 					if (autoUpdate) camera.update();
 					return true;

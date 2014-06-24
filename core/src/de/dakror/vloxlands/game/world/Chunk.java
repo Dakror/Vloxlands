@@ -32,7 +32,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public static short[] indices;
 	public static final int SIZE = 8;
 	public static final int VERTEX_SIZE = 10;
-	public static final int UNLOAD_TICKS = 300;
+	public static final int UNLOAD_TICKS = 120;
 	
 	public int opaqueVerts, transpVerts;
 	
@@ -123,6 +123,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 		doneMeshing = false;
 		meshing = false;
 		loaded = false;
+		opaqueVerts = 0;
+		transpVerts = 0;
 		
 		opaque.dispose();
 		opaque = null;
@@ -383,7 +385,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 			ticksInvisible++;
 			if (ticksInvisible > UNLOAD_TICKS)
 			{
-				// unload();
+				unload();
+				ticksInvisible = 0;
 			}
 		}
 		else ticksInvisible = 0;
@@ -398,14 +401,21 @@ public class Chunk implements Meshable, Tickable, Disposable
 			meshing = true;
 			opaqueMeshData.clear();
 			transpMeshData.clear();
-			getVertices();
-			int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
-			int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
-			opaqueVerts = opaqueNumVerts / 4 * 6;
-			transpVerts = transpNumVerts / 4 * 6;
-			meshRequest = false;
-			doneMeshing = true;
-			meshing = false;
+			try
+			{
+				getVertices();
+				int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
+				int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
+				opaqueVerts = opaqueNumVerts / 4 * 6;
+				transpVerts = transpNumVerts / 4 * 6;
+				meshRequest = false;
+				doneMeshing = true;
+				meshing = false;
+			}
+			catch (Exception e)
+			{
+				meshing = true;
+			}
 		}
 	}
 	

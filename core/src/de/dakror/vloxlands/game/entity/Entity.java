@@ -165,16 +165,10 @@ public abstract class Entity extends EntityBase
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
 			GameLayer.shapeRenderer.identity();
-			GameLayer.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
+			GameLayer.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
 			GameLayer.shapeRenderer.begin(ShapeType.Line);
 			GameLayer.shapeRenderer.setColor(Color.RED);
-			Vector3[] crn = boundingBox.getCorners();
-			for (int i = 0; i < LINES.length; i++)
-			{
-				Vector3 v = crn[LINES[i][0]];
-				Vector3 w = crn[LINES[i][1]];
-				GameLayer.shapeRenderer.line(v.x, v.y, v.z, w.x, w.y, w.z, Color.RED, Color.RED);
-			}
+			GameLayer.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
 			GameLayer.shapeRenderer.end();
 		}
 	}
