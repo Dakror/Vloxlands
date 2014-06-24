@@ -123,7 +123,25 @@ public class GameLayer extends Layer
 		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
-		controller = new CameraInputController(camera);
+		controller = new CameraInputController(camera)
+		{
+			private final Vector3 tmpV1 = new Vector3();
+			
+			@Override
+			public boolean zoom(float amount)
+			{
+				if (!alwaysScroll && activateKey != 0 && !activatePressed) return false;
+				if (camera.position.dst(target) > 10)
+				{
+					camera.translate(tmpV1.set(camera.direction).scl(amount));
+					if (scrollTarget) target.add(tmpV1);
+					if (autoUpdate) camera.update();
+					return true;
+				}
+				
+				return false;
+			}
+		};
 		controller.translateUnits = 20;
 		controller.rotateLeftKey = -1;
 		controller.rotateRightKey = -1;
