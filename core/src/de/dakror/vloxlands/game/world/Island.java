@@ -286,7 +286,7 @@ public class Island implements RenderableProvider, Tickable
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			
 			GameLayer.instance.minimapCamera.position.set(pos);
-			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = (0.05f) * (Island.SIZE / 48f) / (Gdx.graphics.getWidth() / 1920f);
+			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
 			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
 			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
 			GameLayer.instance.minimapCamera.translate(0, 5, 0);

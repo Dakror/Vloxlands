@@ -2,10 +2,13 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
@@ -16,9 +19,9 @@ import de.dakror.vloxlands.generate.WorldGenerator;
  */
 public class LoadingLayer extends Layer
 {
-	Stage stage;
 	Image logo;
 	Texture blur;
+	BitmapFont font;
 	
 	float percent;
 	
@@ -44,6 +47,7 @@ public class LoadingLayer extends Layer
 				Vloxlands.currentGame.addLayer(new HudLayer());
 				Vloxlands.currentGame.removeLayer(this);
 				GameLayer.instance.doneLoading();
+				return;
 			}
 		}
 		
@@ -54,6 +58,13 @@ public class LoadingLayer extends Layer
 		stage.draw();
 		stage.getBatch().begin();
 		stage.getBatch().draw(blur, logo.getX(), logo.getY(), 0, height, 256, 256 - height);
+		
+		String number = Math.round(percent * 100) + "";
+		if (number.length() == 1) number = " " + number;
+		if (number.length() == 2) number = " " + number;
+		String string = number + "% - " + (!worldGen ? "Loading resources" : "Generating world");
+		TextBounds tb = font.getBounds(string);
+		font.draw(stage.getBatch(), string, (Gdx.graphics.getWidth() - tb.width) / 2, logo.getY() + 270);
 		stage.getBatch().end();
 	}
 	
@@ -81,7 +92,8 @@ public class LoadingLayer extends Layer
 		Vloxlands.skin.add("bomb", Vloxlands.assets.get("img/gui/bomb.png", Texture.class));
 		Vloxlands.skin.add("sleep", Vloxlands.assets.get("img/gui/sleep.png", Texture.class));
 		
-		stage = new Stage();
+		stage = new Stage(new ScreenViewport());
+		font = new BitmapFont();
 		logo = new Image(Vloxlands.assets.get("img/logo/logo256.png", Texture.class));
 		blur = Vloxlands.assets.get("img/logo/logo256-blur.png", Texture.class);
 		worldGenerator = new WorldGenerator();
