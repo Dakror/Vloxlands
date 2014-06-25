@@ -6,6 +6,7 @@ import java.util.Comparator;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -40,6 +41,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public Vector3 pos;
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
+	int random;
+	
 	byte[] voxels;
 	
 	FloatArray opaqueMeshData;
@@ -68,6 +71,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	public Chunk(Vector3 index, Island island)
 	{
+		random = MathUtils.random(UNLOAD_TICKS);
 		this.index = index;
 		this.island = island;
 		pos = index.cpy().scl(SIZE);
@@ -383,7 +387,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		if (!inFrustum && loaded)
 		{
 			ticksInvisible++;
-			if (ticksInvisible > UNLOAD_TICKS)
+			if (ticksInvisible > UNLOAD_TICKS + random)
 			{
 				unload();
 				ticksInvisible = 0;

@@ -2,6 +2,7 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -81,9 +83,14 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	Vector3 controllerTarget = new Vector3();
+	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
 	Vector3 targetDirection = new Vector3();
 	Vector3 targetUp = new Vector3();
+	
+	Vector2 mouseDown = new Vector2();
+	
 	Island targetIsland;
 	
 	// -- temp -- //
@@ -127,6 +134,14 @@ public class GameLayer extends Layer
 		{
 			private final Vector3 tmpV1 = new Vector3();
 			private final Vector3 tmpV2 = new Vector3();
+			
+			
+			@Override
+			protected boolean process(float deltaX, float deltaY, int button)
+			{
+				if (button == rotateButton && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) return false;
+				return super.process(deltaX, deltaY, button);
+			}
 			
 			@Override
 			public boolean zoom(float amount)
@@ -593,6 +608,21 @@ public class GameLayer extends Layer
 	}
 	
 	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer)
+	{
+		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+		{
+			float f = 0.1f;
+			
+			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
+			camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
+			camera.update();
+			controller.update();
+		}
+		return false;
+	}
+	
+	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
 		pickRay(true, false, screenX, screenY);
@@ -602,8 +632,12 @@ public class GameLayer extends Layer
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button)
 	{
+		mouseDown.set(screenX, screenY);
+		
 		if (button == Buttons.MIDDLE)
 		{
+			controllerTarget.set(controller.target);
+			cameraPos.set(camera.position);
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}

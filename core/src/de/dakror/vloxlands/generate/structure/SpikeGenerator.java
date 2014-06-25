@@ -37,6 +37,7 @@ public class SpikeGenerator extends Generator
 		Vector2 pos = getRandomCircleInCircle(new Vector2(x, z), radiusAt0, rad);
 		
 		int h = (int) (0.3f * ((MAXRAD - rad) * (radiusAt0 - pos.cpy().sub(new Vector2(x, z)).len()) + topLayers));
+		h = Math.min(h, Island.SIZE - topLayers - 10);
 		
 		island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId());
 		
