@@ -14,6 +14,7 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
@@ -150,5 +151,20 @@ public abstract class Structure extends Entity
 			GameLayer.world.addEntity(i);
 			
 		}
+	}
+	
+	public CurserCommand getDefaultCommand()
+	{
+		return CurserCommand.NO_OP;
+	}
+
+	public CurserCommand getCommandForEntity(Entity selectedEntity)
+	{
+		return getDefaultCommand();
+	}
+
+	public CurserCommand getCommandForStructure(Structure selectedStructure)
+	{
+		return getDefaultCommand();
 	}
 }

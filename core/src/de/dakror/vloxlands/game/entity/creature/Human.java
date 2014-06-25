@@ -28,6 +28,7 @@ import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.MineJob;
 import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -203,6 +204,7 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
+		CurserCommand c = structure.getCommandForEntity(this);
 		if (wasSelected && !lmb)
 		{
 			Job job = null;
