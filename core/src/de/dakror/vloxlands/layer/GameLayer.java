@@ -27,6 +27,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
@@ -127,7 +128,7 @@ public class GameLayer extends Layer
 		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
-		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
 		controller = new CameraInputController(camera)

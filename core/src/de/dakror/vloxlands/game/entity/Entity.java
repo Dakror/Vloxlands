@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -160,7 +161,7 @@ public abstract class Entity extends EntityBase
 			Gdx.gl.glLineWidth(1);
 		}
 		
-		if (Vloxlands.debug && !minimapMode)
+		if (Config.debug && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);

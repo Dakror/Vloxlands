@@ -24,7 +24,6 @@ public class Vloxlands extends GameBase
 	long last;
 	int tick;
 	
-	public static boolean debug;
 	public static boolean showPathDebug;
 	
 	@Override
@@ -34,6 +33,8 @@ public class Vloxlands extends GameBase
 		
 		currentGame = this;
 		
+		Config.init();
+		setFullscreen(Config.pref.getBoolean("fullscreen"));
 		Voxel.loadVoxels();
 		Item.loadItems();
 		
@@ -72,18 +73,23 @@ public class Vloxlands extends GameBase
 	{
 		if (keycode == Keys.F1)
 		{
-			debug = !debug;
+			Config.debug = !Config.debug;
 			toggleLayer(new DebugLayer());
 			return true;
 		}
 		if (keycode == Keys.F2) showPathDebug = !showPathDebug;
 		if (keycode == Keys.F11)
 		{
-			if (Gdx.graphics.isFullscreen()) Gdx.graphics.setDisplayMode(1280, 720, false);
-			else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
+			setFullscreen(!Gdx.graphics.isFullscreen());
 			
 			return true;
 		}
 		return false;
+	}
+	
+	public void setFullscreen(boolean fullscreen)
+	{
+		if (fullscreen) Gdx.graphics.setDisplayMode(1280, 720, false);
+		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 	}
 }
