@@ -87,9 +87,15 @@ public class Vloxlands extends GameBase
 		return false;
 	}
 	
+	@Override
+	public void pause()
+	{
+		Config.savePrefs();
+	}
+	
 	public void setFullscreen(boolean fullscreen)
 	{
-		if (fullscreen) Gdx.graphics.setDisplayMode(1280, 720, false);
+		if (!fullscreen) Gdx.graphics.setDisplayMode(1280, 720, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 	}
 }

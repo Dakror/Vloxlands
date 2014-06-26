@@ -28,4 +28,12 @@ public class Config
 		pref.putInteger("fov", 67);
 		pref.flush();
 	}
+	
+	
+	public static void savePrefs()
+	{
+		pref.putBoolean("fullscreen", Gdx.graphics.isFullscreen());
+		
+		pref.flush();
+	}
 }
