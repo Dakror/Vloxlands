@@ -21,14 +21,14 @@ import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.Path;
-import de.dakror.vloxlands.ai.Path.PathBundle;
-import de.dakror.vloxlands.game.Query;
-import de.dakror.vloxlands.game.Query.Queryable;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.query.PathBundle;
+import de.dakror.vloxlands.game.query.Query;
+import de.dakror.vloxlands.game.query.Query.Queryable;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -267,7 +267,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 		}
 		
 		if (path == null) return null;
-		return new PathBundle(path, structure, creature);
+		return new PathBundle(path, structure, creature, query);
 	}
 	
 	public static float calculateRelativeUplift(float y)
