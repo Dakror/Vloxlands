@@ -27,7 +27,7 @@ import de.dakror.vloxlands.util.event.SelectionListener;
  */
 public class Island implements RenderableProvider, Tickable
 {
-	public static final int CHUNKS = 16;
+	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
 	public static final int SNOWLEVEL = 50;
 	public static final float SNOW_PER_TICK = 0.2f;

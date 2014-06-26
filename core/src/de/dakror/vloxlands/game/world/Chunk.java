@@ -31,7 +31,7 @@ import de.dakror.vloxlands.util.Tickable;
 public class Chunk implements Meshable, Tickable, Disposable
 {
 	public static short[] indices;
-	public static final int SIZE = 8;
+	public static final int SIZE = 16;
 	public static final int VERTEX_SIZE = 10;
 	public static final int UNLOAD_TICKS = 120;
 	
