@@ -27,7 +27,7 @@ import de.dakror.vloxlands.util.event.SelectionListener;
  */
 public class Island implements RenderableProvider, Tickable
 {
-	public static final int CHUNKS = 8;
+	public static final int CHUNKS = 16;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
 	public static final int SNOWLEVEL = 50;
 	public static final float SNOW_PER_TICK = 0.2f;
@@ -277,7 +277,7 @@ public class Island implements RenderableProvider, Tickable
 	{
 		renderStructures(batch, environment, false);
 		
-		if ((tick % 60 == 0) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
+		if ((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 			
@@ -298,10 +298,24 @@ public class Island implements RenderableProvider, Tickable
 			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
 			GameLayer.instance.minimapBatch.end();
 			fbo.end();
-			initFBO = true;
+			initFBO = wasDrawnOnce();
 			minimapMode = false;
 			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
 		}
+	}
+	
+	public boolean wasDrawnOnce()
+	{
+		for (Chunk c : chunks)
+			if (!c.isEmpty() && !c.drawn) return false;
+		return true;
+	}
+	
+	public boolean isFullyLoaded()
+	{
+		for (Chunk c : chunks)
+			if (!c.isEmpty() && !c.loaded) return false;
+		return true;
 	}
 	
 	@Override
@@ -324,12 +338,14 @@ public class Island implements RenderableProvider, Tickable
 			
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
-				if (!chunk.loaded && chunk.onceLoaded && !minimapMode) chunk.load();
+				if (!chunk.loaded && !minimapMode) chunk.load();
 				
 				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
 				
-				if (chunk.loaded)
+				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
+					chunk.drawn = true;
+					
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 					opaque.material = World.opaque;

@@ -31,7 +31,7 @@ import de.dakror.vloxlands.util.Tickable;
 public class Chunk implements Meshable, Tickable, Disposable
 {
 	public static short[] indices;
-	public static final int SIZE = 16;
+	public static final int SIZE = 8;
 	public static final int VERTEX_SIZE = 10;
 	public static final int UNLOAD_TICKS = 120;
 	
@@ -58,6 +58,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
+	public boolean drawn = false;
 	public boolean onceLoaded = false;
 	public boolean loaded = false;
 	
@@ -119,6 +120,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		
 		loaded = true;
 		onceLoaded = true;
+		drawn = false;
 	}
 	
 	public void unload()
@@ -384,7 +386,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	@Override
 	public void tick(int tick)
 	{
-		if (!inFrustum && loaded)
+		if (!inFrustum && loaded && drawn && GameLayer.instance.activeIsland != island)
 		{
 			ticksInvisible++;
 			if (ticksInvisible > UNLOAD_TICKS + random)
