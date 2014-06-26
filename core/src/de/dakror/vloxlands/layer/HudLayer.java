@@ -381,6 +381,7 @@ public class HudLayer extends Layer implements SelectionListener
 			stage.draw();
 			if (dragStart.x > -1)
 			{
+				shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 				shapeRenderer.begin(ShapeType.Line);
 				shapeRenderer.identity();
 				shapeRenderer.setColor(Color.WHITE);
