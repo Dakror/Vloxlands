@@ -15,12 +15,13 @@ import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
+import de.dakror.vloxlands.util.IInventory;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity
+public abstract class Structure extends Entity implements IInventory
 {
 	Array<StructureNode> nodes;
 	Vector3 voxelPos;
