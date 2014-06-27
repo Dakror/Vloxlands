@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -10,6 +9,4 @@ import java.io.IOException;
 public interface Savable
 {
 	public void save(ByteArrayOutputStream baos) throws IOException;
-	
-	public void load(ByteArrayInputStream bais) throws IOException;
 }

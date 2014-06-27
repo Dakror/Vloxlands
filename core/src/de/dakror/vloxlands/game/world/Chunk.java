@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.world;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -448,8 +447,4 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		Bits.putInt(baos, b.length);
 		baos.write(b);
 	}
-	
-	@Override
-	public void load(ByteArrayInputStream bais) throws IOException
-	{}
 }

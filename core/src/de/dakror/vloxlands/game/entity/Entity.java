@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.entity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
@@ -20,12 +22,13 @@ import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
 
 /**
  * @author Dakror
  */
-public abstract class Entity extends EntityBase
+public abstract class Entity extends EntityBase implements Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -192,6 +195,10 @@ public abstract class Entity extends EntityBase
 	{
 		markedForRemoval = true;
 	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{}
 	
 	// -- events -- //
 	

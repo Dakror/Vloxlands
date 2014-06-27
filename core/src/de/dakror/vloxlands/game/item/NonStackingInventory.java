@@ -1,6 +1,10 @@
 package de.dakror.vloxlands.game.item;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
+
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
@@ -53,5 +57,16 @@ public class NonStackingInventory extends Inventory
 		int am = Math.min(amount, storage[item.getId() + 128]);
 		count -= am;
 		return new ItemStack(item, am);
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		Bits.putInt(baos, capacity);
+		Bits.putInt(baos, count);
+		Bits.putInt(baos, storage.length * 4 /* byte size of storage */);
+		
+		for (int i = 0; i < storage.length; i++)
+			Bits.putInt(baos, storage[i]);
 	}
 }

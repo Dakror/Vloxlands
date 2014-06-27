@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.world;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -22,8 +21,8 @@ import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Direction;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.math.Bits;
@@ -482,12 +481,5 @@ public class Island implements RenderableProvider, Tickable, Savable
 		
 		for (Chunk c : chunks)
 			c.save(baos);
-	}
-	
-	@Override
-	public void load(ByteArrayInputStream bais) throws IOException
-	{
-		for (Chunk c : chunks)
-			c.load(bais);
 	}
 }

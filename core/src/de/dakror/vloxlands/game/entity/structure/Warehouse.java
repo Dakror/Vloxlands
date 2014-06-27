@@ -18,12 +18,10 @@ public class Warehouse extends Structure
 		
 		inventory = new NonStackingInventory(100);
 	}
-
+	
 	@Override
 	public CurserCommand getDefaultCommand()
 	{
 		return CurserCommand.DEPOSIT;
 	}
-	
-	
 }

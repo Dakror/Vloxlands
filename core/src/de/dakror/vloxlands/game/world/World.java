@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.world;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -282,13 +281,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		
 		for (Island i : islands)
 			i.save(baos);
-	}
-	
-	@Override
-	public void load(ByteArrayInputStream bais) throws IOException
-	{
-		for (Island i : islands)
-			i.load(bais);
 	}
 	
 	public static float calculateRelativeUplift(float y)
