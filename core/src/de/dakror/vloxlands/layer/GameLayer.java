@@ -183,7 +183,7 @@ public class GameLayer extends Layer
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 		
-		world = new World(1, 1);
+		world = new World(w, d);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
