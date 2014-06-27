@@ -1,5 +1,8 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -30,12 +33,13 @@ import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.query.Query.Queryable;
 import de.dakror.vloxlands.render.Mesher;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 
 /**
  * @author Dakror
  */
-public class World implements RenderableProvider, Tickable, Queryable
+public class World implements RenderableProvider, Tickable, Queryable, Savable
 {
 	public static final Color SELECTION = Color.valueOf("ff9900");
 	
@@ -270,8 +274,26 @@ public class World implements RenderableProvider, Tickable, Queryable
 		return new PathBundle(path, structure, creature, query);
 	}
 	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		baos.write(width);
+		baos.write(depth);
+		
+		for (Island i : islands)
+			i.save(baos);
+	}
+	
+	@Override
+	public void load(ByteArrayInputStream bais) throws IOException
+	{
+		for (Island i : islands)
+			i.load(bais);
+	}
+	
 	public static float calculateRelativeUplift(float y)
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
+	
 }

@@ -1,6 +1,8 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -22,14 +24,17 @@ import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
+import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Meshable;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Chunk implements Meshable, Tickable, Disposable
+public class Chunk implements Meshable, Tickable, Disposable, Savable
 {
 	public static short[] indices;
 	public static final int SIZE = 16;
@@ -430,41 +435,21 @@ public class Chunk implements Meshable, Tickable, Disposable
 			d.dispose();
 	}
 	
-	public void encode(ByteArrayOutputStream baos)
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
 	{
 		if (isEmpty()) return;
 		
-		int count = 0;
-		byte type = 0;
+		baos.write((int) index.x);
+		baos.write((int) index.y);
+		baos.write((int) index.z);
 		
-		boolean first = false;
-		
-		for (int i = 0; i < voxels.length; i++)
-		{
-			byte v = voxels[i];
-			if (!first || type != v || count == 255)
-			{
-				if (count != 0)
-				{
-					baos.write(count);
-					baos.write(type);
-					
-					count = 0;
-				}
-				type = v;
-				
-				first = true;
-			}
-			else
-			{
-				count++;
-			}
-		}
-		
-		if (count > 0)
-		{
-			baos.write(count);
-			baos.write(type);
-		}
+		byte[] b = Compressor.compressRow(voxels);
+		Bits.putInt(baos, b.length);
+		baos.write(b);
 	}
+	
+	@Override
+	public void load(ByteArrayInputStream bais) throws IOException
+	{}
 }

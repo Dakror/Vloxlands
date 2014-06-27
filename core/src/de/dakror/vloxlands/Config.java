@@ -29,7 +29,6 @@ public class Config
 		pref.flush();
 	}
 	
-	
 	public static void savePrefs()
 	{
 		pref.putBoolean("fullscreen", Gdx.graphics.isFullscreen());

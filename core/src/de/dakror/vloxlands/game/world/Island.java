@@ -1,5 +1,8 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -19,14 +22,16 @@ import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.SelectionListener;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Island implements RenderableProvider, Tickable
+public class Island implements RenderableProvider, Tickable, Savable
 {
 	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
@@ -468,4 +473,21 @@ public class Island implements RenderableProvider, Tickable
 		return true;
 	}
 	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		baos.write((int) index.x);
+		baos.write((int) index.z);
+		Bits.putFloat(baos, pos.y);
+		
+		for (Chunk c : chunks)
+			c.save(baos);
+	}
+	
+	@Override
+	public void load(ByteArrayInputStream bais) throws IOException
+	{
+		for (Chunk c : chunks)
+			c.load(bais);
+	}
 }
