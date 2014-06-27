@@ -365,7 +365,7 @@ public class Island implements RenderableProvider, Tickable
 					transp.primitiveType = GL20.GL_TRIANGLES;
 					if (chunk.transpVerts > 0) renderables.add(transp);
 					
-					if (Config.debug)
+					if (Config.debug && !minimapMode)
 					{
 						Renderable opaque1 = pool.obtain();
 						opaque1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);

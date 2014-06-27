@@ -183,7 +183,7 @@ public class GameLayer extends Layer
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 		
-		world = new World(w, d);
+		world = new World(1, 1);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
@@ -203,6 +203,13 @@ public class GameLayer extends Layer
 		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
+		
+		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// for (int i = 0; i < 512; i++)
+		// {
+		// world.getIslands()[0].getChunk(i).encode(baos);
+		// if (baos.size() > 0) break;
+		// }
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	

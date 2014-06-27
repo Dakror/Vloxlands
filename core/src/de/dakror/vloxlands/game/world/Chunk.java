@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -36,7 +37,6 @@ public class Chunk implements Meshable, Tickable, Disposable
 	public static final int UNLOAD_TICKS = 120;
 	
 	public int opaqueVerts, transpVerts;
-	
 	public Vector3 index;
 	public Vector3 pos;
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
@@ -428,5 +428,43 @@ public class Chunk implements Meshable, Tickable, Disposable
 	{
 		for (Disposable d : disposables)
 			d.dispose();
+	}
+	
+	public void encode(ByteArrayOutputStream baos)
+	{
+		if (isEmpty()) return;
+		
+		int count = 0;
+		byte type = 0;
+		
+		boolean first = false;
+		
+		for (int i = 0; i < voxels.length; i++)
+		{
+			byte v = voxels[i];
+			if (!first || type != v || count == 255)
+			{
+				if (count != 0)
+				{
+					baos.write(count);
+					baos.write(type);
+					
+					count = 0;
+				}
+				type = v;
+				
+				first = true;
+			}
+			else
+			{
+				count++;
+			}
+		}
+		
+		if (count > 0)
+		{
+			baos.write(count);
+			baos.write(type);
+		}
 	}
 }
