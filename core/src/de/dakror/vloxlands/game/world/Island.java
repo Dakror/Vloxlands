@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -27,7 +28,7 @@ import de.dakror.vloxlands.util.event.SelectionListener;
  */
 public class Island implements RenderableProvider, Tickable
 {
-	public static final int CHUNKS = 16;
+	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
 	public static final int SNOWLEVEL = 50;
 	public static final float SNOW_PER_TICK = 0.2f;
@@ -329,12 +330,12 @@ public class Island implements RenderableProvider, Tickable
 		int hs = Chunk.SIZE / 2;
 		Renderable block = null;
 		
+		if (!minimapMode && !inFrustum) return;
+		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
 			if (chunk.isEmpty()) continue;
-			
-			if (!chunk.onceLoaded) chunk.load();
 			
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
@@ -363,6 +364,27 @@ public class Island implements RenderableProvider, Tickable
 					transp.meshPartSize = chunk.transpVerts;
 					transp.primitiveType = GL20.GL_TRIANGLES;
 					if (chunk.transpVerts > 0) renderables.add(transp);
+					
+					if (Config.debug)
+					{
+						Renderable opaque1 = pool.obtain();
+						opaque1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+						opaque1.material = World.highlight;
+						opaque1.mesh = chunk.getOpaqueMesh();
+						opaque1.meshPartOffset = 0;
+						opaque1.meshPartSize = chunk.opaqueVerts;
+						opaque1.primitiveType = GL20.GL_LINES;
+						if (chunk.opaqueVerts > 0) renderables.add(opaque1);
+						
+						Renderable transp1 = pool.obtain();
+						transp1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+						transp1.material = World.highlight;
+						transp1.mesh = chunk.getTransparentMesh();
+						transp1.meshPartOffset = 0;
+						transp1.meshPartSize = chunk.transpVerts;
+						transp1.primitiveType = GL20.GL_LINES;
+						if (chunk.transpVerts > 0) renderables.add(transp1);
+					}
 					
 					if (chunk.selectedVoxel.x > -1 && !minimapMode)
 					{

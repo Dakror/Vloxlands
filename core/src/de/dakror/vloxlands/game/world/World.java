@@ -145,7 +145,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 		loadedChunks = 0;
 		for (Island island : islands)
 		{
-			if (island != null)
+			if (island != null && island.inFrustum)
 			{
 				island.getRenderables(renderables, pool);
 				visibleChunks += island.visibleChunks;
