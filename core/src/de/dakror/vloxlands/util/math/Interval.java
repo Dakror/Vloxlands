@@ -1,9 +1,14 @@
 package de.dakror.vloxlands.util.math;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import de.dakror.vloxlands.util.Savable;
+
 /**
  * @author Dakror
  */
-public class Interval implements Comparable<Interval>
+public class Interval implements Comparable<Interval>, Savable
 {
 	int start, length;
 	byte type;
@@ -34,6 +39,16 @@ public class Interval implements Comparable<Interval>
 	public void setType(byte type)
 	{
 		this.type = type;
+	}
+	
+	public void shrink()
+	{
+		length--;
+	}
+
+	public void extend()
+	{
+		length++;
 	}
 
 	public int getStart()
@@ -66,5 +81,12 @@ public class Interval implements Comparable<Interval>
 	public String toString()
 	{
 		return start + "-[" + type + "]-" + (start + length);
+	}
+
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		Bits.putShort(baos, (short) length);
+		baos.write(type);
 	}
 }
