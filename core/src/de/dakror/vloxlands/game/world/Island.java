@@ -284,28 +284,31 @@ public class Island implements RenderableProvider, Tickable, Savable
 		
 		if ((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
 		{
-			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-			
-			fbo.begin();
-			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-			
-			GameLayer.instance.minimapCamera.position.set(pos);
-			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
-			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
-			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
-			GameLayer.instance.minimapCamera.translate(0, 5, 0);
-			GameLayer.instance.minimapCamera.update();
-			
-			minimapMode = true;
-			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
-			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
-			GameLayer.instance.minimapBatch.end();
-			fbo.end();
-			initFBO = wasDrawnOnce();
-			minimapMode = false;
-			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+			if (isFullyLoaded())
+			{
+				if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+				
+				fbo.begin();
+				Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
+				Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+				
+				GameLayer.instance.minimapCamera.position.set(pos);
+				((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
+				GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
+				GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
+				GameLayer.instance.minimapCamera.translate(0, 5, 0);
+				GameLayer.instance.minimapCamera.update();
+				
+				minimapMode = true;
+				GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
+				GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
+				renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
+				GameLayer.instance.minimapBatch.end();
+				fbo.end();
+				initFBO = wasDrawnOnce();
+				minimapMode = false;
+				Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+			}
 		}
 	}
 	
@@ -349,7 +352,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 				
 				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
-					chunk.drawn = true;
+					if (minimapMode) chunk.drawn = true;
 					
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);

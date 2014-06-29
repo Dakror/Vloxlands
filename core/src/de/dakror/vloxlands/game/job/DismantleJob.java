@@ -10,30 +10,30 @@ import de.dakror.vloxlands.util.event.IEvent;
 public class DismantleJob extends Job
 {
 	private Structure target;
-	
+
 	public DismantleJob(Human human, Structure target, boolean persistent)
 	{
 		super(human, "walk", "Dismantling " + target.getName(), 10, persistent);
 		this.target = target;
 	}
-	
+
 	@Override
 	public void tick(int tick)
 	{}
-	
+
 	@Override
 	public void onEnd()
 	{
 		super.onEnd();
 		target.handleEvent(new IEvent()
 		{
-			
+
 			@Override
 			public Object getSender()
 			{
 				return this;
 			}
-			
+
 			@Override
 			public String getName()
 			{
