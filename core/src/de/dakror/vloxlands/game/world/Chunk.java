@@ -16,6 +16,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.binarydreamers.trees.IntegerInterval;
+import com.binarydreamers.trees.IntervalTree;
+import com.binarydreamers.trees.IntervalTree.SearchNearest;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -23,12 +26,13 @@ import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
-import de.dakror.vloxlands.util.Compressor;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Meshable;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.math.Bits;
+import de.dakror.vloxlands.util.math.VoxelInterval;
 
 /**
  * @author Dakror
@@ -40,39 +44,43 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public static final int VERTEX_SIZE = 10;
 	public static final int UNLOAD_TICKS = 120;
 
+	final VoxelInterval tmp = new VoxelInterval();
+	
 	public int opaqueVerts, transpVerts;
 	public Vector3 index;
 	public Vector3 pos;
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
-
+	
 	int random;
-
-	byte[] voxels;
-
+	
+	// byte[] voxels;
+	IntervalTree<Integer> tree;
+	
+	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
-
+	
 	float weight, uplift;
-
+	
 	Mesh opaque, transp;
-
+	
 	public boolean inFrustum;
-
+	
 	boolean updateRequired;
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
 	public boolean drawn = false;
 	public boolean loaded = false;
-
+	
 	Vector2 tex;
 	Island island;
-
+	
 	int[] resources;
 	int ticksInvisible;
-
+	
 	Array<Disposable> disposables = new Array<Disposable>();
-
+	
 	public Chunk(Vector3 index, Island island)
 	{
 		random = MathUtils.random(UNLOAD_TICKS);
@@ -80,21 +88,23 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		this.island = island;
 		pos = index.cpy().scl(SIZE);
 
-		voxels = new byte[SIZE * SIZE * SIZE];
-		for (int i = 0; i < voxels.length; i++)
-			voxels[i] = Voxel.get("AIR").getId();
-
+		// voxels = new byte[SIZE * SIZE * SIZE];
+		// for (int i = 0; i < voxels.length; i++)
+		// voxels[i] = Voxel.get("AIR").getId();
+		tree = new IntervalTree<Integer>(IntegerInterval.comparator);
+		tree.add(new VoxelInterval(Voxel.get("AIR").getId(), 0, SIZE * SIZE * SIZE - 1));
+		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
-
+		
 		MeshingThread.register(this);
 	}
-
+	
 	public Chunk(int x, int y, int z, Island island)
 	{
 		this(new Vector3(x, y, z), island);
 	}
-
+	
 	public void load()
 	{
 		if (indices == null)
@@ -112,103 +122,199 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				indices[i + 5] = (short) (j + 0);
 			}
 		}
-
+		
 		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		opaque.setIndices(indices);
 		transp = new Mesh(false, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		transp.setIndices(indices);
-
+		
 		opaqueMeshData = new FloatArray();
 		transpMeshData = new FloatArray();
-
+		
 		loaded = true;
 		drawn = false;
 	}
-
+	
 	public void unload()
 	{
 		updateRequired = true;
 		doneMeshing = false;
 		meshing = false;
 		loaded = false;
-		
+
 		opaqueVerts = 0;
 		transpVerts = 0;
-
+		
 		opaque.dispose();
 		opaque = null;
 		transp.dispose();
 		transp = null;
-
+		
 		opaqueMeshData.clear();
 		opaqueMeshData = null;
-
+		
 		transpMeshData.clear();
 		transpMeshData = null;
-		
-	}
 
+	}
+	
 	public void add(int x, int y, int z, byte id)
 	{
 		set(x, y, z, id, false);
 	}
-
+	
 	public boolean set(int x, int y, int z, byte id)
 	{
 		return set(x, y, z, id, true);
 	}
-
+	
 	public boolean set(int x, int y, int z, byte id, boolean force)
 	{
 		if (x >= SIZE || x < 0) return false;
 		if (y >= SIZE || y < 0) return false;
 		if (z >= SIZE || z < 0) return false;
-
+		
 		byte air = Voxel.get("AIR").getId();
-
+		byte get = get(x, y, z);
+		
 		int index = z + y * SIZE + x * SIZE * SIZE;
+		
+		if (!force && get != air) return false;
+		
+		VoxelInterval i = (VoxelInterval) tree.searchNearestElement(tmp.set(id, index, index), SearchNearest.SEARCH_NEAREST_ROUNDED_DOWN);
+		VoxelInterval j = null;
+		if (i == null) throw new IllegalArgumentException();
+		if (i.getType() == id) return false;
+		
+		tree.remove(i);
 
-		if (!force && voxels[index] != air) return false;
+		if (i.getLower() == i.getUpper())
+		{
+			i.setType(id);
+		}
+		else if (index == i.getLower())
+		{
+			i.setLower(i.getLower() + 1);
 
-		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
-
-		voxels[index] = id;
+			j = (VoxelInterval) tree.searchNearestElement(tmp.set(id, index - 1, index - 1));
+			if (j != null && j.getType() == id)
+			{
+				tree.remove(j);
+				j.setUpper(index);
+				tree.add(j);
+			}
+			else
+			{
+				tree.add(new VoxelInterval(id, index, index));
+			}
+		}
+		else if (index == i.getUpper())
+		{
+			i.setUpper(i.getUpper() + 1);
+			
+			j = (VoxelInterval) tree.searchNearestElement(tmp.set(id, index + 1, index + 1));
+			if (j != null && j.getType() == id)
+			{
+				tree.remove(j);
+				j.setLower(index);
+				tree.add(j);
+			}
+			else
+			{
+				tree.add(new VoxelInterval(id, index, index));
+			}
+		}
+		else
+		{
+			int oldUpper = i.getUpper();
+			i.setUpper(index - 1);
+			tree.add(new VoxelInterval(id, index, index));
+			tree.add(new VoxelInterval(i.getType(), index + 1, oldUpper));
+		}
+		
+		tree.add(i);
+		
+		if (resources[get + 128] > 0) resources[get + 128]--;
 
 		if (selectedVoxel.x == x && selectedVoxel.y == y && selectedVoxel.z == z)
 		{
 			selectedVoxel.set(-1, 0, 0);
 		}
-
+		
 		resources[id + 128]++;
-
+		
 		updateRequired = true;
-
+		
 		return true;
 	}
-
+	
+	// public boolean set(int x, int y, int z, byte id, boolean force)
+	// {
+	// if (x >= SIZE || x < 0) return false;
+	// if (y >= SIZE || y < 0) return false;
+	// if (z >= SIZE || z < 0) return false;
+	//
+	// byte air = Voxel.get("AIR").getId();
+	//
+	// int index = z + y * SIZE + x * SIZE * SIZE;
+	//
+	// if (!force && voxels[index] != air) return false;
+	//
+	// if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
+	//
+	// voxels[index] = id;
+	//
+	// if (selectedVoxel.x == x && selectedVoxel.y == y && selectedVoxel.z == z)
+	// {
+	// selectedVoxel.set(-1, 0, 0);
+	// }
+	//
+	// resources[id + 128]++;
+	//
+	// updateRequired = true;
+	//
+	// return true;
+	// }
+	
 	public void forceUpdate()
 	{
 		updateRequired = true;
 	}
-
+	
+	// public byte get(int x, int y, int z)
+	// {
+	// if (x >= SIZE || x < 0) return 0;
+	// if (y >= SIZE || y < 0) return 0;
+	// if (z >= SIZE || z < 0) return 0;
+	//
+	// return voxels[z + y * SIZE + x * SIZE * SIZE];
+	// }
+	
 	public byte get(int x, int y, int z)
 	{
 		if (x >= SIZE || x < 0) return 0;
 		if (y >= SIZE || y < 0) return 0;
 		if (z >= SIZE || z < 0) return 0;
 
-		return voxels[z + y * SIZE + x * SIZE * SIZE];
+		int index = z + y * SIZE + x * SIZE * SIZE;
+		VoxelInterval i = (VoxelInterval) tree.searchNearestElement(tmp.set((byte) 0, index, index), SearchNearest.SEARCH_NEAREST_ROUNDED_DOWN);
+		if (i == null)
+		{
+			D.p(x, y, z, index);
+			throw new IllegalArgumentException();
+		}
+		return i.getType();
 	}
-
-	public byte[] getVoxels()
-	{
-		return voxels;
-	}
-
+	
+	// public byte[] getVoxels()
+	// {
+	// return voxels;
+	// }
+	
 	public boolean updateMeshes()
 	{
 		if (!loaded) return false;
-
+		
 		if (doneMeshing)
 		{
 			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
@@ -216,39 +322,39 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			doneMeshing = false;
 			return true;
 		}
-
+		
 		if (!updateRequired) return !meshing;
-
+		
 		updateRequired = false;
-
+		
 		if (!meshing) meshRequest = true;
-
+		
 		return false;
 	}
-
+	
 	public Mesh getOpaqueMesh()
 	{
 		return opaque;
 	}
-
+	
 	public Mesh getTransparentMesh()
 	{
 		return transp;
 	}
-
+	
 	public boolean isEmpty()
 	{
 		return getResource(Voxel.get("AIR").getId()) == SIZE * SIZE * SIZE;
 	}
-
+	
 	public boolean pickVoxel(Ray ray, Vector3 intersection, Vector3 v)
 	{
 		byte air = Voxel.get("AIR").getId();
-
+		
 		float distance = 0;
 		Vector3 is = new Vector3();
 		Vector3 voxel = null;
-
+		
 		for (int x = 0; x < Chunk.SIZE; x++)
 		{
 			for (int y = 0; y < Chunk.SIZE; y++)
@@ -256,13 +362,13 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				for (int z = 0; z < Chunk.SIZE; z++)
 				{
 					byte b = get(x, y, z);
-
+					
 					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
-
+					
 					GameLayer.instance.tmp3.set(GameLayer.instance.tmp1.cpy().add(x, y, z));
 					GameLayer.instance.tmp4.set(GameLayer.instance.tmp3.cpy().add(1, 1, 1));
 					GameLayer.instance.bb2.set(GameLayer.instance.tmp3, GameLayer.instance.tmp4);
-
+					
 					if (Intersector.intersectRayBounds(ray, GameLayer.instance.bb2, is))
 					{
 						float dist = ray.origin.dst(is);
@@ -276,17 +382,17 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				}
 			}
 		}
-
+		
 		if (voxel != null) v.set(voxel);
-
+		
 		return voxel != null;
 	}
-
+	
 	public int getResource(byte id)
 	{
 		return resources[id + 128];
 	}
-
+	
 	public void calculateWeight()
 	{
 		weight = 0;
@@ -302,7 +408,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 	}
-
+	
 	public void calculateUplift()
 	{
 		uplift = 0;
@@ -318,7 +424,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 	}
-
+	
 	public void grassify(Island island)
 	{
 		for (int i = 0; i < SIZE; i++)
@@ -326,25 +432,24 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				for (int k = 0; k < SIZE; k++)
 					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
 	}
-
-	public void getVertices()
+	
+	public void getVertices() // TODO: ENHANCE WITH INTERVALTREE!!!!
 	{
 		ObjectMap<FaceKey, Face> faces = new ObjectMap<FaceKey, Face>();
 		ObjectMap<FaceKey, Face> transpFaces = new ObjectMap<FaceKey, Face>();
-
-		int i = 0;
+		
 		for (int x = 0; x < SIZE; x++)
 		{
 			for (int y = 0; y < SIZE; y++)
 			{
-				for (int z = 0; z < SIZE; z++, i++)
+				for (int z = 0; z < SIZE; z++)
 				{
-					byte voxel = voxels[i];
+					byte voxel = get(x, y, z);
 					if (voxel == 0) continue;
 					Voxel v = Voxel.getForId(voxel);
-
+					
 					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
-
+					
 					for (Direction d : Direction.values())
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
@@ -360,33 +465,32 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				}
 			}
 		}
-
+		
 		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
 		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
-
-		for (Face vf : faces.values())
-			vf.getVertexData(opaqueMeshData);
-
+		
+		faces.values().forEach(vf -> vf.getVertexData(opaqueMeshData));
+		
 		FaceKey[] vfks = transpFaces.keys().toArray().toArray(FaceKey.class);
-
+		
 		try
 		{
 			Arrays.sort(vfks, new Comparator<FaceKey>()
-					{
+			{
 				@Override
 				public int compare(FaceKey o1, FaceKey o2)
 				{
 					return o1.compareTo(o2);
 				}
-					});
+			});
 		}
 		catch (IllegalArgumentException e)
 		{}
-
+		
 		for (FaceKey vfk : vfks)
 			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{
@@ -401,7 +505,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 		else ticksInvisible = 0;
 	}
-
+	
 	@Override
 	public void mesh()
 	{
@@ -428,25 +532,28 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 	}
-
+	
 	@Override
 	public void dispose()
 	{
-		for (Disposable d : disposables)
-			d.dispose();
+		disposables.forEach(d -> d.dispose());
 	}
-
+	
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{
 		if (isEmpty()) return;
-
+		
 		baos.write((int) index.x);
 		baos.write((int) index.y);
 		baos.write((int) index.z);
 
-		byte[] b = Compressor.compressRow(voxels);
-		Bits.putInt(baos, b.length);
-		baos.write(b);
+		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+		tree.forEach((interval) -> {
+			Bits.putInt(baos1, interval.getUpper() - interval.getLower() + 1);
+			baos1.write(((VoxelInterval) interval).getType());
+		});
+		Bits.putInt(baos, baos1.size());
+		baos.write(baos1.toByteArray());
 	}
 }
