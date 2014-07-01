@@ -14,6 +14,22 @@ import de.dakror.vloxlands.game.world.Island;
 
 public abstract class Generator
 {
+	public static class VoxelStats
+	{
+		public float weight, uplift;
+		
+		public VoxelStats()
+		{
+			this(0, 0);
+		}
+		
+		public VoxelStats(float weight, float uplift)
+		{
+			this.weight = weight;
+			this.uplift = uplift;
+		}
+	}
+
 	public static byte[] createRatio(byte[] keys, int[] vals)
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -132,6 +148,44 @@ public abstract class Generator
 		}
 		
 		return chunkVoxels.get((int) (MathUtils.random() * chunkVoxels.size));
+	}
+	
+	public static VoxelStats generateVein(Island island, VoxelStats maximum, float min, float max, byte[] b)
+	{
+		int size = (int) MathUtils.random(min, max);
+
+		Vector3 c = pickRandomNaturalVoxel(island);
+		VoxelStats vs = new VoxelStats();
+		
+		float maxDistance = (float) (size * Math.sqrt(3)) / 2;
+		
+		for (int i = (int) (c.x - size * .5f); i < c.x + size * .5f; i++)
+		{
+			for (int j = (int) (c.y - size * .5f); j < c.y + size * .5f; j++)
+			{
+				for (int k = (int) (c.z - size * .5f); k < c.z + size * .5f; k++)
+				{
+					if (MathUtils.random() * maxDistance > Vector3.dst(i, j, k, c.x, c.y, c.z))
+					{
+						byte bv = b[(int) (MathUtils.random() * b.length)];
+						Voxel v = Voxel.getForId(bv);
+						if (vs.uplift + v.getUplift() >= maximum.uplift && maximum.weight > 0) return vs;
+						if (vs.weight + v.getWeight() >= maximum.weight && maximum.weight > 0) return vs;
+						
+						
+						vs.uplift += v.getUplift();
+						vs.weight += v.getWeight();
+						
+						byte b2 = island.get(i, j, k);
+						if (b2 != Voxel.get("AIR").getId()) vs.uplift += Voxel.getForId(b2).getWeight(); // balances uplift-weight in case of v.getUplift() > 0
+						
+						island.set(i, j, k, bv);
+					}
+				}
+			}
+		}
+		
+		return vs;
 	}
 	
 	public abstract void generate(Island island);

@@ -15,35 +15,35 @@ public class CrystalGenerator extends Generator
 {
 	public static final Voxel[] CRYSTALS = { Voxel.get("BLUE_CRYSTAL"), Voxel.get("RED_CRYSTAL"), Voxel.get("YELLOW_CRYSTAL") };
 	float y;
-	
+
 	public CrystalGenerator(float y)
 	{
 		this.y = y;
 	}
-	
+
 	@Override
 	public void generate(Island island)
 	{
 		island.calculateWeight();
-		
+
 		float weightNeededToUplift = island.getWeight() / World.calculateRelativeUplift(y);
-		
+
 		while (weightNeededToUplift > 100)
 		{
 			int index = (int) (MathUtils.random() * CRYSTALS.length);
-			weightNeededToUplift -= createCrystalVein(island, index, weightNeededToUplift);
+			weightNeededToUplift -= generateVein(island, new VoxelStats(0, weightNeededToUplift), index + 1, index + 4, new byte[] { CRYSTALS[index].getId() }).uplift;
 		}
-		
+
 		int[] amounts = new int[CRYSTALS.length];
 		for (int i = 0; i < amounts.length; i++)
 		{
 			amounts[i] = (int) (weightNeededToUplift / CRYSTALS[i].getUplift());
 			weightNeededToUplift %= CRYSTALS[i].getUplift();
 		}
-		
+
 		placeCrystals(island, amounts, (int) y);
 	}
-	
+
 	private void placeCrystals(Island island, int[] amounts, int y)
 	{
 		for (int j = 0; j < amounts.length; j++)
@@ -54,51 +54,5 @@ public class CrystalGenerator extends Generator
 				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId());
 			}
 		}
-	}
-	
-	/**
-	 * @return uplifted
-	 */
-	private float createCrystalVein(Island island, int index, float maximum)
-	{
-		int type = 0;// (int) (MathUtils.random() * 3);
-		int width = 0, height = 0, depth = 0;
-		
-		Vector3 c = pickRandomNaturalVoxel(island);
-		
-		float uplifted = 0;
-		
-		switch (type)
-		{
-			case 0: // qubic
-			{
-				depth = height = width = (int) (MathUtils.random() * 3 + (index + 1));
-				
-				float maxDistance = (float) (width * Math.sqrt(3)) / 2;
-				
-				for (int i = (int) (c.x - width * .5f); i < c.x + width * .5f; i++)
-				{
-					for (int j = (int) (c.y - height * .5f); j < c.y + height * .5f; j++)
-					{
-						for (int k = (int) (c.z - depth * .5f); k < c.z + depth * .5f; k++)
-						{
-							if (MathUtils.random() * maxDistance > Vector3.dst(i, j, k, c.x, c.y, c.z))
-							{
-								if (uplifted + CRYSTALS[index].getUplift() >= maximum) return uplifted;
-								
-								uplifted += CRYSTALS[index].getUplift();
-								
-								byte b = island.get(i, j, k);
-								if (b != Voxel.get("AIR").getId()) uplifted += //
-								Voxel.getForId(b).getWeight();
-								island.set(i, j, k, CRYSTALS[index].getId());
-							}
-						}
-					}
-				}
-				break;
-			}
-		}
-		return uplifted;
 	}
 }
