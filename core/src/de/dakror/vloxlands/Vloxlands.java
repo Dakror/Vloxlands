@@ -95,25 +95,7 @@ public class Vloxlands extends GameBase
 		}
 		if (keycode == Keys.F6 && GameLayer.world != null)
 		{
-			try
-			{
-				boolean wasNull = false;
-				if (Config.savegameName == null)
-				{
-					wasNull = true;
-					Config.savegameName = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
-				}
-				
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				GameLayer.world.save(baos);
-				FileHandle file = Gdx.files.external(".dakror/Vloxlands/maps/" + Config.savegameName + ".map");
-				file.writeBytes(Compressor.compress(baos.toByteArray()), false);
-				Gdx.app.log("Vloxlands.keyUp", "Game saved" + (wasNull ? " as " + file.name() + " (" + MathHelper.formatBinarySize(file.length(), 0) + ")." : "."));
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
+			saveGame();
 		}
 
 		return false;
@@ -129,5 +111,28 @@ public class Vloxlands extends GameBase
 	{
 		if (!fullscreen) Gdx.graphics.setDisplayMode(1280, 720, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
+	}
+
+	public void saveGame()
+	{
+		try
+		{
+			boolean wasNull = false;
+			if (Config.savegameName == null)
+			{
+				wasNull = true;
+				Config.savegameName = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
+			}
+			
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			GameLayer.world.save(baos);
+			FileHandle file = Gdx.files.external(".dakror/Vloxlands/maps/" + Config.savegameName + ".map");
+			file.writeBytes(Compressor.compress(baos.toByteArray()), false);
+			Gdx.app.log("Vloxlands.saveGame", "Game saved" + (wasNull ? " as " + file.name() + " (" + MathHelper.formatBinarySize(file.length(), 0) + ")." : "."));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
