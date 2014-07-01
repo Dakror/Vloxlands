@@ -3,8 +3,6 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.ai.Path.PathBundle;
-import de.dakror.vloxlands.game.Query;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -12,14 +10,18 @@ import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.job.DismantleJob;
+import de.dakror.vloxlands.game.query.PathBundle;
+import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.CurserCommand;
+import de.dakror.vloxlands.util.IInventory;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity
+public abstract class Structure extends Entity implements IInventory
 {
 	Array<StructureNode> nodes;
 	Vector3 voxelPos;
@@ -150,5 +152,20 @@ public abstract class Structure extends Entity
 			GameLayer.world.addEntity(i);
 			
 		}
+	}
+	
+	public CurserCommand getDefaultCommand()
+	{
+		return CurserCommand.NO_OP;
+	}
+
+	public CurserCommand getCommandForEntity(Entity selectedEntity)
+	{
+		return getDefaultCommand();
+	}
+
+	public CurserCommand getCommandForStructure(Structure selectedStructure)
+	{
+		return getDefaultCommand();
 	}
 }

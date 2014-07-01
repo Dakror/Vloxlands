@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -15,17 +17,20 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.SelectionListener;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Island implements RenderableProvider, Tickable
+public class Island implements RenderableProvider, Tickable, Savable
 {
 	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
@@ -277,7 +282,7 @@ public class Island implements RenderableProvider, Tickable
 	{
 		renderStructures(batch, environment, false);
 		
-		if ((tick % 60 == 0) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
+		if ((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 			
@@ -286,7 +291,7 @@ public class Island implements RenderableProvider, Tickable
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			
 			GameLayer.instance.minimapCamera.position.set(pos);
-			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f / (Gdx.graphics.getWidth() / 1920f);
+			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
 			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
 			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
 			GameLayer.instance.minimapCamera.translate(0, 5, 0);
@@ -298,35 +303,24 @@ public class Island implements RenderableProvider, Tickable
 			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
 			GameLayer.instance.minimapBatch.end();
 			fbo.end();
-			initFBO = true;
+			initFBO = wasDrawnOnce();
 			minimapMode = false;
 			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
 		}
-		if ((tick % 60 == 0) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
-		{
-			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-			
-			fbo.begin();
-			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-			
-			GameLayer.instance.minimapCamera.position.set(pos);
-			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f / (Gdx.graphics.getWidth() / 1920f);
-			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
-			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
-			GameLayer.instance.minimapCamera.translate(0, 5, 0);
-			GameLayer.instance.minimapCamera.update();
-			
-			minimapMode = true;
-			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
-			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
-			GameLayer.instance.minimapBatch.end();
-			fbo.end();
-			initFBO = true;
-			minimapMode = false;
-			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
-		}
+	}
+	
+	public boolean wasDrawnOnce()
+	{
+		for (Chunk c : chunks)
+			if (!c.isEmpty() && !c.drawn) return false;
+		return true;
+	}
+	
+	public boolean isFullyLoaded()
+	{
+		for (Chunk c : chunks)
+			if (!c.isEmpty() && !c.loaded) return false;
+		return true;
 	}
 	
 	@Override
@@ -340,21 +334,23 @@ public class Island implements RenderableProvider, Tickable
 		int hs = Chunk.SIZE / 2;
 		Renderable block = null;
 		
+		if (!minimapMode && !inFrustum) return;
+		
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
 			if (chunk.isEmpty()) continue;
 			
-			if (!chunk.onceLoaded) chunk.load();
-			
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
-				if (!chunk.loaded && chunk.onceLoaded && !minimapMode) chunk.load();
+				if (!chunk.loaded && !minimapMode) chunk.load();
 				
 				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
 				
-				if (!minimapMode || (minimapMode && chunk.loaded))
+				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
+					chunk.drawn = true;
+					
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 					opaque.material = World.opaque;
@@ -362,7 +358,7 @@ public class Island implements RenderableProvider, Tickable
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
 					opaque.primitiveType = GL20.GL_TRIANGLES;
-					renderables.add(opaque);
+					if (chunk.opaqueVerts > 0) renderables.add(opaque);
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -371,7 +367,28 @@ public class Island implements RenderableProvider, Tickable
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;
 					transp.primitiveType = GL20.GL_TRIANGLES;
-					renderables.add(transp);
+					if (chunk.transpVerts > 0) renderables.add(transp);
+					
+					if (Config.debug && !minimapMode)
+					{
+						Renderable opaque1 = pool.obtain();
+						opaque1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+						opaque1.material = World.highlight;
+						opaque1.mesh = chunk.getOpaqueMesh();
+						opaque1.meshPartOffset = 0;
+						opaque1.meshPartSize = chunk.opaqueVerts;
+						opaque1.primitiveType = GL20.GL_LINES;
+						if (chunk.opaqueVerts > 0) renderables.add(opaque1);
+						
+						Renderable transp1 = pool.obtain();
+						transp1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+						transp1.material = World.highlight;
+						transp1.mesh = chunk.getTransparentMesh();
+						transp1.meshPartOffset = 0;
+						transp1.meshPartSize = chunk.transpVerts;
+						transp1.primitiveType = GL20.GL_LINES;
+						if (chunk.transpVerts > 0) renderables.add(transp1);
+					}
 					
 					if (chunk.selectedVoxel.x > -1 && !minimapMode)
 					{
@@ -455,4 +472,14 @@ public class Island implements RenderableProvider, Tickable
 		return true;
 	}
 	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		baos.write((int) index.x);
+		baos.write((int) index.z);
+		Bits.putFloat(baos, pos.y);
+		
+		for (Chunk c : chunks)
+			c.save(baos);
+	}
 }

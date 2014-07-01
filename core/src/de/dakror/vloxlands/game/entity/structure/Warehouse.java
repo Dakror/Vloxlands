@@ -2,6 +2,7 @@ package de.dakror.vloxlands.game.entity.structure;
 
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.NonStackingInventory;
+import de.dakror.vloxlands.util.CurserCommand;
 
 /**
  * @author Dakror
@@ -16,5 +17,11 @@ public class Warehouse extends Structure
 		name = "Warehouse";
 		
 		inventory = new NonStackingInventory(100);
+	}
+	
+	@Override
+	public CurserCommand getDefaultCommand()
+	{
+		return CurserCommand.DEPOSIT;
 	}
 }

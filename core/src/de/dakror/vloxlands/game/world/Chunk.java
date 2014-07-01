@@ -1,11 +1,14 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -20,25 +23,29 @@ import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
+import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Meshable;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Chunk implements Meshable, Tickable, Disposable
+public class Chunk implements Meshable, Tickable, Disposable, Savable
 {
 	public static short[] indices;
-	public static final int SIZE = 8;
+	public static final int SIZE = 16;
 	public static final int VERTEX_SIZE = 10;
-	public static final int UNLOAD_TICKS = 300;
+	public static final int UNLOAD_TICKS = 120;
 	
 	public int opaqueVerts, transpVerts;
-	
 	public Vector3 index;
 	public Vector3 pos;
 	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
+	
+	int random;
 	
 	byte[] voxels;
 	
@@ -55,7 +62,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
-	public boolean onceLoaded = false;
+	public boolean drawn = false;
 	public boolean loaded = false;
 	
 	Vector2 tex;
@@ -68,6 +75,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 	
 	public Chunk(Vector3 index, Island island)
 	{
+		random = MathUtils.random(UNLOAD_TICKS);
 		this.index = index;
 		this.island = island;
 		pos = index.cpy().scl(SIZE);
@@ -114,7 +122,7 @@ public class Chunk implements Meshable, Tickable, Disposable
 		transpMeshData = new FloatArray();
 		
 		loaded = true;
-		onceLoaded = true;
+		drawn = false;
 	}
 	
 	public void unload()
@@ -123,6 +131,8 @@ public class Chunk implements Meshable, Tickable, Disposable
 		doneMeshing = false;
 		meshing = false;
 		loaded = false;
+		opaqueVerts = 0;
+		transpVerts = 0;
 		
 		opaque.dispose();
 		opaque = null;
@@ -378,12 +388,13 @@ public class Chunk implements Meshable, Tickable, Disposable
 	@Override
 	public void tick(int tick)
 	{
-		if (!inFrustum && loaded)
+		if (!inFrustum && loaded && drawn && GameLayer.instance.activeIsland != island)
 		{
 			ticksInvisible++;
-			if (ticksInvisible > UNLOAD_TICKS)
+			if (ticksInvisible > UNLOAD_TICKS + random)
 			{
-				// unload();
+				unload();
+				ticksInvisible = 0;
 			}
 		}
 		else ticksInvisible = 0;
@@ -398,14 +409,21 @@ public class Chunk implements Meshable, Tickable, Disposable
 			meshing = true;
 			opaqueMeshData.clear();
 			transpMeshData.clear();
-			getVertices();
-			int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
-			int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
-			opaqueVerts = opaqueNumVerts / 4 * 6;
-			transpVerts = transpNumVerts / 4 * 6;
-			meshRequest = false;
-			doneMeshing = true;
-			meshing = false;
+			try
+			{
+				getVertices();
+				int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
+				int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
+				opaqueVerts = opaqueNumVerts / 4 * 6;
+				transpVerts = transpNumVerts / 4 * 6;
+				meshRequest = false;
+				doneMeshing = true;
+				meshing = false;
+			}
+			catch (Exception e)
+			{
+				meshing = true;
+			}
 		}
 	}
 	
@@ -414,5 +432,19 @@ public class Chunk implements Meshable, Tickable, Disposable
 	{
 		for (Disposable d : disposables)
 			d.dispose();
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		if (isEmpty()) return;
+		
+		baos.write((int) index.x);
+		baos.write((int) index.y);
+		baos.write((int) index.z);
+		
+		byte[] b = Compressor.compressRow(voxels);
+		Bits.putInt(baos, b.length);
+		baos.write(b);
 	}
 }

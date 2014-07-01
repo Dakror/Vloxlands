@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.world;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -21,21 +23,22 @@ import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.Path;
-import de.dakror.vloxlands.ai.Path.PathBundle;
-import de.dakror.vloxlands.game.Query;
-import de.dakror.vloxlands.game.Query.Queryable;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
+import de.dakror.vloxlands.game.query.PathBundle;
+import de.dakror.vloxlands.game.query.Query;
+import de.dakror.vloxlands.game.query.Query.Queryable;
 import de.dakror.vloxlands.render.Mesher;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 
 /**
  * @author Dakror
  */
-public class World implements RenderableProvider, Tickable, Queryable
+public class World implements RenderableProvider, Tickable, Queryable, Savable
 {
 	public static final Color SELECTION = Color.valueOf("ff9900");
 	
@@ -145,7 +148,7 @@ public class World implements RenderableProvider, Tickable, Queryable
 		loadedChunks = 0;
 		for (Island island : islands)
 		{
-			if (island != null)
+			if (island != null && island.inFrustum)
 			{
 				island.getRenderables(renderables, pool);
 				visibleChunks += island.visibleChunks;
@@ -267,11 +270,22 @@ public class World implements RenderableProvider, Tickable, Queryable
 		}
 		
 		if (path == null) return null;
-		return new PathBundle(path, structure, creature);
+		return new PathBundle(path, structure, creature, query);
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		baos.write(width);
+		baos.write(depth);
+		
+		for (Island i : islands)
+			i.save(baos);
 	}
 	
 	public static float calculateRelativeUplift(float y)
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
+	
 }

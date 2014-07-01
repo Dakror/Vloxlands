@@ -1,11 +1,17 @@
 package de.dakror.vloxlands.game.item;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.badlogic.gdx.utils.Array;
+
+import de.dakror.vloxlands.util.Savable;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Inventory
+public class Inventory implements Savable
 {
 	protected Array<ItemStack> stacks;
 	protected int capacity;
@@ -135,5 +141,15 @@ public class Inventory
 	public void setCapacity(int capacity)
 	{
 		this.capacity = capacity;
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		Bits.putInt(baos, capacity);
+		Bits.putInt(baos, count);
+		Bits.putInt(baos, stacks.size * 2 /* byte size of all stacks */);
+		for (ItemStack is : stacks)
+			is.save(baos);
 	}
 }

@@ -1,13 +1,17 @@
 package de.dakror.vloxlands.game.item;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.ItemStackListener;
 
 /**
  * @author Dakror
  */
-public class ItemStack
+public class ItemStack implements Savable
 {
 	Item item;
 	int amount;
@@ -118,5 +122,12 @@ public class ItemStack
 	public void removeListener(ItemStackListener listener)
 	{
 		listeners.removeValue(listener, true);
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		baos.write(item.getId());
+		baos.write(amount);
 	}
 }

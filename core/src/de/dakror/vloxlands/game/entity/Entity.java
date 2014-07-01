@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.entity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 import com.badlogic.gdx.Gdx;
@@ -16,15 +18,17 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
 
 /**
  * @author Dakror
  */
-public abstract class Entity extends EntityBase
+public abstract class Entity extends EntityBase implements Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -160,21 +164,15 @@ public abstract class Entity extends EntityBase
 			Gdx.gl.glLineWidth(1);
 		}
 		
-		if (Vloxlands.debug && !minimapMode)
+		if (Config.debug && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
 			GameLayer.shapeRenderer.identity();
-			GameLayer.shapeRenderer.translate(posCache.x, posCache.y, posCache.z);
+			GameLayer.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
 			GameLayer.shapeRenderer.begin(ShapeType.Line);
 			GameLayer.shapeRenderer.setColor(Color.RED);
-			Vector3[] crn = boundingBox.getCorners();
-			for (int i = 0; i < LINES.length; i++)
-			{
-				Vector3 v = crn[LINES[i][0]];
-				Vector3 w = crn[LINES[i][1]];
-				GameLayer.shapeRenderer.line(v.x, v.y, v.z, w.x, w.y, w.z, Color.RED, Color.RED);
-			}
+			GameLayer.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
 			GameLayer.shapeRenderer.end();
 		}
 	}
@@ -197,6 +195,10 @@ public abstract class Entity extends EntityBase
 	{
 		markedForRemoval = true;
 	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{}
 	
 	// -- events -- //
 	

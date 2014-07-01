@@ -2,6 +2,7 @@ package de.dakror.vloxlands.layer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,11 +21,13 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.ai.BFS;
@@ -69,6 +72,7 @@ public class GameLayer extends Layer
 	public Environment minimapEnv;
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
+	public Island activeIsland;
 	
 	ModelBatch modelBatch;
 	CameraInputController controller;
@@ -81,10 +85,14 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	Vector3 controllerTarget = new Vector3();
+	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
 	Vector3 targetDirection = new Vector3();
 	Vector3 targetUp = new Vector3();
-	Island targetIsland;
+	
+	Vector2 mouseDown = new Vector2();
+	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -120,10 +128,41 @@ public class GameLayer extends Layer
 		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
-		camera = new PerspectiveCamera(60, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
-		controller = new CameraInputController(camera);
+		controller = new CameraInputController(camera)
+		{
+			private final Vector3 tmpV1 = new Vector3();
+			private final Vector3 tmpV2 = new Vector3();
+			
+			
+			@Override
+			protected boolean process(float deltaX, float deltaY, int button)
+			{
+				if (button == rotateButton && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) return false;
+				return super.process(deltaX, deltaY, button);
+			}
+			
+			@Override
+			public boolean zoom(float amount)
+			{
+				if (!alwaysScroll && activateKey != 0 && !activatePressed) return false;
+				
+				tmpV1.set(camera.direction).scl(amount);
+				tmpV2.set(camera.position).add(tmpV1);
+				
+				if (tmpV2.dst(target) > 5)
+				{
+					camera.translate(tmpV1);
+					if (scrollTarget) target.add(tmpV1);
+					if (autoUpdate) camera.update();
+					return true;
+				}
+				
+				return false;
+			}
+		};
 		controller.translateUnits = 20;
 		controller.rotateLeftKey = -1;
 		controller.rotateRightKey = -1;
@@ -164,6 +203,13 @@ public class GameLayer extends Layer
 		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
+		
+		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// for (int i = 0; i < 512; i++)
+		// {
+		// world.getIslands()[0].getChunk(i).encode(baos);
+		// if (baos.size() > 0) break;
+		// }
 		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
@@ -186,7 +232,7 @@ public class GameLayer extends Layer
 			}
 			
 			ticksForTravel = (int) camera.position.dst(target);
-			targetIsland = island;
+			activeIsland = island;
 			
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
@@ -335,7 +381,7 @@ public class GameLayer extends Layer
 		this.tick = tick;
 		world.tick(tick);
 		
-		if (targetIsland != null)
+		if (activeIsland != null && startTick > 0)
 		{
 			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
@@ -343,11 +389,10 @@ public class GameLayer extends Layer
 			
 			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
 			{
-				Vector3 islandCenter = new Vector3(targetIsland.pos.x + Island.SIZE / 2, targetIsland.pos.y + Island.SIZE / 4 * 3, targetIsland.pos.z + Island.SIZE / 2);
+				Vector3 islandCenter = new Vector3(activeIsland.pos.x + Island.SIZE / 2, activeIsland.pos.y + Island.SIZE / 4 * 3, activeIsland.pos.z + Island.SIZE / 2);
 				controller.target.set(islandCenter);
 				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
 				camera.lookAt(islandCenter);
-				targetIsland = null;
 				startTick = 0;
 			}
 			
@@ -570,6 +615,21 @@ public class GameLayer extends Layer
 	}
 	
 	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer)
+	{
+		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+		{
+			float f = 0.1f;
+			
+			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
+			camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
+			camera.update();
+			controller.update();
+		}
+		return false;
+	}
+	
+	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
 		pickRay(true, false, screenX, screenY);
@@ -579,8 +639,12 @@ public class GameLayer extends Layer
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button)
 	{
+		mouseDown.set(screenX, screenY);
+		
 		if (button == Buttons.MIDDLE)
 		{
+			controllerTarget.set(controller.target);
+			cameraPos.set(camera.position);
 			middleDown = true;
 			Gdx.input.setCursorCatched(true);
 		}

@@ -6,11 +6,11 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 /**
  * @author Dakror
  */
-public class DumpJob extends Job
+public class DepositJob extends Job
 {
 	private Structure target;
 	
-	public DumpJob(Human human, Structure target, boolean persistent)
+	public DepositJob(Human human, Structure target, boolean persistent)
 	{
 		super(human, "ablegen", "Dumping carried items", 1, persistent);
 		this.target = target;
