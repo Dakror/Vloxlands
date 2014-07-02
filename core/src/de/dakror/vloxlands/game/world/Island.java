@@ -37,27 +37,27 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public static final int SNOWLEVEL = 50;
 	public static final float SNOW_PER_TICK = 0.2f;
 	public static final float SNOW_INCREASE = 16;
-	
+
 	public int visibleChunks;
 	public int loadedChunks;
-	
+
 	float weight, uplift;
-	
+
 	public float initBalance = 0;
-	
+
 	public Vector3 index, pos;
-	
+
 	public Chunk[] chunks;
-	
+
 	Array<Structure> structures = new Array<Structure>();
 	public FrameBuffer fbo;
-	
+
 	boolean minimapMode;
 	boolean inFrustum;
-	
+
 	public boolean initFBO;
 	int tick;
-	
+
 	public Island()
 	{
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
@@ -65,25 +65,25 @@ public class Island implements RenderableProvider, Tickable, Savable
 		minimapMode = false;
 		index = new Vector3();
 		pos = new Vector3();
-		
+
 		int l = 0;
 		for (int i = 0; i < CHUNKS; i++)
 			for (int j = 0; j < CHUNKS; j++)
 				for (int k = 0; k < CHUNKS; k++)
 					chunks[l++] = new Chunk(i, j, k, this);
 	}
-	
+
 	public void setPos(Vector3 pos)
 	{
 		this.pos = pos;
 	}
-	
+
 	public void calculateInitBalance()
 	{
 		recalculate();
 		initBalance = (uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f;
 	}
-	
+
 	public void calculateWeight()
 	{
 		weight = 0;
@@ -92,11 +92,11 @@ public class Island implements RenderableProvider, Tickable, Savable
 			c.calculateWeight();
 			weight += c.weight;
 		}
-		
+
 		for (Structure s : structures)
 			weight += s.getWeight();
 	}
-	
+
 	public void calculateUplift()
 	{
 		uplift = 0;
@@ -105,28 +105,28 @@ public class Island implements RenderableProvider, Tickable, Savable
 			c.calculateUplift();
 			uplift += c.uplift;
 		}
-		
+
 		for (Structure s : structures)
 			uplift += s.getUplift();
 	}
-	
+
 	public void recalculate()
 	{
 		calculateUplift();
 		calculateWeight();
 	}
-	
+
 	@Override
 	public void tick(int tick)
 	{
 		this.tick = tick;
-		
+
 		float deltaY = (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
 		pos.y += deltaY;
-		
+
 		for (Chunk c : chunks)
 			c.tick(tick);
-		
+
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
 		{
 			Structure s = iter.next();
@@ -144,29 +144,29 @@ public class Island implements RenderableProvider, Tickable, Savable
 				if (deltaY != 0) s.getTransform().translate(0, deltaY, 0);
 			}
 		}
-		
+
 		inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
 	}
-	
+
 	public void addStructure(Structure s, boolean user, boolean clearArea)
 	{
 		s.onSpawn();
 		s.getTransform().translate(pos);
 		structures.add(s);
-		
+
 		if (!user && clearArea)
 		{
 			byte air = Voxel.get("AIR").getId();
-			
+
 			for (int i = 0; i < Math.ceil(s.getBoundingBox().getDimensions().x); i++)
 				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().z); j++)
 					for (int k = 0; k < Math.ceil(s.getBoundingBox().getDimensions().y); k++)
 						set(i + s.getVoxelPos().x, k + s.getVoxelPos().y + 1, j + s.getVoxelPos().z, air);
 		}
-		
+
 		recalculate();
 	}
-	
+
 	public byte get(float x, float y, float z)
 	{
 		int chunkX = (int) (x / Chunk.SIZE);
@@ -177,17 +177,17 @@ public class Island implements RenderableProvider, Tickable, Savable
 		if (chunkZ < 0 || chunkZ >= CHUNKS) return 0;
 		return chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].get((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE);
 	}
-	
+
 	public void add(float x, float y, float z, byte id)
 	{
 		set(x, y, z, id, false);
 	}
-	
+
 	public void set(float x, float y, float z, byte id)
 	{
 		set(x, y, z, id, true);
 	}
-	
+
 	public void set(float x, float y, float z, byte id, boolean force)
 	{
 		int chunkX = (int) (x / Chunk.SIZE);
@@ -196,14 +196,14 @@ public class Island implements RenderableProvider, Tickable, Savable
 		if (chunkY < 0 || chunkY >= CHUNKS) return;
 		int chunkZ = (int) (z / Chunk.SIZE);
 		if (chunkZ < 0 || chunkZ >= CHUNKS) return;
-		
+
 		int x1 = (int) x % Chunk.SIZE;
 		int y1 = (int) y % Chunk.SIZE;
 		int z1 = (int) z % Chunk.SIZE;
-		
+
 		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force)) notifySurroundingChunks(chunkX, chunkY, chunkZ);
 	}
-	
+
 	public void notifySurroundingChunks(int cx, int cy, int cz)
 	{
 		for (Direction d : Direction.values())
@@ -218,53 +218,53 @@ public class Island implements RenderableProvider, Tickable, Savable
 			}
 		}
 	}
-	
+
 	public float getWeight()
 	{
 		return weight;
 	}
-	
+
 	public float getUplift()
 	{
 		return uplift;
 	}
-	
+
 	public Vector3 getPos()
 	{
 		return pos;
 	}
-	
+
 	public Chunk[] getChunks()
 	{
 		return chunks;
 	}
-	
+
 	public Chunk getChunk(float x, float y, float z)
 	{
 		return getChunk((int) (x * CHUNKS * CHUNKS + y * CHUNKS + z));
 	}
-	
+
 	public Chunk getChunk(int i)
 	{
 		return chunks[i];
 	}
-	
+
 	public int getStructureCount()
 	{
 		return structures.size;
 	}
-	
+
 	public Array<Structure> getStructures()
 	{
 		return structures;
 	}
-	
+
 	public void grassify()
 	{
 		for (Chunk c : chunks)
 			c.grassify(this);
 	}
-	
+
 	protected void renderStructures(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
@@ -277,26 +277,26 @@ public class Island implements RenderableProvider, Tickable, Savable
 			}
 		}
 	}
-	
+
 	public void render(ModelBatch batch, Environment environment)
 	{
 		renderStructures(batch, environment, false);
-		
+
 		if ((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-			
+
 			fbo.begin();
 			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-			
+
 			GameLayer.instance.minimapCamera.position.set(pos);
 			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
 			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
 			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
 			GameLayer.instance.minimapCamera.translate(0, 5, 0);
 			GameLayer.instance.minimapCamera.update();
-			
+
 			minimapMode = true;
 			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
 			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
@@ -308,21 +308,21 @@ public class Island implements RenderableProvider, Tickable, Savable
 			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
 		}
 	}
-	
+
 	public boolean wasDrawnOnce()
 	{
 		for (Chunk c : chunks)
 			if (!c.isEmpty() && !c.drawn) return false;
 		return true;
 	}
-	
+
 	public boolean isFullyLoaded()
 	{
 		for (Chunk c : chunks)
 			if (!c.isEmpty() && !c.loaded) return false;
 		return true;
 	}
-	
+
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
@@ -333,24 +333,24 @@ public class Island implements RenderableProvider, Tickable, Savable
 		}
 		int hs = Chunk.SIZE / 2;
 		Renderable block = null;
-		
+
 		if (!minimapMode && !inFrustum) return;
-		
+
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
 			if (chunk.isEmpty()) continue;
-			
+
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
 				if (!chunk.loaded && !minimapMode) chunk.load();
-				
+
 				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
-				
+
 				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
 					chunk.drawn = true;
-					
+
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 					opaque.material = World.opaque;
@@ -359,7 +359,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 					opaque.meshPartSize = chunk.opaqueVerts;
 					opaque.primitiveType = GL20.GL_TRIANGLES;
 					if (chunk.opaqueVerts > 0) renderables.add(opaque);
-					
+
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 					transp.material = World.transp;
@@ -368,7 +368,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 					transp.meshPartSize = chunk.transpVerts;
 					transp.primitiveType = GL20.GL_TRIANGLES;
 					if (chunk.transpVerts > 0) renderables.add(transp);
-					
+
 					if (Config.debug && !minimapMode)
 					{
 						Renderable opaque1 = pool.obtain();
@@ -379,7 +379,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 						opaque1.meshPartSize = chunk.opaqueVerts;
 						opaque1.primitiveType = GL20.GL_LINES;
 						if (chunk.opaqueVerts > 0) renderables.add(opaque1);
-						
+
 						Renderable transp1 = pool.obtain();
 						transp1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
 						transp1.material = World.highlight;
@@ -389,7 +389,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 						transp1.primitiveType = GL20.GL_LINES;
 						if (chunk.transpVerts > 0) renderables.add(transp1);
 					}
-					
+
 					if (chunk.selectedVoxel.x > -1 && !minimapMode)
 					{
 						block = pool.obtain();
@@ -402,15 +402,15 @@ public class Island implements RenderableProvider, Tickable, Savable
 					}
 				}
 			}
-			
+
 			if (chunk.loaded && !minimapMode) loadedChunks++;
 		}
-		
+
 		if (block != null && !minimapMode) renderables.add(block);
 	}
-	
+
 	// -- voxel queries -- //
-	
+
 	public boolean isSurrounded(float x, float y, float z, boolean opaque)
 	{
 		for (Direction d : Direction.values())
@@ -418,10 +418,10 @@ public class Island implements RenderableProvider, Tickable, Savable
 			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
 			if (v.isOpaque() != opaque || v.getId() == 0) return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Has atleast one air voxel adjacent
 	 */
@@ -433,10 +433,10 @@ public class Island implements RenderableProvider, Tickable, Savable
 			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
 			if (b == air) return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Is solid and has air above
 	 */
@@ -446,7 +446,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 		byte above = get(x, y + 1, z);
 		return get(x, y, z) != air && (above == air || above == 0);
 	}
-	
+
 	public boolean isSpaceAbove(float x, float y, float z, int height)
 	{
 		byte air = Voxel.get("AIR").getId();
@@ -455,10 +455,10 @@ public class Island implements RenderableProvider, Tickable, Savable
 			byte b = get(x, y + i + 1, z);
 			if (b != 0 && b != air) return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean isWrapped(float x, float y, float z, int height)
 	{
 		byte air = Voxel.get("AIR").getId();
@@ -468,17 +468,17 @@ public class Island implements RenderableProvider, Tickable, Savable
 			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
 			if (v.getId() == 0 || (v.getId() == air && isSpaceAbove(x + d.dir.x, y + d.dir.y, z + d.dir.z, height - (int) d.dir.y))) return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{
 		baos.write((int) index.x);
 		baos.write((int) index.z);
 		Bits.putFloat(baos, pos.y);
-		
+
 		for (Chunk c : chunks)
 			c.save(baos);
 	}
