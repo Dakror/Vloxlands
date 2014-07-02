@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Pool;
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.generate.biome.BiomeType;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.Savable;
@@ -38,28 +39,31 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public static final float SNOW_PER_TICK = 0.2f;
 	public static final float SNOW_INCREASE = 16;
 
+	public FrameBuffer fbo;
+	public Vector3 index, pos;
+	public Chunk[] chunks;
+	
 	public int visibleChunks;
 	public int loadedChunks;
+	
+	public float initBalance = 0;
+	
+	public boolean initFBO;
+
+	Array<Structure> structures = new Array<Structure>();
+	
+	BiomeType biome;
 
 	float weight, uplift;
 
-	public float initBalance = 0;
-
-	public Vector3 index, pos;
-
-	public Chunk[] chunks;
-
-	Array<Structure> structures = new Array<Structure>();
-	public FrameBuffer fbo;
-
+	int tick;
+	
 	boolean minimapMode;
 	boolean inFrustum;
 
-	public boolean initFBO;
-	int tick;
-
-	public Island()
+	public Island(BiomeType biome)
 	{
+		this.biome = biome;
 		chunks = new Chunk[CHUNKS * CHUNKS * CHUNKS];
 		initFBO = false;
 		minimapMode = false;
@@ -228,12 +232,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	{
 		return uplift;
 	}
-
-	public Vector3 getPos()
-	{
-		return pos;
-	}
-
+	
 	public Chunk[] getChunks()
 	{
 		return chunks;
@@ -475,6 +474,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{
+		baos.write(biome.ordinal());
 		baos.write((int) index.x);
 		baos.write((int) index.z);
 		Bits.putFloat(baos, pos.y);
