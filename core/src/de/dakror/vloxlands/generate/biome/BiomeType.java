@@ -3,8 +3,8 @@ package de.dakror.vloxlands.generate.biome;
 public enum BiomeType
 {
 	moderate,
-	// forest,
-	// desert,
+	forest,
+	desert,
 	// frost,
 	
 	;

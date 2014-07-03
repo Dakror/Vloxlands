@@ -7,29 +7,22 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.generate.structure.CrystalGenerator;
 import de.dakror.vloxlands.generate.structure.SpikeGenerator;
 import de.dakror.vloxlands.generate.structure.TopLayerGenerator;
-import de.dakror.vloxlands.generate.structure.TreeGenerator;
 
 /**
  * @author Dakror
  */
-public class ModerateBiome extends Biome
+public class DesertBiome extends Biome
 {
-	protected int treeMin = 5;
-	protected int treeMax = 10;
-	protected float spikeFactor = 1;
-	
 	@Override
 	public void generate(Island island, int radius)
 	{
-		byte[] tlRatio = createRatio(new byte[] { Voxel.get("DIRT").getId(), Voxel.get("STONE").getId() }, new int[] { 30, 1 });
+		byte[] tlRatio = createRatio(new byte[] { Voxel.get("SAND").getId(), Voxel.get("SANDSTONE").getId() }, new int[] { 10, 1 });
 		int j = (int) (3 + 3 * MathUtils.random() + radius / 8f);
 		new TopLayerGenerator(Island.SIZE / 2, Island.SIZE / 4 * 3, Island.SIZE / 2, radius, j, tlRatio).generate(island);
-
-		byte[] sRatio = createRatio(new byte[] { Voxel.get("STONE").getId(), Voxel.get("DIRT").getId() }, new int[] { 5, 1 });
-		for (int k = 0; k < radius * spikeFactor; k++)
-			new SpikeGenerator(Island.SIZE / 2, Island.SIZE / 4 * 3, Island.SIZE / 2, radius, j, sRatio).generate(island);
 		
-		new TreeGenerator(treeMin, treeMax).generate(island);
+		byte[] sRatio = createRatio(new byte[] { Voxel.get("SANDSTONE").getId(), Voxel.get("STONE").getId(), Voxel.get("SAND").getId() }, new int[] { 5, 2, 1 });
+		for (int k = 0; k < radius / 5; k++)
+			new SpikeGenerator(Island.SIZE / 2, Island.SIZE / 4 * 3, Island.SIZE / 2, radius, j, sRatio).generate(island);
 
 		new CrystalGenerator(island.pos.y).generate(island);
 	}

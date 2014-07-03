@@ -3,6 +3,7 @@ package de.dakror.vloxlands.generate.structure;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.game.query.VoxelStats;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
