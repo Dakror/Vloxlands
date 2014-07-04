@@ -16,6 +16,7 @@ public class BezierEditorLauncher
 		config.title = "Bezier Editor";
 		config.width = 400;
 		config.height = 400;
+		config.resizable = false;
 		new LwjglApplication(new BezierEditor(), config);
 	}
 }
