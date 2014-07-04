@@ -2,13 +2,13 @@ package de.dakror.vloxlands.generate.biome;
 
 public enum BiomeType
 {
-	// moderate,
-	// forest,
+	moderate,
+	forest,
 	desert,
 	// frost,
-
+	
 	;
-
+	
 	public String getName()
 	{
 		String s = name().replace("_", " ");
