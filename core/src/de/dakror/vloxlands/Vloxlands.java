@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.DebugLayer;
@@ -45,6 +46,8 @@ public class Vloxlands extends GameBase
 		
 		Config.init();
 		setFullscreen(Config.pref.getBoolean("fullscreen"));
+
+		Entity.loadEntities();
 		Voxel.loadVoxels();
 		Item.loadItems();
 		

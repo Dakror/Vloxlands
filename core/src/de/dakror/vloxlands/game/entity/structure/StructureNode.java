@@ -12,7 +12,7 @@ public class StructureNode
 		target(false),
 		entry(true),
 		exit(true),
-		dump(true),
+		deposit(true),
 		pickup(true);
 		
 		public boolean useGhostTarget;

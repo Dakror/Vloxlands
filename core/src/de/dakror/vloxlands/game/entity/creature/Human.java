@@ -211,7 +211,7 @@ public class Human extends Creature
 				if (structure.isWorking())
 				{
 					job = new DepositJob(this, structure, false);
-					type = NodeType.dump;
+					type = NodeType.deposit;
 				}
 			}
 
@@ -237,7 +237,7 @@ public class Human extends Creature
 
 			if (carryingItemStack.isFull())
 			{
-				pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.dump).island(0));
+				pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.deposit).island(0));
 				if (pps != null) queueJob(pps.path, new DepositJob(this, pps.structure, false));
 				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 			}
@@ -252,7 +252,7 @@ public class Human extends Creature
 				{
 					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 					j.setPersistent(false);
-					if (pps == null) pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.dump).island(0));
+					if (pps == null) pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.deposit).island(0));
 					if (pps != null) queueJob(pps.path, new DepositJob(this, pps.structure, false));
 					else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 				}
