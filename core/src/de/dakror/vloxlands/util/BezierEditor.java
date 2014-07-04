@@ -16,9 +16,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -33,7 +35,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * <li>x - reset bezier
  * <li>c - copy bezier to clipboard
  * <li>v - load bezier from clipboard</li>
- * <li>p - run a example of possible voxel generation using this bezier curve with custom params</li>
+ * <li>b - run a example of possible voxel generation using this bezier curve with custom params</li>
+ * <li>n - run a example of possible voxel generation using this bezier curve with last used params</li>
  * <li>SHIFT+DRAG - drag only on X-Axis</li>
  * <li>CTRL+DRAG - drag only on Y-Axis</li>
  * </ul>
@@ -43,6 +46,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class BezierEditor extends InputListener implements ApplicationListener
 {
 	Stage stage;
+	SpriteBatch fontBatch;
 	Skin skin;
 	AssetManager assets;
 	BitmapFont font;
@@ -50,7 +54,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	final float SIZE = 200f;
 	final float X = (380 - SIZE) / 2;
 
-	final Vector2[] startPos = { new Vector2(X, X), new Vector2(X, X + SIZE), new Vector2(X + SIZE, X), new Vector2(X + SIZE, X + SIZE) };
+	final Vector2[] startPos = { new Vector2(X + SIZE, X + SIZE), new Vector2(X + SIZE, X), new Vector2(X, X + SIZE), new Vector2(X, X) };
 	final Vector2 tmpV = new Vector2();
 	final Vector2 tmpV2 = new Vector2();
 
@@ -58,6 +62,9 @@ public class BezierEditor extends InputListener implements ApplicationListener
 
 	int SAMPLE_POINTS = 100;
 	float SAMPLE_POINT_DISTANCE = 1f / SAMPLE_POINTS;
+
+	int lastRad;
+	int lastHeight;
 
 	ImmediateModeRenderer20 renderer;
 	Image[] knobs;
@@ -76,6 +83,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 			e.printStackTrace();
 		}
 		stage = new Stage(new ScreenViewport());
+		fontBatch = new SpriteBatch();
 
 		font = new BitmapFont();
 		assets = new AssetManager();
@@ -104,6 +112,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		bezierLogic = new Bezier<Vector2>(w);
 
 		stage.addListener(this);
+		stage.getCamera().rotate(Vector3.Z, -270);
 
 		Gdx.input.setInputProcessor(stage);
 	}
@@ -113,13 +122,13 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	{
 		Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
+		
 		for (int i = 0; i < knobs.length; i++)
 		{
 			bezier.points.get(i).set(knobs[i].getX() + 12, knobs[i].getY() + 12);
 			bezierLogic.points.get(i).set((knobs[i].getX() - X) / SIZE, (knobs[i].getY() - X) / SIZE);
 		}
-
+		
 		renderer.begin(stage.getBatch().getProjectionMatrix(), GL20.GL_LINE_STRIP);
 		float val = 0f;
 		while (val <= 1f)
@@ -144,13 +153,11 @@ public class BezierEditor extends InputListener implements ApplicationListener
 
 		stage.act();
 		stage.draw();
-
-		stage.getBatch().begin();
-		stage.getBatch().setColor(Color.WHITE);
-
-
-		font.draw(stage.getBatch(), s(), 0, 400);
-		stage.getBatch().end();
+		
+		fontBatch.begin();
+		fontBatch.setColor(Color.WHITE);
+		font.draw(fontBatch, s(), 0, 400);
+		fontBatch.end();
 	}
 
 	public String s()
@@ -208,20 +215,20 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	}
 	
 	@Override
-	public boolean keyTyped(InputEvent event, char character)
+	public boolean keyUp(InputEvent event, int keycode)
 	{
-		if (character == 'x')
+		if (keycode == Keys.X)
 		{
 			for (int i = 0; i < knobs.length; i++)
 			{
 				knobs[i].setPosition(startPos[i].x, startPos[i].y);
 			}
 		}
-		else if (character == 'c')
+		else if (keycode == Keys.C)
 		{
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(s()), null);
 		}
-		else if (character == 'v')
+		else if (keycode == Keys.V)
 		{
 			try
 			{
@@ -239,19 +246,22 @@ public class BezierEditor extends InputListener implements ApplicationListener
 				e.printStackTrace();
 			}
 		}
-		else if (character == 'p')
+		else if (keycode == Keys.B || keycode == Keys.N)
 		{
 			try
 			{
-				Integer rad = Integer.parseInt(JOptionPane.showInputDialog("Maximum Radius (int)"));
-				Integer height = Integer.parseInt(JOptionPane.showInputDialog("Height / Length (int)"));
-				
-				String[] lines = new String[height];
-				int highest = 0;
-				for (int i = 0; i < height; i++)
+				if (keycode == Keys.B || lastRad == 0)
 				{
-					bezierLogic.valueAt(tmpV2, i / (float) height);
-					int y = (int) Math.floor(tmpV2.y * rad);
+					lastRad = Integer.parseInt(JOptionPane.showInputDialog("Maximum Radius (int)"));
+					lastHeight = Integer.parseInt(JOptionPane.showInputDialog("Height / Length (int)"));
+				}
+				
+				String[] lines = new String[lastHeight];
+				int highest = 0;
+				for (int i = 0; i < lastHeight; i++)
+				{
+					bezierLogic.valueAt(tmpV2, i / (float) lastHeight);
+					int y = (int) Math.floor(tmpV2.y * lastRad);
 					if (y > highest) highest = y;
 					lines[i] = "";
 					for (int j = 0; j < y; j++)
@@ -267,7 +277,9 @@ public class BezierEditor extends InputListener implements ApplicationListener
 				}
 			}
 			catch (Exception e)
-			{}
+			{
+				return true;
+			}
 		}
 		return true;
 	}

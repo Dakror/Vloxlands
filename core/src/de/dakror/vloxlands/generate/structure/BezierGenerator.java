@@ -3,13 +3,16 @@ package de.dakror.vloxlands.generate.structure;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.generate.Generator;
 
-public class TopLayerGenerator extends Generator
+/**
+ * @author Dakror
+ */
+public class BezierGenerator extends Generator
 {
-	public static final float[] BEZIER = { 1.0F, 0.6F, 0.3F, 1.0F, 0.7F, 0.4F, 0.0F, 0.5F };
 	int radius, topLayers, x, y, z;
 	byte[] ratio;
+	float[] bezier;
 
-	public TopLayerGenerator(int x, int y, int z, int radius, int topLayers, byte[] ratio)
+	public BezierGenerator(int x, int y, int z, int radius, int topLayers, byte[] ratio, float[] bezier)
 	{
 		this.x = x;
 		this.y = y;
@@ -17,11 +20,12 @@ public class TopLayerGenerator extends Generator
 		this.radius = radius;
 		this.topLayers = topLayers;
 		this.ratio = ratio;
+		this.bezier = bezier;
 	}
 
 	@Override
 	public void generate(Island island)
 	{
-		generateBezier(island, BEZIER, x, z, radius, y, topLayers, ratio, true);
+		generateBezier(island, bezier, x, z, radius, y, topLayers, ratio, true);
 	}
 }

@@ -18,6 +18,7 @@ public abstract class Generator
 	public static Array<Byte> getNaturalTypes()
 	{
 		Array<Byte> naturalVoxels = new Array<Byte>();
+		naturalVoxels.add(Voxel.get("SANDSTONE").getId());
 		naturalVoxels.add(Voxel.get("STONE").getId());
 		naturalVoxels.add(Voxel.get("DIRT").getId());
 		return naturalVoxels;
