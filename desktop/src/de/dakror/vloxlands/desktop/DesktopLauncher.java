@@ -6,6 +6,9 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 import de.dakror.vloxlands.Vloxlands;
 
+/**
+ * @author Dakror
+ */
 public class DesktopLauncher
 {
 	public static void main(String[] arg)
