@@ -341,6 +341,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 			Chunk chunk = chunks[i];
 			if (chunk.isEmpty()) continue;
 
+			if (!chunk.onceLoaded) chunk.load();
+
 			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
 				if (!chunk.loaded && !minimapMode) chunk.load();
@@ -349,7 +351,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 
 				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
-					chunk.drawn = true;
+					if (minimapMode) chunk.drawn = true;
 
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
