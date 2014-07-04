@@ -62,6 +62,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	boolean meshing;
 	boolean meshRequest;
 	boolean doneMeshing;
+	public boolean onceLoaded = false;
 	public boolean drawn = false;
 	public boolean loaded = false;
 	
@@ -122,6 +123,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		transpMeshData = new FloatArray();
 		
 		loaded = true;
+		onceLoaded = true;
 		drawn = false;
 	}
 	
