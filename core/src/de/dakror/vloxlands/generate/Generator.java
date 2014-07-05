@@ -182,7 +182,7 @@ public abstract class Generator
 
 	// -- structures -- //
 	
-	public static void generateTree(Island island, int min, int max)
+	public static void generateTrees(Island island, int min, int max)
 	{
 		int width = MathUtils.random(min, max);
 		int depth = MathUtils.random(min, max);

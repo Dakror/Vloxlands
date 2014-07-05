@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.layer;
 
+import java.util.Random;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
@@ -54,7 +56,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
  */
 public class GameLayer extends Layer
 {
-	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
+	public static final long seed = 143697638790545408l;// (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static final float pickRayMaxDistance = 150f;
@@ -93,7 +95,6 @@ public class GameLayer extends Layer
 	
 	Vector2 mouseDown = new Vector2();
 	
-	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
 	public final Vector3 tmp1 = new Vector3();
@@ -116,7 +117,7 @@ public class GameLayer extends Layer
 		instance = this;
 		
 		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
-		MathUtils.random.setSeed(seed);
+		MathUtils.random = new Random(seed);
 		
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

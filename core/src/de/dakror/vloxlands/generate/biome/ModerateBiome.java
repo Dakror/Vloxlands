@@ -28,7 +28,7 @@ public class ModerateBiome extends Biome
 		for (int k = 0; k < radius * spikeFactor; k++)
 			generateSpikes(island, Island.SIZE / 2, Island.SIZE / 4 * 3, Island.SIZE / 2, radius, j, sRatio);
 
-		generateTree(island, treeMin, treeMax);
+		generateTrees(island, treeMin, treeMax);
 		
 		generateCrystals(island);
 	}
