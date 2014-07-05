@@ -8,13 +8,17 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.query.VoxelStats;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.game.world.World;
 
 public abstract class Generator
 {
+	public abstract void generate(Island island);
+	
 	public static Array<Byte> getNaturalTypes()
 	{
 		Array<Byte> naturalVoxels = new Array<Byte>();
@@ -176,5 +180,81 @@ public abstract class Generator
 		return vs;
 	}
 
-	public abstract void generate(Island island);
+	// -- structures -- //
+	
+	public static void generateTree(Island island, int min, int max)
+	{
+		int width = MathUtils.random(min, max);
+		int depth = MathUtils.random(min, max);
+		int size = MathUtils.ceil(Island.SIZE / (float) Math.min(width, depth));
+		for (int i = 0; i < width; i++)
+		{
+			for (int j = 0; j < depth; j++)
+			{
+				int x = i * size + MathUtils.random(-size / 2, size / 2);
+				int z = j * size + MathUtils.random(-size / 2, size / 2);
+				
+				VoxelPos vp = island.getHighestVoxel(x, z);
+				if (vp.y <= 0 || vp.b != Voxel.get("DIRT").getId()) continue;
+				
+				int height = (int) (Math.random() * 5 + 5);
+				
+				byte wood = Voxel.get("WOOD").getId();
+				
+				for (int k = 0; k < height; k++)
+					island.set(x, vp.y + 1 + k, z, wood);
+				
+				generateBezier(island, Beziers.TREE, x, z, 5, (int) (vp.y + 1 + height * 1.5f), (int) (height * 1.4f), new byte[] { Voxel.get("LEAVES").getId() }, false);
+			}
+		}
+	}
+	
+	public static void generateSpikes(Island island, int x, int y, int z, int radius, int topLayers, byte[] ratio)
+	{
+		int MAXRAD = (int) (radius * 0.3f + 5);
+		int rad = Math.round(MathUtils.random() * (radius * 0.3f)) + 3;
+		
+		Vector2 highest = getHighestBezierValue(Beziers.TOPLAYER);
+		int radiusAt0 = (int) (highest.y * radius);
+		
+		Vector2 pos = getRandomCircleInCircle(new Vector2(x, z), radiusAt0, rad);
+		
+		int h = (int) (0.3f * ((MAXRAD - rad) * (radiusAt0 - pos.cpy().sub(new Vector2(x, z)).len()) + topLayers));
+		h = Math.min(h, Island.SIZE - topLayers - 10);
+		
+		island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId());
+		
+		generateBezier(island, Beziers.SPIKE, (int) pos.x, (int) pos.y /* Z */, rad, (int) (y - highest.x * topLayers), h, ratio, false);
+	}
+
+	public static void generateCrystals(Island island)
+	{
+		final Voxel[] CRYSTALS = { Voxel.get("BLUE_CRYSTAL"), Voxel.get("RED_CRYSTAL"), Voxel.get("YELLOW_CRYSTAL") };
+		
+		island.calculateWeight();
+
+		float weightNeededToUplift = island.getWeight() / World.calculateRelativeUplift(island.pos.y);
+
+		while (weightNeededToUplift > 100)
+		{
+			int index = (int) (MathUtils.random() * CRYSTALS.length);
+			weightNeededToUplift -= generateVein(island, new VoxelStats(0, weightNeededToUplift), index + 1, index + 4, new byte[] { CRYSTALS[index].getId() }).uplift;
+		}
+
+		int[] amounts = new int[CRYSTALS.length];
+		for (int i = 0; i < amounts.length; i++)
+		{
+			amounts[i] = (int) (weightNeededToUplift / CRYSTALS[i].getUplift());
+			weightNeededToUplift %= CRYSTALS[i].getUplift();
+		}
+		
+		for (int j = 0; j < amounts.length; j++)
+		{
+			for (int i = 0; i < amounts[j]; i++)
+			{
+				Vector3 v = pickRandomNaturalVoxel(island);
+				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId());
+			}
+		}
+	}
 }
