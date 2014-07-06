@@ -40,7 +40,7 @@ import de.dakror.vloxlands.util.Tickable;
  */
 public class World implements RenderableProvider, Tickable, Queryable, Savable
 {
-	public static final Color SELECTION = Color.valueOf("ff9900");
+	public static final Color SELECTION = Color.WHITE;
 	
 	public static final int MAXHEIGHT = 512;
 	
@@ -287,5 +287,4 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
-	
 }

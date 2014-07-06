@@ -163,10 +163,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 		{
 			byte air = Voxel.get("AIR").getId();
 
-			for (int i = 0; i < Math.ceil(s.getBoundingBox().getDimensions().x); i++)
-				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().z); j++)
-					for (int k = 0; k < Math.ceil(s.getBoundingBox().getDimensions().y); k++)
-						set(i + s.getVoxelPos().x, k + s.getVoxelPos().y + 1, j + s.getVoxelPos().z, air);
+			Vector3 vp = s.getVoxelPos();
+			
+			for (int i = -1; i < Math.ceil(s.getBoundingBox().getDimensions().x) + 1; i++)
+				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().y); j++)
+					for (int k = -1; k < Math.ceil(s.getBoundingBox().getDimensions().z) + 1; k++)
+						set(i + vp.x, j + vp.y + 1, k + vp.z, air);
 		}
 
 		recalculate();
@@ -494,8 +496,18 @@ public class Island implements RenderableProvider, Tickable, Savable
 		baos.write((int) index.z);
 		Bits.putFloat(baos, pos.y);
 
+		short i = 0;
+		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+		
 		for (Chunk c : chunks)
-			c.save(baos);
-	}
+		{
+			if (!c.isEmpty()) i++;
+			c.save(baos1);
+		}
 
+		Bits.putShort(baos, i); // maximum of i is 8³ = 512 so 1 byte is not enough
+		baos.write(baos1.toByteArray());
+
+		Bits.putInt(baos, structures.size);
+	}
 }

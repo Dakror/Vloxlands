@@ -209,24 +209,42 @@ public abstract class Generator
 		}
 	}
 	
-	public static void generateSpikes(Island island, int x, int y, int z, int radius, int topLayers, byte[] ratio)
+	public static void generateSpikes(Island island, int amount, int y, int radius, int topLayers, byte[] ratio)
 	{
-		int MAXRAD = (int) (radius * 0.3f + 5);
-		int rad = Math.round(MathUtils.random() * (radius * 0.3f)) + 3;
-		
-		Vector2 highest = getHighestBezierValue(Beziers.TOPLAYER);
-		int radiusAt0 = (int) (highest.y * radius);
-		
-		Vector2 pos = getRandomCircleInCircle(new Vector2(x, z), radiusAt0, rad);
-		
-		int h = (int) (0.3f * ((MAXRAD - rad) * (radiusAt0 - pos.cpy().sub(new Vector2(x, z)).len()) + topLayers));
-		h = Math.min(h, Island.SIZE - topLayers - 10);
-		
-		island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId());
-		
-		generateBezier(island, Beziers.SPIKE, (int) pos.x, (int) pos.y /* Z */, rad, (int) (y - highest.x * topLayers), h, ratio, false);
+		for (int i = 0; i < amount; i++)
+		{
+			int MAXRAD = (int) (radius * 0.3f + 5);
+			int rad = Math.round(MathUtils.random() * (radius * 0.3f)) + 3;
+
+			Vector2 highest = getHighestBezierValue(Beziers.TOPLAYER);
+			int radiusAt0 = (int) (highest.y * radius);
+
+			Vector2 m = new Vector2(Island.SIZE / 2, Island.SIZE / 2);
+
+			Vector2 pos = getRandomCircleInCircle(m, radiusAt0, rad);
+
+			int h = (int) (0.3f * ((MAXRAD - rad) * (radiusAt0 - pos.cpy().sub(m).len()) + topLayers));
+			h = Math.min(h, Island.SIZE - topLayers - 10);
+
+			island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId());
+
+			generateBezier(island, Beziers.SPIKE, (int) pos.x, (int) pos.y /* Z */, rad, (int) (y - highest.x * topLayers), h, ratio, false);
+		}
 	}
 
+	public static void generateBoulders(Island island, int y, int radius, int min, int max, int minRad, int maxRad, int minHeight, int maxHeight, byte[] b)
+	{
+		int boulders = MathUtils.random(min, max);
+		int highest = (int) (getHighestBezierValue(Beziers.BOULDER).y * radius);
+		for (int i = 0; i < boulders; i++)
+		{
+			int rad = MathUtils.random(minRad, maxRad);
+			int height = MathUtils.random(minHeight, maxHeight);
+			Vector2 pos = getRandomCircleInCircle(new Vector2(Island.SIZE / 2, Island.SIZE / 2), highest, rad);
+			generateBezier(island, Beziers.BOULDER, (int) pos.x, (int) pos.y, rad, y + height / 2 + 1, height, b, true);
+		}
+	}
+	
 	public static void generateCrystals(Island island)
 	{
 		final Voxel[] CRYSTALS = { Voxel.get("BLUE_CRYSTAL"), Voxel.get("RED_CRYSTAL"), Voxel.get("YELLOW_CRYSTAL") };

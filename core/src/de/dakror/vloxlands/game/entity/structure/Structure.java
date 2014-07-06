@@ -16,12 +16,13 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.IInventory;
+import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity implements IInventory
+public abstract class Structure extends Entity implements IInventory, Savable
 {
 	Array<StructureNode> nodes;
 	Vector3 voxelPos;
@@ -62,7 +63,7 @@ public abstract class Structure extends Entity implements IInventory
 
 	/**
 	 * @param from
-	 *            expected to be in world space
+	 *          expected to be in world space
 	 */
 	public StructureNode getStructureNode(Vector3 from, NodeType type, String name)
 	{
@@ -109,13 +110,19 @@ public abstract class Structure extends Entity implements IInventory
 
 	/**
 	 * @param from
-	 *            expected to be in world space
+	 *          expected to be in world space
 	 */
 	public StructureNode getStructureNode(Vector3 from, NodeType type)
 	{
 		return getStructureNode(from, type, null);
 	}
 
+	public Array<StructureNode> getStructureNodes()
+	{
+		return nodes;
+	}
+	
+	@Override
 	public Inventory getInventory()
 	{
 		return inventory;
@@ -146,7 +153,7 @@ public abstract class Structure extends Entity implements IInventory
 	{
 		if (e.getName().equals("onDismantle"))
 		{
-			this.kill();
+			kill();
 			Vector3 p = GameLayer.world.getIslands()[0].pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			GameLayer.world.addEntity(i);
