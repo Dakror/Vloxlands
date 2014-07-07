@@ -207,6 +207,7 @@ public class Face
 		vert.add(tex.y);
 		vert.add(tx);
 		vert.add(ty);
+		vert.add(15f);
 		
 		vert.add(tr.x + pos.x);
 		vert.add(tr.y + pos.y);
@@ -218,6 +219,7 @@ public class Face
 		vert.add(tex.y);
 		vert.add(tx);
 		vert.add(ty);
+		vert.add(15f);
 		
 		vert.add(br.x + pos.x);
 		vert.add(br.y + pos.y);
@@ -229,6 +231,7 @@ public class Face
 		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
+		vert.add(15f);
 		
 		vert.add(bl.x + pos.x);
 		vert.add(bl.y + pos.y);
@@ -240,6 +243,7 @@ public class Face
 		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
+		vert.add(15f);
 	}
 	
 	public void increaseSize(Vector3 direction)

@@ -102,6 +102,8 @@ float frac(float f) {
 	return f-floor(f);
 }
 
+varying float v_lightLevel;
+
 void main() {
 	#if defined(normalFlag) 
 		vec3 normal = v_normal;
@@ -137,6 +139,10 @@ void main() {
 		vec4 diffuse = v_color;
 	#else
 		vec4 diffuse = vec4(1.0);
+	#endif
+
+	#if (v_lightLevel > 0.0)
+	  gl_FragColor.rgb = vec3(0.0);
 	#endif
 
 	#if (!defined(lightingFlag))  

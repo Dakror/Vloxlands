@@ -177,11 +177,16 @@ varying vec3 v_ambientLight;
 
 #endif // lightingFlag
 
+attribute float lightLevel;
+varying float v_lightLevel;
+
 void main() {
 	#ifdef textureFlag
 	v_texCoords0 = a_texCoord0;
 	v_texCoords1 = a_texCoord1;
 	#endif // textureFlag
+	
+	v_lightLevel = lightLevel;
 	
 	#if defined(colorFlag)
 		v_color = a_color;
