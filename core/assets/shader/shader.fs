@@ -141,10 +141,6 @@ void main() {
 		vec4 diffuse = vec4(1.0);
 	#endif
 
-	#if (v_lightLevel > 0.0)
-	  gl_FragColor.rgb = vec3(0.0);
-	#endif
-
 	#if (!defined(lightingFlag))  
 		gl_FragColor.rgb = diffuse.rgb;
 	#elif (!defined(specularFlag))
@@ -202,5 +198,8 @@ void main() {
 	#else
 		gl_FragColor.a = 1.0;
 	#endif
-
+	
+	#if defined(textureFlag) 
+	  gl_FragColor.rgb *= pow(0.8, 15 - v_lightLevel);
+	#endif
 }
