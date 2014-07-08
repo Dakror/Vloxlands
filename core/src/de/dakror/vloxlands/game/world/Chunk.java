@@ -49,6 +49,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	int random;
 	
 	byte[] voxels;
+	byte[] skyLight;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -83,8 +84,12 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		pos = index.cpy().scl(SIZE);
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
+		skyLight = new byte[SIZE * SIZE * SIZE];
 		for (int i = 0; i < voxels.length; i++)
+		{
 			voxels[i] = Voxel.get("AIR").getId();
+			skyLight[i] = 15;
+		}
 		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
@@ -146,6 +151,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		transpMeshData = null;
 	}
 	
+	public void forceUpdate()
+	{
+		updateRequired = true;
+	}
+	
 	public void add(int x, int y, int z, byte id)
 	{
 		set(x, y, z, id, false);
@@ -180,13 +190,9 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		resources[id + 128]++;
 		
 		updateRequired = true;
+		notifyAdjacentChunks(x, y, z);
 		
 		return true;
-	}
-	
-	public void forceUpdate()
-	{
-		updateRequired = true;
 	}
 	
 	public byte get(int x, int y, int z)
@@ -194,8 +200,58 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		if (x >= SIZE || x < 0) return 0;
 		if (y >= SIZE || y < 0) return 0;
 		if (z >= SIZE || z < 0) return 0;
-		
+
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
+	}
+	
+	public byte getSkyLight(int x, int y, int z)
+	{
+		if (x >= SIZE || x < 0) return 0;
+		if (y >= SIZE || y < 0) return 0;
+		if (z >= SIZE || z < 0) return 0;
+		
+		return skyLight[z + y * SIZE + x * SIZE * SIZE];
+	}
+	
+	public boolean setSkyLight(int x, int y, int z, byte sl)
+	{
+		if (x >= SIZE || x < 0) return false;
+		if (y >= SIZE || y < 0) return false;
+		if (z >= SIZE || z < 0) return false;
+		
+		skyLight[z + y * SIZE + x * SIZE * SIZE] = sl;
+		return true;
+	}
+	
+	private void notifyAdjacentChunks(int x, int y, int z)
+	{
+		if (!isOnEdge(x) || !isOnEdge(y) || !isOnEdge(z)) return;
+
+		final Vector3 tmp = new Vector3();
+		
+		for (int i = -1; i < 2; i++)
+		{
+			for (int j = -1; j < 2; j++)
+			{
+				for (int k = -1; k < 2; k++)
+				{
+					if (i == 0 && j == 0 && k == 0) continue;
+					float x1 = pos.x + i * SIZE + SIZE / 2;
+					float y1 = pos.y + j * SIZE + SIZE / 2;
+					float z1 = pos.z + k * SIZE + SIZE / 2;
+
+					// if (tmp.set(x1, y1, z1).dst(pos.x + x, pos.y + y, pos.z + z) < SIZE * 0.75f * Math.sqrt(2))
+					// {
+					island.getChunk(index.x + i, index.y + j, index.z + k).forceUpdate();
+					// }
+				}
+			}
+		}
+	}
+	
+	private boolean isOnEdge(int i)
+	{
+		return i == 0 || i == SIZE - 1;
 	}
 	
 	public byte[] getVoxels()
@@ -329,7 +385,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
 	}
 	
-	public void getVertices()
+	private void getVertices()
 	{
 		ObjectMap<FaceKey, Face> faces = new ObjectMap<FaceKey, Face>();
 		ObjectMap<FaceKey, Face> transpFaces = new ObjectMap<FaceKey, Face>();
@@ -342,6 +398,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				for (int z = 0; z < SIZE; z++, i++)
 				{
 					byte voxel = voxels[i];
+					int sl = skyLight[i];
 					if (voxel == 0) continue;
 					Voxel v = Voxel.getForId(voxel);
 					
@@ -350,10 +407,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					for (Direction d : Direction.values())
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
+						int slO = island.getSkyLight(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
 						Voxel ww = Voxel.getForId(w);
 						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
-							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
+							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d), (byte) ((sl + slO) / 2f/* TODO experimental */));
 							FaceKey key = new FaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal());
 							if (v.isOpaque()) faces.put(key, face);
 							else transpFaces.put(key, face);
@@ -389,6 +447,33 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
 	
+	private void updateSkyLight()
+	{
+		Arrays.fill(skyLight, (byte) 15);
+
+		byte air = Voxel.get("AIR").getId();
+		
+		for (int l = 0; l < 2; l++)
+		{
+			for (int i = SIZE - 1; i >= 0; i--)
+			{
+				for (int j = 0; j < SIZE; j++)
+				{
+					for (int k = 0; k < SIZE; k++)
+					{
+						if (pos.y + i == Island.SIZE - 1) continue;
+						byte v = get(j, i, k);
+						byte b = island.get(pos.x + j, pos.y + i + 1, pos.z + k);
+						if (v != air && b != air) continue;
+						
+						byte sl = island.getSkyLight(pos.x + j, pos.y + i + 1, pos.z + k);
+						setSkyLight(j, i, k, (byte) (sl - (b != air || (v == air && island.isWrapped(pos.x + j, pos.y + i, pos.z + k)) ? 1 : 0)));
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void tick(int tick)
 	{
@@ -415,6 +500,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			transpMeshData = new FloatArray();
 			try
 			{
+				updateSkyLight();
 				getVertices();
 				int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
 				int transpNumVerts = transpMeshData.size / VERTEX_SIZE;

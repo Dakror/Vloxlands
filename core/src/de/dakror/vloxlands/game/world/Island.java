@@ -185,6 +185,17 @@ public class Island implements RenderableProvider, Tickable, Savable
 		return chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].get((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE);
 	}
 
+	public byte getSkyLight(float x, float y, float z)
+	{
+		int chunkX = (int) (x / Chunk.SIZE);
+		if (chunkX < 0 || chunkX >= CHUNKS) return 0;
+		int chunkY = (int) (y / Chunk.SIZE);
+		if (chunkY < 0 || chunkY >= CHUNKS) return 0;
+		int chunkZ = (int) (z / Chunk.SIZE);
+		if (chunkZ < 0 || chunkZ >= CHUNKS) return 0;
+		return chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].getSkyLight((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE);
+	}
+
 	public void add(float x, float y, float z, byte id)
 	{
 		set(x, y, z, id, false);
@@ -469,8 +480,20 @@ public class Island implements RenderableProvider, Tickable, Savable
 		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
 		for (Direction d : directions)
 		{
-			Voxel v = Voxel.getForId(get(x + d.dir.x, y + d.dir.y, z + d.dir.z));
-			if (v.getId() == 0 || (v.getId() == air && isSpaceAbove(x + d.dir.x, y + d.dir.y, z + d.dir.z, height - (int) d.dir.y))) return false;
+			byte b = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
+			if (b == air || (b == air && isSpaceAbove(x + d.dir.x, y + d.dir.y, z + d.dir.z, height - (int) d.dir.y))) return false;
+		}
+
+		return true;
+	}
+
+	public boolean isWrapped(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+		for (Direction d : directions)
+		{
+			if (get(x + d.dir.x, y + d.dir.y, z + d.dir.z) == air) return false;
 		}
 
 		return true;

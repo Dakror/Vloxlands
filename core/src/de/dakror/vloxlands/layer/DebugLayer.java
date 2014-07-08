@@ -35,8 +35,12 @@ public class DebugLayer extends Layer
 			font.draw(spriteBatch, "X: " + GameLayer.camera.position.x, 0, Gdx.graphics.getHeight() - 80);
 			font.draw(spriteBatch, "Y: " + GameLayer.camera.position.y, 0, Gdx.graphics.getHeight() - 100);
 			font.draw(spriteBatch, "Z: " + GameLayer.camera.position.z, 0, Gdx.graphics.getHeight() - 120);
+			if (GameLayer.instance.activeIsland != null)
+			{
+				font.draw(spriteBatch, "SL: " + GameLayer.instance.activeIsland.getSkyLight(GameLayer.instance.selectedVoxel.x, GameLayer.instance.selectedVoxel.y, GameLayer.instance.selectedVoxel.z), 0, Gdx.graphics.getHeight() - 140);
+			}
 		}
-		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 140);
+		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 160);
 		
 		spriteBatch.end();
 	}

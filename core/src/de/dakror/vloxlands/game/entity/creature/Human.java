@@ -66,7 +66,8 @@ public class Human extends Creature
 		{
 			toolModelInstance = null;
 			toolTransform = null;
-		} else
+		}
+		else
 		{
 			this.tool.setItem(tool);
 			this.tool.setAmount(1);
@@ -92,7 +93,8 @@ public class Human extends Creature
 		{
 			carryingItemModelInstance = null;
 			carryingItemTransform = null;
-		} else
+		}
+		else
 		{
 			carryingItemModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class), new Matrix4());
 			carryingItemTransform = carryingItemModelInstance.transform;
@@ -141,8 +143,10 @@ public class Human extends Creature
 						j.resetState();
 						queueJob(null, j);
 					}
-				} else j.tick(tick);
-			} else j.trigger();
+				}
+				else j.tick(tick);
+			}
+			else j.trigger();
 		}
 	}
 
@@ -158,7 +162,8 @@ public class Human extends Creature
 		if (job == null)
 		{
 			if (path.size() > 0) jobQueue.add(new WalkJob(path, this));
-		} else
+		}
+		else
 		{
 			if (path != null && path.size() > 0) jobQueue.add(new WalkJob(path, this));
 			else rotateTowardsGhostTarget(path);
@@ -183,8 +188,7 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop()
-					&& (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+			boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
 
 			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
 
@@ -195,6 +199,8 @@ public class Human extends Creature
 			}
 			selected = true;
 		}
+		
+		if (!wasSelected && !lmb) vs.island.set(vs.voxel.x, vs.voxel.y, vs.voxel.z, (byte) 0);
 	}
 
 	@Override
@@ -248,7 +254,8 @@ public class Human extends Creature
 				{
 					((MineJob) j).getTarget().voxel.set(path.getGhostTarget());
 					queueJob(path, null);
-				} else
+				}
+				else
 				{
 					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 					j.setPersistent(false);

@@ -87,6 +87,7 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	Vector3 selectedVoxel = new Vector3();
 	Vector3 controllerTarget = new Vector3();
 	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
@@ -184,7 +185,7 @@ public class GameLayer extends Layer
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 
-		world = new World(w, d);
+		world = new World(1, 1);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 
@@ -204,20 +205,13 @@ public class GameLayer extends Layer
 		focusIsland(world.getIslands()[0], true);
 
 		doneLoading = true;
-
-		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// for (int i = 0; i < 512; i++)
-		// {
-		// world.getIslands()[0].getChunk(i).encode(baos);
-		// if (baos.size() > 0) break;
-		// }
-		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 
 	public void focusIsland(Island island, boolean initial)
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
-
+		activeIsland = island;
+		
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
@@ -233,7 +227,6 @@ public class GameLayer extends Layer
 			}
 
 			ticksForTravel = (int) camera.position.dst(target);
-			activeIsland = island;
 
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
@@ -554,6 +547,8 @@ public class GameLayer extends Layer
 				}
 
 				selectedChunk.selectedVoxel.set(selectedVoxel);
+
+				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
 
 				for (SelectionListener sl : listeners)
 					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb);
