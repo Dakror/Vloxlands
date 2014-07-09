@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
@@ -47,6 +49,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.render.DepthShader;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
@@ -181,7 +184,14 @@ public class GameLayer extends Layer
 		minimapEnv.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * 12, Gdx.graphics.getHeight() * 12, 128, 128, 1, camera.far)).set(0.6f, 0.6f, 0.6f, -0.5f, -0.5f, -0.5f));
 		minimapEnv.shadowMap = shadowLight;
 
-		shadowBatch = new ModelBatch(new DepthShaderProvider());
+		shadowBatch = new ModelBatch(new DepthShaderProvider()
+		{
+			@Override
+			protected Shader createShader(Renderable renderable)
+			{
+				return new DepthShader(renderable, config);
+			}
+		});
 
 		shapeRenderer = new ShapeRenderer();
 		
