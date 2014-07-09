@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
@@ -68,7 +67,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		Texture tex2 = new Texture(Gdx.files.internal("img/transparent.png"));
 		
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
-		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
+		transp = new Material(TextureAttribute.createDiffuse(tex)/* , new BlendingAttribute() */); // TODO Reenable transparency
 		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(SELECTION));
 		
 		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
