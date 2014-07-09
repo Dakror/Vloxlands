@@ -13,12 +13,9 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -65,33 +62,34 @@ public class GameLayer extends Layer
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static final float pickRayMaxDistance = 150f;
-
+	
 	public static GameLayer instance;
-
+	
 	public static World world;
 	public static Camera camera;
 	public static ShapeRenderer shapeRenderer;
-
+	
 	public Environment env;
-
+	
 	public Array<SelectionListener> listeners = new Array<SelectionListener>();
-
+	
 	public Environment minimapEnv;
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
+	
 	public Island activeIsland;
-
+	public DirectionalShadowLight shadowLight;
+	
 	ModelBatch modelBatch;
 	CameraInputController controller;
-	
+
 	ModelBatch shadowBatch;
-	DirectionalShadowLight shadowLight;
-	
+
 	boolean middleDown;
 	boolean doneLoading;
-
+	
 	ModelInstance sky;
-
+	
 	int tick;
 	int ticksForTravel;
 	int startTick;
@@ -101,9 +99,9 @@ public class GameLayer extends Layer
 	Vector3 target = new Vector3();
 	Vector3 targetDirection = new Vector3();
 	Vector3 targetUp = new Vector3();
-
+	
 	Vector2 mouseDown = new Vector2();
-
+	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
 	public final Vector3 tmp1 = new Vector3();
@@ -118,19 +116,19 @@ public class GameLayer extends Layer
 	public final BoundingBox bb = new BoundingBox();
 	public final BoundingBox bb2 = new BoundingBox();
 	public final BoundingBox bb3 = new BoundingBox();
-
+	
 	@Override
 	public void show()
 	{
 		modal = true;
 		instance = this;
-
+		
 		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
 		MathUtils.random = new Random(seed);
-
+		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
-
+		
 		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
@@ -138,23 +136,23 @@ public class GameLayer extends Layer
 		{
 			private final Vector3 tmpV1 = new Vector3();
 			private final Vector3 tmpV2 = new Vector3();
-
-
+			
+			
 			@Override
 			protected boolean process(float deltaX, float deltaY, int button)
 			{
 				if (button == rotateButton && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) return false;
 				return super.process(deltaX, deltaY, button);
 			}
-
+			
 			@Override
 			public boolean zoom(float amount)
 			{
 				if (!alwaysScroll && activateKey != 0 && !activatePressed) return false;
-
+				
 				tmpV1.set(camera.direction).scl(amount);
 				tmpV2.set(camera.position).add(tmpV1);
-
+				
 				if (tmpV2.dst(target) > 5)
 				{
 					camera.translate(tmpV1);
@@ -162,7 +160,7 @@ public class GameLayer extends Layer
 					if (autoUpdate) camera.update();
 					return true;
 				}
-
+				
 				return false;
 			}
 		};
@@ -174,69 +172,60 @@ public class GameLayer extends Layer
 		controller.translateButton = -1;
 		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
-
+		
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		minimapCamera.near = 0.1f;
 		minimapCamera.far = pickRayMaxDistance;
 		minimapEnv = new Environment();
 		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		minimapEnv.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
-
-		int AA = 12;
-
-		minimapEnv.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, -0.5f, -0.5f, -0.5f));
-		minimapEnv.shadowMap = shadowLight;
+		minimapEnv.add(new DirectionalLight().set(1f, 1f, 1f, -0.5f, -0.5f, -0.5f));
+		minimapEnv.add(new DirectionalLight().set(0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f));
 		
-		shadowBatch = new ModelBatch(new DepthShaderProvider()
-		{
-			@Override
-			protected Shader createShader(Renderable renderable)
-			{
-				return new DepthShader(renderable, config);
-			}
-		});
-		
+		shadowBatch = new ModelBatch(new DepthShaderProvider());
+
 		shapeRenderer = new ShapeRenderer();
-
+		
 		new MeshingThread();
-
+		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		// env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
-		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, 0, -1, 1));
-		env.add(shadowLight);
+		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+		
+		int AA = 12;
+		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, -0.5f, -0.5f, -0.5f));
 		env.shadowMap = shadowLight;
-
+		
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
-
-		world = new World(1, 1);
+		
+		world = new World(w, d);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
-
+	
 	public void doneLoading()
 	{
 		for (Item item : Item.getAll())
 			item.onLoaded();
-
+		
 		Vector3 p = world.getIslands()[0].pos;
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
 		human.setTool(Item.get("PICKAXE"));
 		world.addEntity(human);
-		
+
 		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
 		world.getIslands()[0].calculateInitBalance();
-
+		
 		focusIsland(world.getIslands()[0], true);
-
+		
 		doneLoading = true;
 	}
-
+	
 	public void focusIsland(Island island, boolean initial)
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
 		activeIsland = island;
-		
+
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
@@ -245,29 +234,29 @@ public class GameLayer extends Layer
 				camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 				controller.target.set(islandCenter);
 				camera.lookAt(islandCenter);
-
+				
 				controller.update();
 				camera.update();
 				return;
 			}
-
+			
 			ticksForTravel = (int) camera.position.dst(target);
-
+			
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
 			Vector3 up = camera.up.cpy();
-
+			
 			camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			controller.target.set(islandCenter);
 			camera.lookAt(islandCenter);
-
+			
 			targetDirection.set(camera.direction);
 			targetUp.set(camera.up);
-
+			
 			camera.position.set(pos);
 			camera.direction.set(dir);
 			camera.up.set(up);
-
+			
 			startTick = tick;
 		}
 		else
@@ -275,40 +264,41 @@ public class GameLayer extends Layer
 			camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			controller.target.set(islandCenter);
 			camera.lookAt(islandCenter);
-
+			
 			controller.update();
 			camera.update();
 		}
 	}
-
+	
 	@Override
 	public void render(float delta)
 	{
 		if (!doneLoading) return;
 		controller.update();
-		camera.update();
 		world.update();
+
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
 		shadowLight.begin(controller.target, camera.direction);
 		shadowBatch.begin(shadowLight.getCamera());
 		world.render(shadowBatch, null);
 		shadowBatch.end();
 		shadowLight.end();
-
+		
 		Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
-
+		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
 		// modelBatch.render(sky, lights);
 		modelBatch.end();
-
+		
 		if (Vloxlands.showPathDebug)
 		{
 			renderBFS();
 			renderAStar();
 		}
-
+		
 		if (BFS.lastTarget != null)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -324,7 +314,7 @@ public class GameLayer extends Layer
 			Gdx.gl.glLineWidth(1);
 		}
 	}
-
+	
 	public void renderAStar()
 	{
 		for (AStarNode node : AStar.openList)
@@ -369,7 +359,7 @@ public class GameLayer extends Layer
 			}
 		}
 	}
-
+	
 	public void renderBFS()
 	{
 		for (BFSNode node : BFS.queue)
@@ -386,7 +376,7 @@ public class GameLayer extends Layer
 			shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
-
+		
 		if (BFS.lastTarget != null)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -402,19 +392,19 @@ public class GameLayer extends Layer
 			Gdx.gl.glLineWidth(1);
 		}
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{
 		this.tick = tick;
 		world.tick(tick);
-
+		
 		if (activeIsland != null && startTick > 0)
 		{
 			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
 			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
-
+			
 			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
 			{
 				Vector3 islandCenter = new Vector3(activeIsland.pos.x + Island.SIZE / 2, activeIsland.pos.y + Island.SIZE / 4 * 3, activeIsland.pos.z + Island.SIZE / 2);
@@ -423,40 +413,40 @@ public class GameLayer extends Layer
 				camera.lookAt(islandCenter);
 				startTick = 0;
 			}
-
+			
 			controller.update();
 			camera.update();
 		}
 	}
-
+	
 	@Override
 	public void resize(int width, int height)
 	{
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();
-
+		
 		minimapCamera.viewportWidth = width;
 		minimapCamera.viewportHeight = height;
 		minimapCamera.update();
 	}
-
+	
 	public void pickRay(boolean hover, boolean lmb, int x, int y)
 	{
 		Ray ray = camera.getPickRay(x, y);
-
+		
 		if (hover)
 		{
 			Entity hovered = null;
 			float distance = 0;
-
+			
 			for (Entity entity : world.getEntities())
 			{
 				entity.hovered = false;
 				if (!entity.inFrustum) continue;
-
+				
 				entity.getWorldBoundingBox(bb);
-
+				
 				if (Intersector.intersectRayBounds(ray, bb, tmp))
 				{
 					float dst = ray.origin.dst(tmp);
@@ -467,7 +457,7 @@ public class GameLayer extends Layer
 					}
 				}
 			}
-
+			
 			for (Island i : world.getIslands())
 			{
 				if (i == null) continue;
@@ -475,9 +465,9 @@ public class GameLayer extends Layer
 				{
 					structure.hovered = false;
 					if (!structure.inFrustum) continue;
-
+					
 					structure.getWorldBoundingBox(bb);
-
+					
 					if (Intersector.intersectRayBounds(ray, bb, tmp))
 					{
 						float dst = ray.origin.dst(tmp);
@@ -489,7 +479,7 @@ public class GameLayer extends Layer
 					}
 				}
 			}
-
+			
 			if (hovered != null) hovered.hovered = true;
 		}
 		else
@@ -499,7 +489,7 @@ public class GameLayer extends Layer
 			Island selectedIsland = null;
 			Chunk selectedChunk = null;
 			Vector3 selectedVoxel = new Vector3();
-
+			
 			float distance = 0;
 			for (Entity entity : world.getEntities())
 			{
@@ -513,7 +503,7 @@ public class GameLayer extends Layer
 					break;
 				}
 			}
-
+			
 			for (Island i : world.getIslands())
 			{
 				if (i == null) continue;
@@ -528,14 +518,14 @@ public class GameLayer extends Layer
 						selectedStructure = structure;
 					}
 				}
-
+				
 				for (Chunk c : i.getChunks())
 				{
 					if (c.inFrustum && !c.isEmpty())
 					{
 						tmp1.set(i.pos.x + c.pos.x, i.pos.y + c.pos.y, i.pos.z + c.pos.z);
 						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
-
+						
 						bb.set(tmp1, tmp2);
 						c.selectedVoxel.set(-1, 0, 0);
 						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
@@ -552,7 +542,7 @@ public class GameLayer extends Layer
 					}
 				}
 			}
-
+			
 			if (selectedChunk != null)
 			{
 				// -- determine selectedVoxelFace -- //
@@ -560,15 +550,15 @@ public class GameLayer extends Layer
 				float distanc = 0;
 				Vector3 is2 = new Vector3();
 				byte air = Voxel.get("AIR").getId();
-
+				
 				for (Direction d : Direction.values())
 				{
 					tmp7.set(selectedIsland.pos.x + selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedIsland.pos.y + selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedIsland.pos.z + selectedChunk.pos.z + selectedVoxel.z + d.dir.z);
 					tmp8.set(tmp7.cpy().add(1, 1, 1));
 					bb3.set(tmp7, tmp8);
-
+					
 					if (selectedIsland.get(selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedChunk.pos.z + selectedVoxel.z + d.dir.z) != air) continue;
-
+					
 					if (Intersector.intersectRayBounds(ray, bb3, is2))
 					{
 						float dist = ray.origin.dst(is2);
@@ -579,11 +569,11 @@ public class GameLayer extends Layer
 						}
 					}
 				}
-
+				
 				selectedChunk.selectedVoxel.set(selectedVoxel);
-
+				
 				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
-
+				
 				for (SelectionListener sl : listeners)
 					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb);
 			}
@@ -601,22 +591,22 @@ public class GameLayer extends Layer
 			}
 		}
 	}
-
+	
 	public void selectionBox(Rectangle rectangle)
 	{
 		CustomizableFrustum frustum = new CustomizableFrustum(rectangle);
 		camera.update();
 		frustum.update(camera.invProjectionView);
 		Vector3 origin = camera.unproject(new Vector3(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+		
 		boolean anyEntitySelected = false;
-
+		
 		for (Entity entity : world.getEntities())
 		{
 			entity.wasSelected = entity.selected;
 			entity.selected = false;
 			entity.getWorldBoundingBox(bb);
-
+			
 			float dst = origin.dst(entity.posCache);
 			if (entity.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance)
 			{
@@ -625,7 +615,7 @@ public class GameLayer extends Layer
 				break;
 			}
 		}
-
+		
 		if (!anyEntitySelected)
 		{
 			for (Island i : world.getIslands())
@@ -636,21 +626,21 @@ public class GameLayer extends Layer
 					structure.wasSelected = structure.selected;
 					structure.selected = false;
 					structure.getWorldBoundingBox(bb);
-
+					
 					float dst = origin.dst(structure.posCache);
 					if (structure.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance) structure.selected = true;
 				}
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
 		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
 		{
 			float f = 0.1f;
-
+			
 			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
 			camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
 			camera.update();
@@ -658,19 +648,19 @@ public class GameLayer extends Layer
 		}
 		return false;
 	}
-
+	
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
 		pickRay(true, false, screenX, screenY);
 		return false;
 	}
-
+	
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button)
 	{
 		mouseDown.set(screenX, screenY);
-
+		
 		if (button == Buttons.MIDDLE)
 		{
 			controllerTarget.set(controller.target);
@@ -680,14 +670,14 @@ public class GameLayer extends Layer
 		}
 		return false;
 	}
-
+	
 	@Override
 	public boolean tap(float x, float y, int count, int button)
 	{
 		if (button != Buttons.MIDDLE) pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
 		return false;
 	}
-
+	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button)
 	{
@@ -698,12 +688,12 @@ public class GameLayer extends Layer
 		}
 		return false;
 	}
-
+	
 	public void addListener(SelectionListener value)
 	{
 		listeners.insert(0, value);
 	}
-
+	
 	public boolean removeListener(SelectionListener value)
 	{
 		return listeners.removeValue(value, true);
