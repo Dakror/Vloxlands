@@ -40,40 +40,40 @@ import de.dakror.vloxlands.util.Tickable;
 public class World implements RenderableProvider, Tickable, Queryable, Savable
 {
 	public static final Color SELECTION = Color.WHITE;
-	
+
 	public static final int MAXHEIGHT = 512;
-	
+
 	static Material opaque, transp, highlight;
-	
+
 	Island[] islands;
-	
+
 	int width, depth;
-	
+
 	public int visibleChunks, loadedChunks, chunks, visibleEntities, totalEntities;
-	
+
 	public static Mesh chunkCube, blockCube;
 	public static final float gap = 0.01f;
-	
+
 	Array<Entity> entities = new Array<Entity>();
-	
+
 	public World(int width, int depth)
 	{
 		this.width = width;
 		this.depth = depth;
-		
+
 		islands = new Island[width * depth];
-		
-		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png"));
+
+		Texture tex = new Texture(Gdx.files.internal("img/voxelTexturesOPQ.png"));
 		Texture tex2 = new Texture(Gdx.files.internal("img/transparent.png"));
-		
+
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 		transp = new Material(TextureAttribute.createDiffuse(tex)/* , new BlendingAttribute() */); // TODO Reenable transparency
 		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(SELECTION));
-		
+
 		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
 		blockCube = Mesher.genCubeWireframe(1 + gap);
 	}
-	
+
 	/**
 	 * @param x in index space
 	 * @param y in pos space
@@ -85,7 +85,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		island.index.set(x, 0, z);
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
-	
+
 	public void update()
 	{
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
@@ -94,13 +94,13 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			e.update();
 		}
 	}
-	
+
 	@Override
 	public void tick(int tick)
 	{
 		for (Island island : islands)
 			if (island != null) island.tick(tick);
-		
+
 		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
 		{
 			Entity e = iter.next();
@@ -112,34 +112,34 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			else e.tick(tick);
 		}
 	}
-	
+
 	public Island[] getIslands()
 	{
 		return islands;
 	}
-	
+
 	public Array<Entity> getEntities()
 	{
 		return entities;
 	}
-	
+
 	public int getWidth()
 	{
 		return width;
 	}
-	
+
 	public int getDepth()
 	{
 		return depth;
 	}
-	
+
 	public void addEntity(Entity e)
 	{
 		if (e instanceof Structure) Gdx.app.debug("World.addEntity", "Discouraged! Structures should be added to a specific island!");
 		e.onSpawn();
 		entities.add(e);
 	}
-	
+
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
@@ -155,7 +155,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			}
 		}
 	}
-	
+
 	public void render(ModelBatch batch, Environment environment)
 	{
 		batch.render(this, environment);
@@ -170,14 +170,14 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				visibleEntities++;
 			}
 		}
-		
+
 		for (Island island : islands)
 		{
 			island.render(batch, environment);
 			totalEntities += island.getStructureCount();
 		}
 	}
-	
+
 	@Override
 	public PathBundle query(Query query)
 	{
@@ -186,18 +186,18 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			Gdx.app.error("World.query", "You should specify an island index because they can't be connected yet! Return null.");
 			return null;
 		}
-		
+
 		Structure structure = query.sourceStructure;
 		Creature creature = query.sourceCreature;
 		Path path = null;
 		float distance = 0;
-		
+
 		if (structure == null && creature == null)
 		{
 			Gdx.app.error("World.query", "You have to specify either a source Creature or Structure when querying! Return null.");
 			return null;
 		}
-		
+
 		if (query.searchingStructure)
 		{
 			if (query.sourceCreature == null)
@@ -206,7 +206,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				return null;
 			}
 			Vector3 v = query.sourceCreature.getVoxelBelow();
-			
+
 			for (Iterator<Structure> iter = new ArrayIterator<Structure>(islands[query.island].structures); iter.hasNext();)
 			{
 				Structure s = iter.next();
@@ -220,11 +220,11 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				if (query.searchedNodeType != null && !s.hasStructureNode(query.searchedNodeType)) continue;
 				if (query.searchedNodeName != null && !s.hasStructureNode(query.searchedNodeName)) continue;
 				if (query.searchedItemStack != null && !s.getInventory().contains(query.searchedItemStack)) continue;
-				
+
 				NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 				Path p = AStar.findPath(v, s.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(s.getVoxelPos()), query.sourceCreature, type.useGhostTarget);
 				if (p == null) continue;
-				
+
 				float dist = p.length();
 				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
 				{
@@ -237,7 +237,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		else
 		{
 			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
-			
+
 			for (Iterator<Entity> iter = new ArrayIterator<Entity>(entities); iter.hasNext();)
 			{
 				Entity e = iter.next();
@@ -252,12 +252,12 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 					if (query.mustHaveCapacity && ((Human) e).getCarryingItemStack().isFull()) continue;
 					if (query.mustHaveCapacityForTransportedItemStack && !((Human) e).getCarryingItemStack().canAdd(query.transportedItemStack)) continue;
 				}
-				
+
 				Vector3 v = ((Creature) e).getVoxelBelow();
 				Vector3 to = query.sourceStructure.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(query.sourceStructure.getVoxelPos());
 				Path p = AStar.findPath(v, query.sourceCreature != null ? query.sourceCreature.getVoxelBelow() : to, query.sourceCreature != null ? query.sourceCreature : (Creature) e, query.sourceCreature != null ? true : type.useGhostTarget);
 				if (p == null) continue;
-				
+
 				float dist = p.length();
 				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
 				{
@@ -267,21 +267,21 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				}
 			}
 		}
-		
+
 		if (path == null) return null;
 		return new PathBundle(path, structure, creature, query);
 	}
-	
+
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{
 		baos.write(width);
 		baos.write(depth);
-		
+
 		for (Island i : islands)
 			i.save(baos);
 	}
-	
+
 	public static float calculateRelativeUplift(float y)
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
