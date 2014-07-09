@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.render;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
@@ -77,22 +78,19 @@ public class Face
 	public float texWidth = Voxel.TEXSIZE;
 	public float texHeight = Voxel.TEXSIZE;
 
-	public byte light;
-	
 	public float sizeX, sizeY, sizeZ;
 	
-	public Face(Direction dir, Vector3 pos, Vector2 tex, byte light)
+	public Face(Direction dir, Vector3 pos, Vector2 tex)
 	{
-		this(dir, pos, tex, 1, 1, 1, light);
+		this(dir, pos, tex, 1, 1, 1);
 	}
 	
-	public Face(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ, byte light)
+	public Face(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
 	{
 		super();
 		this.dir = dir;
 		this.pos = pos;
 		this.tex = tex;
-		this.light = light;
 		setSize(sizeX, sizeY, sizeZ);
 	}
 	
@@ -180,17 +178,19 @@ public class Face
 		float tx = (float) Math.ceil(zDir ? sizeX : yDir ? sizeX : sizeZ);
 		float ty = (float) Math.ceil(yDir ? sizeZ : sizeY);
 		
+		float b = Color.toFloatBits(1f, 1f, 1f, 1f);
+
 		vert.add(tl.x + pos.x);
 		vert.add(tl.y + pos.y);
 		vert.add(tl.z + pos.z);
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x);
 		vert.add(tex.y);
 		vert.add(tx);
 		vert.add(ty);
-		vert.add(light);
 		
 		vert.add(tr.x + pos.x);
 		vert.add(tr.y + pos.y);
@@ -198,11 +198,11 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x + texWidth);
 		vert.add(tex.y);
 		vert.add(tx);
 		vert.add(ty);
-		vert.add(light);
 		
 		vert.add(br.x + pos.x);
 		vert.add(br.y + pos.y);
@@ -210,11 +210,11 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x + texWidth);
 		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
-		vert.add(light);
 		
 		vert.add(bl.x + pos.x);
 		vert.add(bl.y + pos.y);
@@ -222,11 +222,11 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x);
 		vert.add(tex.y + texHeight);
 		vert.add(tx);
 		vert.add(ty);
-		vert.add(light);
 	}
 	
 	public void increaseSize(Vector3 direction)

@@ -73,7 +73,7 @@ varying vec3 v_shadowMapUv;
 
 float getShadowness(vec2 offset)
 {
-    const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 160581375.0);
+    const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
     return step(v_shadowMapUv.z, dot(texture2D(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));	
 }
 
@@ -101,8 +101,6 @@ varying float v_fog;
 float frac(float f) {
 	return f-floor(f);
 }
-
-varying float v_lightLevel;
 
 void main() {
 	#if defined(normalFlag) 
@@ -197,9 +195,5 @@ void main() {
 		#endif
 	#else
 		gl_FragColor.a = 1.0;
-	#endif
-	
-	#if defined(textureFlag) 
-	  gl_FragColor.rgb *= pow(0.8, 15 - v_lightLevel);
 	#endif
 }

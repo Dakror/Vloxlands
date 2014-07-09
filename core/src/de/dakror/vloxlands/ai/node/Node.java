@@ -5,18 +5,17 @@ package de.dakror.vloxlands.ai.node;
  */
 public class Node
 {
-	public int x, y, z;// , island;
+	public int x, y, z;
 	public Node parent;
-	
-	public Node(float x, float y, float z/* , int island, */, Node parent)
+
+	public Node(float x, float y, float z, Node parent)
 	{
 		this.x = (int) x;
 		this.y = (int) y;
 		this.z = (int) z;
 		this.parent = parent;
-		// this.island = island;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj)
 	{
