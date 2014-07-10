@@ -1,7 +1,6 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -188,14 +187,15 @@ public class Human extends Creature
 	{
 		if (wasSelected && !lmb)
 		{
-			boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
-
-			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
-
+			// boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
+			//
+			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, false);
+			
 			if (path != null)
 			{
-				if (mineTarget) setJob(path, new MineJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
-				else setJob(path, null);
+				// if (mineTarget) setJob(path, new MineJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
+				// else
+				setJob(path, null);
 			}
 			selected = true;
 		}
