@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.layer;
 
+import java.util.Random;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
@@ -13,7 +15,9 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
@@ -37,8 +41,9 @@ import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.Warehouse;
+import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -52,9 +57,10 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 /**
  * @author Dakror
  */
+@SuppressWarnings("deprecation")
 public class GameLayer extends Layer
 {
-	public static final long seed = (long) (Math.random() * Long.MAX_VALUE);
+	public static long seed = 4377295308625607680l;// (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static final float pickRayMaxDistance = 150f;
@@ -72,10 +78,14 @@ public class GameLayer extends Layer
 	public Environment minimapEnv;
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
+	
 	public Island activeIsland;
+	public DirectionalShadowLight shadowLight;
 	
 	ModelBatch modelBatch;
 	CameraInputController controller;
+	
+	ModelBatch shadowBatch;
 	
 	boolean middleDown;
 	boolean doneLoading;
@@ -85,6 +95,7 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	Vector3 selectedVoxel = new Vector3();
 	Vector3 controllerTarget = new Vector3();
 	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
@@ -92,7 +103,6 @@ public class GameLayer extends Layer
 	Vector3 targetUp = new Vector3();
 	
 	Vector2 mouseDown = new Vector2();
-	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -116,17 +126,10 @@ public class GameLayer extends Layer
 		instance = this;
 		
 		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
-		MathUtils.random.setSeed(seed);
-		
-		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
-		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		minimapCamera.near = 0.1f;
-		minimapCamera.far = pickRayMaxDistance;
-		minimapEnv = new Environment();
-		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		minimapEnv.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		MathUtils.random = new Random(seed);
 		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
+		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
 		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
@@ -172,13 +175,28 @@ public class GameLayer extends Layer
 		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
 		
+		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		minimapCamera.near = 0.1f;
+		minimapCamera.far = pickRayMaxDistance;
+		minimapEnv = new Environment();
+		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+		minimapEnv.add(new DirectionalLight().set(1f, 1f, 1f, -0.5f, -0.5f, -0.5f));
+		minimapEnv.add(new DirectionalLight().set(0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f));
+		
+		shadowBatch = new ModelBatch(new DepthShaderProvider());
+		
 		shapeRenderer = new ShapeRenderer();
 		
 		new MeshingThread();
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		// env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
+		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+		
+		int AA = 2;
+		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.shadowMap = shadowLight;
 		
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
@@ -194,35 +212,31 @@ public class GameLayer extends Layer
 		
 		Vector3 p = world.getIslands()[0].pos;
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
-		human.setTool(Item.get("PICKAXE"));
 		world.addEntity(human);
 		
-		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
+		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
+		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		world.getIslands()[0].addStructure(tc, false, true);
+		
 		world.getIslands()[0].calculateInitBalance();
 		
 		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
-		
-		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// for (int i = 0; i < 512; i++)
-		// {
-		// world.getIslands()[0].getChunk(i).encode(baos);
-		// if (baos.size() > 0) break;
-		// }
-		// sky = new ModelInstance(assets.get("models/sky/sky.g3db", Model.class));
 	}
 	
 	public void focusIsland(Island island, boolean initial)
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
+		activeIsland = island;
 		
 		if (!initial)
 		{
-			target.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			if (target.equals(camera.position))
 			{
-				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 				controller.target.set(islandCenter);
 				camera.lookAt(islandCenter);
 				
@@ -232,13 +246,12 @@ public class GameLayer extends Layer
 			}
 			
 			ticksForTravel = (int) camera.position.dst(target);
-			activeIsland = island;
 			
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
 			Vector3 up = camera.up.cpy();
 			
-			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			controller.target.set(islandCenter);
 			camera.lookAt(islandCenter);
 			
@@ -253,7 +266,7 @@ public class GameLayer extends Layer
 		}
 		else
 		{
-			camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+			camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			controller.target.set(islandCenter);
 			camera.lookAt(islandCenter);
 			
@@ -266,10 +279,20 @@ public class GameLayer extends Layer
 	public void render(float delta)
 	{
 		if (!doneLoading) return;
-		Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
 		controller.update();
-		
 		world.update();
+		
+		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		shadowLight.begin(controller.target, camera.direction);
+		shadowBatch.begin(shadowLight.getCamera());
+		world.render(shadowBatch, null);
+		shadowBatch.end();
+		shadowLight.end();
+		
+		Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
 		// modelBatch.render(sky, lights);
@@ -391,7 +414,7 @@ public class GameLayer extends Layer
 			{
 				Vector3 islandCenter = new Vector3(activeIsland.pos.x + Island.SIZE / 2, activeIsland.pos.y + Island.SIZE / 4 * 3, activeIsland.pos.z + Island.SIZE / 2);
 				controller.target.set(islandCenter);
-				camera.position.set(islandCenter).add(-Island.SIZE / 2, Island.SIZE / 2, -Island.SIZE / 2);
+				camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 				camera.lookAt(islandCenter);
 				startTick = 0;
 			}
@@ -553,6 +576,8 @@ public class GameLayer extends Layer
 				}
 				
 				selectedChunk.selectedVoxel.set(selectedVoxel);
+				
+				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
 				
 				for (SelectionListener sl : listeners)
 					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb);

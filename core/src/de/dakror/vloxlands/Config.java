@@ -25,7 +25,7 @@ public class Config
 
 		dir.mkdirs();
 		pref = Gdx.app.getPreferences("settings.xml");
-		pref.putBoolean("fullscreen", false);
+		pref.putBoolean("fullscreen", true);
 		pref.putInteger("fov", 67);
 		pref.flush();
 	}

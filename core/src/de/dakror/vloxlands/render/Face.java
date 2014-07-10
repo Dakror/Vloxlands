@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.render;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
@@ -17,14 +18,6 @@ public class Face
 		public FaceKey(int x, int y, int z, int d)
 		{
 			set(x, y, z, d);
-		}
-		
-		public FaceKey(Face vf)
-		{
-			x = (int) vf.pos.x;
-			y = (int) vf.pos.y;
-			z = (int) vf.pos.z;
-			d = vf.dir.ordinal();
 		}
 		
 		public FaceKey set(FaceKey k)
@@ -90,18 +83,6 @@ public class Face
 	public Face(Direction dir, Vector3 pos, Vector2 tex)
 	{
 		this(dir, pos, tex, 1, 1, 1);
-	}
-	
-	public Face(Face o)
-	{
-		sizeX = o.sizeX;
-		sizeY = o.sizeY;
-		sizeZ = o.sizeZ;
-		dir = o.dir;
-		tex = o.tex.cpy();
-		pos = o.pos.cpy();
-		
-		updateVertices();
 	}
 	
 	public Face(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
@@ -197,12 +178,15 @@ public class Face
 		float tx = (float) Math.ceil(zDir ? sizeX : yDir ? sizeX : sizeZ);
 		float ty = (float) Math.ceil(yDir ? sizeZ : sizeY);
 		
+		float b = Color.toFloatBits(1f, 1f, 1f, 1f);
+		
 		vert.add(tl.x + pos.x);
 		vert.add(tl.y + pos.y);
 		vert.add(tl.z + pos.z);
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x);
 		vert.add(tex.y);
 		vert.add(tx);
@@ -214,6 +198,7 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x + texWidth);
 		vert.add(tex.y);
 		vert.add(tx);
@@ -225,6 +210,7 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x + texWidth);
 		vert.add(tex.y + texHeight);
 		vert.add(tx);
@@ -236,6 +222,7 @@ public class Face
 		vert.add(n.x);
 		vert.add(n.y);
 		vert.add(n.z);
+		vert.add(b);
 		vert.add(tex.x);
 		vert.add(tex.y + texHeight);
 		vert.add(tx);

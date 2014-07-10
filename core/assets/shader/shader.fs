@@ -73,7 +73,7 @@ varying vec3 v_shadowMapUv;
 
 float getShadowness(vec2 offset)
 {
-    const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 160581375.0);
+    const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
     return step(v_shadowMapUv.z, dot(texture2D(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));	
 }
 
@@ -196,5 +196,4 @@ void main() {
 	#else
 		gl_FragColor.a = 1.0;
 	#endif
-
 }

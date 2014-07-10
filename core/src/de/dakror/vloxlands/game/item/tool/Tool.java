@@ -38,6 +38,6 @@ public abstract class Tool extends Item
 		Quaternion q = new Quaternion();
 		tr.getRotation(q);
 		float f = q.getAngleAround(Vector3.Y) - 100;
-		transform.translate(v).rotate(Vector3.Y, 90).rotate(0, 0, c.getRotationPerpendicular(), f).translate(0, boundingBox.getDimensions().y + boundingBox.getCenter().y + 0.1f, -0.02f);
+		transform.translate(v).rotate(Vector3.Y, 90).rotate(0, 0, c.getRotationPerpendicular(), f).translate(0, boundingBox.getDimensions().y / 2 - boundingBox.getCenter().y / 2, -0.02f);
 	}
 }

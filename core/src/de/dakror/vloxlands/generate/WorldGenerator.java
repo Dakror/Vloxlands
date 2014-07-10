@@ -12,12 +12,12 @@ public class WorldGenerator extends Thread
 {
 	public float progress;
 	public boolean done;
-
+	
 	public WorldGenerator()
 	{
 		setName("WorldGenerator Thread");
 	}
-
+	
 	@Override
 	public void run()
 	{
@@ -29,11 +29,11 @@ public class WorldGenerator extends Thread
 				Island island = IslandGenerator.generate();
 				island.setPos(new Vector3(i * Island.SIZE, island.pos.y, j * Island.SIZE));
 				GameLayer.world.addIsland(i, j, island);
-
+				
 				progress += 1f / total;
 			}
 		}
-
+		
 		done = true;
 	}
 }

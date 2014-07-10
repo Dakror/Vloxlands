@@ -36,7 +36,7 @@ public class DebugLayer extends Layer
 			font.draw(spriteBatch, "Y: " + GameLayer.camera.position.y, 0, Gdx.graphics.getHeight() - 100);
 			font.draw(spriteBatch, "Z: " + GameLayer.camera.position.z, 0, Gdx.graphics.getHeight() - 120);
 		}
-		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 140);
+		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 160);
 		
 		spriteBatch.end();
 	}

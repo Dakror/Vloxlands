@@ -114,9 +114,9 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 		
-		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		opaque.setIndices(indices);
-		transp = new Mesh(false, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp = new Mesh(false, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();
@@ -141,11 +141,13 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		transp.dispose();
 		transp = null;
 		
-		opaqueMeshData.clear();
 		opaqueMeshData = null;
-		
-		transpMeshData.clear();
 		transpMeshData = null;
+	}
+	
+	public void forceUpdate()
+	{
+		updateRequired = true;
 	}
 	
 	public void add(int x, int y, int z, byte id)
@@ -186,11 +188,6 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return true;
 	}
 	
-	public void forceUpdate()
-	{
-		updateRequired = true;
-	}
-	
 	public byte get(int x, int y, int z)
 	{
 		if (x >= SIZE || x < 0) return 0;
@@ -213,6 +210,10 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		{
 			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
 			transp.setVertices(transpMeshData.items, 0, transpMeshData.size);
+			
+			opaqueMeshData = null;
+			transpMeshData = null;
+			
 			doneMeshing = false;
 			return true;
 		}
@@ -321,13 +322,15 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void grassify(Island island)
 	{
+		if (isEmpty() || getResource(Voxel.get("DIRT").getId()) == 0) return;
+		
 		for (int i = 0; i < SIZE; i++)
 			for (int j = 0; j < SIZE; j++)
 				for (int k = 0; k < SIZE; k++)
 					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
 	}
 	
-	public void getVertices()
+	private void getVertices()
 	{
 		ObjectMap<FaceKey, Face> faces = new ObjectMap<FaceKey, Face>();
 		ObjectMap<FaceKey, Face> transpFaces = new ObjectMap<FaceKey, Face>();
@@ -409,8 +412,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		{
 			if (!loaded) return;
 			meshing = true;
-			opaqueMeshData.clear();
-			transpMeshData.clear();
+			opaqueMeshData = new FloatArray();
+			transpMeshData = new FloatArray();
 			try
 			{
 				getVertices();

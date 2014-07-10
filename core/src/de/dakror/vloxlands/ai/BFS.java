@@ -1,8 +1,9 @@
 package de.dakror.vloxlands.ai;
 
+import java.util.ArrayDeque;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.ai.node.BFSNode;
 import de.dakror.vloxlands.game.entity.creature.Creature;
@@ -14,7 +15,7 @@ import de.dakror.vloxlands.layer.GameLayer;
  */
 public class BFS
 {
-	public static Array<BFSNode> queue = new Array<BFSNode>();
+	public static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	public static BFSNode lastTarget;
 	
 	// TODO: multi island support
@@ -23,10 +24,9 @@ public class BFS
 		queue.clear();
 		queue.add(new BFSNode(pos.x, pos.y, pos.z, GameLayer.world.getIslands()[0].get(pos.x, pos.y, pos.z), null));
 		
-		while (queue.size > 0)
+		while (queue.size() > 0)
 		{
-			BFSNode v = queue.first();
-			queue.removeIndex(0);
+			BFSNode v = queue.poll();
 			
 			if (v.voxel == voxel)
 			{
@@ -65,7 +65,7 @@ public class BFS
 					// don't need parents here
 					BFSNode node = new BFSNode(v.x, v.y, v.z, vxl, null);
 					
-					if (queue.contains(node, false)) continue;
+					if (queue.contains(node)) continue;
 					
 					boolean free = true;
 					

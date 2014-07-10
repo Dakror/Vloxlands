@@ -1,35 +1,35 @@
 package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.util.IInventory;
 
 /**
  * @author Dakror
  */
 public class DepositJob extends Job
 {
-	private Structure target;
-	
-	public DepositJob(Human human, Structure target, boolean persistent)
+	private IInventory target;
+
+	public DepositJob(Human human, IInventory target, boolean persistent)
 	{
 		super(human, "ablegen", "Dumping carried items", 1, persistent);
 		this.target = target;
 	}
-	
-	public Structure getTarget()
+
+	public IInventory getTarget()
 	{
 		return target;
 	}
-	
+
 	@Override
 	public void tick(int tick)
 	{}
-	
+
 	@Override
 	public void onEnd()
 	{
 		super.onEnd();
-		
+
 		human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
 	}
 }

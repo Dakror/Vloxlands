@@ -2,7 +2,7 @@ package de.dakror.vloxlands.game.entity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.UUID;
+import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.CSVReader;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
 
@@ -30,102 +31,119 @@ import de.dakror.vloxlands.util.base.EntityBase;
 public abstract class Entity extends EntityBase implements Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
-
+	
+	static HashMap<Byte, Class<?>> idToClassMap = new HashMap<Byte, Class<?>>();
+	static HashMap<Class<?>, Byte> classToIdMap = new HashMap<Class<?>, Byte>();
+	
 	protected Matrix4 transform;
-
+	
 	public ModelInstance modelInstance;
-
-	protected int id;
+	
+	protected byte id;
+	protected int level;
 	protected String name;
-
+	
 	protected float weight;
 	protected float uplift;
-
+	
 	public boolean inFrustum;
 	public boolean hovered;
 	public boolean wasSelected;
 	public boolean selected;
-
+	
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
-
+	
 	protected AnimationController animationController;
-
+	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
-
+	
 	public Entity(float x, float y, float z, String model)
 	{
-		id = UUID.randomUUID().hashCode();
+		id = classToIdMap.get(getClass());
+		
 		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
-
+		
 		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
-
+		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
 		transform = modelInstance.transform;
-
+		
 		transform.getTranslation(posCache);
-
+		
+		level = 0;
+		
 		GameLayer.instance.addListener(this);
 	}
-
+	
 	public String getName()
 	{
 		return name;
 	}
-
+	
 	public void setName(String name)
 	{
 		this.name = name;
 	}
-
+	
 	public float getWeight()
 	{
 		return weight;
 	}
-
+	
 	public void setWeight(float weight)
 	{
 		this.weight = weight;
 	}
-
+	
 	public float getUplift()
 	{
 		return uplift;
 	}
-
+	
 	public void setUplift(float uplift)
 	{
 		this.uplift = uplift;
 	}
-
+	
 	public BoundingBox getBoundingBox()
 	{
 		return boundingBox;
 	}
-
+	
 	public AnimationController getAnimationController()
 	{
 		return animationController;
 	}
-
+	
 	public Matrix4 getTransform()
 	{
 		return transform;
 	}
-
-	public int getId()
+	
+	public byte getId()
 	{
 		return id;
 	}
-
+	
+	public int getLevel()
+	{
+		return level;
+	}
+	
+	public void setLevel(int level)
+	{
+		this.level = level;
+	}
+	
 	public boolean isMarkedForRemoval()
 	{
 		return markedForRemoval;
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{
@@ -133,21 +151,21 @@ public abstract class Entity extends EntityBase implements Savable
 		transform.getRotation(rotCache);
 		inFrustum = GameLayer.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
-
+	
 	public void getWorldBoundingBox(BoundingBox bb)
 	{
 		bb.min.set(boundingBox.min).add(posCache);
 		bb.max.set(boundingBox.max).add(posCache);
-
+		
 		bb.set(bb.min, bb.max);
 	}
-
+	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
 		batch.render(modelInstance, environment);
-
+		
 		renderAdditional(batch, environment);
-
+		
 		if ((hovered || selected) && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -162,7 +180,7 @@ public abstract class Entity extends EntityBase implements Savable
 			GameLayer.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
-
+		
 		if (Vloxlands.wireframe && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -175,34 +193,83 @@ public abstract class Entity extends EntityBase implements Savable
 			GameLayer.shapeRenderer.end();
 		}
 	}
-
+	
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
-
+	
 	public void update()
 	{
 		animationController.update(Gdx.graphics.getDeltaTime());
 	}
-
+	
 	@Override
 	public void dispose()
 	{
 		GameLayer.instance.removeListener(this);
 	}
-
+	
 	public void kill()
 	{
 		markedForRemoval = true;
 	}
-
+	
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{}
-
+	
 	// -- events -- //
-
+	
 	public void onSpawn()
 	{}
-
+	
 	// -- abstracts -- //
+	
+	// -- statics -- //
+	
+	public static void loadEntities()
+	{
+		CSVReader csv = new CSVReader(Gdx.files.internal("data/entities.csv"));
+		csv.readRow(); // headers
+		
+		String cell;
+		Class<?> c = null;
+		while ((cell = csv.readNext()) != null)
+		{
+			try
+			{
+				if (csv.getIndex() == 0)
+				{
+					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
+				}
+				else
+				{
+					byte b = (byte) Integer.parseInt(cell.trim());
+					
+					idToClassMap.put(b, c);
+					classToIdMap.put(c, b);
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		Gdx.app.debug("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
+	}
+	
+	public static Entity getForId(byte id, float x, float y, float z)
+	{
+		Class<?> c = idToClassMap.get(id);
+		if (c == null) return null;
+		try
+		{
+			return (Entity) c.getConstructor(float.class, float.class, float.class).newInstance(x, y, z);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

@@ -100,6 +100,12 @@ public class ItemStack implements Savable
 		if (stack.getItem().getId() != item.getId()) return false;
 		return amount + stack.getAmount() <= item.getStack();
 	}
+
+	public boolean canAddWithOverflow(ItemStack stack)
+	{
+		if (stack.getItem().getId() != item.getId()) return false;
+		return !isFull();
+	}
 	
 	@Override
 	public String toString()

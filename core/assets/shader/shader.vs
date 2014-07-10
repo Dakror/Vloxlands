@@ -142,7 +142,6 @@ uniform vec4 u_cameraPosition;
 varying float v_fog;
 #endif // fogFlag
 
-
 #if defined(numDirectionalLights) && (numDirectionalLights > 0)
 struct DirectionalLight
 {
