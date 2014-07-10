@@ -144,10 +144,17 @@ public class HudLayer extends Layer implements SelectionListener
 				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).height(0);
 
 				selectedEntityWindow.row();
-				selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
+				ItemSlot tool = new ItemSlot(stage, ((Human) creature).getTool());
+				tool.getTooltip().set("Tool Slot", "Currently equiped tool or weapon");
+				selectedEntityWindow.left().add(tool);
+				
 				ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
 				selectedEntityWindow.add(slot);
-				selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
+				slot.getTooltip().set("Item Slot", "Currently carried items");
+				
+				ItemSlot armor = new ItemSlot(stage, new ItemStack());
+				armor.getTooltip().set("Armor Slot", "Currently equiped piece of armor");
+				selectedEntityWindow.add(armor);
 
 				ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
 				style.imageUp = Vloxlands.skin.getDrawable("gears");
