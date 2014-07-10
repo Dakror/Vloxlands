@@ -139,7 +139,8 @@ public class Voxel
 		return getClass().getName() + "." + name.toUpperCase().replace(" ", "_");
 	}
 	
-	public boolean hasItemdrop(){
+	public boolean hasItemdrop()
+	{
 		return itemdrop != -128;
 	}
 	

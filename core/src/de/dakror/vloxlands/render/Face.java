@@ -19,7 +19,7 @@ public class Face
 		{
 			set(x, y, z, d);
 		}
-
+		
 		public FaceKey set(FaceKey k)
 		{
 			x = k.x;
@@ -77,7 +77,7 @@ public class Face
 	public Vector2 tex;
 	public float texWidth = Voxel.TEXSIZE;
 	public float texHeight = Voxel.TEXSIZE;
-
+	
 	public float sizeX, sizeY, sizeZ;
 	
 	public Face(Direction dir, Vector3 pos, Vector2 tex)
@@ -179,7 +179,7 @@ public class Face
 		float ty = (float) Math.ceil(yDir ? sizeZ : sizeY);
 		
 		float b = Color.toFloatBits(1f, 1f, 1f, 1f);
-
+		
 		vert.add(tl.x + pos.x);
 		vert.add(tl.y + pos.y);
 		vert.add(tl.z + pos.z);

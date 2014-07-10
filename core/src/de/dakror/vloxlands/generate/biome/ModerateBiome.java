@@ -16,7 +16,7 @@ public class ModerateBiome extends Biome
 	protected int boulderMin = 5;
 	protected int boulderMax = 10;
 	protected float spikeFactor = 1;
-
+	
 	@Override
 	public void generate(Island island, int radius)
 	{
@@ -26,10 +26,10 @@ public class ModerateBiome extends Biome
 		
 		byte[] sRatio = createRatio(new byte[] { Voxel.get("STONE").getId(), Voxel.get("DIRT").getId() }, new int[] { 5, 1 });
 		generateSpikes(island, (int) (radius * spikeFactor), Island.SIZE / 4 * 3, radius, j, sRatio);
-
+		
 		generateTrees(island, treeMin, treeMax);
 		generateBoulders(island, Island.SIZE / 4 * 3, radius, boulderMin, boulderMax, 3, 6, 4, 7, new byte[] { Voxel.get("STONE").getId() });
-
+		
 		generateCrystals(island);
 	}
 }

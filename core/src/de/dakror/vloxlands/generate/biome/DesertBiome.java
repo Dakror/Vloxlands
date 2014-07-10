@@ -20,7 +20,7 @@ public class DesertBiome extends Biome
 		fillHorizontalCircle(island, Island.SIZE / 2, Island.SIZE / 4 * 3 + 1, Island.SIZE / 2, radius, new byte[] { Voxel.get("AIR").getId() }, true);
 		
 		generateBoulders(island, Island.SIZE / 4 * 3, radius, radius / 4, radius / 2, 3, 6, 4, 7, new byte[] { Voxel.get("SANDSTONE").getId() });
-
+		
 		byte[] sRatio = createRatio(new byte[] { Voxel.get("SANDSTONE").getId(), Voxel.get("STONE").getId(), Voxel.get("SAND").getId() }, new int[] { 5, 2, 1 });
 		generateSpikes(island, radius / 5, Island.SIZE / 4 * 3, radius, j, sRatio);
 		

@@ -7,7 +7,7 @@ public class Node
 {
 	public int x, y, z;
 	public Node parent;
-
+	
 	public Node(float x, float y, float z, Node parent)
 	{
 		this.x = (int) x;
@@ -15,7 +15,7 @@ public class Node
 		this.z = (int) z;
 		this.parent = parent;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj)
 	{

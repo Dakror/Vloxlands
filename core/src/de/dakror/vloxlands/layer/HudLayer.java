@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
@@ -229,7 +230,23 @@ public class HudLayer extends Layer implements SelectionListener
 				@Override
 				public void clicked(InputEvent event, float x, float y)
 				{
-					structure.requestDismantle();
+					if (structure.isConfirmDismantle())
+					{
+						Dialog d = new Dialog("Confirm Dismantle", Vloxlands.skin)
+						{
+							@Override
+							protected void result(Object object)
+							{
+								if (object != null) structure.requestDismantle();
+							}
+						};
+						d.text("Are you sure you want todismantle\nthis building? All perks given by\nit will be gone after deconstruction!");
+						d.button("Cancel");
+						d.button("Yes", true);
+						
+						d.show(stage);
+					}
+					else structure.requestDismantle();
 				}
 			});
 			dismantle.pad(4);

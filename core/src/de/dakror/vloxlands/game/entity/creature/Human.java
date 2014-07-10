@@ -199,8 +199,6 @@ public class Human extends Creature
 			}
 			selected = true;
 		}
-		
-		if (!wasSelected && !lmb) vs.island.set(vs.voxel.x, vs.voxel.y, vs.voxel.z, (byte) 0);
 	}
 
 	@Override

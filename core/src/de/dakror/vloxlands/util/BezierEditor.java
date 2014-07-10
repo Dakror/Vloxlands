@@ -53,24 +53,24 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	
 	final float SIZE = 200f;
 	final float X = (380 - SIZE) / 2;
-
+	
 	final Vector2[] startPos = { new Vector2(X + SIZE, X + SIZE), new Vector2(X + SIZE, X), new Vector2(X, X + SIZE), new Vector2(X, X) };
 	final Vector2 tmpV = new Vector2();
 	final Vector2 tmpV2 = new Vector2();
-
+	
 	Actor selected;
-
+	
 	int SAMPLE_POINTS = 100;
 	float SAMPLE_POINT_DISTANCE = 1f / SAMPLE_POINTS;
-
+	
 	int lastRad;
 	int lastHeight;
-
+	
 	ImmediateModeRenderer20 renderer;
 	Image[] knobs;
 	Bezier<Vector2> bezier;
 	Bezier<Vector2> bezierLogic;
-
+	
 	@Override
 	public void create()
 	{
@@ -84,18 +84,18 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		}
 		stage = new Stage(new ScreenViewport());
 		fontBatch = new SpriteBatch();
-
+		
 		font = new BitmapFont();
 		assets = new AssetManager();
 		assets.load("img/gui/knob.png", Texture.class);
 		assets.finishLoading();
-
+		
 		skin = new Skin(Gdx.files.internal("skin/default/uiskin.json"));
 		skin.add("knob", assets.get("img/gui/knob.png", Texture.class));
-
+		
 		knobs = new Image[4];
 		renderer = new ImmediateModeRenderer20(false, false, 0);
-
+		
 		Vector2[] v = new Vector2[4];
 		Vector2[] w = new Vector2[4];
 		
@@ -110,13 +110,13 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		
 		bezier = new Bezier<Vector2>(v);
 		bezierLogic = new Bezier<Vector2>(w);
-
+		
 		stage.addListener(this);
 		stage.getCamera().rotate(Vector3.Z, -270);
-
+		
 		Gdx.input.setInputProcessor(stage);
 	}
-
+	
 	@Override
 	public void render()
 	{
@@ -139,7 +139,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 			val += SAMPLE_POINT_DISTANCE;
 		}
 		renderer.end();
-
+		
 		renderer.begin(stage.getBatch().getProjectionMatrix(), GL20.GL_LINE_STRIP);
 		renderer.color(0f, 0f, 0f, 1f);
 		renderer.vertex(bezier.points.get(0).x, bezier.points.get(0).y, 0);
@@ -150,7 +150,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		renderer.vertex(bezier.points.get(2).x, bezier.points.get(2).y, 0);
 		renderer.vertex(bezier.points.get(3).x, bezier.points.get(3).y, 0);
 		renderer.end();
-
+		
 		stage.act();
 		stage.draw();
 		
@@ -159,7 +159,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		font.draw(fontBatch, s(), 0, 400);
 		fontBatch.end();
 	}
-
+	
 	public String s()
 	{
 		return String.format(Locale.ENGLISH, "%.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff", //
@@ -172,23 +172,23 @@ public class BezierEditor extends InputListener implements ApplicationListener
 				bezierLogic.points.get(3).x,//
 				bezierLogic.points.get(3).y);
 	}
-
+	
 	@Override
 	public void resize(int width, int height)
 	{}
-
+	
 	@Override
 	public void pause()
 	{}
-
+	
 	@Override
 	public void resume()
 	{}
-
+	
 	@Override
 	public void dispose()
 	{}
-
+	
 	@Override
 	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
 	{
@@ -201,10 +201,10 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	public void touchDragged(InputEvent event, float x, float y, int pointer)
 	{
 		if (selected == null) return;
-
+		
 		float x1 = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) ? selected.getX() : x - 12;
 		float y1 = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) ? selected.getY() : y - 12;
-
+		
 		selected.setPosition(x1, y1);
 	}
 	
@@ -267,7 +267,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 					for (int j = 0; j < y; j++)
 						lines[i] += "=";
 				}
-
+				
 				for (String line : lines)
 				{
 					for (int i = 0; i < Math.round(highest - line.length() / 2f); i++)

@@ -84,7 +84,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		voxels = new byte[SIZE * SIZE * SIZE];
 		for (int i = 0; i < voxels.length; i++)
 			voxels[i] = Voxel.get("AIR").getId();
-
+		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
 		
@@ -193,10 +193,10 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		if (x >= SIZE || x < 0) return 0;
 		if (y >= SIZE || y < 0) return 0;
 		if (z >= SIZE || z < 0) return 0;
-
+		
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}
-
+	
 	public byte[] getVoxels()
 	{
 		return voxels;
@@ -210,7 +210,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		{
 			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
 			transp.setVertices(transpMeshData.items, 0, transpMeshData.size);
-
+			
 			opaqueMeshData = null;
 			transpMeshData = null;
 			
@@ -319,7 +319,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 	}
-
+	
 	public void grassify(Island island)
 	{
 		if (isEmpty() || getResource(Voxel.get("DIRT").getId()) == 0) return;
@@ -389,7 +389,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		for (FaceKey vfk : vfks)
 			transpFaces.get(vfk).getVertexData(transpMeshData);
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{
