@@ -37,6 +37,8 @@ import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.Revolver;
+import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -77,7 +79,59 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedStructureWindow.setTitleAlignment(Align.left);
 		selectedStructureWindow.setVisible(false);
 		stage.addActor(selectedStructureWindow);
+		
+		Revolver actions = new Revolver();
+		actions.setPosition(10, 10);
+		
+		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
+		s.getTooltip().set("Mine", "Mine or harvest natural ressources");
+		actions.addSlot(0, null, s);
+		s = new RevolverSlot(stage, new Vector2(0, 3), "Wood");
+		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(4, 4), "Stone");
+		s.getTooltip().set("Stone", "Mine rocks for stone using a pickaxe.");
+		actions.addSlot(1, "Mine", s);
 
+		s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
+		s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(3, 2), "YellowCrystal");
+		s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+		s = new RevolverSlot(stage, new Vector2(2, 2), "RedCrystal");
+		s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+		s = new RevolverSlot(stage, new Vector2(1, 2), "BlueCrystal");
+		s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+
+		s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
+		s.getTooltip().set("Ore", "Mine the different kinds of ore.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(3, 3), "IronOre");
+		s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
+		actions.addSlot(2, "Ore", s);
+		s = new RevolverSlot(stage, new Vector2(4, 3), "GoldOre");
+		s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
+		actions.addSlot(2, "Ore", s);
+		s = new RevolverSlot(stage, new Vector2(5, 3), "CoalOre");
+		s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
+		actions.addSlot(2, "Ore", s);
+		
+		s = new RevolverSlot(stage, new Vector2(1, 5), "Build");
+		s.getTooltip().set("Build", "Build various building and structures.");
+		actions.addSlot(0, null, s);
+		s = new RevolverSlot(stage, new Vector2(1, 5), "Towncenter");
+		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
+		actions.addSlot(1, "Build", s);
+		
+		s = new RevolverSlot(stage, new Vector2(5, 1), "Potato");
+		s.getTooltip().set("Potato", "Hi.");
+		actions.addSlot(0, null, s);
+
+		stage.addActor(actions);
+		
 		stage.addActor(new Minimap());
 	}
 

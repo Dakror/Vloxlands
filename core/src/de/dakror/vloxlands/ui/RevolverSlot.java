@@ -14,35 +14,43 @@ import de.dakror.vloxlands.game.item.Item;
  */
 public class RevolverSlot extends TooltipImageButton
 {
-	public static int size = 48;
-	
-	public RevolverSlot(Stage stage, Vector2 icon)
+	public static final int SIZE = 54;
+
+	public RevolverSlot(Stage stage, Vector2 icon, String name)
 	{
 		super(stage, createStyle(icon));
+		setName(name);
+		pad(12);
 	}
-
+	
 	private static ImageButtonStyle createStyle(Vector2 icon)
 	{
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
-		TextureRegion region = new TextureRegion(tex, icon.x * Item.SIZE, icon.y * Item.SIZE, Item.SIZE, Item.SIZE);
+		TextureRegion region = new TextureRegion(tex, (int) icon.x * Item.SIZE, (int) icon.y * Item.SIZE, Item.SIZE, Item.SIZE);
 
 		ImageButtonStyle style = new ImageButtonStyle();
 		
 		style.up = Vloxlands.skin.getDrawable("revolverSlot");
-		style.up.setMinWidth(size);
-		style.up.setMinHeight(size);
+		style.up.setMinWidth(SIZE);
+		style.up.setMinHeight(SIZE);
 		style.down = Vloxlands.skin.getDrawable("revolverSlot");
-		style.down.setMinWidth(size);
-		style.down.setMinHeight(size);
+		style.down.setMinWidth(SIZE);
+		style.down.setMinHeight(SIZE);
+		style.over = Vloxlands.skin.getDrawable("revolverSlot_over");
+		style.over.setMinWidth(SIZE);
+		style.over.setMinHeight(SIZE);
+		style.checked = Vloxlands.skin.getDrawable("revolverSlot_over");
+		style.checked.setMinWidth(SIZE);
+		style.checked.setMinHeight(SIZE);
 		style.disabled = Vloxlands.skin.getDrawable("revolverSlot_disabled");
-		style.disabled.setMinWidth(size);
-		style.disabled.setMinHeight(size);
+		style.disabled.setMinWidth(SIZE);
+		style.disabled.setMinHeight(SIZE);
 		style.imageUp = new TextureRegionDrawable(region);
-		style.imageUp.setMinWidth(size);
-		style.imageUp.setMinHeight(size);
+		style.imageUp.setMinWidth(SIZE);
+		style.imageUp.setMinHeight(SIZE);
 		style.imageDown = new TextureRegionDrawable(region);
-		style.imageDown.setMinWidth(size);
-		style.imageDown.setMinHeight(size);
+		style.imageDown.setMinWidth(SIZE);
+		style.imageDown.setMinHeight(SIZE);
 		return style;
 	}
 }

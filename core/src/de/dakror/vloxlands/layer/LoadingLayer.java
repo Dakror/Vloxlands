@@ -86,6 +86,7 @@ public class LoadingLayer extends Layer
 		Vloxlands.assets.load("img/gui/bomb.png", Texture.class);
 		Vloxlands.assets.load("img/gui/sleep.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
@@ -94,6 +95,7 @@ public class LoadingLayer extends Layer
 		Vloxlands.skin.add("bomb", Vloxlands.assets.get("img/gui/bomb.png", Texture.class));
 		Vloxlands.skin.add("sleep", Vloxlands.assets.get("img/gui/sleep.png", Texture.class));
 		Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
+		Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
 		Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
 		
 		stage = new Stage(new ScreenViewport());
