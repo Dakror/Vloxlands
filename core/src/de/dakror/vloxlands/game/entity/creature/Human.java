@@ -190,14 +190,14 @@ public class Human extends Creature
 			// TODO just temporary, gets replace by revolver ui triggers
 			Job job = null;
 			Path path = null;
-			if (vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())))
-			{
-				// TODO handle different types of mining, digging
-			}
-			else
-			{
-				path = AStar.findPath(getVoxelBelow(), vs.voxel, this, false);
-			}
+			// if (vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())))
+			// {
+			// // TODO handle different types of mining, digging
+			// }
+			// else
+			// {
+			path = AStar.findPath(getVoxelBelow(), vs.voxel, this, false);
+			// }
 			
 			if (path != null)
 			{
