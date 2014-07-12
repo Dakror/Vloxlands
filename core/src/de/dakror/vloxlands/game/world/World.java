@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -31,6 +32,7 @@ import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.query.Query.Queryable;
+import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
@@ -44,7 +46,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static final int MAXHEIGHT = 512;
 	
-	static Material opaque, transp, highlight;
+	public static Material opaque, transp, highlight;
 	
 	Island[] islands;
 	
@@ -155,6 +157,16 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				loadedChunks += island.loadedChunks;
 			}
 		}
+
+		Renderable r = pool.obtain();
+		r.worldTransform.setToTranslation(64, 100, 64);
+		r.material = World.opaque;
+		r.mesh = Voxel.getForId(11).getMesh();
+		r.meshPartOffset = 0;
+		r.meshPartSize = 36;
+		r.primitiveType = GL20.GL_TRIANGLES;
+		renderables.add(r);
+
 	}
 	
 	public void render(ModelBatch batch, Environment environment)
@@ -212,7 +224,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			{
 				Structure s = iter.next();
 				if (s == query.sourceStructure) continue;
-				if (!s.getClass().equals(query.searchedClass)) continue;
+				if (!query.searchedClass.isAssignableFrom(s.getClass())) continue;
 				if (query.mustWork && !s.isWorking()) continue;
 				if (query.mustBeEmpty && s.getInventory().getCount() > 0) continue;
 				if (query.mustBeFull && !s.getInventory().isFull()) continue;
@@ -221,6 +233,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				if (query.searchedNodeType != null && !s.hasStructureNode(query.searchedNodeType)) continue;
 				if (query.searchedNodeName != null && !s.hasStructureNode(query.searchedNodeName)) continue;
 				if (query.searchedItemStack != null && !s.getInventory().contains(query.searchedItemStack)) continue;
+				if (query.searchedToolType != null && !s.getInventory().contains(query.searchedToolType)) continue;
 				
 				NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 				Path p = AStar.findPath(v, s.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(s.getVoxelPos()), query.sourceCreature, type.useGhostTarget);

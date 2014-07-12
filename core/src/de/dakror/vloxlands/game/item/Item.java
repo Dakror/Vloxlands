@@ -26,14 +26,14 @@ public class Item
 		custom,
 		stack
 	}
-
+	
 	public static final int ITEMS = 256;
 	public static final int SIZE = 24;
-
+	
 	private static ObjectMap<String, Item> items = new ObjectMap<String, Item>();
-
+	
 	private static Item[] itemList = new Item[ITEMS];
-
+	
 	public void registerItem(int id)
 	{
 		if (itemList[id + 128] == null) itemList[id + 128] = this;
@@ -44,7 +44,7 @@ public class Item
 		}
 		this.id = (byte) id;
 	}
-
+	
 	protected String name = "NA";
 	protected String model;
 	protected String description;
@@ -56,86 +56,86 @@ public class Item
 	protected boolean resource;
 	protected boolean tool;
 	protected boolean equipable;
-
+	
 	public String getName()
 	{
 		return name;
 	}
-
+	
 	public String getModel()
 	{
 		return model;
 	}
-
+	
 	public boolean isModel()
 	{
 		return !model.contains(":");
 	}
-
+	
 	public String getDescription()
 	{
 		return description;
 	}
-
+	
 	public String getCustom()
 	{
 		return custom;
 	}
-
+	
 	public byte getId()
 	{
 		return id;
 	}
-
+	
 	public int getTextureX()
 	{
 		return textureX;
 	}
-
+	
 	public int getTextureY()
 	{
 		return textureY;
 	}
-
+	
 	public boolean isResource()
 	{
 		return resource;
 	}
-
+	
 	public boolean isTool()
 	{
 		return tool;
 	}
-
+	
 	public boolean isEquipable()
 	{
 		return equipable;
 	}
-
+	
 	public int getStack()
 	{
 		return stack;
 	}
-
+	
 	public void onLoaded()
 	{}
-
+	
 	@Override
 	public String toString()
 	{
 		return getClass().getName() + "." + name.toUpperCase().replace(" ", "_");
 	}
-
+	
 	public static Item getForId(byte id)
 	{
 		return itemList[id + 128];
 	}
-
+	
 	public synchronized static Item getForId(int id)
 	{
 		return itemList[id];
 	}
-
+	
 	public static int getIdForName(String name)
 	{
 		for (int i = 0; i < itemList.length; i++)
@@ -143,21 +143,21 @@ public class Item
 			Item v = Item.getForId(i);
 			if (v.getName().equals(name)) return i;
 		}
-
+		
 		Gdx.app.error("Item.getIdForName", name + " not found");
 		return -1;
 	}
-
+	
 	public static Item get(String name)
 	{
 		return items.get(name);
 	}
-
+	
 	public static Array<Item> getAll()
 	{
 		return items.values().toArray();
 	}
-
+	
 	public static void loadItems()
 	{
 		CSVReader csv = new CSVReader(Gdx.files.internal("data/items.csv"));
@@ -179,7 +179,7 @@ public class Item
 					e.printStackTrace();
 				}
 			}
-
+			
 			Categories c = Categories.valueOf(categories[csv.getIndex()]);
 			switch (c)
 			{
@@ -256,9 +256,9 @@ public class Item
 					break;
 			}
 		}
-
+		
 		items.put(item.getName().toUpperCase().replace(" ", "_"), item);
-
+		
 		Gdx.app.debug("Item.loadItems", items.size + " items loaded.");
 	}
 }

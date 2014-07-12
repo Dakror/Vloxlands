@@ -14,15 +14,15 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public abstract class EntityBase implements Tickable, Disposable, SelectionListener
 {
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
 	{}
 	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb)
+	public void onStructureSelection(Structure structure, boolean lmb, String[] action)
 	{}
 	
 	@Override
-	public void onCreatureSelection(Creature creature, boolean lmb)
+	public void onCreatureSelection(Creature creature, boolean lmb, String[] action)
 	{}
 	
 	@Override

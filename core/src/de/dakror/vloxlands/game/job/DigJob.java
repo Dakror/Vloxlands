@@ -11,13 +11,13 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class MineJob extends DestroyVoxelJob
+public class DigJob extends DestroyVoxelJob
 {
 	private VoxelSelection target;
 
-	public MineJob(Human human, VoxelSelection target, boolean persistent)
+	public DigJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
+		super(human, "walk" /* mine */, (persistent ? "Auto. d" : "d") + "iging " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
 	}
 
@@ -42,6 +42,6 @@ public class MineJob extends DestroyVoxelJob
 			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));
 			else human.getCarryingItemStack().add(1);
 		}
-		else Gdx.app.error("MineJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
+		else Gdx.app.error("DigJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
 	}
 }

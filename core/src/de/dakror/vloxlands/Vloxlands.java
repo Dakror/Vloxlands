@@ -51,6 +51,7 @@ public class Vloxlands extends GameBase
 
 		Entity.loadEntities();
 		Voxel.loadVoxels();
+		Voxel.buildMeshes();
 		Item.loadItems();
 
 		setFullscreen(Config.pref.getBoolean("fullscreen"));
@@ -118,8 +119,6 @@ public class Vloxlands extends GameBase
 
 	public void setFullscreen(boolean fullscreen)
 	{
-		if (Gdx.graphics.isFullscreen() == fullscreen) return;
-
 		if (!fullscreen) Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 	}

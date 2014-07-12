@@ -139,7 +139,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			{
 				s.selected = false;
 				for (SelectionListener sl : GameLayer.instance.listeners)
-					sl.onStructureSelection(null, true);
+					sl.onStructureSelection(null, true, null);
 				s.dispose();
 				iter.remove();
 			}
