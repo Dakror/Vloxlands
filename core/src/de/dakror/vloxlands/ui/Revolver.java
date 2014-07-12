@@ -75,10 +75,41 @@ public class Revolver extends Group
 				if (g != null) g.setVisible(true);
 				if (g == null)
 				{
-					String action = slot.getName();
+					String action = "";
 					Actor p = slot;
-					while ((p = p.getParent()).getName() != null)
-						action = p.getName() + "-" + action;
+					while (p.getName() != null)
+					{
+						action = p.getName() + (action.length() > 0 ? "-" + action : "");
+						if (p instanceof RevolverSlot)
+						{
+							p = p.getParent();
+						}
+						else
+						{
+							for (Actor a : getChildren())
+							{
+								if ((int) a.getUserObject() == (int) p.getUserObject() - 1)
+								{
+									boolean done = false;
+									
+									for (Actor b : ((Group) a).getChildren())
+									{
+										if (b.getName().equals(p.getName()))
+										{
+											done = true;
+											p = b.getParent();
+											break;
+										}
+									}
+
+									if (done) break;
+								}
+							}
+						}
+
+						if ((int) p.getUserObject() == 0) break;
+					}
+
 					GameLayer.instance.activeAction = action.split("-");
 				}
 				else GameLayer.instance.activeAction = null;

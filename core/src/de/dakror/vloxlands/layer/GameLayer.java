@@ -213,7 +213,7 @@ public class GameLayer extends Layer
 
 		Vector3 p = world.getIslands()[0].pos;
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
-		human.setTool(Item.getForId(31));
+		human.setCarryingItemStack(new ItemStack(Item.getForId(11), 1));
 		world.addEntity(human);
 
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
