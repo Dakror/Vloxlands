@@ -2,11 +2,13 @@ package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -22,11 +24,15 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
 import de.dakror.vloxlands.game.job.DepositJob;
+import de.dakror.vloxlands.game.job.DestroyVoxelJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.MineJob;
+import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
+import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -37,35 +43,36 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public class Human extends Creature
 {
 	public static final Vector3 resourceTrn = new Vector3(0, 0.2f, -0.3f);
-
+	
 	ItemStack carryingItemStack;
 	ModelInstance carryingItemModelInstance;
 	Matrix4 carryingItemTransform;
-
+	
 	ItemStack tool;
 	ModelInstance toolModelInstance;
 	Matrix4 toolTransform;
-
+	
 	Array<Job> jobQueue = new Array<Job>();
-
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/humanblend/humanblend.g3db");
 		name = "Human";
-
+		
 		speed = 0.025f;
 		climbHeight = 1;
-
+		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
 	}
-
+	
 	public void setTool(Item tool)
 	{
 		if (tool == null)
 		{
 			toolModelInstance = null;
 			toolTransform = null;
+			this.tool.set(new ItemStack());
 		}
 		else
 		{
@@ -75,17 +82,17 @@ public class Human extends Creature
 			toolTransform = toolModelInstance.transform;
 		}
 	}
-
+	
 	public ItemStack getTool()
 	{
 		return tool;
 	}
-
+	
 	public ItemStack getCarryingItemStack()
 	{
 		return carryingItemStack;
 	}
-
+	
 	public void setCarryingItemStack(ItemStack carryingItemStack)
 	{
 		this.carryingItemStack.set(carryingItemStack);
@@ -96,31 +103,59 @@ public class Human extends Creature
 		}
 		else
 		{
-			carryingItemModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class), new Matrix4());
+			Model model = null;
+			Vector3 scale = new Vector3(1, 1, 1);
+			Vector3 tr = new Vector3();
+			if (carryingItemStack.getItem().isModel())
+			{
+				model = Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class);
+			}
+			else if (carryingItemStack.getItem().getModel().startsWith("voxel:"))
+			{
+				Voxel v = Voxel.getForId(Integer.parseInt(carryingItemStack.getItem().getModel().replace("voxel:", "").trim()));
+				
+				ModelBuilder mb = new ModelBuilder();
+				mb.begin();
+				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, World.opaque); // DOESNT WORK
+				model = mb.end();
+				scale.set(0.4f, 0.4f, 0.4f);
+				tr.set(-0.2f, 0, -0.3f);
+			}
+			else
+			{
+				Gdx.app.error("Human.setCarryingItemStack", "Can't handle item model!");
+				return;
+			}
+
+			carryingItemModelInstance = new ModelInstance(model, new Matrix4());
+			carryingItemModelInstance.nodes.get(0).scale.set(scale);
+			carryingItemModelInstance.nodes.get(0).translation.set(tr);
+			carryingItemModelInstance.calculateTransforms();
 			carryingItemTransform = carryingItemModelInstance.transform;
 		}
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{
+		if (tick % 120 == 0) setCarryingItemStack(carryingItemStack);
+		
 		super.tick(tick);
-
 		if (!carryingItemStack.isNull())
 		{
 			carryingItemTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			carryingItemTransform.rotate(Vector3.Y, rotCache.getYaw());
 			carryingItemTransform.translate(resourceTrn);
 		}
-
+		
 		if (!tool.isNull())
 		{
 			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
 			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
-
+			
 			((Tool) tool.getItem()).transformInHand(toolTransform, this);
 		}
-
+		
 		if (jobQueue.size > 0)
 		{
 			Job j = firstJob();
@@ -130,14 +165,14 @@ public class Human extends Creature
 				{
 					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
 				}
-
+				
 				if (j.isDone())
 				{
 					j.onEnd();
-
+					
 					jobQueue.removeIndex(0);
 					onJobDone(j);
-
+					
 					if (j.isPersistent())
 					{
 						j.resetState();
@@ -149,14 +184,14 @@ public class Human extends Creature
 			else j.trigger();
 		}
 	}
-
+	
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if ((firstJob() instanceof MineJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof MineJob)) batch.render(toolModelInstance, environment);
+		if ((firstJob() instanceof DestroyVoxelJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof DestroyVoxelJob)) batch.render(toolModelInstance, environment);
 		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
 	}
-
+	
 	public void queueJob(Path path, Job job)
 	{
 		if (job == null)
@@ -170,46 +205,76 @@ public class Human extends Creature
 			jobQueue.add(job);
 		}
 	}
-
+	
 	public void setJob(Path path, Job job)
 	{
 		jobQueue.clear();
 		queueJob(path, job);
 	}
-
+	
 	public Job firstJob()
 	{
 		if (jobQueue.size == 0) return null;
 		return jobQueue.first();
 	}
-
+	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
 	{
 		if (wasSelected && !lmb)
 		{
-			boolean mineTarget = !tool.isNull() && vs.type.getMining() > 0 && vs.type.hasItemdrop() && (carryingItemStack.isNull() || (!carryingItemStack.isFull() && carryingItemStack.getItem().getId() == vs.type.getItemdrop())) && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT);
-
-			Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, mineTarget);
-
-			if (path != null)
-			{
-				if (mineTarget) setJob(path, new MineJob(this, vs, Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)));
-				else setJob(path, null);
-			}
 			selected = true;
-		}
-		
-		if (!wasSelected && !lmb) vs.island.set(vs.voxel.x, vs.voxel.y, vs.voxel.z, (byte) 0);
-	}
 
+			if (action != null)
+			{
+				if (action[0].equals("Mine"))
+				{
+					if (action[action.length - 1].startsWith("voxel"))
+					{
+						Voxel v = Voxel.getForId(Integer.parseInt(action[action.length - 1].replace("voxel:", "").trim()));
+						if (v.getId() == vs.type.getId())
+						{
+							PathBundle pb = null;
+
+							if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
+							{
+								pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));
+								if (pb != null)
+								{
+									queueJob(pb.path, new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(v.getTool()), 1), true, false));
+								}
+							}
+
+							try
+							{
+								Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
+								queueJob(AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxel, this, true), job);
+							}
+							catch (Exception e)
+							{
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				
+				GameLayer.instance.activeAction = null;
+			}
+			else
+			{
+				Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, false);
+				if (path != null) setJob(path, null);
+			}
+		}
+	}
+	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb)
+	public void onStructureSelection(Structure structure, boolean lmb, String[] action)
 	{
 		if (wasSelected && !lmb)
 		{
 			CurserCommand c = structure.getCommandForEntity(this);
-
+			
 			Job job = null;
 			NodeType type = NodeType.target;
 			if (c == CurserCommand.DEPOSIT)
@@ -220,36 +285,36 @@ public class Human extends Creature
 					type = NodeType.deposit;
 				}
 			}
-
+			
 			Vector3 v = structure.getStructureNode(posCache, type).pos.cpy().add(structure.getVoxelPos());
 			Path path = AStar.findPath(getVoxelBelow(), v, this, type.useGhostTarget);
 			if (path != null || job != null) setJob(path, job);
 		}
 	}
-
+	
 	@Override
 	public void onReachTarget()
 	{
 		super.onReachTarget();
-
+		
 		if (firstJob() instanceof WalkJob) firstJob().setDone();
 	}
-
+	
 	public void onJobDone(Job j)
 	{
 		if (j instanceof MineJob)
 		{
-			PathBundle pps = null;
-
+			PathBundle pb = null;
+			
 			if (carryingItemStack.isFull())
 			{
-				pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.deposit).island(0));
-				if (pps != null) queueJob(pps.path, new DepositJob(this, pps.structure, false));
+				pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).node(NodeType.deposit).island(0));
+				if (pb != null) queueJob(pb.path, new DepositJob(this, pb.structure, false));
 				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 			}
 			if (j.isPersistent())
 			{
-				Path path = BFS.findClosestVoxel(pps != null ? pps.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
+				Path path = BFS.findClosestVoxel(pb != null ? pb.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
 				if (path != null)
 				{
 					((MineJob) j).getTarget().voxel.set(path.getGhostTarget());
@@ -259,24 +324,24 @@ public class Human extends Creature
 				{
 					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
 					j.setPersistent(false);
-					if (pps == null) pps = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.deposit).island(0));
-					if (pps != null) queueJob(pps.path, new DepositJob(this, pps.structure, false));
+					if (pb == null) pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).structure(true).node(NodeType.deposit).island(0));
+					if (pb != null) queueJob(pb.path, new DepositJob(this, pb.structure, false));
 					else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
 				}
 			}
 		}
 	}
-
+	
 	public Array<Job> getJobQueue()
 	{
 		return jobQueue;
 	}
-
+	
 	public boolean isIdle()
 	{
 		return jobQueue.size == 0;
 	}
-
+	
 	@Override
 	public void onEnd(AnimationDesc animation)
 	{

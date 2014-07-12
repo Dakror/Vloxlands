@@ -12,6 +12,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.dakror.vloxlands.game.entity.Entity;
@@ -37,21 +38,24 @@ public class Vloxlands extends GameBase
 
 	public static boolean showPathDebug;
 	public static boolean wireframe;
-
+	
 	@Override
 	public void create()
 	{
-		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-
 		currentGame = this;
 
+		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		Dialog.fadeDuration = 0;
+
 		Config.init();
-		setFullscreen(Config.pref.getBoolean("fullscreen"));
-		
+
 		Entity.loadEntities();
 		Voxel.loadVoxels();
+		Voxel.buildMeshes();
 		Item.loadItems();
 
+		setFullscreen(Config.pref.getBoolean("fullscreen"));
+		
 		assets = new AssetManager();
 		skin = new Skin(Gdx.files.internal("skin/default/uiskin.json"));
 
@@ -115,7 +119,7 @@ public class Vloxlands extends GameBase
 
 	public void setFullscreen(boolean fullscreen)
 	{
-		if (!fullscreen) Gdx.graphics.setDisplayMode(1280, 720, false);
+		if (!fullscreen) Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 	}
 
@@ -129,7 +133,7 @@ public class Vloxlands extends GameBase
 				wasNull = true;
 				Config.savegameName = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
 			}
-			
+
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			Bits.putLong(baos, GameLayer.seed);
 			GameLayer.world.save(baos);

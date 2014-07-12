@@ -85,12 +85,18 @@ public class LoadingLayer extends Layer
 		Vloxlands.assets.load("img/gui/gears.png", Texture.class);
 		Vloxlands.assets.load("img/gui/bomb.png", Texture.class);
 		Vloxlands.assets.load("img/gui/sleep.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
 		
 		Vloxlands.skin.add("gears", Vloxlands.assets.get("img/gui/gears.png", Texture.class));
 		Vloxlands.skin.add("bomb", Vloxlands.assets.get("img/gui/bomb.png", Texture.class));
 		Vloxlands.skin.add("sleep", Vloxlands.assets.get("img/gui/sleep.png", Texture.class));
+		Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
+		Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
+		Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
 		
 		stage = new Stage(new ScreenViewport());
 		font = new BitmapFont();
@@ -105,6 +111,6 @@ public class LoadingLayer extends Layer
 		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
 		for (Item item : Item.getAll())
-			if (item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
+			if (item.isModel() && item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}
 }

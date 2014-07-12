@@ -13,6 +13,6 @@ public abstract class Biome extends Generator
 	@Deprecated
 	public void generate(Island island)
 	{}
-
+	
 	public abstract void generate(Island island, int radius);
 }

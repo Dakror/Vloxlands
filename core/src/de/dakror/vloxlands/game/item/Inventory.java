@@ -76,7 +76,7 @@ public class Inventory implements Savable
 		count -= is.getAmount();
 		return is;
 	}
-	
+
 	/**
 	 * @param item Item type to get
 	 * @param amount amount to get
@@ -123,6 +123,28 @@ public class Inventory implements Savable
 		return false;
 	}
 	
+	/**
+	 * Searches for Tool type
+	 *
+	 * @param class1 searched type
+	 * @return true if this contains item(s) of searched type
+	 */
+	public boolean contains(Class<?> class1)
+	{
+		for (ItemStack s : stacks)
+			if (s.getItem().getClass().equals(class1)) return true;
+		
+		return false;
+	}
+	
+	public Item getAnyItemForToolType(Class<?> class1)
+	{
+		for (ItemStack s : stacks)
+			if (s.getItem().getClass().equals(class1)) return s.getItem();
+		
+		return null;
+	}
+
 	public boolean isFull()
 	{
 		return count == capacity;

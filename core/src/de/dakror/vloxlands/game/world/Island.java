@@ -4,7 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -136,7 +139,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			{
 				s.selected = false;
 				for (SelectionListener sl : GameLayer.instance.listeners)
-					sl.onStructureSelection(null, true);
+					sl.onStructureSelection(null, true, null);
 				s.dispose();
 				iter.remove();
 			}
@@ -166,7 +169,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().y); j++)
 					for (int k = -1; k < Math.ceil(s.getBoundingBox().getDimensions().z) + 1; k++)
 						set(i + vp.x, j + vp.y + 1, k + vp.z, air);
-
+			
 			grassify();
 		}
 		
@@ -282,32 +285,33 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public void render(ModelBatch batch, Environment environment)
 	{
 		renderStructures(batch, environment, false);
-
-		// if ((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight())
-		// {
-		// if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-		//
-		// fbo.begin();
-		// Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
-		// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		//
-		// GameLayer.instance.minimapCamera.position.set(pos);
-		// ((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
-		// GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
-		// GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
-		// GameLayer.instance.minimapCamera.translate(0, 5, 0);
-		// GameLayer.instance.minimapCamera.update();
-		//
-		// minimapMode = true;
-		// GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
-		// GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-		// renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
-		// GameLayer.instance.minimapBatch.end();
-		// fbo.end();
-		// initFBO = wasDrawnOnce();
-		// minimapMode = false;
-		// Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
-		// }
+		
+		if (((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
+		{
+			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+			
+			fbo.begin();
+			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+			
+			GameLayer.instance.minimapCamera.position.set(pos);
+			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
+			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
+			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
+			GameLayer.instance.minimapCamera.translate(0, 5, 0);
+			GameLayer.instance.minimapCamera.update();
+			
+			minimapMode = true;
+			
+			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
+			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
+			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
+			GameLayer.instance.minimapBatch.end();
+			fbo.end();
+			initFBO = wasDrawnOnce();
+			minimapMode = false;
+			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 1);
+		}
 	}
 	
 	public boolean wasDrawnOnce()

@@ -16,6 +16,11 @@ public class DepositJob extends Job
 		this.target = target;
 	}
 	
+	public IInventory getTarget()
+	{
+		return target;
+	}
+	
 	@Override
 	public void tick(int tick)
 	{}

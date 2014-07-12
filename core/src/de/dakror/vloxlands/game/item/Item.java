@@ -67,6 +67,11 @@ public class Item
 		return model;
 	}
 	
+	public boolean isModel()
+	{
+		return !model.contains(":");
+	}
+	
 	public String getDescription()
 	{
 		return description;

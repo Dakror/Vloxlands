@@ -1,19 +1,19 @@
-classpath;id;textureX;textureY;name;opaque;weight;uplift;brightness;mining;itemdrop;custom
-Voxel;0;0;0;default;1;1;0;0;0;0;
-;128;0;0;Air;0;0;;;;;
-;1;1;0;Stone;;;;;6;;
-;2;2;0;Dirt;;0.8;;;2;;
-;3;3;0;Yellow Crystal;0;0;1;0.2;2;4;
-;4;3;1;Red Crystal;0;0;10;0.5;4;5;
-;5;3;2;Blue Crystal;0;0;25;0.7;6;6;
-VoxelGrass;6;0;1;Grass;;0.8;;;2;;
-;7;5;1;Iron Ore;;1.2;;;9;;
-;8;5;0;Coal Ore;;0.8;;;7;;
-;9;5;2;Gold Ore;;1.2;;;11;;
-VoxelGrass;10;0;2;Snow;;0.8;;;;;
-VoxelDouble;11;0;3;Wood;;0.9;;;6;;
-;12;2;3;Leaves;0;0.3;;;1;;
-;13;3;3;Sand;;0.7;;;2;;
-;14;4;3;Sandstone;;1.1;;;4;;
-;15;2;1;Morass;;0.9;;;2;;
-;16;2;0;Gravel;;0.7;;;2;;
+classpath;id;textureX;textureY;name;opaque;weight;uplift;brightness;mining;itemdrop;tool;custom
+Voxel;0;0;0;default;1;1;0;0;0;-1;;
+;128;0;0;Air;0;0;;;;0;;
+;1;1;0;Stone;;;;;6;;MineTool;
+;2;2;0;Dirt;;0.8;;;2;;DigTool;
+;3;3;0;Yellow Crystal;0;0;1;0.2;2;;MineTool;
+;4;3;1;Red Crystal;0;0;10;0.5;4;;MineTool;
+;5;3;2;Blue Crystal;0;0;25;0.7;6;;MineTool;
+VoxelGrass;6;0;1;Grass;;0.8;;;2;;DigTool;
+;7;5;1;Iron Ore;;1.2;;;9;;MineTool;
+;8;5;0;Coal Ore;;0.8;;;7;;MineTool;
+;9;5;2;Gold Ore;;1.2;;;11;;MineTool;
+VoxelGrass;10;0;2;Snow;;0.8;;;;;DigTool;
+VoxelDouble;11;0;3;Wood;;0.9;;;6;;ChopTool;
+;12;2;3;Leaves;;0.3;;;1;0;;
+;13;3;3;Sand;;0.7;;;2;;DigTool;
+;14;4;3;Sandstone;;1.1;;;4;;MineTool;
+;15;2;1;Morass;;0.9;;;2;;DigTool;
+;16;2;0;Gravel;;0.7;;;2;;DigTool;

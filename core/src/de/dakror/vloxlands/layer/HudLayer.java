@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
@@ -36,6 +37,8 @@ import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
 import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.Revolver;
+import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -76,7 +79,9 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedStructureWindow.setTitleAlignment(Align.left);
 		selectedStructureWindow.setVisible(false);
 		stage.addActor(selectedStructureWindow);
-		
+
+		addActionsMenu();
+
 		stage.addActor(new Minimap());
 	}
 	
@@ -87,8 +92,67 @@ public class HudLayer extends Layer implements SelectionListener
 		GameLayer.instance.removeListener(this);
 	}
 	
+	public void addActionsMenu()
+	{
+		Revolver actions = new Revolver();
+		actions.setPosition(10, 10);
+
+		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
+		s.getTooltip().set("Mine", "Mine or harvest natural ressources");
+		actions.addSlot(0, null, s);
+		s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
+		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1");
+		s.getTooltip().set("Stone", "Mine rocks for stone using a pickaxe.");
+		actions.addSlot(1, "Mine", s);
+		
+		s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
+		s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(3, 2), "voxel:3");
+		s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+		s = new RevolverSlot(stage, new Vector2(2, 2), "voxel:4");
+		s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+		s = new RevolverSlot(stage, new Vector2(1, 2), "voxel:5");
+		s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
+		actions.addSlot(2, "Crystal", s);
+		
+		s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
+		s.getTooltip().set("Ore", "Mine the different kinds of ore.");
+		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(3, 3), "voxel:7");
+		s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
+		s.setDisabled(true);
+		actions.addSlot(2, "Ore", s);
+		s = new RevolverSlot(stage, new Vector2(5, 3), "voxel:8");
+		s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
+		s.setDisabled(true);
+		actions.addSlot(2, "Ore", s);
+		s = new RevolverSlot(stage, new Vector2(4, 3), "voxel:9");
+		s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
+		s.setDisabled(true);
+		actions.addSlot(2, "Ore", s);
+		
+		s = new RevolverSlot(stage, new Vector2(1, 5), "Build");
+		s.getTooltip().set("Build", "Build various building and structures.");
+		actions.addSlot(0, null, s);
+		s = new RevolverSlot(stage, new Vector2(1, 5), "entity:129");
+		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
+		s.setDisabled(true);
+		actions.addSlot(1, "Build", s);
+
+		s = new RevolverSlot(stage, new Vector2(5, 1), "Potato");
+		s.getTooltip().set("Potato", "Hi.");
+		actions.addSlot(0, null, s);
+		
+		stage.addActor(actions);
+	}
+
 	@Override
-	public void onCreatureSelection(final Creature creature, boolean lmb)
+	public void onCreatureSelection(final Creature creature, boolean lmb, String[] action)
 	{
 		if (lmb && selectedStructureWindow.setShown(false))
 		{
@@ -143,10 +207,14 @@ public class HudLayer extends Layer implements SelectionListener
 				final Cell<?> cell = selectedEntityWindow.add(jobsWrap).height(0);
 				
 				selectedEntityWindow.row();
-				selectedEntityWindow.left().add(new ItemSlot(stage, ((Human) creature).getTool()));
+				ItemSlot tool = new ItemSlot(stage, ((Human) creature).getTool());
+				selectedEntityWindow.left().add(tool);
+
 				ItemSlot slot = new ItemSlot(stage, ((Human) creature).getCarryingItemStack());
 				selectedEntityWindow.add(slot);
-				selectedEntityWindow.add(new ItemSlot(stage, new ItemStack())); // armor / jetpack
+
+				ItemSlot armor = new ItemSlot(stage, new ItemStack());
+				selectedEntityWindow.add(armor);
 				
 				ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
 				style.imageUp = Vloxlands.skin.getDrawable("gears");
@@ -180,7 +248,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -195,7 +263,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onStructureSelection(final Structure structure, boolean lmb)
+	public void onStructureSelection(final Structure structure, boolean lmb, String[] action)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -229,7 +297,23 @@ public class HudLayer extends Layer implements SelectionListener
 				@Override
 				public void clicked(InputEvent event, float x, float y)
 				{
-					structure.requestDismantle();
+					if (structure.isConfirmDismantle())
+					{
+						Dialog d = new Dialog("Confirm Dismantle", Vloxlands.skin)
+						{
+							@Override
+							protected void result(Object object)
+							{
+								if (object != null) structure.requestDismantle();
+							}
+						};
+						d.text("Are you sure you want todismantle\nthis building? All perks given by\nit will be gone after deconstruction!");
+						d.button("Cancel");
+						d.button("Yes", true);
+						
+						d.show(stage);
+					}
+					else structure.requestDismantle();
 				}
 			});
 			dismantle.pad(4);

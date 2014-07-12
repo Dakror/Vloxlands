@@ -13,19 +13,19 @@ public class DebugLayer extends Layer
 {
 	SpriteBatch spriteBatch;
 	BitmapFont font;
-
+	
 	@Override
 	public void show()
 	{
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
 	}
-
+	
 	@Override
 	public void render(float delta)
 	{
 		spriteBatch.begin();
-
+		
 		font.draw(spriteBatch, "Vloxlands " + Config.version, 0, Gdx.graphics.getHeight());
 		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight() - 20);
 		if (GameLayer.world != null)
@@ -37,10 +37,10 @@ public class DebugLayer extends Layer
 			font.draw(spriteBatch, "Z: " + GameLayer.camera.position.z, 0, Gdx.graphics.getHeight() - 120);
 		}
 		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 160);
-
+		
 		spriteBatch.end();
 	}
-
+	
 	@Override
 	public void resize(int width, int height)
 	{

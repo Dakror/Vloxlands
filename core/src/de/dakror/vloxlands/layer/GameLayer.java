@@ -13,12 +13,9 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -44,8 +41,9 @@ import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.Warehouse;
+import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -59,6 +57,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 /**
  * @author Dakror
  */
+@SuppressWarnings("deprecation")
 public class GameLayer extends Layer
 {
 	public static long seed = 4377295308625607680l;// (long) (Math.random() * Long.MAX_VALUE);
@@ -79,14 +78,16 @@ public class GameLayer extends Layer
 	public Environment minimapEnv;
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
+
+	public String[] activeAction;
 	public Island activeIsland;
+	public DirectionalShadowLight shadowLight;
 
 	ModelBatch modelBatch;
 	CameraInputController controller;
-	
+
 	ModelBatch shadowBatch;
-	DirectionalShadowLight shadowLight;
-	
+
 	boolean middleDown;
 	boolean doneLoading;
 
@@ -180,22 +181,11 @@ public class GameLayer extends Layer
 		minimapCamera.far = pickRayMaxDistance;
 		minimapEnv = new Environment();
 		minimapEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		minimapEnv.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+		minimapEnv.add(new DirectionalLight().set(1f, 1f, 1f, -0.5f, -0.5f, -0.5f));
+		minimapEnv.add(new DirectionalLight().set(0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f));
 
-		int AA = 12;
+		shadowBatch = new ModelBatch(new DepthShaderProvider());
 
-		minimapEnv.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, -0.5f, -0.5f, -0.5f));
-		minimapEnv.shadowMap = shadowLight;
-		
-		shadowBatch = new ModelBatch(new DepthShaderProvider()
-		{
-			@Override
-			protected Shader createShader(Renderable renderable)
-			{
-				return new DepthShader(renderable, config);
-			}
-		});
-		
 		shapeRenderer = new ShapeRenderer();
 
 		new MeshingThread();
@@ -203,14 +193,16 @@ public class GameLayer extends Layer
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		// env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
-		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, 0, -1, 1));
-		env.add(shadowLight);
+		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+
+		int AA = 4;
+		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
 		env.shadowMap = shadowLight;
 
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 
-		world = new World(1, 1);
+		world = new World(w, d);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 
@@ -221,10 +213,14 @@ public class GameLayer extends Layer
 
 		Vector3 p = world.getIslands()[0].pos;
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y, Island.SIZE / 2);
-		human.setTool(Item.get("PICKAXE"));
+		human.setCarryingItemStack(new ItemStack(Item.getForId(11), 1));
 		world.addEntity(human);
-		
-		world.getIslands()[0].addStructure(new Warehouse(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2), false, true);
+
+		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
+		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		world.getIslands()[0].addStructure(tc, false, true);
+
 		world.getIslands()[0].calculateInitBalance();
 
 		focusIsland(world.getIslands()[0], true);
@@ -236,7 +232,7 @@ public class GameLayer extends Layer
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
 		activeIsland = island;
-		
+
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
@@ -286,10 +282,11 @@ public class GameLayer extends Layer
 	{
 		if (!doneLoading) return;
 		controller.update();
-		camera.update();
 		world.update();
+
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
 		shadowLight.begin(controller.target, camera.direction);
 		shadowBatch.begin(shadowLight.getCamera());
 		world.render(shadowBatch, null);
@@ -585,19 +582,19 @@ public class GameLayer extends Layer
 				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
 
 				for (SelectionListener sl : listeners)
-					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb);
+					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb, activeAction);
 			}
 			else if (selectedStructure != null)
 			{
 				selectedStructure.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onStructureSelection(selectedStructure, lmb);
+					sl.onStructureSelection(selectedStructure, lmb, activeAction);
 			}
 			else if (selectedEntity != null && selectedEntity instanceof Creature)
 			{
 				selectedEntity.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onCreatureSelection((Creature) selectedEntity, lmb);
+					sl.onCreatureSelection((Creature) selectedEntity, lmb, activeAction);
 			}
 		}
 	}
@@ -622,7 +619,6 @@ public class GameLayer extends Layer
 			{
 				entity.selected = true;
 				anyEntitySelected = true;
-				break;
 			}
 		}
 
