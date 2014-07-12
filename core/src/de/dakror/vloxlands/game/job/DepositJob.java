@@ -12,7 +12,7 @@ public class DepositJob extends Job
 	
 	public DepositJob(Human human, IInventory target, boolean persistent)
 	{
-		super(human, "depositing", "Depositing carried items", 1, persistent);
+		super(human, "ablegen", "Depositing carried items", 1, persistent);
 		this.target = target;
 	}
 	
