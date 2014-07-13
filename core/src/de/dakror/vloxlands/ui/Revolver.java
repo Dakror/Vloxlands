@@ -36,6 +36,7 @@ public class Revolver extends Group
 			@Override
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
 			{
+				if (slot.isDisabled()) return false;
 				if (button != Buttons.LEFT) return false;
 				
 				for (Actor a : group.getChildren())
@@ -47,6 +48,7 @@ public class Revolver extends Group
 			@Override
 			public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 			{
+				if (slot.isDisabled()) return;
 				if (button != Buttons.LEFT) return;
 				
 				Actor g = null;
@@ -116,7 +118,6 @@ public class Revolver extends Group
 
 				slot.setChecked(false);
 			}
-			
 		});
 		slot.setPosition(-MathUtils.cosDeg(degrees + 90) * radius, MathUtils.sinDeg(degrees + 90) * radius);
 		group.addActor(slot);
