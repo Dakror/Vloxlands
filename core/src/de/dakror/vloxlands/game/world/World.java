@@ -7,7 +7,6 @@ import java.util.Iterator;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -33,7 +32,6 @@ import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.query.Query.Queryable;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -54,7 +52,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public int visibleChunks, loadedChunks, chunks, visibleEntities, totalEntities;
 	
-	public static Mesh chunkCube, blockCube;
 	public static final float gap = 0.01f;
 	
 	Array<Entity> entities = new Array<Entity>();
@@ -72,9 +69,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		opaque = new Material(TextureAttribute.createDiffuse(tex));
 		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
 		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(SELECTION));
-		
-		chunkCube = Mesher.genCubeWireframe(Chunk.SIZE + gap);
-		blockCube = Mesher.genCubeWireframe(1 + gap);
 	}
 	
 	/**
@@ -157,7 +151,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				loadedChunks += island.loadedChunks;
 			}
 		}
-
+		
 		Renderable r = pool.obtain();
 		r.worldTransform.setToTranslation(64, 100, 64);
 		r.material = World.opaque;
@@ -166,7 +160,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		r.meshPartSize = 36;
 		r.primitiveType = GL20.GL_TRIANGLES;
 		renderables.add(r);
-
+		
 	}
 	
 	public void render(ModelBatch batch, Environment environment)

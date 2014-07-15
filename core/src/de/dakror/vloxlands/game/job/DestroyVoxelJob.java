@@ -11,9 +11,8 @@ public class DestroyVoxelJob extends Job
 	{
 		super(human, animation, text, repeats, persistent);
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{}
-	
 }

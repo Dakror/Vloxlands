@@ -57,6 +57,12 @@ public class AStar
 			openList.sort(COMPARATOR);
 			selected = openList.get(0);
 			openList.removeIndex(0);
+			while (selected.cantBeNeighborForGhostTarget && openList.size > 0)
+			{
+				selected = openList.get(0);
+				openList.removeIndex(0);
+			}
+			
 			closedList.add(selected);
 			
 			if (selected.H == 0 && !useGhostTarget) break;
@@ -187,12 +193,16 @@ public class AStar
 						if (useGhostTarget)
 						{
 							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free);
-							if (x == 0 && z == 0) targetable = false;
-							if (targetable)
+							boolean close = true;
+							
+							if (x == 0 && z == 0) close = false;
+							if (y == 1) close = false;
+							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;
 								return v.equals(to) ? node : target;
 							}
+							else if (targetable) node.cantBeNeighborForGhostTarget = true;
 						}
 						if (free && y < 2) openList.add(node);
 					}

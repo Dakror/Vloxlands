@@ -14,29 +14,37 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 public class MineJob extends DestroyVoxelJob
 {
 	private VoxelSelection target;
-
+	
 	public MineJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
+		super(human, "mine", (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
 	}
-
+	
 	public VoxelSelection getTarget()
 	{
 		return target;
 	}
-
+	
+	@Override
+	public void trigger()
+	{
+		animation = "mine" + (target.voxel.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxel.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
+		
+		super.trigger();
+	}
+	
 	@Override
 	public void tick(int tick)
 	{}
-
+	
 	@Override
 	public void onEnd()
 	{
 		super.onEnd();
-
+		
 		target.island.set(target.voxel.x, target.voxel.y, target.voxel.z, Voxel.get("AIR").getId());
-
+		
 		if (target.type.hasItemdrop())
 		{
 			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));

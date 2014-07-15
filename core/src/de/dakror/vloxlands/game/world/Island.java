@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -210,7 +212,14 @@ public class Island implements RenderableProvider, Tickable, Savable
 		int y1 = (int) y % Chunk.SIZE;
 		int z1 = (int) z % Chunk.SIZE;
 		
-		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force)) notifySurroundingChunks(chunkX, chunkY, chunkZ);
+		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force))
+		{
+			if (GameLayer.instance.activeIsland == this && id == Voxel.get("AIR").getId() && x == GameLayer.instance.selectedVoxel.x && y == GameLayer.instance.selectedVoxel.y && z == GameLayer.instance.selectedVoxel.z)
+			{
+				GameLayer.instance.selectedVoxel.set(-1, 0, 0);
+			}
+			notifySurroundingChunks(chunkX, chunkY, chunkZ);
+		}
 	}
 	
 	public void notifySurroundingChunks(int cx, int cy, int cz)
@@ -286,6 +295,18 @@ public class Island implements RenderableProvider, Tickable, Savable
 	{
 		renderStructures(batch, environment, false);
 		
+		if (GameLayer.instance.activeIsland == this && GameLayer.instance.selectedVoxel.x > -1)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
+			GameLayer.shapeRenderer.identity();
+			GameLayer.shapeRenderer.translate(pos.x + GameLayer.instance.selectedVoxel.x, pos.y + GameLayer.instance.selectedVoxel.y, pos.z + GameLayer.instance.selectedVoxel.z + 1);
+			GameLayer.shapeRenderer.begin(ShapeType.Line);
+			GameLayer.shapeRenderer.setColor(Color.WHITE);
+			GameLayer.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
+			GameLayer.shapeRenderer.end();
+		}
+		
 		if (((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
@@ -337,7 +358,6 @@ public class Island implements RenderableProvider, Tickable, Savable
 			loadedChunks = 0;
 		}
 		int hs = Chunk.SIZE / 2;
-		Renderable block = null;
 		
 		if (!minimapMode && !inFrustum) return;
 		
@@ -396,24 +416,11 @@ public class Island implements RenderableProvider, Tickable, Savable
 						transp1.primitiveType = GL20.GL_LINES;
 						if (chunk.transpVerts > 0) renderables.add(transp1);
 					}
-					
-					if (chunk.selectedVoxel.x > -1 && !minimapMode)
-					{
-						block = pool.obtain();
-						block.worldTransform.setToTranslation(pos.x + chunk.pos.x + chunk.selectedVoxel.x - World.gap / 2, pos.y + chunk.pos.y + chunk.selectedVoxel.y - World.gap / 2, pos.z + chunk.pos.z + chunk.selectedVoxel.z - World.gap / 2);
-						block.material = World.highlight;
-						block.mesh = World.blockCube;
-						block.meshPartOffset = 0;
-						block.meshPartSize = 36;
-						block.primitiveType = GL20.GL_LINES;
-					}
 				}
 			}
 			
 			if (chunk.loaded && !minimapMode) loadedChunks++;
 		}
-		
-		if (block != null && !minimapMode) renderables.add(block);
 	}
 	
 	// -- voxel queries -- //

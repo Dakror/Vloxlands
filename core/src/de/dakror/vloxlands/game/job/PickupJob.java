@@ -15,47 +15,47 @@ public class PickupJob extends Job
 	ItemStack stack;
 	IInventory target;
 	boolean equip;
-
+	
 	public PickupJob(Human human, IInventory target, ItemStack stack, boolean equip, boolean persistent)
 	{
-		super(human, "ablegen", human.getTool().isNull() && equip || !equip ? "Picking up " + (stack.getItem() instanceof Tool ? "tool" : "item") : "Changing tool", 1, persistent);
+		super(human, "deposit", human.getTool().isNull() && equip || !equip ? "Picking up " + (stack.getItem() instanceof Tool ? "tool" : "item") : "Changing tool", 1, persistent);
 		this.stack = stack;
 		this.target = target;
 		this.equip = equip;
 	}
-
+	
 	public ItemStack getItemStack()
 	{
 		return stack;
 	}
-
+	
 	public IInventory getTarget()
 	{
 		return target;
 	}
-
+	
 	public boolean isEquip()
 	{
 		return equip;
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{}
-
+	
 	@Override
 	public void onEnd()
 	{
 		super.onEnd();
-
+		
 		if (!human.getTool().isNull() && equip)
 		{
 			target.getInventory().add(human.getTool());
 			human.setTool(null);
 		}
-
+		
 		target.getInventory().take(stack.getItem(), stack.getAmount());
-
+		
 		if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
 		{
 			human.setTool(stack.getItem());

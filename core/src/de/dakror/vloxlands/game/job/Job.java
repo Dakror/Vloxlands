@@ -36,7 +36,7 @@ public abstract class Job implements Tickable
 	
 	public void onEnd()
 	{
-		human.getAnimationController().animate(null, 0); // TODO: replace with idle animation
+		human.getAnimationController().animate(null, 0.2f); // TODO: replace with idle animation
 	}
 	
 	public void setDone()

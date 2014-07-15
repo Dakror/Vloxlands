@@ -17,7 +17,7 @@ import de.dakror.vloxlands.game.item.Item;
 public abstract class Tool extends Item
 {
 	BoundingBox boundingBox;
-	
+
 	@Override
 	public void onLoaded()
 	{
@@ -32,12 +32,20 @@ public abstract class Tool extends Item
 	
 	public void transformInHand(Matrix4 transform, Creature c)
 	{
-		Matrix4 tr = c.modelInstance.getAnimation("walk").nodeAnimations.get(2).node.getChild("Bone_014", true, false).globalTransform; // right hand
+		transformInHand(transform, c, 120);
+	}
+	
+	protected void transformInHand(Matrix4 transform, Creature c, float yRot)
+	{
+		Matrix4 tr = c.modelInstance.getNode("Bone_006").globalTransform;
+		Matrix4 tr2 = c.modelInstance.getNode("Bone_014").globalTransform;
 		Vector3 v = new Vector3();
-		tr.getTranslation(v);
+		tr2.getTranslation(v);
 		Quaternion q = new Quaternion();
 		tr.getRotation(q);
-		float f = q.getAngleAround(Vector3.Y) - 100;
+
+		float f = q.getAngleAround(Vector3.X) - yRot;
+		
 		transform.translate(v).rotate(Vector3.Y, 90).rotate(0, 0, c.getRotationPerpendicular(), f).translate(0, boundingBox.getDimensions().y / 2 - boundingBox.getCenter().y / 2, -0.02f);
 	}
 }
