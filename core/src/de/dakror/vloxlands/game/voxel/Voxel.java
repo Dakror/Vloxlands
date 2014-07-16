@@ -31,17 +31,17 @@ public class Voxel
 		tool,
 		custom,
 	}
-
+	
 	static short[] indices;
 	static FloatArray verts = new FloatArray();
 	
 	public static final int VOXELS = 256;
 	public static final float TEXSIZE = 16 / 512f;
-
+	
 	private static ObjectMap<String, Voxel> voxels = new ObjectMap<String, Voxel>();
-
+	
 	private static Voxel[] voxelList = new Voxel[VOXELS];
-
+	
 	String name = "NA";
 	String custom;
 	Class<?> tool;
@@ -57,7 +57,7 @@ public class Voxel
 	int mining;
 	byte itemdrop;
 	Mesh mesh;
-
+	
 	public void registerVoxel(int id)
 	{
 		if (voxelList[id + 128] == null) voxelList[id + 128] = this;
@@ -68,12 +68,12 @@ public class Voxel
 		}
 		this.id = (byte) id;
 	}
-
+	
 	public static Voxel getForId(byte id)
 	{
 		return voxelList[id + 128];
 	}
-
+	
 	public synchronized static Voxel getForId(int id)
 	{
 		return voxelList[id];
@@ -83,17 +83,17 @@ public class Voxel
 	{
 		return mesh;
 	}
-
+	
 	public boolean isReplaceable()
 	{
 		return false;
 	}
-
+	
 	public String getName()
 	{
 		return name;
 	}
-
+	
 	public Class<?> getTool()
 	{
 		return tool;
@@ -103,69 +103,69 @@ public class Voxel
 	{
 		return new Vector2(textureX, textureY);
 	}
-
+	
 	public Vector2 getTextureUV(int x, int y, int z, Direction d)
 	{
 		return getTexCoord(x, y, z, d).cpy().scl(TEXSIZE);
 	}
-
+	
 	public boolean isOpaque()
 	{
 		return opaque;
 	}
-
+	
 	public float getSmoothness()
 	{
 		return smoothness;
 	}
-
+	
 	public byte getId()
 	{
 		return id;
 	}
-
+	
 	public float getWeight()
 	{
 		return weight;
 	}
-
+	
 	public float getUplift()
 	{
 		return uplift;
 	}
-
+	
 	public float getBrightness()
 	{
 		return brightness;
 	}
-
+	
 	public String getCustom()
 	{
 		return custom;
 	}
-
+	
 	public int getMining()
 	{
 		return mining;
 	}
-
+	
 	public byte getItemdrop()
 	{
 		if (itemdrop == 127) return id;
 		return itemdrop;
 	}
-
+	
 	@Override
 	public String toString()
 	{
 		return getClass().getName() + "." + name.toUpperCase().replace(" ", "_");
 	}
-
+	
 	public boolean hasItemdrop()
 	{
 		return itemdrop != (byte) 0;
 	}
-
+	
 	public static int getIdForName(String name)
 	{
 		for (int i = 0; i < voxelList.length; i++)
@@ -173,21 +173,21 @@ public class Voxel
 			Voxel v = Voxel.getForId(i);
 			if (v.getName().equals(name)) return i;
 		}
-
+		
 		Gdx.app.error("Voxel.getIdForName", name + " not found");
 		return -1;
 	}
-
+	
 	public static Voxel get(String name)
 	{
 		return voxels.get(name);
 	}
-
+	
 	public static Array<Voxel> getAll()
 	{
 		return voxels.values().toArray();
 	}
-
+	
 	public static void loadVoxels()
 	{
 		CSVReader csv = new CSVReader(Gdx.files.internal("data/voxels.csv"));
@@ -209,7 +209,7 @@ public class Voxel
 					e.printStackTrace();
 				}
 			}
-
+			
 			Categories c = Categories.valueOf(categories[csv.getIndex()]);
 			switch (c)
 			{
@@ -302,13 +302,13 @@ public class Voxel
 					break;
 			}
 		}
-
+		
 		voxels.put(voxel.getName().toUpperCase().replace(" ", "_"), voxel);
-
+		
 		Gdx.app.debug("Voxel.loadVoxels", voxels.size + " voxels loaded.");
-
+		
 	}
-
+	
 	public static void buildMeshes()
 	{
 		if (indices == null)
@@ -326,7 +326,7 @@ public class Voxel
 				indices[i + 5] = (short) (j + 0);
 			}
 		}
-
+		
 		for (Voxel v : voxels.values())
 		{
 			v.mesh = new Mesh(true, 24, indices.length, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1));
@@ -337,7 +337,7 @@ public class Voxel
 			v.mesh.setVertices(verts.items, 0, verts.size);
 		}
 	}
-
+	
 	public static String capitalizeFirstLetter(String string)
 	{
 		return string.substring(0, 1).toUpperCase() + string.substring(1);

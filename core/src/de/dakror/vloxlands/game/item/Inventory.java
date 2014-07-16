@@ -76,7 +76,7 @@ public class Inventory implements Savable
 		count -= is.getAmount();
 		return is;
 	}
-
+	
 	/**
 	 * @param item Item type to get
 	 * @param amount amount to get
@@ -144,7 +144,7 @@ public class Inventory implements Savable
 		
 		return null;
 	}
-
+	
 	public boolean isFull()
 	{
 		return count == capacity;

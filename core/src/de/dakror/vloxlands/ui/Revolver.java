@@ -60,7 +60,7 @@ public class Revolver extends Group
 						break;
 					}
 				}
-
+				
 				int l = g != null ? (int) g.getUserObject() : (int) slot.getUserObject() + 1;
 				
 				for (Actor a : getChildren())
@@ -103,19 +103,19 @@ public class Revolver extends Group
 											break;
 										}
 									}
-
+									
 									if (done) break;
 								}
 							}
 						}
-
+						
 						if ((int) p.getUserObject() == 0) break;
 					}
-
+					
 					GameLayer.instance.activeAction = action.split("-");
 				}
 				else GameLayer.instance.activeAction = null;
-
+				
 				slot.setChecked(false);
 			}
 		});

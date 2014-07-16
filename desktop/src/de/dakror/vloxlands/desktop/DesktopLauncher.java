@@ -23,7 +23,7 @@ public class DesktopLauncher
 		config.addIcon("img/logo/logo16.png", FileType.Internal);
 		config.setFromDisplayMode(LwjglApplicationConfiguration.getDesktopDisplayMode());
 		config.fullscreen = false;
-
+		
 		new LwjglApplication(new Vloxlands(), config);
 	}
 }

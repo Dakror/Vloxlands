@@ -9,14 +9,14 @@ import de.dakror.vloxlands.game.entity.creature.Human;
  */
 public class IdleJob extends Job
 {
-
+	
 	public IdleJob(Human human)
 	{
 		super(human, "idle", "Idling...", -1, false);
 	}
-
+	
 	@Override
 	public void tick(int tick)
 	{}
-
+	
 }

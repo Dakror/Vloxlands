@@ -15,7 +15,7 @@ import de.dakror.vloxlands.game.item.Item;
 public class RevolverSlot extends TooltipImageButton
 {
 	public static final int SIZE = 54;
-
+	
 	public RevolverSlot(Stage stage, Vector2 icon, String name)
 	{
 		super(stage, createStyle(icon));
@@ -27,7 +27,7 @@ public class RevolverSlot extends TooltipImageButton
 	{
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = new TextureRegion(tex, (int) icon.x * Item.SIZE, (int) icon.y * Item.SIZE, Item.SIZE, Item.SIZE);
-
+		
 		ImageButtonStyle style = new ImageButtonStyle();
 		
 		style.up = Vloxlands.skin.getDrawable("revolverSlot");
