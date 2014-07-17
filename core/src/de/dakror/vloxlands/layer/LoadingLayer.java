@@ -79,21 +79,24 @@ public class LoadingLayer extends Layer
 	public void show()
 	{
 		modal = true;
+		
+		String[] icons = { "bomb", "gears", "queue", "sleep", "work" };
+		
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
 		Vloxlands.assets.load("img/icons.png", Texture.class);
-		Vloxlands.assets.load("img/gui/gears.png", Texture.class);
-		Vloxlands.assets.load("img/gui/bomb.png", Texture.class);
-		Vloxlands.assets.load("img/gui/sleep.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
+		for (String i : icons)
+			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
 		
-		Vloxlands.skin.add("gears", Vloxlands.assets.get("img/gui/gears.png", Texture.class));
-		Vloxlands.skin.add("bomb", Vloxlands.assets.get("img/gui/bomb.png", Texture.class));
-		Vloxlands.skin.add("sleep", Vloxlands.assets.get("img/gui/sleep.png", Texture.class));
+		for (String i : icons)
+			Vloxlands.skin.add(i, Vloxlands.assets.get("img/gui/icons/" + i + ".png", Texture.class));
+		
 		Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
 		Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
 		Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));

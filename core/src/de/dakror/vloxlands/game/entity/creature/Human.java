@@ -186,7 +186,7 @@ public class Human extends Creature
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if ((firstJob() instanceof DestroyVoxelJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof DestroyVoxelJob)) batch.render(toolModelInstance, environment);
+		if (((firstJob() instanceof DestroyVoxelJob) || (jobQueue.size > 1 && jobQueue.get(1) instanceof DestroyVoxelJob)) && toolModelInstance != null) batch.render(toolModelInstance, environment);
 		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
 	}
 	

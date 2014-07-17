@@ -231,7 +231,7 @@ public class GameLayer extends Layer
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
 		activeIsland = island;
-		
+		selectedVoxel.set(-1, 0, 0);
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);

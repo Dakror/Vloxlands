@@ -85,6 +85,11 @@ public class Island implements RenderableProvider, Tickable, Savable
 		this.pos = pos;
 	}
 	
+	public BiomeType getBiome()
+	{
+		return biome;
+	}
+	
 	public void calculateInitBalance()
 	{
 		recalculate();
@@ -128,8 +133,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 	{
 		this.tick = tick;
 		
-		float deltaY = (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
-		pos.y += deltaY;
+		float delta = getDelta();
+		pos.y += delta;
 		
 		for (Chunk c : chunks)
 			c.tick(tick);
@@ -148,11 +153,21 @@ public class Island implements RenderableProvider, Tickable, Savable
 			else
 			{
 				s.tick(tick);
-				if (deltaY != 0) s.getTransform().translate(0, deltaY, 0);
+				if (delta != 0) s.getTransform().translate(0, delta, 0);
 			}
 		}
 		
 		inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
+	}
+	
+	public float getDelta()
+	{
+		return (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
+	}
+	
+	public float getDeltaPerSecond()
+	{
+		return getDelta() * 60f;
 	}
 	
 	public void addStructure(Structure s, boolean user, boolean clearArea)

@@ -34,6 +34,7 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.ui.IslandInfo;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.NonStackingInventoryListItem;
@@ -81,10 +82,10 @@ public class HudLayer extends Layer implements SelectionListener
 		selectedStructureWindow.setVisible(false);
 		stage.addActor(selectedStructureWindow);
 		
-		addIslandInfo();
 		addActionsMenu();
 		
 		stage.addActor(new Minimap());
+		stage.addActor(new IslandInfo());
 	}
 	
 	@Override
@@ -152,11 +153,6 @@ public class HudLayer extends Layer implements SelectionListener
 		actions.addSlot(0, null, s);
 		
 		stage.addActor(actions);
-	}
-	
-	public void addIslandInfo()
-	{	
-		
 	}
 	
 	@Override
@@ -227,10 +223,10 @@ public class HudLayer extends Layer implements SelectionListener
 				selectedEntityWindow.add(armor);
 				
 				ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
-				style.imageUp = Vloxlands.skin.getDrawable("gears");
+				style.imageUp = Vloxlands.skin.getDrawable("queue");
 				style.imageUp.setMinWidth(ItemSlot.size);
 				style.imageUp.setMinHeight(ItemSlot.size);
-				style.imageDown = Vloxlands.skin.getDrawable("gears");
+				style.imageDown = Vloxlands.skin.getDrawable("queue");
 				style.imageDown.setMinWidth(ItemSlot.size);
 				style.imageDown.setMinHeight(ItemSlot.size);
 				final TooltipImageButton job = new TooltipImageButton(stage, style);
@@ -341,7 +337,7 @@ public class HudLayer extends Layer implements SelectionListener
 			style.imageUp = Vloxlands.skin.getDrawable("sleep");
 			style.imageUp.setMinWidth(ItemSlot.size);
 			style.imageUp.setMinHeight(ItemSlot.size);
-			style.imageChecked = Vloxlands.skin.getDrawable("gears");
+			style.imageChecked = Vloxlands.skin.getDrawable("work");
 			style.imageChecked.setMinWidth(ItemSlot.size);
 			style.imageChecked.setMinHeight(ItemSlot.size);
 			final TooltipImageButton sleep = new TooltipImageButton(stage, style);
@@ -356,7 +352,19 @@ public class HudLayer extends Layer implements SelectionListener
 				}
 			});
 			sleep.pad(4);
-			sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
+			sleep.getTooltip().set("Production is " + (structure.isWorking() ? "running" : "paused"), "Toggle the building's production activity.");
+			
+			style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+			style.imageUp = Vloxlands.skin.getDrawable("queue");
+			style.imageUp.setMinWidth(ItemSlot.size);
+			style.imageUp.setMinHeight(ItemSlot.size);
+			style.imageChecked = Vloxlands.skin.getDrawable("queue");
+			style.imageChecked.setMinWidth(ItemSlot.size);
+			style.imageChecked.setMinHeight(ItemSlot.size);
+			TooltipImageButton queue = new TooltipImageButton(stage, style);
+			queue.getTooltip().set("Job Queue", "Toggle Job Queue display");
+			queue.pad(4);
+			
 			
 			if (structure instanceof Warehouse)
 			{
@@ -416,10 +424,11 @@ public class HudLayer extends Layer implements SelectionListener
 				
 				Table rightSide = new Table(Vloxlands.skin);
 				rightSide.row();
-				rightSide.add(capacity).colspan(2);
+				rightSide.add(capacity).colspan(3);
 				rightSide.row().left().spaceTop(5);
-				rightSide.add(dismantle).left();
-				rightSide.add(sleep).right();
+				rightSide.add(dismantle);
+				rightSide.add(sleep);
+				rightSide.add(queue);
 				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			
