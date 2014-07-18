@@ -134,6 +134,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 		this.tick = tick;
 		
 		float delta = getDelta();
+		if (GameLayer.instance.activeIsland == this)
+		{
+			GameLayer.camera.position.y += delta;
+			GameLayer.instance.controller.target.y += delta;
+			GameLayer.camera.update();
+		}
 		pos.y += delta;
 		
 		for (Chunk c : chunks)

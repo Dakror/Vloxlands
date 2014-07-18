@@ -82,9 +82,9 @@ public class GameLayer extends Layer
 	public String[] activeAction;
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
+	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
-	CameraInputController controller;
 	
 	ModelBatch shadowBatch;
 	
