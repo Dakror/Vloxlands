@@ -192,7 +192,6 @@ public class GameLayer extends Layer
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		// env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
 		int AA = 4;
@@ -202,7 +201,8 @@ public class GameLayer extends Layer
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 		
-		world = new World(w, d);
+		world = new World(1, 1); // TODO: multi island support
+		// world = new World(w, d);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
