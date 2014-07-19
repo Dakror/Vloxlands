@@ -107,8 +107,8 @@ public class HudLayer extends Layer implements SelectionListener
 		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
 		s.setDisabled(true);
 		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1");
-		s.getTooltip().set("Stone", "Mine rocks for stone using a pickaxe.");
+		s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1|14");
+		s.getTooltip().set("(Sand-)Stone", "Mine rocks for stone, respectively sandstone in deserts, using a pickaxe.");
 		actions.addSlot(1, "Mine", s);
 		
 		s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
