@@ -85,9 +85,8 @@ public class Face
 		this(dir, pos, tex, 1, 1, 1);
 	}
 	
-	public Face(Direction dir, Vector3 pos, Vector2 tex, int sizeX, int sizeY, int sizeZ)
+	public Face(Direction dir, Vector3 pos, Vector2 tex, float sizeX, float sizeY, float sizeZ)
 	{
-		super();
 		this.dir = dir;
 		this.pos = pos;
 		this.tex = tex;

@@ -11,27 +11,19 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class MineJob extends DestroyVoxelJob
+public class ChopJob extends DestroyVoxelJob
 {
 	private VoxelSelection target;
 	
-	public MineJob(Human human, VoxelSelection target, boolean persistent)
+	public ChopJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "mine", (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
+		super(human, "walk" /* mine */, (persistent ? "Auto. c" : "C") + "hopping " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
 	}
 	
 	public VoxelSelection getTarget()
 	{
 		return target;
-	}
-	
-	@Override
-	public void trigger()
-	{
-		animation = "mine" + (target.voxel.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxel.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
-		
-		super.trigger();
 	}
 	
 	@Override
@@ -50,6 +42,6 @@ public class MineJob extends DestroyVoxelJob
 			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));
 			else human.getCarryingItemStack().add(1);
 		}
-		else Gdx.app.error("MineJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
+		else Gdx.app.error("ChopJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
 	}
 }

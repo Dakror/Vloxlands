@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.render;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector3;
@@ -84,7 +85,7 @@ public class Mesher
 	
 	public static Mesh genCube(float size, float texX, float texY, float texSize)
 	{
-		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		
 		float[] cubeVerts = { 0, 0, 0, 0, 0, size, size, 0, size, size, 0, 0, 0, size, 0, 0, size, size, size, size, size, size, size, 0, 0, 0, 0, 0, size, 0, size, size, 0, size, 0, 0, 0, 0, size, 0, size, size, size, size, size, size, 0, size, 0, 0, 0, 0, 0, size, 0, size, size, 0, size, 0, size, 0, 0, size, 0, size, size, size, size, size, size, 0, };
 		
@@ -92,7 +93,9 @@ public class Mesher
 		
 		float[] cubeTex = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, };
 		
-		float[] vertices = new float[24 * 10];
+		float b = Color.toFloatBits(1f, 1f, 1f, 1f);
+		
+		float[] vertices = new float[24 * 11];
 		int pIdx = 0;
 		int nIdx = 0;
 		int tIdx = 0;
@@ -104,6 +107,7 @@ public class Mesher
 			vertices[i++] = cubeNormals[nIdx++];
 			vertices[i++] = cubeNormals[nIdx++];
 			vertices[i++] = cubeNormals[nIdx++];
+			vertices[i++] = b;
 			vertices[i++] = cubeTex[tIdx++] * texSize + texX;
 			vertices[i++] = cubeTex[tIdx++] * texSize + texY;
 			vertices[i++] = 1;

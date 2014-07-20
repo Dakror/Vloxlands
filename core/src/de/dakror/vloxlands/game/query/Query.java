@@ -23,6 +23,7 @@ public class Query
 	public ItemStack searchedItemStack;
 	public NodeType searchedNodeType;
 	public String searchedNodeName;
+	public Class<?> searchedToolType;
 	
 	// -- mode -- //
 	public boolean searchingStructure;
@@ -79,6 +80,12 @@ public class Query
 	public Query stack(ItemStack searchedItemStack)
 	{
 		this.searchedItemStack = searchedItemStack;
+		return this;
+	}
+	
+	public Query tool(Class<?> class1)
+	{
+		searchedToolType = class1;
 		return this;
 	}
 	

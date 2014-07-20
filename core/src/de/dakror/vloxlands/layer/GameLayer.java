@@ -60,7 +60,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 @SuppressWarnings("deprecation")
 public class GameLayer extends Layer
 {
-	public static long seed = 4377295308625607680l;// (long) (Math.random() * Long.MAX_VALUE);
+	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static final float pickRayMaxDistance = 150f;
@@ -79,11 +79,12 @@ public class GameLayer extends Layer
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
 	
+	public String[] activeAction;
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
+	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
-	CameraInputController controller;
 	
 	ModelBatch shadowBatch;
 	
@@ -95,7 +96,7 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
-	Vector3 selectedVoxel = new Vector3();
+	public Vector3 selectedVoxel = new Vector3();
 	Vector3 controllerTarget = new Vector3();
 	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
@@ -191,17 +192,17 @@ public class GameLayer extends Layer
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		// env.add(new DirectionalLight().set(255, 255, 255, 0, -1, 1));
 		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		int AA = 2;
+		int AA = 4;
 		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
 		env.shadowMap = shadowLight;
 		
 		int w = MathUtils.random(1, 5);
 		int d = MathUtils.random(1, 5);
 		
-		world = new World(w, d);
+		world = new World(1, 1); // TODO: multi island support
+		// world = new World(w, d);
 		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
@@ -230,7 +231,7 @@ public class GameLayer extends Layer
 	{
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
 		activeIsland = island;
-		
+		selectedVoxel.set(-1, 0, 0);
 		if (!initial)
 		{
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
@@ -304,7 +305,7 @@ public class GameLayer extends Layer
 			renderAStar();
 		}
 		
-		if (BFS.lastTarget != null)
+		if (BFS.lastTarget != null && Vloxlands.showPathDebug)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(2);
@@ -532,7 +533,6 @@ public class GameLayer extends Layer
 						tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
 						
 						bb.set(tmp1, tmp2);
-						c.selectedVoxel.set(-1, 0, 0);
 						if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
 						{
 							float dst = ray.origin.dst(tmp5);
@@ -575,24 +575,24 @@ public class GameLayer extends Layer
 					}
 				}
 				
-				selectedChunk.selectedVoxel.set(selectedVoxel);
-				
 				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
 				
 				for (SelectionListener sl : listeners)
-					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb);
+					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb, activeAction);
 			}
 			else if (selectedStructure != null)
 			{
+				selectedVoxel.set(-1, 0, 0);
 				selectedStructure.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onStructureSelection(selectedStructure, lmb);
+					sl.onStructureSelection(selectedStructure, lmb, activeAction);
 			}
 			else if (selectedEntity != null && selectedEntity instanceof Creature)
 			{
+				selectedVoxel.set(-1, 0, 0);
 				selectedEntity.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onCreatureSelection((Creature) selectedEntity, lmb);
+					sl.onCreatureSelection((Creature) selectedEntity, lmb, activeAction);
 			}
 		}
 	}
@@ -605,6 +605,7 @@ public class GameLayer extends Layer
 		Vector3 origin = camera.unproject(new Vector3(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		boolean anyEntitySelected = false;
+		boolean dispatched = false;
 		
 		for (Entity entity : world.getEntities())
 		{
@@ -617,7 +618,12 @@ public class GameLayer extends Layer
 			{
 				entity.selected = true;
 				anyEntitySelected = true;
-				break;
+				if (!dispatched && entity instanceof Creature)
+				{
+					for (SelectionListener sl : listeners)
+						sl.onCreatureSelection((Creature) entity, true, activeAction);
+					dispatched = true;
+				}
 			}
 		}
 		

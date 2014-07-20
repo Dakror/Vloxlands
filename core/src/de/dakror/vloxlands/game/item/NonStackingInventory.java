@@ -51,11 +51,30 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
+	public boolean contains(Class<?> class1)
+	{
+		for (Item i : Item.getAll())
+			if (i.getClass().equals(class1) && get(i) > 0) return true;
+		
+		return false;
+	}
+	
+	@Override
+	public Item getAnyItemForToolType(Class<?> class1)
+	{
+		for (Item i : Item.getAll())
+			if (i.getClass().equals(class1) && get(i) > 0) return i;
+		
+		return null;
+	}
+	
+	@Override
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
 		int am = Math.min(amount, storage[item.getId() + 128]);
 		count -= am;
+		storage[item.getId() + 128] -= am;
 		return new ItemStack(item, am);
 	}
 	

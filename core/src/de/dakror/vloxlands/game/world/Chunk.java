@@ -37,13 +37,12 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 {
 	public static short[] indices;
 	public static final int SIZE = 16;
-	public static final int VERTEX_SIZE = 10;
+	public static final int VERTEX_SIZE = 11;
 	public static final int UNLOAD_TICKS = 120;
 	
 	public int opaqueVerts, transpVerts;
 	public Vector3 index;
 	public Vector3 pos;
-	public Vector3 selectedVoxel = new Vector3(-1, 0, 0);
 	
 	int random;
 	
@@ -116,7 +115,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		
 		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		opaque.setIndices(indices);
-		transp = new Mesh(false, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
 		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();
@@ -175,11 +174,6 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
 		voxels[index] = id;
-		
-		if (selectedVoxel.x == x && selectedVoxel.y == y && selectedVoxel.z == z)
-		{
-			selectedVoxel.set(-1, 0, 0);
-		}
 		
 		resources[id + 128]++;
 		

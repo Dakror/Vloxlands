@@ -15,16 +15,15 @@ public class DesktopLauncher
 	{
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Vloxlands";
-		config.width = 1920;
-		config.height = 1080;
 		config.foregroundFPS = 0;
 		config.vSyncEnabled = false;
 		config.preferencesDirectory = ".dakror/Vloxlands";
 		config.addIcon("img/logo/logo128.png", FileType.Internal);
 		config.addIcon("img/logo/logo32.png", FileType.Internal);
 		config.addIcon("img/logo/logo16.png", FileType.Internal);
-		config.fullscreen = true;
-
+		config.setFromDisplayMode(LwjglApplicationConfiguration.getDesktopDisplayMode());
+		config.fullscreen = false;
+		
 		new LwjglApplication(new Vloxlands(), config);
 	}
 }
