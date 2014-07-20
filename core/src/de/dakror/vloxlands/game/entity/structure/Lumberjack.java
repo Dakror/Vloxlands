@@ -1,28 +1,28 @@
 package de.dakror.vloxlands.game.entity.structure;
 
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
-import de.dakror.vloxlands.game.item.NonStackingInventory;
+import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.util.CurserCommand;
 
 /**
  * @author Dakror
  */
-public class Warehouse extends Structure
+public class Lumberjack extends Structure
 {
-	public Warehouse(float x, float y, float z)
+	public Lumberjack(float x, float y, float z)
 	{
-		super(x, y, z, "models/structure/PH_tent_red/PH_tent_red.g3db");
+		super(x, y, z, "models/structure/PH_tent_green/PH_tent_green.g3db");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
-		name = "Warehouse";
+		name = "Lumberjack";
 		
-		inventory = new NonStackingInventory(100);
+		inventory = new Inventory(20);
 	}
 	
 	@Override
 	public CurserCommand getDefaultCommand()
 	{
-		return CurserCommand.DEPOSIT;
+		return CurserCommand.PICK_UP;
 	}
 }

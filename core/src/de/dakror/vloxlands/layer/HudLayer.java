@@ -102,6 +102,7 @@ public class HudLayer extends Layer implements SelectionListener
 		
 		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
 		s.getTooltip().set("Mine", "Mine or harvest natural ressources");
+		s.setDisabled(true);
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
 		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");

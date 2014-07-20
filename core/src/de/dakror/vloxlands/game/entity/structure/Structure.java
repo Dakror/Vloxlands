@@ -25,6 +25,7 @@ import de.dakror.vloxlands.util.event.IEvent;
 public abstract class Structure extends Entity implements IInventory, Savable
 {
 	Array<StructureNode> nodes;
+	Array<Human> workers;
 	Vector3 voxelPos;
 	Inventory inventory;
 	boolean working;
@@ -39,6 +40,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		super(Math.round(x), Math.round(y), Math.round(z), model);
 		voxelPos = new Vector3(x, y, z);
 		nodes = new Array<StructureNode>();
+		workers = new Array<Human>();
 		
 		int width = (int) Math.ceil(boundingBox.getDimensions().x);
 		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
