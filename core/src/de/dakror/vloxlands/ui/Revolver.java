@@ -61,11 +61,11 @@ public class Revolver extends Group
 					}
 				}
 				
-				int l = g != null ? (int) g.getUserObject() : (int) slot.getUserObject() + 1;
+				int l = g != null ? (Integer) g.getUserObject() : (Integer) slot.getUserObject() + 1;
 				
 				for (Actor a : getChildren())
 				{
-					if ((int) a.getUserObject() < l && !a.isVisible()) continue;
+					if ((Integer) a.getUserObject() < l && !a.isVisible()) continue;
 					a.setVisible((Integer) a.getUserObject() < l);
 					if (!a.isVisible())
 					{
@@ -90,7 +90,7 @@ public class Revolver extends Group
 						{
 							for (Actor a : getChildren())
 							{
-								if ((int) a.getUserObject() == (int) p.getUserObject() - 1)
+								if ((Integer) a.getUserObject() == (Integer) p.getUserObject() - 1)
 								{
 									boolean done = false;
 									
@@ -109,7 +109,7 @@ public class Revolver extends Group
 							}
 						}
 						
-						if ((int) p.getUserObject() == 0) break;
+						if ((Integer) p.getUserObject() == 0) break;
 					}
 					
 					GameLayer.instance.activeAction = action.split("-");
