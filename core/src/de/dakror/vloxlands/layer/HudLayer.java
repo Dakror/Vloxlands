@@ -425,11 +425,11 @@ public class HudLayer extends Layer implements SelectionListener
 				
 				Table rightSide = new Table(Vloxlands.skin);
 				rightSide.row();
-				rightSide.add(capacity).colspan(3);
-				rightSide.row().left().spaceTop(5);
+				rightSide.add(capacity).colspan(2);
+				rightSide.row().spaceTop(5);
 				rightSide.add(dismantle);
 				rightSide.add(sleep);
-				rightSide.add(queue);
+				// rightSide.add(queue);
 				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			

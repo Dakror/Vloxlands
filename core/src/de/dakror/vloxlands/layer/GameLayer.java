@@ -218,6 +218,7 @@ public class GameLayer extends Layer
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
 		world.getIslands()[0].addStructure(tc, false, true);
 		
 		world.getIslands()[0].calculateInitBalance();
