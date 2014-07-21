@@ -86,7 +86,6 @@ public class GameLayer extends Layer
 	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
-	
 	ModelBatch shadowBatch;
 	
 	boolean middleDown;
@@ -301,7 +300,7 @@ public class GameLayer extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
-		// modelBatch.render(sky, lights);
+		// modelBatch.render(sky, env);
 		modelBatch.end();
 		
 		if (Vloxlands.showPathDebug)
@@ -310,40 +309,29 @@ public class GameLayer extends Layer
 			renderAStar();
 		}
 		
-		// if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
-		// {
-		// Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		// Gdx.gl.glEnable(GL20.GL_BLEND);
-		// shapeRenderer.setProjectionMatrix(camera.combined);
-		//
-		//
-		// float minX = Math.min(selectionStartVoxel.x, selectedVoxel.x);
-		// float maxX = Math.max(selectionStartVoxel.x, selectedVoxel.x);
-		// float minY = Math.min(selectionStartVoxel.z, selectedVoxel.y);
-		// float maxY = Math.max(selectionStartVoxel.z, selectedVoxel.y);
-		// float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
-		// float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
-		// // TODO: needs optimization, iteration is very slow
-		// for (int i = (int) minX; i <= maxX; i++)
-		// {
-		// for (int j = (int) minZ; j <= maxZ; j++)
-		// {
-		// for (int k = (int) maxY; k >= minY; k--)
-		// {
-		// if (activeIsland.get(i, k, j) != 0)
-		// {
-		// shapeRenderer.identity();
-		// shapeRenderer.translate(world.getIslands()[0].pos.x + i, world.getIslands()[0].pos.y + k, world.getIslands()[0].pos.z + j);
-		// shapeRenderer.rotate(1, 0, 0, 90);
-		// shapeRenderer.begin(ShapeType.Filled);
-		// shapeRenderer.setColor(0, 1, 0, 0.4f);
-		// shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
-		// shapeRenderer.end();
-		// }
-		// }
-		// }
-		// }
-		// }
+		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			
+			
+			float minX = Math.min(selectionStartVoxel.x, selectedVoxel.x);
+			float maxX = Math.max(selectionStartVoxel.x, selectedVoxel.x);
+			
+			float minY = Math.min(selectionStartVoxel.y, selectedVoxel.y);
+			float maxY = Math.max(selectionStartVoxel.y, selectedVoxel.y);
+			
+			float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
+			float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
+			
+			shapeRenderer.identity();
+			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
+			shapeRenderer.setColor(0, 1, 0, 0.3f);
+			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
+			shapeRenderer.end();
+		}
 		
 		if (BFS.lastTarget != null && Vloxlands.showPathDebug)
 		{
