@@ -98,6 +98,8 @@ public class GameLayer extends Layer
 	int startTick;
 	
 	public boolean regionSelectionMode = false;
+	boolean regionSelectionLMB;
+	
 	public Vector3 selectedVoxel = new Vector3();
 	public Vector3 selectionStartVoxel = new Vector3(-1, 0, 0);
 	Vector3 controllerTarget = new Vector3();
@@ -313,9 +315,6 @@ public class GameLayer extends Layer
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glEnable(GL20.GL_BLEND);
-			shapeRenderer.begin(ShapeType.Filled);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			
 			
 			float minX = Math.min(selectionStartVoxel.x, selectedVoxel.x);
 			float maxX = Math.max(selectionStartVoxel.x, selectedVoxel.x);
@@ -326,6 +325,8 @@ public class GameLayer extends Layer
 			float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
 			float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
 			
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setProjectionMatrix(camera.combined);
 			shapeRenderer.identity();
 			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
 			shapeRenderer.setColor(0, 1, 0, 0.3f);
@@ -754,11 +755,18 @@ public class GameLayer extends Layer
 			}
 			else
 			{
-				selectedVoxel.set(-1, 0, 0);
-				if (selectionStartVoxel.x == -1) pickVoxelRay(activeIsland, selectionStartVoxel, button == Buttons.LEFT, (int) x, (int) y);
-				else
+				if (selectionStartVoxel.x == -1)
+				{
+					selectedVoxel.set(-1, 0, 0);
+					pickVoxelRay(activeIsland, selectionStartVoxel, regionSelectionLMB = button == Buttons.LEFT, (int) x, (int) y);
+				}
+				else if (regionSelectionLMB == (button == Buttons.LEFT))
 				{
 					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
+					
+					for (SelectionListener sl : listeners)
+						sl.onVoxelRangeSelection(selectionStartVoxel, selectedVoxel, regionSelectionLMB, activeAction);
+					
 					regionSelectionMode = false;
 				}
 			}

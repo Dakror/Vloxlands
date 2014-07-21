@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.util.base;
 
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 
 import de.dakror.vloxlands.game.entity.creature.Creature;
@@ -23,6 +24,10 @@ public abstract class EntityBase implements Tickable, Disposable, SelectionListe
 	
 	@Override
 	public void onCreatureSelection(Creature creature, boolean lmb, String[] action)
+	{}
+	
+	@Override
+	public void onVoxelRangeSelection(Vector3 start, Vector3 end, boolean lmb, String[] action)
 	{}
 	
 	@Override

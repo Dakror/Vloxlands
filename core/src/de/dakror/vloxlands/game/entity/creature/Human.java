@@ -317,6 +317,13 @@ public class Human extends Creature
 	}
 	
 	@Override
+	public void onVoxelRangeSelection(Vector3 start, Vector3 end, boolean lmb, String[] action)
+	{
+		if (wasSelected && !lmb)
+		{}
+	}
+	
+	@Override
 	public void onReachTarget()
 	{
 		super.onReachTarget();

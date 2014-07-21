@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -104,7 +105,7 @@ public class HudLayer extends Layer implements SelectionListener
 		s.getTooltip().set("Mine", "Mine or dig terrain.");
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(3, 0), "clear|region");
-		s.getTooltip().set("Clear", "Clear a selected region.");
+		s.getTooltip().set("Clear", "Clear a selected region of natural materials.");
 		actions.addSlot(1, "Mine", s);
 		
 		// s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
@@ -149,6 +150,10 @@ public class HudLayer extends Layer implements SelectionListener
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(1, 5), "entity:129");
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
+		s.setDisabled(true);
+		actions.addSlot(1, "Build", s);
+		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
+		s.getTooltip().set("Lumberjack", "Chops nearby trees for ooden logs..");
 		s.setDisabled(true);
 		actions.addSlot(1, "Build", s);
 		
@@ -504,4 +509,8 @@ public class HudLayer extends Layer implements SelectionListener
 			}
 		}
 	}
+	
+	@Override
+	public void onVoxelRangeSelection(Vector3 start, Vector3 end, boolean lmb, String[] action)
+	{}
 }
