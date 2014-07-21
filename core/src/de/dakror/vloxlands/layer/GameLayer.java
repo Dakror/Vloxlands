@@ -765,7 +765,7 @@ public class GameLayer extends Layer
 					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
 					
 					for (SelectionListener sl : listeners)
-						sl.onVoxelRangeSelection(selectionStartVoxel, selectedVoxel, regionSelectionLMB, activeAction);
+						sl.onVoxelRangeSelection(activeIsland, selectionStartVoxel, selectedVoxel, regionSelectionLMB, activeAction);
 					
 					regionSelectionMode = false;
 				}

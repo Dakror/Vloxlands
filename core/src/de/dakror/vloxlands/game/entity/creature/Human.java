@@ -23,6 +23,7 @@ import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
+import de.dakror.vloxlands.game.job.ClearRegionJob;
 import de.dakror.vloxlands.game.job.DepositJob;
 import de.dakror.vloxlands.game.job.DestroyVoxelJob;
 import de.dakror.vloxlands.game.job.Job;
@@ -32,6 +33,7 @@ import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
+import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
@@ -219,7 +221,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
 	{
-		if (wasSelected && !lmb)
+		if ((wasSelected || selected) && !lmb)
 		{
 			selected = true;
 			
@@ -230,17 +232,13 @@ public class Human extends Creature
 					if (action[action.length - 1].startsWith("voxel"))
 					{
 						String[] voxels = action[action.length - 1].replace("voxel:", "").trim().split("\\|");
-						
 						for (String s : voxels)
 						{
 							if (s.trim().length() == 0) continue;
-							
 							Voxel v = Voxel.getForId(Integer.parseInt(s));
-							
 							if (v.getId() == vs.type.getId())
 							{
 								PathBundle pb = null;
-								
 								boolean setJob = false;
 								if (!carryingItemStack.isNull() && !carryingItemStack.canAdd(new ItemStack(Item.getForId(vs.type.getItemdrop()), 1)))
 								{
@@ -248,7 +246,6 @@ public class Human extends Creature
 									setJob(pb.path, new DepositJob(this, pb.structure, false));
 									setJob = true;
 								}
-								
 								if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
 								{
 									pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));
@@ -263,7 +260,6 @@ public class Human extends Creature
 										else queueJob(pb.path, pickup);
 									}
 								}
-								
 								try
 								{
 									Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
@@ -275,7 +271,6 @@ public class Human extends Creature
 								{
 									e.printStackTrace();
 								}
-								
 								break;
 							}
 						}
@@ -317,10 +312,26 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void onVoxelRangeSelection(Vector3 start, Vector3 end, boolean lmb, String[] action)
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb, String[] action)
 	{
-		if (wasSelected && !lmb)
-		{}
+		if ((wasSelected || selected) && !lmb)
+		{
+			selected = true;
+			
+			if (action != null)
+			{
+				if (action[0].equals("Mine"))
+				{
+					if (action[action.length - 1].startsWith("clear"))
+					{
+						if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
+						else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // TODO: finish clear region action
+					}
+				}
+				
+				GameLayer.instance.activeAction = null;
+			}
+		}
 	}
 	
 	@Override

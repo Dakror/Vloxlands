@@ -35,6 +35,7 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.IslandInfo;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.Minimap;
@@ -447,6 +448,10 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb, String[] action)
+	{}
+	
+	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button)
 	{
 		if (button == Buttons.LEFT)
@@ -510,7 +515,4 @@ public class HudLayer extends Layer implements SelectionListener
 		}
 	}
 	
-	@Override
-	public void onVoxelRangeSelection(Vector3 start, Vector3 end, boolean lmb, String[] action)
-	{}
 }
