@@ -113,6 +113,12 @@ public class Revolver extends Group
 					}
 					
 					GameLayer.instance.activeAction = action.split("-");
+					if (GameLayer.instance.activeAction[GameLayer.instance.activeAction.length - 1].contains("|region"))
+					{
+						GameLayer.instance.selectionStartVoxel.set(-1, 0, 0);
+						GameLayer.instance.selectedVoxel.set(-1, 0, 0);
+						GameLayer.instance.regionSelectionMode = true;
+					}
 				}
 				else GameLayer.instance.activeAction = null;
 				

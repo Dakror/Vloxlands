@@ -9,6 +9,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
@@ -28,6 +29,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	Array<Human> workers;
 	Vector3 voxelPos;
 	Inventory inventory;
+	ResourceList resourceList;
 	boolean working;
 	
 	boolean dismantleRequested;
@@ -51,6 +53,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
 		
 		inventory = new Inventory();
+		resourceList = new ResourceList();
 		working = true;
 	}
 	
@@ -129,6 +132,11 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	public Inventory getInventory()
 	{
 		return inventory;
+	}
+	
+	public ResourceList getResourceList()
+	{
+		return resourceList;
 	}
 	
 	public boolean isWorking()

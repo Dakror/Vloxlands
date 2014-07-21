@@ -29,7 +29,7 @@ public class MineJob extends DestroyVoxelJob
 	@Override
 	public void trigger()
 	{
-		animation = "mine" + (target.voxel.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxel.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
+		animation = "mine" + (target.voxelPos.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxelPos.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
 		
 		super.trigger();
 	}
@@ -43,7 +43,7 @@ public class MineJob extends DestroyVoxelJob
 	{
 		super.onEnd();
 		
-		target.island.set(target.voxel.x, target.voxel.y, target.voxel.z, Voxel.get("AIR").getId());
+		target.island.set(target.voxelPos.x, target.voxelPos.y, target.voxelPos.z, Voxel.get("AIR").getId());
 		
 		if (target.type.hasItemdrop())
 		{

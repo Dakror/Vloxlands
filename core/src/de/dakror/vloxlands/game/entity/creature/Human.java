@@ -267,7 +267,7 @@ public class Human extends Creature
 								try
 								{
 									Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
-									Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxel, this, true);
+									Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxelPos.getPos(), this, true);
 									if (setJob) queueJob(p, job);
 									else setJob(p, job);
 								}
@@ -286,7 +286,7 @@ public class Human extends Creature
 			}
 			else
 			{
-				Path path = AStar.findPath(getVoxelBelow(), vs.voxel, this, false);
+				Path path = AStar.findPath(getVoxelBelow(), vs.voxelPos.getPos(), this, false);
 				if (path != null) setJob(path, null);
 			}
 		}
@@ -342,7 +342,7 @@ public class Human extends Creature
 				
 				if (path != null)
 				{
-					((MineJob) j).getTarget().voxel.set(path.getGhostTarget());
+					((MineJob) j).getTarget().voxelPos.set(path.getGhostTarget());
 					queueJob(path, null);
 				}
 				else

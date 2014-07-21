@@ -35,7 +35,7 @@ public class ChopJob extends DestroyVoxelJob
 	{
 		super.onEnd();
 		
-		target.island.set(target.voxel.x, target.voxel.y, target.voxel.z, Voxel.get("AIR").getId());
+		target.island.set(target.voxelPos.x, target.voxelPos.y, target.voxelPos.z, Voxel.get("AIR").getId());
 		
 		if (target.type.hasItemdrop())
 		{

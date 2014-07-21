@@ -44,6 +44,7 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -96,7 +97,10 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	
+	public boolean regionSelectionMode = false;
 	public Vector3 selectedVoxel = new Vector3();
+	public Vector3 selectionStartVoxel = new Vector3(-1, 0, 0);
 	Vector3 controllerTarget = new Vector3();
 	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
@@ -306,6 +310,41 @@ public class GameLayer extends Layer
 			renderAStar();
 		}
 		
+		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			
+			
+			float minX = Math.min(selectionStartVoxel.x, selectedVoxel.x);
+			float maxX = Math.max(selectionStartVoxel.x, selectedVoxel.x);
+			float minY = Math.min(selectionStartVoxel.z, selectedVoxel.y);
+			float maxY = Math.max(selectionStartVoxel.z, selectedVoxel.y);
+			float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
+			float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
+			// TODO: needs optimization, iteration is very slow
+			for (int i = (int) minX; i <= maxX; i++)
+			{
+				for (int j = (int) minZ; j <= maxZ; j++)
+				{
+					for (int k = (int) maxY; k >= minY; k--)
+					{
+						if (activeIsland.get(i, k, j) != 0)
+						{
+							shapeRenderer.identity();
+							shapeRenderer.translate(world.getIslands()[0].pos.x + i, world.getIslands()[0].pos.y + k, world.getIslands()[0].pos.z + j);
+							shapeRenderer.rotate(1, 0, 0, 90);
+							shapeRenderer.begin(ShapeType.Filled);
+							shapeRenderer.setColor(0, 1, 0, 0.4f);
+							shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
+							shapeRenderer.end();
+						}
+					}
+				}
+			}
+		}
+		
 		if (BFS.lastTarget != null && Vloxlands.showPathDebug)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -495,7 +534,7 @@ public class GameLayer extends Layer
 			Structure selectedStructure = null;
 			Island selectedIsland = null;
 			Chunk selectedChunk = null;
-			Vector3 selectedVoxel = new Vector3();
+			Vector3 selVoxel = new Vector3();
 			
 			float distance = 0;
 			for (Entity entity : world.getEntities())
@@ -540,7 +579,7 @@ public class GameLayer extends Layer
 							if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
 							{
 								distance = dst;
-								selectedVoxel.set(tmp6);
+								selVoxel.set(tmp6);
 								selectedChunk = c;
 								selectedIsland = i;
 							}
@@ -559,11 +598,11 @@ public class GameLayer extends Layer
 				
 				for (Direction d : Direction.values())
 				{
-					tmp7.set(selectedIsland.pos.x + selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedIsland.pos.y + selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedIsland.pos.z + selectedChunk.pos.z + selectedVoxel.z + d.dir.z);
+					tmp7.set(selectedIsland.pos.x + selectedChunk.pos.x + selVoxel.x + d.dir.x, selectedIsland.pos.y + selectedChunk.pos.y + selVoxel.y + d.dir.y, selectedIsland.pos.z + selectedChunk.pos.z + selVoxel.z + d.dir.z);
 					tmp8.set(tmp7.cpy().add(1, 1, 1));
 					bb3.set(tmp7, tmp8);
 					
-					if (selectedIsland.get(selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedChunk.pos.z + selectedVoxel.z + d.dir.z) != air) continue;
+					if (selectedIsland.get(selectedChunk.pos.x + selVoxel.x + d.dir.x, selectedChunk.pos.y + selVoxel.y + d.dir.y, selectedChunk.pos.z + selVoxel.z + d.dir.z) != air) continue;
 					
 					if (Intersector.intersectRayBounds(ray, bb3, is2))
 					{
@@ -576,26 +615,57 @@ public class GameLayer extends Layer
 					}
 				}
 				
-				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
+				selectedVoxel.set(selVoxel).add(selectedChunk.pos);
 				
 				for (SelectionListener sl : listeners)
-					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb, activeAction);
+					sl.onVoxelSelection(new VoxelSelection(selectedIsland, new VoxelPos(selVoxel.cpy().add(selectedChunk.pos), selectedChunk.get((int) selVoxel.x, (int) selVoxel.y, (int) selVoxel.z)), dir), lmb, activeAction);
 			}
 			else if (selectedStructure != null)
 			{
-				selectedVoxel.set(-1, 0, 0);
+				selVoxel.set(-1, 0, 0);
 				selectedStructure.selected = true;
 				for (SelectionListener sl : listeners)
 					sl.onStructureSelection(selectedStructure, lmb, activeAction);
 			}
 			else if (selectedEntity != null && selectedEntity instanceof Creature)
 			{
-				selectedVoxel.set(-1, 0, 0);
+				selVoxel.set(-1, 0, 0);
 				selectedEntity.selected = true;
 				for (SelectionListener sl : listeners)
 					sl.onCreatureSelection((Creature) selectedEntity, lmb, activeAction);
 			}
 		}
+	}
+	
+	public Chunk pickVoxelRay(Island island, Vector3 selVoxel, boolean lmb, int x, int y)
+	{
+		Chunk selectedChunk = null;
+		Ray ray = camera.getPickRay(x, y);
+		
+		float distance = 0;
+		
+		for (Chunk c : island.getChunks())
+		{
+			if (c.inFrustum && !c.isEmpty())
+			{
+				tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
+				tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
+				
+				bb.set(tmp1, tmp2);
+				if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+				{
+					float dst = ray.origin.dst(tmp5);
+					if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
+					{
+						distance = dst;
+						selVoxel.set(tmp6).add(c.pos);
+						selectedChunk = c;
+					}
+				}
+			}
+		}
+		
+		return selectedChunk;
 	}
 	
 	public void selectionBox(Rectangle rectangle)
@@ -664,7 +734,8 @@ public class GameLayer extends Layer
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
-		pickRay(true, false, screenX, screenY);
+		if (!regionSelectionMode) pickRay(true, false, screenX, screenY);
+		else pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
 		return false;
 	}
 	
@@ -686,7 +757,24 @@ public class GameLayer extends Layer
 	@Override
 	public boolean tap(float x, float y, int count, int button)
 	{
-		if (button != Buttons.MIDDLE) pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+		if (button != Buttons.MIDDLE)
+		{
+			if (!regionSelectionMode)
+			{
+				selectionStartVoxel.set(-1, 0, 0);
+				pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+			}
+			else
+			{
+				selectedVoxel.set(-1, 0, 0);
+				if (selectionStartVoxel.x == -1) pickVoxelRay(activeIsland, selectionStartVoxel, button == Buttons.LEFT, (int) x, (int) y);
+				else
+				{
+					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
+					regionSelectionMode = false;
+				}
+			}
+		}
 		return false;
 	}
 	

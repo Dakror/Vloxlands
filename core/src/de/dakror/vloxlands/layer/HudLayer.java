@@ -101,45 +101,48 @@ public class HudLayer extends Layer implements SelectionListener
 		actions.setPosition(10, 10);
 		
 		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
-		s.getTooltip().set("Mine", "Mine or harvest natural ressources");
-		s.setDisabled(true);
+		s.getTooltip().set("Mine", "Mine or dig terrain.");
 		actions.addSlot(0, null, s);
-		s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
-		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
-		s.setDisabled(true);
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1|14");
-		s.getTooltip().set("(Sand-)Stone", "Mine rocks for stone, respectively sandstone in deserts, using a pickaxe.");
+		s = new RevolverSlot(stage, new Vector2(3, 0), "clear|region");
+		s.getTooltip().set("Clear", "Clear a selected region.");
 		actions.addSlot(1, "Mine", s);
 		
-		s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
-		s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(3, 2), "voxel:3");
-		s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
-		s = new RevolverSlot(stage, new Vector2(2, 2), "voxel:4");
-		s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
-		s = new RevolverSlot(stage, new Vector2(1, 2), "voxel:5");
-		s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
-		
-		s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
-		s.getTooltip().set("Ore", "Mine the different kinds of ore.");
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(3, 3), "voxel:7");
-		s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
-		s = new RevolverSlot(stage, new Vector2(5, 3), "voxel:8");
-		s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
-		s = new RevolverSlot(stage, new Vector2(4, 3), "voxel:9");
-		s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
+		// s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
+		// s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
+		// s.setDisabled(true);
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1|14");
+		// s.getTooltip().set("(Sand-)Stone", "Mine rocks for stone, respectively sandstone in deserts, using a pickaxe.");
+		// actions.addSlot(1, "Mine", s);
+		//
+		// s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
+		// s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(3, 2), "voxel:3");
+		// s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		// s = new RevolverSlot(stage, new Vector2(2, 2), "voxel:4");
+		// s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		// s = new RevolverSlot(stage, new Vector2(1, 2), "voxel:5");
+		// s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		//
+		// s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
+		// s.getTooltip().set("Ore", "Mine the different kinds of ore.");
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(3, 3), "voxel:7");
+		// s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
+		// s = new RevolverSlot(stage, new Vector2(5, 3), "voxel:8");
+		// s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
+		// s = new RevolverSlot(stage, new Vector2(4, 3), "voxel:9");
+		// s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
 		
 		s = new RevolverSlot(stage, new Vector2(1, 5), "Build");
 		s.getTooltip().set("Build", "Build various building and structures.");
@@ -429,7 +432,6 @@ public class HudLayer extends Layer implements SelectionListener
 				rightSide.row().spaceTop(5);
 				rightSide.add(dismantle);
 				rightSide.add(sleep);
-				// rightSide.add(queue);
 				selectedStructureWindow.add(rightSide).top().width(200);
 			}
 			
