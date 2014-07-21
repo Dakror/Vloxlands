@@ -80,6 +80,8 @@ public class GameLayer extends Layer
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
 	
+	public Structure cursorStructure;
+	
 	public String[] activeAction;
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
@@ -100,6 +102,7 @@ public class GameLayer extends Layer
 	public boolean regionSelectionMode = false;
 	boolean regionSelectionLMB;
 	
+	public Vector3 hoveredVoxel = new Vector3();
 	public Vector3 selectedVoxel = new Vector3();
 	public Vector3 selectionStartVoxel = new Vector3(-1, 0, 0);
 	Vector3 controllerTarget = new Vector3();
@@ -303,6 +306,11 @@ public class GameLayer extends Layer
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
 		// modelBatch.render(sky, env);
+		if (cursorStructure != null)
+		{
+			cursorStructure.update();
+			cursorStructure.render(modelBatch, env, false);
+		}
 		modelBatch.end();
 		
 		if (Vloxlands.showPathDebug)
@@ -433,6 +441,7 @@ public class GameLayer extends Layer
 	{
 		this.tick = tick;
 		world.tick(tick);
+		if (cursorStructure != null) cursorStructure.tick(tick);
 		
 		if (activeIsland != null && startTick > 0)
 		{
@@ -723,8 +732,16 @@ public class GameLayer extends Layer
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
-		if (!regionSelectionMode) pickRay(true, false, screenX, screenY);
-		else pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
+		if (regionSelectionMode) pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
+		else if (cursorStructure != null)
+		{
+			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
+			cursorStructure.getTransform().setToTranslation(activeIsland.pos);
+			cursorStructure.getTransform().translate(hoveredVoxel);
+			cursorStructure.getTransform().translate(0, cursorStructure.getBoundingBox().getDimensions().y / 2, 0);
+			cursorStructure.updateVoxelPos();
+		}
+		else pickRay(true, false, screenX, screenY);
 		return false;
 	}
 	

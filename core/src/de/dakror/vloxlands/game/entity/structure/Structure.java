@@ -67,9 +67,13 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
+	public void updateVoxelPos()
+	{
+		voxelPos = new Vector3(Math.round(posCache.x), Math.round(posCache.y), Math.round(posCache.z));
+	}
+	
 	/**
-	 * @param from
-	 *          expected to be in world space
+	 * @param from expected to be in world space
 	 */
 	public StructureNode getStructureNode(Vector3 from, NodeType type, String name)
 	{
@@ -115,8 +119,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	}
 	
 	/**
-	 * @param from
-	 *          expected to be in world space
+	 * @param from expected to be in world space
 	 */
 	public StructureNode getStructureNode(Vector3 from, NodeType type)
 	{

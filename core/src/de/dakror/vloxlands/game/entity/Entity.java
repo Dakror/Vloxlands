@@ -261,7 +261,11 @@ public abstract class Entity extends EntityBase implements Savable
 	public static Entity getForId(byte id, float x, float y, float z)
 	{
 		Class<?> c = idToClassMap.get(id);
-		if (c == null) return null;
+		if (c == null)
+		{
+			Gdx.app.error("Entity.getForId", "No Entity found for id=" + id + "!");
+			return null;
+		}
 		try
 		{
 			return (Entity) c.getConstructor(float.class, float.class, float.class).newInstance(x, y, z);
