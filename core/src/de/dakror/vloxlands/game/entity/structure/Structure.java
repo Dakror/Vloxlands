@@ -54,9 +54,9 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
 		
 		nodes.add(new StructureNode(NodeType.target, -1, 0, Math.round(depth / 2)));
-		nodes.add(new StructureNode(NodeType.target, width + 1, 0, Math.round(depth / 2)));
+		nodes.add(new StructureNode(NodeType.target, width, 0, Math.round(depth / 2)));
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, -1));
-		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
+		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth));
 		
 		nodes.add(new StructureNode(NodeType.build, 0, 0, Math.round(depth / 2)));
 		nodes.add(new StructureNode(NodeType.build, width - 1, 0, Math.round(depth / 2)));
@@ -105,18 +105,21 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
 	}
 	
-	public boolean isStuckInTerrain()
+	public boolean canBePlaced()
 	{
 		int width = (int) Math.ceil(boundingBox.getDimensions().x);
 		int height = (int) Math.ceil(boundingBox.getDimensions().y);
 		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
 		
 		for (int i = 0; i < width; i++)
-			for (int j = 0; j < height; j++)
+			for (int j = -1; j < height; j++)
 				for (int k = 0; k < depth; k++)
-					if (island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return true;
+				{
+					if (j == -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) == 0) return false;
+					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
+				}
 		
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -222,7 +225,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		
 		human.equipCorrectToolForJob(job, false, pathStart);
 		
-		((Human) pb.creature).queueJob(AStar.findPath(pathStart, pb.path.getLast(), human, NodeType.build.useGhostTarget), job);
+		((Human) pb.creature).queueJob(AStar.findPath(pathStart, pb.path.getGhostTarget() != null ? pb.path.getGhostTarget() : pb.path.getLast(), human, NodeType.build.useGhostTarget), job);
 		dismantleRequested = true;
 		return true;
 	}

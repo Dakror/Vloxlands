@@ -17,6 +17,8 @@ public class Lumberjack extends Structure
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
 		name = "Lumberjack";
 		
+		resourceList.setCostPopulation(1);
+		
 		inventory = new Inventory(20);
 	}
 	

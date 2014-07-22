@@ -748,7 +748,7 @@ public class GameLayer extends Layer
 			cursorStructure.setIsland(activeIsland);
 			cursorStructure.updateVoxelPos();
 			
-			cursorStructurePlacable = !cursorStructure.isStuckInTerrain();
+			cursorStructurePlacable = cursorStructure.canBePlaced();
 			
 			if (defaultCursorStructureMaterials == null)
 			{
