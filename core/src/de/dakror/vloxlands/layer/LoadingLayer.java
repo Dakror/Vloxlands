@@ -110,8 +110,9 @@ public class LoadingLayer extends Layer
 		stage.addActor(logo);
 		
 		// TODO: Add all models wanting to be loaded
-		Vloxlands.assets.load("models/humanblend/humanblend.g3db", Model.class);
-		Vloxlands.assets.load("models/tent/tent.g3db", Model.class);
+		Vloxlands.assets.load("models/creature/humanblend/humanblend.g3db", Model.class);
+		Vloxlands.assets.load("models/structure/PH_tent_red/PH_tent_red.g3db", Model.class);
+		Vloxlands.assets.load("models/structure/PH_tent_green/PH_tent_green.g3db", Model.class);
 		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
 		for (Item item : Item.getAll())
 			if (item.isModel() && item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);

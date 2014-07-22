@@ -60,8 +60,11 @@ public class Minimap extends Group
 				Actor actor = hit(x, y, true);
 				if (actor != null && actor instanceof MinimapIsland)
 				{
-					((MinimapIsland) actor).active = true;
-					GameLayer.instance.focusIsland(((MinimapIsland) actor).island, false);
+					if (GameLayer.instance.cursorStructure == null && !GameLayer.instance.regionSelectionMode)
+					{
+						((MinimapIsland) actor).active = true;
+						GameLayer.instance.focusIsland(((MinimapIsland) actor).island, false);
+					}
 				}
 				return false;
 			}

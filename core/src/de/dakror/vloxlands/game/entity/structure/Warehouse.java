@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.NonStackingInventory;
 import de.dakror.vloxlands.util.CurserCommand;
@@ -11,7 +13,7 @@ public class Warehouse extends Structure
 {
 	public Warehouse(float x, float y, float z)
 	{
-		super(x, y, z, "models/tent/tent.g3db");
+		super(x, y, z, "models/structure/PH_tent_red/PH_tent_red.g3db");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
@@ -21,8 +23,9 @@ public class Warehouse extends Structure
 	}
 	
 	@Override
-	public CurserCommand getDefaultCommand()
+	public CurserCommand getCommandForEntity(Entity selectedEntity)
 	{
-		return CurserCommand.DEPOSIT;
+		if (selectedEntity instanceof Human && !((Human) selectedEntity).getCarryingItemStack().isNull()) return CurserCommand.DEPOSIT;
+		return super.getCommandForEntity(selectedEntity);
 	}
 }

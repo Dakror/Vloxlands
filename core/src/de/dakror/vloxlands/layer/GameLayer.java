@@ -11,8 +11,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
@@ -44,6 +46,7 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
@@ -79,13 +82,16 @@ public class GameLayer extends Layer
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
 	
+	public Structure cursorStructure;
+	boolean cursorStructurePlacable;
+	Array<Material> defaultCursorStructureMaterials;
+	
 	public String[] activeAction;
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
 	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
-	
 	ModelBatch shadowBatch;
 	
 	boolean middleDown;
@@ -96,7 +102,13 @@ public class GameLayer extends Layer
 	int tick;
 	int ticksForTravel;
 	int startTick;
+	
+	public boolean regionSelectionMode = false;
+	boolean regionSelectionLMB;
+	
+	public Vector3 hoveredVoxel = new Vector3();
 	public Vector3 selectedVoxel = new Vector3();
+	public Vector3 selectionStartVoxel = new Vector3(-1, 0, 0);
 	Vector3 controllerTarget = new Vector3();
 	Vector3 cameraPos = new Vector3();
 	Vector3 target = new Vector3();
@@ -218,6 +230,9 @@ public class GameLayer extends Layer
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
+		tc.setBuilt(true);
 		world.getIslands()[0].addStructure(tc, false, true);
 		
 		world.getIslands()[0].calculateInitBalance();
@@ -296,13 +311,41 @@ public class GameLayer extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
-		// modelBatch.render(sky, lights);
+		// modelBatch.render(sky, env);
+		if (cursorStructure != null)
+		{
+			cursorStructure.update();
+			cursorStructure.render(modelBatch, env, false);
+		}
 		modelBatch.end();
 		
 		if (Vloxlands.showPathDebug)
 		{
 			renderBFS();
 			renderAStar();
+		}
+		
+		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			
+			float minX = Math.min(selectionStartVoxel.x, selectedVoxel.x);
+			float maxX = Math.max(selectionStartVoxel.x, selectedVoxel.x);
+			
+			float minY = Math.min(selectionStartVoxel.y, selectedVoxel.y);
+			float maxY = Math.max(selectionStartVoxel.y, selectedVoxel.y);
+			
+			float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
+			float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
+			
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			shapeRenderer.identity();
+			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
+			shapeRenderer.setColor(0, 1, 0, 0.3f);
+			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
+			shapeRenderer.end();
 		}
 		
 		if (BFS.lastTarget != null && Vloxlands.showPathDebug)
@@ -404,6 +447,7 @@ public class GameLayer extends Layer
 	{
 		this.tick = tick;
 		world.tick(tick);
+		if (cursorStructure != null) cursorStructure.tick(tick);
 		
 		if (activeIsland != null && startTick > 0)
 		{
@@ -494,7 +538,7 @@ public class GameLayer extends Layer
 			Structure selectedStructure = null;
 			Island selectedIsland = null;
 			Chunk selectedChunk = null;
-			Vector3 selectedVoxel = new Vector3();
+			Vector3 selVoxel = new Vector3();
 			
 			float distance = 0;
 			for (Entity entity : world.getEntities())
@@ -539,7 +583,7 @@ public class GameLayer extends Layer
 							if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
 							{
 								distance = dst;
-								selectedVoxel.set(tmp6);
+								selVoxel.set(tmp6);
 								selectedChunk = c;
 								selectedIsland = i;
 							}
@@ -558,11 +602,11 @@ public class GameLayer extends Layer
 				
 				for (Direction d : Direction.values())
 				{
-					tmp7.set(selectedIsland.pos.x + selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedIsland.pos.y + selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedIsland.pos.z + selectedChunk.pos.z + selectedVoxel.z + d.dir.z);
+					tmp7.set(selectedIsland.pos.x + selectedChunk.pos.x + selVoxel.x + d.dir.x, selectedIsland.pos.y + selectedChunk.pos.y + selVoxel.y + d.dir.y, selectedIsland.pos.z + selectedChunk.pos.z + selVoxel.z + d.dir.z);
 					tmp8.set(tmp7.cpy().add(1, 1, 1));
 					bb3.set(tmp7, tmp8);
 					
-					if (selectedIsland.get(selectedChunk.pos.x + selectedVoxel.x + d.dir.x, selectedChunk.pos.y + selectedVoxel.y + d.dir.y, selectedChunk.pos.z + selectedVoxel.z + d.dir.z) != air) continue;
+					if (selectedIsland.get(selectedChunk.pos.x + selVoxel.x + d.dir.x, selectedChunk.pos.y + selVoxel.y + d.dir.y, selectedChunk.pos.z + selVoxel.z + d.dir.z) != air) continue;
 					
 					if (Intersector.intersectRayBounds(ray, bb3, is2))
 					{
@@ -575,26 +619,57 @@ public class GameLayer extends Layer
 					}
 				}
 				
-				this.selectedVoxel.set(selectedVoxel).add(selectedChunk.pos);
+				selectedVoxel.set(selVoxel).add(selectedChunk.pos);
 				
 				for (SelectionListener sl : listeners)
-					sl.onVoxelSelection(new VoxelSelection(selectedIsland, Voxel.getForId(selectedChunk.get((int) selectedVoxel.x, (int) selectedVoxel.y, (int) selectedVoxel.z)), selectedVoxel.cpy().add(selectedChunk.pos), dir), lmb, activeAction);
+					sl.onVoxelSelection(new VoxelSelection(selectedIsland, new VoxelPos(selVoxel.cpy().add(selectedChunk.pos), selectedChunk.get((int) selVoxel.x, (int) selVoxel.y, (int) selVoxel.z)), dir), lmb, activeAction);
 			}
 			else if (selectedStructure != null)
 			{
-				selectedVoxel.set(-1, 0, 0);
+				selVoxel.set(-1, 0, 0);
 				selectedStructure.selected = true;
 				for (SelectionListener sl : listeners)
 					sl.onStructureSelection(selectedStructure, lmb, activeAction);
 			}
 			else if (selectedEntity != null && selectedEntity instanceof Creature)
 			{
-				selectedVoxel.set(-1, 0, 0);
+				selVoxel.set(-1, 0, 0);
 				selectedEntity.selected = true;
 				for (SelectionListener sl : listeners)
 					sl.onCreatureSelection((Creature) selectedEntity, lmb, activeAction);
 			}
 		}
+	}
+	
+	public Chunk pickVoxelRay(Island island, Vector3 selVoxel, boolean lmb, int x, int y)
+	{
+		Chunk selectedChunk = null;
+		Ray ray = camera.getPickRay(x, y);
+		
+		float distance = 0;
+		
+		for (Chunk c : island.getChunks())
+		{
+			if (c.inFrustum && !c.isEmpty())
+			{
+				tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
+				tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
+				
+				bb.set(tmp1, tmp2);
+				if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
+				{
+					float dst = ray.origin.dst(tmp5);
+					if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
+					{
+						distance = dst;
+						selVoxel.set(tmp6).add(c.pos);
+						selectedChunk = c;
+					}
+				}
+			}
+		}
+		
+		return selectedChunk;
 	}
 	
 	public void selectionBox(Rectangle rectangle)
@@ -663,7 +738,43 @@ public class GameLayer extends Layer
 	@Override
 	public boolean mouseMoved(int screenX, int screenY)
 	{
-		pickRay(true, false, screenX, screenY);
+		if (regionSelectionMode) pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
+		else if (cursorStructure != null)
+		{
+			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
+			cursorStructure.getTransform().setToTranslation(activeIsland.pos);
+			cursorStructure.getTransform().translate(hoveredVoxel);
+			cursorStructure.getTransform().translate(0, cursorStructure.getBoundingBox().getDimensions().y / 2, 0);
+			cursorStructure.setIsland(activeIsland);
+			cursorStructure.updateVoxelPos();
+			
+			cursorStructurePlacable = cursorStructure.canBePlaced();
+			
+			if (defaultCursorStructureMaterials == null)
+			{
+				defaultCursorStructureMaterials = new Array<Material>();
+				
+				for (Material m : cursorStructure.getModelInstance().materials)
+					defaultCursorStructureMaterials.add(m.copy());
+			}
+			
+			for (int i = 0; i < cursorStructure.getModelInstance().materials.size; i++)
+			{
+				Material m = cursorStructure.getModelInstance().materials.get(i);
+				
+				Color defaultColor = ((ColorAttribute) defaultCursorStructureMaterials.get(i).get(ColorAttribute.Diffuse)).color;
+				
+				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultColor) : defaultColor));
+				if (!cursorStructurePlacable) m.set(new BlendingAttribute(0.8f));
+				else
+				{
+					BlendingAttribute ba = (BlendingAttribute) defaultCursorStructureMaterials.get(i).get(BlendingAttribute.Type);
+					if (ba == null) m.remove(BlendingAttribute.Type);
+					else m.set(ba);
+				}
+			}
+		}
+		else pickRay(true, false, screenX, screenY);
 		return false;
 	}
 	
@@ -685,7 +796,62 @@ public class GameLayer extends Layer
 	@Override
 	public boolean tap(float x, float y, int count, int button)
 	{
-		if (button != Buttons.MIDDLE) pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+		if (button != Buttons.MIDDLE)
+		{
+			if (!regionSelectionMode)
+			{
+				if (cursorStructure != null)
+				{
+					if (button == Buttons.LEFT)
+					{
+						if (cursorStructurePlacable)
+						{
+							for (int i = 0; i < defaultCursorStructureMaterials.size; i++)
+							{
+								cursorStructure.getModelInstance().materials.set(i, defaultCursorStructureMaterials.get(i));
+							}
+							
+							cursorStructure.setBuilt(false);
+							cursorStructure.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
+							activeIsland.addStructure(cursorStructure, true, false);
+							cursorStructure.updateVoxelPos();
+							
+							cursorStructure = null;
+							defaultCursorStructureMaterials = null;
+							cursorStructurePlacable = false;
+						}
+					}
+					else
+					{
+						cursorStructure = null;
+						defaultCursorStructureMaterials = null;
+						cursorStructurePlacable = false;
+					}
+				}
+				else
+				{
+					selectionStartVoxel.set(-1, 0, 0);
+					pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+				}
+			}
+			else
+			{
+				if (selectionStartVoxel.x == -1)
+				{
+					selectedVoxel.set(-1, 0, 0);
+					pickVoxelRay(activeIsland, selectionStartVoxel, regionSelectionLMB = button == Buttons.LEFT, (int) x, (int) y);
+				}
+				else if (regionSelectionLMB == (button == Buttons.LEFT))
+				{
+					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
+					
+					for (SelectionListener sl : listeners)
+						sl.onVoxelRangeSelection(activeIsland, selectionStartVoxel, selectedVoxel, regionSelectionLMB, activeAction);
+					
+					regionSelectionMode = false;
+				}
+			}
+		}
 		return false;
 	}
 	
