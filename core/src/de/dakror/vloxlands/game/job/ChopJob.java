@@ -5,13 +5,14 @@ import com.badlogic.gdx.Gdx;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.item.tool.ChopTool;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class ChopJob extends DestroyVoxelJob
+public class ChopJob extends Job
 {
 	private VoxelSelection target;
 	
@@ -19,6 +20,7 @@ public class ChopJob extends DestroyVoxelJob
 	{
 		super(human, "walk" /* mine */, (persistent ? "Auto. c" : "C") + "hopping " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
+		tool = ChopTool.class;
 	}
 	
 	public VoxelSelection getTarget()

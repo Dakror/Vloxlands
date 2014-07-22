@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.ai.AStar;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -11,6 +12,7 @@ import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
+import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
@@ -44,6 +46,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	{
 		super(Math.round(x), Math.round(y), Math.round(z), model);
 		voxelPos = new Vector3(x, y, z);
+		
 		nodes = new Array<StructureNode>();
 		workers = new Array<Human>();
 		
@@ -54,6 +57,11 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		nodes.add(new StructureNode(NodeType.target, width + 1, 0, Math.round(depth / 2)));
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, -1));
 		nodes.add(new StructureNode(NodeType.target, Math.round(width / 2), 0, depth + 1));
+		
+		nodes.add(new StructureNode(NodeType.build, 0, 0, Math.round(depth / 2)));
+		nodes.add(new StructureNode(NodeType.build, width - 1, 0, Math.round(depth / 2)));
+		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, 0));
+		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
 		resourceList = new ResourceList();
@@ -94,7 +102,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		transform.getTranslation(posCache);
 		transform.getRotation(rotCache);
 		Vector3 p = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().cpy().scl(0.5f));
-		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y) + 1, Math.round(p.z));
+		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
 	}
 	
 	public boolean isStuckInTerrain()
@@ -106,7 +114,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		for (int i = 0; i < width; i++)
 			for (int j = 0; j < height; j++)
 				for (int k = 0; k < depth; k++)
-					if (island.get(i + voxelPos.x, j + voxelPos.y, k + voxelPos.z) != 0) return true;
+					if (island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return true;
 		
 		return false;
 	}
@@ -123,7 +131,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 			
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < depth; j++)
-					island.set(i + voxelPos.x, voxelPos.y - 1, j + voxelPos.z, gr, true);
+					island.set(i + voxelPos.x, voxelPos.y, j + voxelPos.z, gr, true);
 		}
 	}
 	
@@ -205,10 +213,16 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	public boolean requestDismantle()
 	{
 		if (dismantleRequested) return false;
-		PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.target).island(0));
+		PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
 		if (pb == null || pb.creature == null) return false;
 		
-		((Human) pb.creature).queueJob(pb.path, new DismantleJob((Human) pb.creature, this, false));
+		Human human = (Human) pb.creature;
+		Job job = new DismantleJob((Human) pb.creature, this, false);
+		Vector3 pathStart = human.getVoxelBelow();
+		
+		human.equipCorrectToolForJob(job, false, pathStart);
+		
+		((Human) pb.creature).queueJob(AStar.findPath(pathStart, pb.path.getLast(), human, NodeType.build.useGhostTarget), job);
 		dismantleRequested = true;
 		return true;
 	}
@@ -231,17 +245,18 @@ public abstract class Structure extends Entity implements IInventory, Savable
 			Vector3 p = GameLayer.world.getIslands()[0].pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			GameLayer.world.addEntity(i);
-			
 		}
+		else if (e.getName().equals("onBuild")) setBuilt(true);
 	}
 	
 	public CurserCommand getDefaultCommand()
 	{
-		return CurserCommand.NO_OP;
+		return CurserCommand.WALK;
 	}
 	
 	public CurserCommand getCommandForEntity(Entity selectedEntity)
 	{
+		if (selectedEntity instanceof Human && !built) return CurserCommand.BUILD;
 		return getDefaultCommand();
 	}
 	

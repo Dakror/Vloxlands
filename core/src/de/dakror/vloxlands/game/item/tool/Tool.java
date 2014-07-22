@@ -37,8 +37,8 @@ public abstract class Tool extends Item
 	
 	protected void transformInHand(Matrix4 transform, Creature c, float yRot)
 	{
-		Matrix4 tr = c.modelInstance.getNode("Bone_006").globalTransform;
-		Matrix4 tr2 = c.modelInstance.getNode("Bone_014").globalTransform;
+		Matrix4 tr = c.getModelInstance().getNode("Bone_006").globalTransform;
+		Matrix4 tr2 = c.getModelInstance().getNode("Bone_014").globalTransform;
 		Vector3 v = new Vector3();
 		tr2.getTranslation(v);
 		Quaternion q = new Quaternion();

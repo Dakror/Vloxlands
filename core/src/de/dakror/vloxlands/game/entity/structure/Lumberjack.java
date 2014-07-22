@@ -23,6 +23,6 @@ public class Lumberjack extends Structure
 	@Override
 	public CurserCommand getDefaultCommand()
 	{
-		return CurserCommand.PICK_UP;
+		return CurserCommand.PICKUP;
 	}
 }

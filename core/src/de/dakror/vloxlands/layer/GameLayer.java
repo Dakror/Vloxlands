@@ -84,7 +84,7 @@ public class GameLayer extends Layer
 	
 	public Structure cursorStructure;
 	boolean cursorStructurePlacable;
-	Array<ColorAttribute> defaultCursorStructureColors;
+	Array<Material> defaultCursorStructureMaterials;
 	
 	public String[] activeAction;
 	public Island activeIsland;
@@ -231,6 +231,7 @@ public class GameLayer extends Layer
 		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
+		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
 		tc.setBuilt(true);
 		world.getIslands()[0].addStructure(tc, false, true);
 		
@@ -749,22 +750,28 @@ public class GameLayer extends Layer
 			
 			cursorStructurePlacable = !cursorStructure.isStuckInTerrain();
 			
-			if (defaultCursorStructureColors == null)
+			if (defaultCursorStructureMaterials == null)
 			{
-				defaultCursorStructureColors = new Array<ColorAttribute>();
+				defaultCursorStructureMaterials = new Array<Material>();
 				
 				for (Material m : cursorStructure.getModelInstance().materials)
-				{
-					ColorAttribute ca = (ColorAttribute) m.get(ColorAttribute.Diffuse);
-					if (ca != null) defaultCursorStructureColors.add((ColorAttribute) ca.copy());
-				}
+					defaultCursorStructureMaterials.add(m.copy());
 			}
 			
 			for (int i = 0; i < cursorStructure.getModelInstance().materials.size; i++)
 			{
 				Material m = cursorStructure.getModelInstance().materials.get(i);
-				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultCursorStructureColors.get(i).color) : defaultCursorStructureColors.get(i).color));
-				m.set(new BlendingAttribute(!cursorStructurePlacable ? 0.8f : 1));
+				
+				Color defaultColor = ((ColorAttribute) defaultCursorStructureMaterials.get(i).get(ColorAttribute.Diffuse)).color;
+				
+				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultColor) : defaultColor));
+				if (!cursorStructurePlacable) m.set(new BlendingAttribute(0.8f));
+				else
+				{
+					BlendingAttribute ba = (BlendingAttribute) defaultCursorStructureMaterials.get(i).get(BlendingAttribute.Type);
+					if (ba == null) m.remove(BlendingAttribute.Type);
+					else m.set(ba);
+				}
 			}
 		}
 		else pickRay(true, false, screenX, screenY);
@@ -795,14 +802,29 @@ public class GameLayer extends Layer
 			{
 				if (cursorStructure != null)
 				{
-					if (cursorStructurePlacable)
+					if (button == Buttons.LEFT)
 					{
-						cursorStructure.setBuilt(false);
-						cursorStructure.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
-						activeIsland.addStructure(cursorStructure, true, false);
-						
+						if (cursorStructurePlacable)
+						{
+							for (int i = 0; i < defaultCursorStructureMaterials.size; i++)
+							{
+								cursorStructure.getModelInstance().materials.set(i, defaultCursorStructureMaterials.get(i));
+							}
+							
+							cursorStructure.setBuilt(false);
+							cursorStructure.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
+							activeIsland.addStructure(cursorStructure, true, false);
+							cursorStructure.updateVoxelPos();
+							
+							cursorStructure = null;
+							defaultCursorStructureMaterials = null;
+							cursorStructurePlacable = false;
+						}
+					}
+					else
+					{
 						cursorStructure = null;
-						defaultCursorStructureColors = null;
+						defaultCursorStructureMaterials = null;
 						cursorStructurePlacable = false;
 					}
 				}

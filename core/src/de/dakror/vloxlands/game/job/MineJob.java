@@ -5,13 +5,14 @@ import com.badlogic.gdx.Gdx;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.item.tool.MineTool;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class MineJob extends DestroyVoxelJob
+public class MineJob extends Job
 {
 	private VoxelSelection target;
 	
@@ -19,6 +20,7 @@ public class MineJob extends DestroyVoxelJob
 	{
 		super(human, "mine", (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
+		tool = MineTool.class;
 	}
 	
 	public VoxelSelection getTarget()

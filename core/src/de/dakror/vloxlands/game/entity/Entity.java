@@ -37,7 +37,7 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	protected Matrix4 transform;
 	
-	public ModelInstance modelInstance;
+	protected ModelInstance modelInstance;
 	
 	protected byte id;
 	protected int level;

@@ -14,6 +14,7 @@ public abstract class Job implements Tickable
 	boolean active;
 	boolean done;
 	boolean persistent;
+	Class<?> tool;
 	
 	Human human;
 	
@@ -26,6 +27,16 @@ public abstract class Job implements Tickable
 		this.persistent = persistent;
 		
 		active = false;
+	}
+	
+	public boolean isUsingTool()
+	{
+		return tool != null;
+	}
+	
+	public Class<?> getTool()
+	{
+		return tool;
 	}
 	
 	public void trigger()

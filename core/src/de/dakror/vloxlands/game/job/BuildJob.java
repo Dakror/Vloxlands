@@ -8,15 +8,20 @@ import de.dakror.vloxlands.util.event.IEvent;
 /**
  * @author Dakror
  */
-public class DismantleJob extends Job
+public class BuildJob extends Job
 {
-	private Structure target;
+	Structure target;
 	
-	public DismantleJob(Human human, Structure target, boolean persistent)
+	public BuildJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "mine" /* build */, "Dismantling " + target.getName(), 10, persistent);
+		super(human, "mine" /* build */, "Building " + target.getName(), 10, persistent);
 		this.target = target;
 		tool = BuildTool.class;
+	}
+	
+	public Structure getTarget()
+	{
+		return target;
 	}
 	
 	@Override
@@ -27,19 +32,19 @@ public class DismantleJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
+		
 		target.handleEvent(new IEvent()
 		{
-			
 			@Override
 			public Object getSender()
 			{
-				return DismantleJob.this;
+				return BuildJob.this;
 			}
 			
 			@Override
 			public String getName()
 			{
-				return "onDismantle";
+				return "onBuild";
 			}
 		});
 	}
