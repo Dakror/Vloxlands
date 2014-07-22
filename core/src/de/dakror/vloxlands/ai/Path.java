@@ -40,7 +40,8 @@ public class Path
 	
 	public Vector3 getLast()
 	{
-		return nodes.peek();
+		if(nodes.size > 0)	return nodes.peek();
+		return null;
 	}
 	
 	public Vector3 get()
