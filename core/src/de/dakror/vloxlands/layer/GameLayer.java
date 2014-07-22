@@ -11,8 +11,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
@@ -81,6 +83,8 @@ public class GameLayer extends Layer
 	public ModelBatch minimapBatch;
 	
 	public Structure cursorStructure;
+	boolean cursorStructurePlacable;
+	Array<ColorAttribute> defaultCursorStructureColors;
 	
 	public String[] activeAction;
 	public Island activeIsland;
@@ -227,6 +231,7 @@ public class GameLayer extends Layer
 		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
+		tc.setBuilt(true);
 		world.getIslands()[0].addStructure(tc, false, true);
 		
 		world.getIslands()[0].calculateInitBalance();
@@ -739,7 +744,28 @@ public class GameLayer extends Layer
 			cursorStructure.getTransform().setToTranslation(activeIsland.pos);
 			cursorStructure.getTransform().translate(hoveredVoxel);
 			cursorStructure.getTransform().translate(0, cursorStructure.getBoundingBox().getDimensions().y / 2, 0);
+			cursorStructure.setIsland(activeIsland);
 			cursorStructure.updateVoxelPos();
+			
+			cursorStructurePlacable = !cursorStructure.isStuckInTerrain();
+			
+			if (defaultCursorStructureColors == null)
+			{
+				defaultCursorStructureColors = new Array<ColorAttribute>();
+				
+				for (Material m : cursorStructure.getModelInstance().materials)
+				{
+					ColorAttribute ca = (ColorAttribute) m.get(ColorAttribute.Diffuse);
+					if (ca != null) defaultCursorStructureColors.add((ColorAttribute) ca.copy());
+				}
+			}
+			
+			for (int i = 0; i < cursorStructure.getModelInstance().materials.size; i++)
+			{
+				Material m = cursorStructure.getModelInstance().materials.get(i);
+				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultCursorStructureColors.get(i).color) : defaultCursorStructureColors.get(i).color));
+				m.set(new BlendingAttribute(!cursorStructurePlacable ? 0.8f : 1));
+			}
 		}
 		else pickRay(true, false, screenX, screenY);
 		return false;
@@ -767,8 +793,24 @@ public class GameLayer extends Layer
 		{
 			if (!regionSelectionMode)
 			{
-				selectionStartVoxel.set(-1, 0, 0);
-				pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+				if (cursorStructure != null)
+				{
+					if (cursorStructurePlacable)
+					{
+						cursorStructure.setBuilt(false);
+						cursorStructure.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
+						activeIsland.addStructure(cursorStructure, true, false);
+						
+						cursorStructure = null;
+						defaultCursorStructureColors = null;
+						cursorStructurePlacable = false;
+					}
+				}
+				else
+				{
+					selectionStartVoxel.set(-1, 0, 0);
+					pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
+				}
 			}
 			else
 			{

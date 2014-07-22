@@ -13,6 +13,7 @@ import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
+import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
@@ -30,10 +31,12 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	Vector3 voxelPos;
 	Inventory inventory;
 	ResourceList resourceList;
+	Island island;
 	boolean working;
 	
 	boolean dismantleRequested;
 	boolean confirmDismante;
+	boolean built;
 	
 	final Vector3 tmp = new Vector3();
 	
@@ -55,11 +58,30 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		inventory = new Inventory();
 		resourceList = new ResourceList();
 		working = true;
+		
+		setBuilt(false);
+	}
+	
+	public void setIsland(Island island)
+	{
+		this.island = island;
 	}
 	
 	public Vector3 getVoxelPos()
 	{
 		return voxelPos;
+	}
+	
+	public boolean isBuilt()
+	{
+		return built;
+	}
+	
+	public void setBuilt(boolean built)
+	{
+		this.built = built;
+		modelVisible = built;
+		additionalVisible = built;
 	}
 	
 	public Vector3 getCenter()
@@ -69,7 +91,40 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	
 	public void updateVoxelPos()
 	{
-		voxelPos = new Vector3(Math.round(posCache.x), Math.round(posCache.y), Math.round(posCache.z));
+		transform.getTranslation(posCache);
+		transform.getRotation(rotCache);
+		Vector3 p = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().cpy().scl(0.5f));
+		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y) + 1, Math.round(p.z));
+	}
+	
+	public boolean isStuckInTerrain()
+	{
+		int width = (int) Math.ceil(boundingBox.getDimensions().x);
+		int height = (int) Math.ceil(boundingBox.getDimensions().y);
+		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
+		
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+				for (int k = 0; k < depth; k++)
+					if (island.get(i + voxelPos.x, j + voxelPos.y, k + voxelPos.z) != 0) return true;
+		
+		return false;
+	}
+	
+	@Override
+	public void onSpawn()
+	{
+		if (!built)
+		{
+			int width = (int) Math.ceil(boundingBox.getDimensions().x);
+			int depth = (int) Math.ceil(boundingBox.getDimensions().z);
+			
+			byte gr = Voxel.get("GRAVEL").getId();
+			
+			for (int i = 0; i < width; i++)
+				for (int j = 0; j < depth; j++)
+					island.set(i + voxelPos.x, voxelPos.y - 1, j + voxelPos.z, gr, true);
+		}
 	}
 	
 	/**

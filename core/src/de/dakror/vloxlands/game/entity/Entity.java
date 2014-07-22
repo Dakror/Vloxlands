@@ -45,6 +45,8 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	protected float weight;
 	protected float uplift;
+	protected boolean modelVisible;
+	protected boolean additionalVisible;
 	
 	public boolean inFrustum;
 	public boolean hovered;
@@ -75,6 +77,8 @@ public abstract class Entity extends EntityBase implements Savable
 		transform.getTranslation(posCache);
 		
 		level = 0;
+		modelVisible = true;
+		additionalVisible = true;
 		
 		GameLayer.instance.addListener(this);
 	}
@@ -117,6 +121,11 @@ public abstract class Entity extends EntityBase implements Savable
 	public AnimationController getAnimationController()
 	{
 		return animationController;
+	}
+	
+	public ModelInstance getModelInstance()
+	{
+		return modelInstance;
 	}
 	
 	public Matrix4 getTransform()
@@ -162,9 +171,8 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		batch.render(modelInstance, environment);
-		
-		renderAdditional(batch, environment);
+		if (modelVisible) batch.render(modelInstance, environment);
+		if (additionalVisible) renderAdditional(batch, environment);
 		
 		if ((hovered || selected) && !minimapMode)
 		{

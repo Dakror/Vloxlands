@@ -127,7 +127,9 @@ public class Revolver extends Group
 						String s = GameLayer.instance.activeAction[GameLayer.instance.activeAction.length - 1].replace("entity:", "");
 						Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
 						if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
+						((Structure) e).setBuilt(true);
 						GameLayer.instance.cursorStructure = (Structure) e;
+						
 					}
 				}
 				else GameLayer.instance.activeAction = null;
