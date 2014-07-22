@@ -226,9 +226,61 @@ public class Human extends Creature
 			
 			if (action != null)
 			{
-				/*
-				 * if (action[0].equals("Mine")) { if (action[action.length - 1].startsWith("voxel")) { String[] voxels = action[action.length - 1].replace("voxel:", "").trim().split("\\|"); for (String s : voxels) { if (s.trim().length() == 0) continue; Voxel v = Voxel.getForId(Integer.parseInt(s)); Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)); if (v.getId() == vs.type.getId()) { PathBundle pb = null; boolean setJob = false; if (!carryingItemStack.isNull() && !carryingItemStack.canAdd(new ItemStack(Item.getForId(vs.type.getItemdrop()), 1))) { pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).capacityForTransported(true).node(NodeType.deposit).island(0)); setJob(pb.path, new DepositJob(this, pb.structure, false)); setJob = true; } if (equipCorrectToolForJob(job, !setJob,)) { setJob = true; } if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass())) { pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0)); if (pb != null) { Job pickup = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(v.getTool()), 1), true, false); if (!setJob) { setJob(pb.path, pickup); setJob = true; } else queueJob(pb.path, pickup); } } try { Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxelPos.getPos(), this, true); if (setJob) queueJob(p, job); else setJob(p, job); } catch (Exception e) { e.printStackTrace(); } break; } } } }
-				 */
+				// if (action[0].equals("Mine"))
+				// {
+				// if (action[action.length - 1].startsWith("voxel"))
+				// {
+				// String[] voxels = action[action.length - 1].replace("voxel:", "").trim().split("\\|");
+				// for (String s : voxels)
+				// {
+				// if (s.trim().length() == 0) continue;
+				// Voxel v = Voxel.getForId(Integer.parseInt(s));
+				// try
+				// {
+				// Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
+				// if (v.getId() == vs.type.getId())
+				// {
+				// PathBundle pb = null;
+				// boolean setJob = false;
+				// if (!carryingItemStack.isNull() && !carryingItemStack.canAdd(new ItemStack(Item.getForId(vs.type.getItemdrop()), 1)))
+				// {
+				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).capacityForTransported(true).node(NodeType.deposit).island(0));
+				// setJob(pb.path, new DepositJob(this, pb.structure, false));
+				// setJob = true;
+				// }
+				// // if (equipCorrectToolForJob(job, !setJob, ))
+				// // {
+				// // setJob = true;
+				// // }
+				// if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
+				// {
+				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));
+				// if (pb != null)
+				// {
+				// Job pickup = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(v.getTool()), 1), true, false);
+				// if (!setJob)
+				// {
+				// setJob(pb.path, pickup);
+				// setJob = true;
+				// }
+				// else queueJob(pb.path, pickup);
+				// }
+				// }
+				//
+				// Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxelPos.getPos(), this, true);
+				// if (setJob) queueJob(p, job);
+				// else setJob(p, job);
+				//
+				// break;
+				// }
+				// }
+				// catch (Exception e)
+				// {
+				// e.printStackTrace();
+				// }
+				// }
+				// }
+				// }
 				
 				GameLayer.instance.activeAction = null;
 			}
