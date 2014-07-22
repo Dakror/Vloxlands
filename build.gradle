@@ -2,8 +2,11 @@ buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven { url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/' }
     }
     dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
+        classpath 'com.android.tools.build:gradle:0.10+'
     }
 }
 
@@ -15,7 +18,7 @@ allprojects {
     ext {
         appName = 'Vloxlands'
         gdxVersion = '1.2.1-SNAPSHOT'
-        roboVMVersion = '0.0.13'
+        roboVMVersion = '0.0.14'
     }
 
     repositories {
@@ -34,6 +37,20 @@ project(":desktop") {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    }
+}
+
+project(":android") {
+    apply plugin: "android"
+
+    configurations { natives }
+
+    dependencies {
+        compile project(":core")
+        compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
     }
 }
 
