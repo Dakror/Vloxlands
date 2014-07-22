@@ -40,6 +40,8 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	boolean confirmDismante;
 	boolean built;
 	
+	int buildProgress;
+	
 	final Vector3 tmp = new Vector3();
 	
 	public Structure(float x, float y, float z, String model)
@@ -120,6 +122,22 @@ public abstract class Structure extends Entity implements IInventory, Savable
 				}
 		
 		return true;
+	}
+	
+	/**
+	 * @return true if building is done
+	 */
+	public boolean progressBuild()
+	{
+		if (buildProgress == resourceList.getCount())
+		{
+			if (!built) setBuilt(true);
+			return true;
+		}
+		buildProgress++;
+		
+		if (!built && buildProgress == resourceList.getCount()) setBuilt(true);
+		return buildProgress == resourceList.getCount();
 	}
 	
 	@Override
@@ -249,7 +267,6 @@ public abstract class Structure extends Entity implements IInventory, Savable
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			GameLayer.world.addEntity(i);
 		}
-		else if (e.getName().equals("onBuild")) setBuilt(true);
 	}
 	
 	public CurserCommand getDefaultCommand()

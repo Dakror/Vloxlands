@@ -17,6 +17,8 @@ public class ResourceList
 	int maxPopulation;
 	int costPopulation;
 	
+	int count;
+	
 	public ResourceList()
 	{
 		items = new int[Item.ITEMS];
@@ -31,7 +33,13 @@ public class ResourceList
 	public ResourceList add(Item item, int amount)
 	{
 		items[item.getId() + 128] = amount;
+		count += amount;
 		return this;
+	}
+	
+	public int getCount()
+	{
+		return count;
 	}
 	
 	public int get(Item item)

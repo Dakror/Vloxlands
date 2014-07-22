@@ -180,7 +180,7 @@ public class Human extends Creature
 				}
 				else j.tick(tick);
 			}
-			else j.trigger();
+			else j.trigger(tick);
 		}
 	}
 	
@@ -248,10 +248,10 @@ public class Human extends Creature
 				// setJob(pb.path, new DepositJob(this, pb.structure, false));
 				// setJob = true;
 				// }
-				// // if (equipCorrectToolForJob(job, !setJob, ))
-				// // {
-				// // setJob = true;
-				// // }
+				// if (equipCorrectToolForJob(job, !setJob, ))
+				// {
+				// setJob = true;
+				// }
 				// if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
 				// {
 				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));

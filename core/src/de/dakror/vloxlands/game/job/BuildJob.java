@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.job;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.tool.BuildTool;
-import de.dakror.vloxlands.util.event.IEvent;
 
 /**
  * @author Dakror
@@ -14,7 +13,7 @@ public class BuildJob extends Job
 	
 	public BuildJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "mine" /* build */, "Building " + target.getName(), 10, persistent);
+		super(human, "mine" /* build */, "Building " + target.getName(), -1, persistent);
 		this.target = target;
 		tool = BuildTool.class;
 	}
@@ -26,26 +25,10 @@ public class BuildJob extends Job
 	
 	@Override
 	public void tick(int tick)
-	{}
-	
-	@Override
-	public void onEnd()
 	{
-		super.onEnd();
-		
-		target.handleEvent(new IEvent()
+		if ((tick - startTick) % durationInTicks == 0 && tick > startTick)
 		{
-			@Override
-			public Object getSender()
-			{
-				return BuildJob.this;
-			}
-			
-			@Override
-			public String getName()
-			{
-				return "onBuild";
-			}
-		});
+			if (target.progressBuild()) done = true;
+		}
 	}
 }

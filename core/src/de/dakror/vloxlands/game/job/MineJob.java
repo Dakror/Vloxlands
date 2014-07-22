@@ -29,11 +29,11 @@ public class MineJob extends Job
 	}
 	
 	@Override
-	public void trigger()
+	public void trigger(int tick)
 	{
 		animation = "mine" + (target.voxelPos.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxelPos.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
 		
-		super.trigger();
+		super.trigger(tick);
 	}
 	
 	@Override
