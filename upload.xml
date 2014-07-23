@@ -6,18 +6,16 @@
 	<property name="debuglevel" value="source,lines,vars" />
 	<property name="target" value="1.7" />
 	<property name="source" value="1.7" />
-	<property name="mainclass" value="arise.${project.name}" /> <!--  The only line that has to be changed -->
-	
-	<path id="classpath">
-		<pathelement location="bin" />
-		<fileset dir="libs">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
 	
 	<target name="upload">
-	    <copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
-	    <copy file="android/bin/Vloxlands-android.apk" tofile="${project.name}.apk" />
+	    <copy tofile="${project.name}.jar">
+	        <first><fileset dir="${basedir}" includes="**/*.jar" /></first>
+	    </copy>
+	    <copy tofile="${project.name}.apk">
+	        <first><fileset dir="${basedir}" includes="**/*.apk" /></first>
+	    </copy>
+	    <!-->copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
+	    <copy file="android/bin/Vloxlands-android.apk" tofile="${project.name}.apk" /-->
 	    
    		<signjar jar="${project.name}.jar" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
 			storepass="dakrorKeystore" />
