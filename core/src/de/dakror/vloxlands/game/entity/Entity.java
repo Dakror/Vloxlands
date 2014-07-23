@@ -263,7 +263,7 @@ public abstract class Entity extends EntityBase implements Savable
 			}
 		}
 		
-		Gdx.app.debug("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
+		Gdx.app.log("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
 	}
 	
 	public static Entity getForId(byte id, float x, float y, float z)

@@ -1,11 +1,12 @@
 package de.dakror.vloxlands.util.base;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.layer.Layer;
 
@@ -14,14 +15,14 @@ import de.dakror.vloxlands.layer.Layer;
  */
 public abstract class GameBase extends ApplicationAdapter implements InputProcessor, GestureListener
 {
-	protected Array<Layer> layers = new Array<Layer>();
+	public CopyOnWriteArrayList<Layer> layers = new CopyOnWriteArrayList<Layer>();
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	
 	public void addLayer(Layer layer)
 	{
 		layer.show();
+		getMultiplexer().addProcessor(0, layer.gestureDetector);
 		getMultiplexer().addProcessor(0, layer);
-		getMultiplexer().addProcessor(1, layer.gestureDetector);
 		if (layer.getStage() != null) getMultiplexer().addProcessor(0, layer.getStage());
 		layers.add(layer);
 	}
@@ -38,7 +39,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 		getMultiplexer().removeProcessor(layer.gestureDetector);
 		if (layer.getStage() != null) getMultiplexer().removeProcessor(layer.getStage());
 		layer.dispose();
-		return layers.removeValue(layer, true);
+		return layers.remove(layer);
 	}
 	
 	public boolean removeLayer(Class<?> layerClass)
@@ -59,7 +60,7 @@ public abstract class GameBase extends ApplicationAdapter implements InputProces
 	
 	public Layer getActiveLayer()
 	{
-		return layers.peek();
+		return layers.get(layers.size() - 1);
 	}
 	
 	public void clearLayers()

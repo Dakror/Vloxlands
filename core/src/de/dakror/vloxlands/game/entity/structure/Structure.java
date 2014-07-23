@@ -152,7 +152,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 			
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < depth; j++)
-					island.set(i + voxelPos.x, voxelPos.y, j + voxelPos.z, gr, true);
+					island.set(i + voxelPos.x, voxelPos.y, j + voxelPos.z, gr);
 		}
 	}
 	

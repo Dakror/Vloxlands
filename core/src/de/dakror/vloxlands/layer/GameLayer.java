@@ -52,6 +52,7 @@ import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -66,7 +67,7 @@ public class GameLayer extends Layer
 	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
-	public static final float pickRayMaxDistance = 150f;
+	public static float pickRayMaxDistance = 150f;
 	
 	public static GameLayer instance;
 	
@@ -86,7 +87,7 @@ public class GameLayer extends Layer
 	boolean cursorStructurePlacable;
 	Array<Material> defaultCursorStructureMaterials;
 	
-	public String[] activeAction;
+	public String activeAction = "";
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
 	public CameraInputController controller;
@@ -144,6 +145,8 @@ public class GameLayer extends Layer
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
+		if (D.android()) pickRayMaxDistance = 80;
+		
 		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
@@ -152,6 +155,11 @@ public class GameLayer extends Layer
 			private final Vector3 tmpV1 = new Vector3();
 			private final Vector3 tmpV2 = new Vector3();
 			
+			@Override
+			public String toString()
+			{
+				return "CameraInputController";
+			}
 			
 			@Override
 			protected boolean process(float deltaX, float deltaY, int button)
@@ -185,7 +193,8 @@ public class GameLayer extends Layer
 		controller.forwardKey = -1;
 		controller.backwardKey = -1;
 		controller.translateButton = -1;
-		controller.rotateButton = Buttons.MIDDLE;
+		if (D.android()) controller.pinchZoomFactor = 50;
+		controller.rotateButton = D.android() ? Buttons.LEFT : Buttons.MIDDLE;
 		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
 		
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -206,16 +215,15 @@ public class GameLayer extends Layer
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		int AA = 4;
-		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth() * AA, Gdx.graphics.getHeight() * AA, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
 		env.shadowMap = shadowLight;
 		
-		int w = MathUtils.random(1, 5);
-		int d = MathUtils.random(1, 5);
+		// int w = MathUtils.random(1, 5);
+		// int d = MathUtils.random(1, 5);
 		
 		world = new World(1, 1); // TODO: multi island support
 		// world = new World(w, d);
-		Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
+		// Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
 	public void doneLoading()
@@ -571,6 +579,8 @@ public class GameLayer extends Layer
 				
 				for (Chunk c : i.getChunks())
 				{
+					if (c == null) continue;
+					
 					if (c.inFrustum && !c.isEmpty())
 					{
 						tmp1.set(i.pos.x + c.pos.x, i.pos.y + c.pos.y, i.pos.z + c.pos.z);
@@ -622,21 +632,21 @@ public class GameLayer extends Layer
 				selectedVoxel.set(selVoxel).add(selectedChunk.pos);
 				
 				for (SelectionListener sl : listeners)
-					sl.onVoxelSelection(new VoxelSelection(selectedIsland, new VoxelPos(selVoxel.cpy().add(selectedChunk.pos), selectedChunk.get((int) selVoxel.x, (int) selVoxel.y, (int) selVoxel.z)), dir), lmb, activeAction);
+					sl.onVoxelSelection(new VoxelSelection(selectedIsland, new VoxelPos(selVoxel.cpy().add(selectedChunk.pos), selectedChunk.get((int) selVoxel.x, (int) selVoxel.y, (int) selVoxel.z)), dir), lmb);
 			}
 			else if (selectedStructure != null)
 			{
 				selVoxel.set(-1, 0, 0);
 				selectedStructure.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onStructureSelection(selectedStructure, lmb, activeAction);
+					sl.onStructureSelection(selectedStructure, lmb);
 			}
 			else if (selectedEntity != null && selectedEntity instanceof Creature)
 			{
 				selVoxel.set(-1, 0, 0);
 				selectedEntity.selected = true;
 				for (SelectionListener sl : listeners)
-					sl.onCreatureSelection((Creature) selectedEntity, lmb, activeAction);
+					sl.onCreatureSelection((Creature) selectedEntity, lmb);
 			}
 		}
 	}
@@ -650,6 +660,7 @@ public class GameLayer extends Layer
 		
 		for (Chunk c : island.getChunks())
 		{
+			if (c == null) continue;
 			if (c.inFrustum && !c.isEmpty())
 			{
 				tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
@@ -696,7 +707,7 @@ public class GameLayer extends Layer
 				if (!dispatched && entity instanceof Creature)
 				{
 					for (SelectionListener sl : listeners)
-						sl.onCreatureSelection((Creature) entity, true, activeAction);
+						sl.onCreatureSelection((Creature) entity, true);
 					dispatched = true;
 				}
 			}
@@ -723,14 +734,18 @@ public class GameLayer extends Layer
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+		if (D.android()) mouseMoved(screenX, screenY);
+		else
 		{
-			float f = 0.1f;
-			
-			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
-			camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
-			camera.update();
-			controller.update();
+			if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+			{
+				float f = 0.1f;
+				
+				controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
+				camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
+				camera.update();
+				controller.update();
+			}
 		}
 		return false;
 	}
@@ -846,7 +861,7 @@ public class GameLayer extends Layer
 					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
 					
 					for (SelectionListener sl : listeners)
-						sl.onVoxelRangeSelection(activeIsland, selectionStartVoxel, selectedVoxel, regionSelectionLMB, activeAction);
+						sl.onVoxelRangeSelection(activeIsland, selectionStartVoxel, selectedVoxel, regionSelectionLMB);
 					
 					regionSelectionMode = false;
 				}
@@ -874,5 +889,28 @@ public class GameLayer extends Layer
 	public boolean removeListener(SelectionListener value)
 	{
 		return listeners.removeValue(value, true);
+	}
+	
+	/*
+	 * Only call when @param:action != null
+	 */
+	public void action(String action)
+	{
+		if (action.contains("|region"))
+		{
+			GameLayer.instance.selectionStartVoxel.set(-1, 0, 0);
+			GameLayer.instance.selectedVoxel.set(-1, 0, 0);
+			GameLayer.instance.regionSelectionMode = true;
+		}
+		if (action.contains("entity"))
+		{
+			String s = action.replace("entity:", "");
+			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
+			if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
+			((Structure) e).setBuilt(true);
+			GameLayer.instance.cursorStructure = (Structure) e;
+		}
+		
+		activeAction = action;
 	}
 }

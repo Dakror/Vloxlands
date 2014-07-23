@@ -218,13 +218,13 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
 		if ((wasSelected || selected) && !lmb)
 		{
 			selected = true;
 			
-			if (action != null)
+			if (GameLayer.instance.activeAction.length() > 0)
 			{
 				// if (action[0].equals("Mine"))
 				// {
@@ -282,7 +282,7 @@ public class Human extends Creature
 				// }
 				// }
 				
-				GameLayer.instance.activeAction = null;
+				GameLayer.instance.activeAction = "";
 			}
 			else
 			{
@@ -293,7 +293,7 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb, String[] action)
+	public void onStructureSelection(Structure structure, boolean lmb)
 	{
 		if (wasSelected && !lmb)
 		{
@@ -330,25 +330,22 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb, String[] action)
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
 	{
 		if ((wasSelected || selected) && !lmb)
 		{
 			selected = true;
 			
-			if (action != null)
+			if (GameLayer.instance.activeAction.length() > 0)
 			{
-				if (action[0].equals("Mine"))
+				if (GameLayer.instance.activeAction.equals("clear"))
 				{
-					if (action[action.length - 1].startsWith("clear"))
-					{
-						if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
-						else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // TODO: finish clear region action
-					}
+					if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
+					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // TODO: finish clear region action
 				}
-				
-				GameLayer.instance.activeAction = null;
 			}
+			
+			GameLayer.instance.activeAction = "";
 		}
 	}
 	

@@ -298,14 +298,14 @@ public class Voxel
 					break;
 				}
 				default:
-					Gdx.app.debug("Voxel.loadVoxels", "Unhandled voxel data column: " + c);
+					Gdx.app.log("Voxel.loadVoxels", "Unhandled voxel data column: " + c);
 					break;
 			}
 		}
 		
 		voxels.put(voxel.getName().toUpperCase().replace(" ", "_"), voxel);
 		
-		Gdx.app.debug("Voxel.loadVoxels", voxels.size + " voxels loaded.");
+		Gdx.app.log("Voxel.loadVoxels", voxels.size + " voxels loaded.");
 		
 	}
 	

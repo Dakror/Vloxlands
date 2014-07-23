@@ -6,7 +6,6 @@ import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -31,7 +30,6 @@ import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.query.Query.Queryable;
-import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -132,7 +130,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public void addEntity(Entity e)
 	{
-		if (e instanceof Structure) Gdx.app.debug("World.addEntity", "Discouraged! Structures should be added to a specific island!");
+		if (e instanceof Structure) Gdx.app.log("World.addEntity", "Discouraged! Structures should be added to a specific island!");
 		e.onSpawn();
 		entities.add(e);
 	}
@@ -151,16 +149,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				loadedChunks += island.loadedChunks;
 			}
 		}
-		
-		Renderable r = pool.obtain();
-		r.worldTransform.setToTranslation(64, 100, 64);
-		r.material = World.opaque;
-		r.mesh = Voxel.getForId(11).getMesh();
-		r.meshPartOffset = 0;
-		r.meshPartSize = 36;
-		r.primitiveType = GL20.GL_TRIANGLES;
-		renderables.add(r);
-		
 	}
 	
 	public void render(ModelBatch batch, Environment environment)

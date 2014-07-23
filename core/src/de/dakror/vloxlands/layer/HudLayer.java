@@ -44,6 +44,7 @@ import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.Revolver;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TooltipImageButton;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -102,12 +103,12 @@ public class HudLayer extends Layer implements SelectionListener
 		Revolver actions = new Revolver();
 		actions.setPosition(10, 10);
 		
-		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
+		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "mine");
 		s.getTooltip().set("Mine", "Mine or dig terrain.");
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(3, 0), "clear|region");
 		s.getTooltip().set("Clear", "Clear a selected region of natural materials.");
-		actions.addSlot(1, "Mine", s);
+		actions.addSlot(1, "mine", s);
 		
 		// s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
 		// s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
@@ -146,25 +147,34 @@ public class HudLayer extends Layer implements SelectionListener
 		// s.setDisabled(true);
 		// actions.addSlot(2, "Ore", s);
 		
-		s = new RevolverSlot(stage, new Vector2(1, 5), "Build");
+		s = new RevolverSlot(stage, new Vector2(1, 5), "build");
 		s.getTooltip().set("Build", "Build various building and structures.");
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(1, 5), "entity:129");
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
-		actions.addSlot(1, "Build", s);
+		actions.addSlot(1, "build", s);
 		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
 		s.getTooltip().set("Lumberjack", "Chops nearby trees for wooden logs.");
-		actions.addSlot(1, "Build", s);
+		actions.addSlot(1, "build", s);
 		
-		s = new RevolverSlot(stage, new Vector2(5, 1), "Potato");
-		s.getTooltip().set("Potato", "Hi.");
+		if (D.android())
+		{
+			s = new RevolverSlot(stage, new Vector2(1, 6), "controls");
+			s.getTooltip().set("Controls", "Selection modes and controls.");
+			actions.addSlot(0, null, s);
+			s = new RevolverSlot(stage, new Vector2(2, 6), "rect|android");
+			s.getTooltip().set("Rectangle Selection", "Select a group of entities by dragging a rectangle.");
+			actions.addSlot(1, "controls", s);
+		}
+		
+		s = new RevolverSlot(stage, new Vector2(5, 0), "collapse");
 		actions.addSlot(0, null, s);
 		
 		stage.addActor(actions);
 	}
 	
 	@Override
-	public void onCreatureSelection(final Creature creature, boolean lmb, String[] action)
+	public void onCreatureSelection(final Creature creature, boolean lmb)
 	{
 		if (lmb && selectedStructureWindow.setShown(false))
 		{
@@ -270,7 +280,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -285,7 +295,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onStructureSelection(final Structure structure, boolean lmb, String[] action)
+	public void onStructureSelection(final Structure structure, boolean lmb)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -454,7 +464,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb, String[] action)
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
 	{}
 	
 	@Override
@@ -470,6 +480,8 @@ public class HudLayer extends Layer implements SelectionListener
 				float height = Math.abs(dragStart.y - dragEnd.y) / Gdx.graphics.getHeight();
 				
 				GameLayer.instance.selectionBox(new Rectangle(x, y, width, height));
+				
+				GameLayer.instance.activeAction = "";
 			}
 			dragStart.set(-1, -1);
 			dragEnd.set(-1, -1);
@@ -488,7 +500,7 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if (buttonDown == Buttons.LEFT)
+		if ((!D.android() && buttonDown == Buttons.LEFT) || GameLayer.instance.activeAction.equals("rect|android"))
 		{
 			if (dragStart.x == -1)
 			{
@@ -499,6 +511,7 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			return true;
 		}
+		
 		return false;
 	}
 	
@@ -520,5 +533,4 @@ public class HudLayer extends Layer implements SelectionListener
 			}
 		}
 	}
-	
 }

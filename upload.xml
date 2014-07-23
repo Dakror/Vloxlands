@@ -17,6 +17,13 @@
 	
 	<target name="upload">
 	    <copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
+	    <copy file="android/bin/Vloxlands-android.apk" tofile="${project.name}.apk" />
+	    
+   		<signjar jar="${project.name}.jar" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
+			storepass="dakrorKeystore" />
+   		
+   		<signjar jar="${project.name}.apk" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
+			storepass="dakrorKeystore" />
 	    
 		<echo message="starting FTP file upload" />
 		<java classname="de.dakror.dakrorbin.Uploader">

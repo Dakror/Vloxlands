@@ -2,6 +2,7 @@ package de.dakror.vloxlands.util;
 
 import java.util.Arrays;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 
 /**
@@ -31,5 +32,10 @@ public class D
 	public static String r(double d)
 	{
 		return (Math.round(d * 1000) / 1000.0) + "";
+	}
+	
+	public static boolean android()
+	{
+		return Gdx.app.getType() == ApplicationType.Android;
 	}
 }

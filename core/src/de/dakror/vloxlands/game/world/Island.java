@@ -72,12 +72,6 @@ public class Island implements RenderableProvider, Tickable, Savable
 		minimapMode = false;
 		index = new Vector3();
 		pos = new Vector3();
-		
-		int l = 0;
-		for (int i = 0; i < CHUNKS; i++)
-			for (int j = 0; j < CHUNKS; j++)
-				for (int k = 0; k < CHUNKS; k++)
-					chunks[l++] = new Chunk(i, j, k, this);
 	}
 	
 	public void setPos(Vector3 pos)
@@ -101,6 +95,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 		weight = 0;
 		for (Chunk c : chunks)
 		{
+			if (c == null) continue;
 			c.calculateWeight();
 			weight += c.weight;
 		}
@@ -114,6 +109,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 		uplift = 0;
 		for (Chunk c : chunks)
 		{
+			if (c == null) continue;
 			c.calculateUplift();
 			uplift += c.uplift;
 		}
@@ -143,7 +139,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 		pos.y += delta;
 		
 		for (Chunk c : chunks)
-			c.tick(tick);
+			if (c != null) c.tick(tick);
 		
 		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
 		{
@@ -152,7 +148,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			{
 				s.selected = false;
 				for (SelectionListener sl : GameLayer.instance.listeners)
-					sl.onStructureSelection(null, true, null);
+					sl.onStructureSelection(null, true);
 				s.dispose();
 				iter.remove();
 			}
@@ -208,20 +204,23 @@ public class Island implements RenderableProvider, Tickable, Savable
 		if (chunkY < 0 || chunkY >= CHUNKS) return 0;
 		int chunkZ = (int) (z / Chunk.SIZE);
 		if (chunkZ < 0 || chunkZ >= CHUNKS) return 0;
+		
+		ensureChunkExists(chunkX, chunkY, chunkZ);
+		
 		return chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].get((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE);
 	}
 	
 	public void add(float x, float y, float z, byte id)
 	{
-		set(x, y, z, id, false);
+		set(x, y, z, id, false, true);
 	}
 	
 	public void set(float x, float y, float z, byte id)
 	{
-		set(x, y, z, id, true);
+		set(x, y, z, id, true, true);
 	}
 	
-	public void set(float x, float y, float z, byte id, boolean force)
+	public void set(float x, float y, float z, byte id, boolean force, boolean notify)
 	{
 		int chunkX = (int) (x / Chunk.SIZE);
 		if (chunkX < 0 || chunkX >= CHUNKS) return;
@@ -234,14 +233,22 @@ public class Island implements RenderableProvider, Tickable, Savable
 		int y1 = (int) y % Chunk.SIZE;
 		int z1 = (int) z % Chunk.SIZE;
 		
+		ensureChunkExists(chunkX, chunkY, chunkZ);
+		
 		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force))
 		{
 			if (GameLayer.instance.activeIsland == this && id == Voxel.get("AIR").getId() && x == GameLayer.instance.selectedVoxel.x && y == GameLayer.instance.selectedVoxel.y && z == GameLayer.instance.selectedVoxel.z)
 			{
 				GameLayer.instance.selectedVoxel.set(-1, 0, 0);
 			}
-			notifySurroundingChunks(chunkX, chunkY, chunkZ);
+			if (notify) notifySurroundingChunks(chunkX, chunkY, chunkZ);
 		}
+	}
+	
+	public void ensureChunkExists(int x, int y, int z)
+	{
+		int index = z + y * CHUNKS + x * CHUNKS * CHUNKS;
+		if (chunks[index] == null) chunks[index] = new Chunk(x, y, z, this);
 	}
 	
 	public void notifySurroundingChunks(int cx, int cy, int cz)
@@ -250,7 +257,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 		{
 			try
 			{
-				chunks[(int) ((cz + d.dir.z) + (cy + d.dir.y) * CHUNKS + (cx + d.dir.x) * CHUNKS * CHUNKS)].forceUpdate();
+				int index = (int) ((cz + d.dir.z) + (cy + d.dir.y) * CHUNKS + (cx + d.dir.x) * CHUNKS * CHUNKS);
+				if (chunks[index] != null) chunks[index].forceUpdate();
 			}
 			catch (IndexOutOfBoundsException e)
 			{
@@ -297,7 +305,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public void grassify()
 	{
 		for (Chunk c : chunks)
-			c.grassify(this);
+			if (c != null) c.grassify(this);
 	}
 	
 	protected void renderStructures(ModelBatch batch, Environment environment, boolean minimapMode)
@@ -360,14 +368,14 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public boolean wasDrawnOnce()
 	{
 		for (Chunk c : chunks)
-			if (!c.isEmpty() && !c.drawn) return false;
+			if (c != null && !c.isEmpty() && !c.drawn) return false;
 		return true;
 	}
 	
 	public boolean isFullyLoaded()
 	{
 		for (Chunk c : chunks)
-			if (!c.isEmpty() && !c.loaded) return false;
+			if (c != null && !c.isEmpty() && !c.loaded) return false;
 		return true;
 	}
 	
@@ -386,6 +394,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
+			if (chunk == null) continue;
 			if (chunk.isEmpty()) continue;
 			
 			if (!chunk.onceLoaded) chunk.load();
@@ -545,8 +554,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 		
 		for (Chunk c : chunks)
 		{
-			if (!c.isEmpty()) i++;
-			c.save(baos1);
+			if (c == null) continue;
+			if (!c.isEmpty())
+			{
+				i++;
+				c.save(baos1);
+			}
 		}
 		
 		Bits.putShort(baos, i); // maximum of i is 8³ = 512 so 1 byte is not enough

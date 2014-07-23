@@ -21,19 +21,21 @@ public class WorldGenerator extends Thread
 	@Override
 	public void run()
 	{
-		int total = GameLayer.world.getWidth() * GameLayer.world.getDepth();
 		for (int i = 0; i < GameLayer.world.getWidth(); i++)
 		{
 			for (int j = 0; j < GameLayer.world.getDepth(); j++)
 			{
-				Island island = IslandGenerator.generate();
+				Island island = IslandGenerator.generate(this);
 				island.setPos(new Vector3(i * Island.SIZE, island.pos.y, j * Island.SIZE));
 				GameLayer.world.addIsland(i, j, island);
-				
-				progress += 1f / total;
 			}
 		}
-		
 		done = true;
+	}
+	
+	public void step()
+	{
+		int total = GameLayer.world.getWidth() * GameLayer.world.getDepth() * 6;
+		progress += 1f / total;
 	}
 }

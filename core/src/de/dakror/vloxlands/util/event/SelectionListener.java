@@ -11,11 +11,11 @@ import de.dakror.vloxlands.game.world.Island;
  */
 public interface SelectionListener
 {
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action);
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb);
 	
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb, String[] action);
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb);
 	
-	public void onStructureSelection(Structure structure, boolean lmb, String[] action);
+	public void onStructureSelection(Structure structure, boolean lmb);
 	
-	public void onCreatureSelection(Creature creature, boolean lmb, String[] action);
+	public void onCreatureSelection(Creature creature, boolean lmb);
 }

@@ -252,13 +252,13 @@ public class Item
 					break;
 				}
 				default:
-					Gdx.app.debug("Item.loadItems", "Unhandled item data column: " + c);
+					Gdx.app.log("Item.loadItems", "Unhandled item data column: " + c);
 					break;
 			}
 		}
 		
 		items.put(item.getName().toUpperCase().replace(" ", "_"), item);
 		
-		Gdx.app.debug("Item.loadItems", items.size + " items loaded.");
+		Gdx.app.log("Item.loadItems", items.size + " items loaded.");
 	}
 }

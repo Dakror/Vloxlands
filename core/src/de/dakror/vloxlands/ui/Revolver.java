@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.ui;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -10,8 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 
-import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.layer.GameLayer;
 
 /**
@@ -80,59 +77,9 @@ public class Revolver extends Group
 				if (g != null) g.setVisible(true);
 				if (g == null)
 				{
-					String action = "";
-					Actor p = slot;
-					while (p.getName() != null)
-					{
-						action = p.getName() + (action.length() > 0 ? "-" + action : "");
-						if (p instanceof RevolverSlot)
-						{
-							p = p.getParent();
-						}
-						else
-						{
-							for (Actor a : getChildren())
-							{
-								if ((Integer) a.getUserObject() == (Integer) p.getUserObject() - 1)
-								{
-									boolean done = false;
-									
-									for (Actor b : ((Group) a).getChildren())
-									{
-										if (b.getName().equals(p.getName()))
-										{
-											done = true;
-											p = b.getParent();
-											break;
-										}
-									}
-									
-									if (done) break;
-								}
-							}
-						}
-						
-						if ((Integer) p.getUserObject() == 0) break;
-					}
-					
-					GameLayer.instance.activeAction = action.split("-");
-					if (GameLayer.instance.activeAction[GameLayer.instance.activeAction.length - 1].contains("|region"))
-					{
-						GameLayer.instance.selectionStartVoxel.set(-1, 0, 0);
-						GameLayer.instance.selectedVoxel.set(-1, 0, 0);
-						GameLayer.instance.regionSelectionMode = true;
-					}
-					if (GameLayer.instance.activeAction[GameLayer.instance.activeAction.length - 1].contains("entity"))
-					{
-						String s = GameLayer.instance.activeAction[GameLayer.instance.activeAction.length - 1].replace("entity:", "");
-						Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
-						if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
-						((Structure) e).setBuilt(true);
-						GameLayer.instance.cursorStructure = (Structure) e;
-						
-					}
+					GameLayer.instance.action(slot.getName());
 				}
-				else GameLayer.instance.activeAction = null;
+				else GameLayer.instance.activeAction = "";
 				
 				slot.setChecked(false);
 			}
@@ -149,7 +96,7 @@ public class Revolver extends Group
 	public float getDegrees(int slots, int level)
 	{
 		float radius = getRadius(level);
-		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12;
+		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12 * (RevolverSlot.SIZE / RevolverSlot.DEFAULT_SIZE);
 		float degreesPerSlot = (float) Math.toDegrees(Math.asin(slotRadius / (radius - slotRadius)));
 		
 		return slots * degreesPerSlot;

@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
+import de.dakror.vloxlands.util.D;
 
 /**
  * @author Dakror
@@ -29,6 +30,9 @@ public class LoadingLayer extends Layer
 	
 	boolean worldGen;
 	
+	boolean iconsSet;
+	String[] icons = { "bomb", "gears", "queue", "sleep", "work" };
+	
 	@Override
 	public void render(float delta)
 	{
@@ -36,15 +40,26 @@ public class LoadingLayer extends Layer
 		
 		if (Vloxlands.assets.update())
 		{
+			if (!iconsSet)
+			{
+				for (String i : icons)
+					Vloxlands.skin.add(i, Vloxlands.assets.get("img/gui/icons/" + i + ".png", Texture.class));
+				
+				Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
+				Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
+				Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
+				iconsSet = true;
+			}
 			if (!worldGen)
 			{
 				Vloxlands.currentGame.addLayer(new GameLayer());
 				worldGenerator.start();
 				worldGen = true;
 			}
-			else if (worldGenerator.done)
+			else if (worldGenerator.done && percent > 0.99)
 			{
 				Vloxlands.currentGame.addLayer(new HudLayer());
+				if (D.android()) Vloxlands.currentGame.addLayer(new DebugLayer());
 				Vloxlands.currentGame.removeLayer(this);
 				GameLayer.instance.doneLoading();
 				return;
@@ -52,7 +67,10 @@ public class LoadingLayer extends Layer
 		}
 		
 		int height = Math.round(256 * percent);
-		percent = Interpolation.linear.apply(percent, (Vloxlands.assets.getProgress() + worldGenerator.progress) / 2f, 0.01f);
+		
+		float np = (Vloxlands.assets.getProgress() + worldGenerator.progress) / 2f;
+		
+		percent = Interpolation.linear.apply(percent, np, Math.max((np - percent) / 5, 0.1f));
 		
 		stage.act();
 		stage.draw();
@@ -80,26 +98,10 @@ public class LoadingLayer extends Layer
 	{
 		modal = true;
 		
-		String[] icons = { "bomb", "gears", "queue", "sleep", "work" };
-		
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
 		Vloxlands.assets.load("img/logo/logo256-blur.png", Texture.class);
-		Vloxlands.assets.load("img/icons.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
-		for (String i : icons)
-			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
 		
 		Vloxlands.assets.finishLoading();
-		
-		for (String i : icons)
-			Vloxlands.skin.add(i, Vloxlands.assets.get("img/gui/icons/" + i + ".png", Texture.class));
-		
-		Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
-		Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
-		Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
 		
 		stage = new Stage(new ScreenViewport());
 		font = new BitmapFont();
@@ -109,11 +111,19 @@ public class LoadingLayer extends Layer
 		
 		stage.addActor(logo);
 		
+		Vloxlands.assets.load("img/icons.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
+		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
+		for (String i : icons)
+			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
+		
 		// TODO: Add all models wanting to be loaded
 		Vloxlands.assets.load("models/creature/humanblend/humanblend.g3db", Model.class);
 		Vloxlands.assets.load("models/structure/PH_tent_red/PH_tent_red.g3db", Model.class);
 		Vloxlands.assets.load("models/structure/PH_tent_green/PH_tent_green.g3db", Model.class);
-		Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
+		// Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
 		for (Item item : Item.getAll())
 			if (item.isModel() && item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
 	}

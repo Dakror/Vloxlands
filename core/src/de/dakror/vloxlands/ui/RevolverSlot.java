@@ -14,13 +14,14 @@ import de.dakror.vloxlands.game.item.Item;
  */
 public class RevolverSlot extends TooltipImageButton
 {
-	public static final int SIZE = 54;
+	public static final float DEFAULT_SIZE = 54f;
+	public static int SIZE = (int) DEFAULT_SIZE;
 	
 	public RevolverSlot(Stage stage, Vector2 icon, String name)
 	{
 		super(stage, createStyle(icon));
 		setName(name);
-		pad(12);
+		pad(12 * (SIZE / DEFAULT_SIZE));
 	}
 	
 	private static ImageButtonStyle createStyle(Vector2 icon)
