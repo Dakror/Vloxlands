@@ -2,6 +2,7 @@ package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.item.tool.BuildTool;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
@@ -13,8 +14,9 @@ public class DismantleJob extends Job
 	
 	public DismantleJob(Human human, Structure target, boolean persistent)
 	{
-		super(human, "mine_lower", "Dismantling " + target.getName(), 10, persistent);
+		super(human, "mine" /* build */, "Dismantling " + target.getName(), 10, persistent);
 		this.target = target;
+		tool = BuildTool.class;
 	}
 	
 	@Override
@@ -31,7 +33,7 @@ public class DismantleJob extends Job
 			@Override
 			public Object getSender()
 			{
-				return this;
+				return DismantleJob.this;
 			}
 			
 			@Override

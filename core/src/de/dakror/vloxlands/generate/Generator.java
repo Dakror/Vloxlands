@@ -17,7 +17,7 @@ import de.dakror.vloxlands.game.world.World;
 
 public abstract class Generator
 {
-	public abstract void generate(Island island);
+	public abstract void generate(WorldGenerator worldGen, Island island);
 	
 	public static Array<Byte> getNaturalTypes()
 	{
@@ -43,11 +43,14 @@ public abstract class Generator
 	
 	public static void fillHorizontalCircle(Island island, int x, int y, int z, float radius, byte[] b, boolean force)
 	{
-		for (int i = 0; i < Island.SIZE; i++) // x axis
+		int rad = (int) Math.ceil(radius);
+		for (int i = -rad; i <= rad; i++)
 		{
-			for (int j = 0; j < Island.SIZE; j++) // z axis
+			for (int j = -rad; j <= rad; j++)
 			{
-				if (Vector2.dst(i, j, x, z) < radius) island.set(i, y, j, b[((int) (MathUtils.random() * b.length))], force);
+				int x1 = x + i;
+				int z1 = z + j;
+				if (Vector2.dst(i, j, 0, 0) < radius) island.set(x1, y, z1, b[((int) (MathUtils.random() * b.length))], force, false);
 			}
 		}
 	}
@@ -100,6 +103,8 @@ public abstract class Generator
 	
 	public static boolean hasNaturalVoxel(Chunk c)
 	{
+		if (c == null) return false;
+		
 		for (byte b : getNaturalTypes())
 			if (c.getResource(b) > 0) return true;
 		
@@ -133,6 +138,8 @@ public abstract class Generator
 			{
 				for (int k = 0; k < Chunk.SIZE; k++)
 				{
+					if (chunkVoxels.size > 50) break;
+					
 					byte id = chunk.get(i, j, k);
 					if (naturalTypes.contains(id, false)) chunkVoxels.add(new Vector3(i + c.x * Chunk.SIZE, j + c.y * Chunk.SIZE, k + c.z * Chunk.SIZE));
 				}
@@ -171,7 +178,7 @@ public abstract class Generator
 						byte b2 = island.get(i, j, k);
 						if (b2 != Voxel.get("AIR").getId()) vs.uplift += Voxel.getForId(b2).getWeight(); // balances uplift-weight in case of v.getUplift() > 0
 						
-						island.set(i, j, k, bv);
+						island.set(i, j, k, bv, true, false);
 					}
 				}
 			}
@@ -202,7 +209,7 @@ public abstract class Generator
 				byte wood = Voxel.get("WOOD").getId();
 				
 				for (int k = 0; k < height; k++)
-					island.set(x, vp.y + 1 + k, z, wood);
+					island.set(x, vp.y + 1 + k, z, wood, true, false);
 				
 				generateBezier(island, Beziers.TREE, x, z, 5, (int) (vp.y + 1 + height * 1.5f), (int) (height * 1.4f), new byte[] { Voxel.get("LEAVES").getId() }, false);
 			}
@@ -226,7 +233,7 @@ public abstract class Generator
 			int h = (int) (0.3f * ((MAXRAD - rad) * (radiusAt0 - pos.cpy().sub(m).len()) + topLayers));
 			h = Math.min(h, Island.SIZE - topLayers - 10);
 			
-			island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId());
+			island.set((int) pos.x, -1 + y, (int) pos.y, Voxel.get("STONE").getId(), true, false);
 			
 			generateBezier(island, Beziers.SPIKE, (int) pos.x, (int) pos.y /* Z */, rad, (int) (y - highest.x * topLayers), h, ratio, false);
 		}
@@ -271,7 +278,7 @@ public abstract class Generator
 			for (int i = 0; i < amounts[j]; i++)
 			{
 				Vector3 v = pickRandomNaturalVoxel(island);
-				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId());
+				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId(), true, false);
 			}
 		}
 	}

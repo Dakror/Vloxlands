@@ -77,44 +77,9 @@ public class Revolver extends Group
 				if (g != null) g.setVisible(true);
 				if (g == null)
 				{
-					String action = "";
-					Actor p = slot;
-					while (p.getName() != null)
-					{
-						action = p.getName() + (action.length() > 0 ? "-" + action : "");
-						if (p instanceof RevolverSlot)
-						{
-							p = p.getParent();
-						}
-						else
-						{
-							for (Actor a : getChildren())
-							{
-								if ((Integer) a.getUserObject() == (Integer) p.getUserObject() - 1)
-								{
-									boolean done = false;
-									
-									for (Actor b : ((Group) a).getChildren())
-									{
-										if (b.getName().equals(p.getName()))
-										{
-											done = true;
-											p = b.getParent();
-											break;
-										}
-									}
-									
-									if (done) break;
-								}
-							}
-						}
-						
-						if ((Integer) p.getUserObject() == 0) break;
-					}
-					
-					GameLayer.instance.activeAction = action.split("-");
+					GameLayer.instance.action(slot.getName());
 				}
-				else GameLayer.instance.activeAction = null;
+				else GameLayer.instance.activeAction = "";
 				
 				slot.setChecked(false);
 			}
@@ -131,7 +96,7 @@ public class Revolver extends Group
 	public float getDegrees(int slots, int level)
 	{
 		float radius = getRadius(level);
-		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12;
+		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12 * (RevolverSlot.SIZE / RevolverSlot.DEFAULT_SIZE);
 		float degreesPerSlot = (float) Math.toDegrees(Math.asin(slotRadius / (radius - slotRadius)));
 		
 		return slots * degreesPerSlot;

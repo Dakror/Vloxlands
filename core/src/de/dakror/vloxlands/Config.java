@@ -20,7 +20,7 @@ public class Config
 	
 	public static void init()
 	{
-		if (Gdx.app.getType() == ApplicationType.Android) dir = Gdx.files.internal("de.dakror/Vloxlands/");
+		if (Gdx.app.getType() == ApplicationType.Android) dir = Gdx.files.local("de.dakror/Vloxlands/");
 		else dir = Gdx.files.external(".dakror/Vloxlands/");
 		
 		dir.mkdirs();

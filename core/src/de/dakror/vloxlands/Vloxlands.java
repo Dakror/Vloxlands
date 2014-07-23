@@ -22,7 +22,9 @@ import de.dakror.vloxlands.layer.DebugLayer;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
+import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.Compressor;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
@@ -48,6 +50,8 @@ public class Vloxlands extends GameBase
 		Dialog.fadeDuration = 0;
 		
 		Config.init();
+		
+		if (D.android()) RevolverSlot.SIZE = 80;
 		
 		Entity.loadEntities();
 		Voxel.loadVoxels();

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -34,6 +35,7 @@ import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
 import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.IslandInfo;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.Minimap;
@@ -42,6 +44,7 @@ import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.Revolver;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TooltipImageButton;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -100,64 +103,78 @@ public class HudLayer extends Layer implements SelectionListener
 		Revolver actions = new Revolver();
 		actions.setPosition(10, 10);
 		
-		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "Mine");
-		s.getTooltip().set("Mine", "Mine or harvest natural ressources");
-		s.setDisabled(true);
+		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "mine");
+		s.getTooltip().set("Mine", "Mine or dig terrain.");
 		actions.addSlot(0, null, s);
-		s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
-		s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
-		s.setDisabled(true);
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1|14");
-		s.getTooltip().set("(Sand-)Stone", "Mine rocks for stone, respectively sandstone in deserts, using a pickaxe.");
-		actions.addSlot(1, "Mine", s);
+		s = new RevolverSlot(stage, new Vector2(3, 0), "clear|region");
+		s.getTooltip().set("Clear", "Clear a selected region of natural materials.");
+		actions.addSlot(1, "mine", s);
 		
-		s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
-		s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(3, 2), "voxel:3");
-		s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
-		s = new RevolverSlot(stage, new Vector2(2, 2), "voxel:4");
-		s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
-		s = new RevolverSlot(stage, new Vector2(1, 2), "voxel:5");
-		s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
-		actions.addSlot(2, "Crystal", s);
+		// s = new RevolverSlot(stage, new Vector2(0, 3), "voxel:11");
+		// s.getTooltip().set("Wood", "Chop trees for wooden logs using an axe.");
+		// s.setDisabled(true);
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(4, 4), "voxel:1|14");
+		// s.getTooltip().set("(Sand-)Stone", "Mine rocks for stone, respectively sandstone in deserts, using a pickaxe.");
+		// actions.addSlot(1, "Mine", s);
+		//
+		// s = new RevolverSlot(stage, new Vector2(0, 2), "Crystal");
+		// s.getTooltip().set("Crystals", "Mine the different kinds of crystals.");
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(3, 2), "voxel:3");
+		// s.getTooltip().set("Yellow Crystal", "Smash yellow crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		// s = new RevolverSlot(stage, new Vector2(2, 2), "voxel:4");
+		// s.getTooltip().set("Red Crystal", "Smash red crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		// s = new RevolverSlot(stage, new Vector2(1, 2), "voxel:5");
+		// s.getTooltip().set("Blue Crystal", "Smash blue crystals using a pickaxe.");
+		// actions.addSlot(2, "Crystal", s);
+		//
+		// s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
+		// s.getTooltip().set("Ore", "Mine the different kinds of ore.");
+		// actions.addSlot(1, "Mine", s);
+		// s = new RevolverSlot(stage, new Vector2(3, 3), "voxel:7");
+		// s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
+		// s = new RevolverSlot(stage, new Vector2(5, 3), "voxel:8");
+		// s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
+		// s = new RevolverSlot(stage, new Vector2(4, 3), "voxel:9");
+		// s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
+		// s.setDisabled(true);
+		// actions.addSlot(2, "Ore", s);
 		
-		s = new RevolverSlot(stage, new Vector2(2, 3), "Ore");
-		s.getTooltip().set("Ore", "Mine the different kinds of ore.");
-		actions.addSlot(1, "Mine", s);
-		s = new RevolverSlot(stage, new Vector2(3, 3), "voxel:7");
-		s.getTooltip().set("Iron Ore", "Mine iron ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
-		s = new RevolverSlot(stage, new Vector2(5, 3), "voxel:8");
-		s.getTooltip().set("Coal Ore", "Mine coal ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
-		s = new RevolverSlot(stage, new Vector2(4, 3), "voxel:9");
-		s.getTooltip().set("Gold Ore", "Mine gold ore using a pickaxe.");
-		s.setDisabled(true);
-		actions.addSlot(2, "Ore", s);
-		
-		s = new RevolverSlot(stage, new Vector2(1, 5), "Build");
+		s = new RevolverSlot(stage, new Vector2(1, 5), "build");
 		s.getTooltip().set("Build", "Build various building and structures.");
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(1, 5), "entity:129");
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
-		s.setDisabled(true);
-		actions.addSlot(1, "Build", s);
+		actions.addSlot(1, "build", s);
+		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
+		s.getTooltip().set("Lumberjack", "Chops nearby trees for wooden logs.");
+		actions.addSlot(1, "build", s);
 		
-		s = new RevolverSlot(stage, new Vector2(5, 1), "Potato");
-		s.getTooltip().set("Potato", "Hi.");
+		if (D.android())
+		{
+			s = new RevolverSlot(stage, new Vector2(1, 6), "controls");
+			s.getTooltip().set("Controls", "Selection modes and controls.");
+			actions.addSlot(0, null, s);
+			s = new RevolverSlot(stage, new Vector2(2, 6), "rect|android");
+			s.getTooltip().set("Rectangle Selection", "Select a group of entities by dragging a rectangle.");
+			actions.addSlot(1, "controls", s);
+		}
+		
+		s = new RevolverSlot(stage, new Vector2(5, 0), "collapse");
 		actions.addSlot(0, null, s);
 		
 		stage.addActor(actions);
 	}
 	
 	@Override
-	public void onCreatureSelection(final Creature creature, boolean lmb, String[] action)
+	public void onCreatureSelection(final Creature creature, boolean lmb)
 	{
 		if (lmb && selectedStructureWindow.setShown(false))
 		{
@@ -263,7 +280,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb, String[] action)
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -278,7 +295,7 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onStructureSelection(final Structure structure, boolean lmb, String[] action)
+	public void onStructureSelection(final Structure structure, boolean lmb)
 	{
 		if (lmb && selectedEntityWindow.setShown(false))
 		{
@@ -366,78 +383,89 @@ public class HudLayer extends Layer implements SelectionListener
 			queue.getTooltip().set("Job Queue", "Toggle Job Queue display");
 			queue.pad(4);
 			
-			
-			if (structure instanceof Warehouse)
-			{
-				final VerticalGroup items = new VerticalGroup();
-				items.left();
-				items.addAction(new Action()
-				{
-					int hashCode = 0;
-					
-					@Override
-					public boolean act(float delta)
-					{
-						int hc = structure.getInventory().hashCode();
-						if (hc != hashCode)
-						{
-							hashCode = hc;
-							
-							for (int i = 0; i < Item.ITEMS; i++)
-							{
-								Item item = Item.getForId(i);
-								if (item == null) continue;
-								
-								Actor a = items.findActor(i + "");
-								if (a != null) ((NonStackingInventoryListItem) a).setAmount(structure.getInventory().get(item));
-								else items.addActor(new NonStackingInventoryListItem(stage, item, structure.getInventory().get(item)));
-							}
-						}
-						return false;
-					}
-				});
+			if (!structure.isBuilt())
+			{	
 				
-				selectedStructureWindow.row().pad(0).width(400);
-				final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
-				itemsWrap.setScrollbarsOnTop(false);
-				itemsWrap.setFadeScrollBars(false);
-				selectedStructureWindow.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
-				
-				final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
-				capacity.setAlignment(Align.center, Align.center);
-				capacity.addAction(new Action()
-				{
-					@Override
-					public boolean act(float delta)
-					{
-						capacity.setText("Capacity: " + structure.getInventory().getCount() + " / " + structure.getInventory().getCapacity() + " Items");
-						
-						float percent = structure.getInventory().getCount() / (float) structure.getInventory().getCapacity();
-						
-						if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
-						else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
-						else if (percent == 1) capacity.setColor(1, 0, 0, 1);
-						else capacity.setColor(1, 1, 1, 1);
-						
-						return false;
-					}
-				});
-				
-				Table rightSide = new Table(Vloxlands.skin);
-				rightSide.row();
-				rightSide.add(capacity).colspan(3);
-				rightSide.row().left().spaceTop(5);
-				rightSide.add(dismantle);
-				rightSide.add(sleep);
-				rightSide.add(queue);
-				selectedStructureWindow.add(rightSide).top().width(200);
 			}
+			else
+			{
+				if (structure instanceof Warehouse)
+				{
+					final VerticalGroup items = new VerticalGroup();
+					items.left();
+					items.addAction(new Action()
+					{
+						int hashCode = 0;
+						
+						@Override
+						public boolean act(float delta)
+						{
+							int hc = structure.getInventory().hashCode();
+							if (hc != hashCode)
+							{
+								hashCode = hc;
+								
+								for (int i = 0; i < Item.ITEMS; i++)
+								{
+									Item item = Item.getForId(i);
+									if (item == null) continue;
+									
+									Actor a = items.findActor(i + "");
+									if (a != null) ((NonStackingInventoryListItem) a).setAmount(structure.getInventory().get(item));
+									else items.addActor(new NonStackingInventoryListItem(stage, item, structure.getInventory().get(item)));
+								}
+							}
+							return false;
+						}
+					});
+					
+					selectedStructureWindow.row().pad(0).width(400);
+					final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
+					itemsWrap.setScrollbarsOnTop(false);
+					itemsWrap.setFadeScrollBars(false);
+					selectedStructureWindow.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
+					
+					final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
+					capacity.setAlignment(Align.center, Align.center);
+					capacity.addAction(new Action()
+					{
+						@Override
+						public boolean act(float delta)
+						{
+							capacity.setText("Capacity: " + structure.getInventory().getCount() + " / " + structure.getInventory().getCapacity() + " Items");
+							
+							float percent = structure.getInventory().getCount() / (float) structure.getInventory().getCapacity();
+							
+							if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
+							else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
+							else if (percent == 1) capacity.setColor(1, 0, 0, 1);
+							else capacity.setColor(1, 1, 1, 1);
+							
+							return false;
+						}
+					});
+					
+					Table rightSide = new Table(Vloxlands.skin);
+					rightSide.row();
+					rightSide.add(capacity).colspan(2);
+					rightSide.row().spaceTop(5);
+					rightSide.add(dismantle);
+					rightSide.add(sleep);
+					selectedStructureWindow.add(rightSide).top().width(200);
+				}
+			}
+			
+			
 			
 			selectedStructureWindow.pack();
 			selectedStructureWindow.setVisible(true);
 			selectedStructureWindow.toFront();
 		}
 	}
+	
+	@Override
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
+	{}
 	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button)
@@ -452,6 +480,8 @@ public class HudLayer extends Layer implements SelectionListener
 				float height = Math.abs(dragStart.y - dragEnd.y) / Gdx.graphics.getHeight();
 				
 				GameLayer.instance.selectionBox(new Rectangle(x, y, width, height));
+				
+				GameLayer.instance.activeAction = "";
 			}
 			dragStart.set(-1, -1);
 			dragEnd.set(-1, -1);
@@ -470,7 +500,7 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if (buttonDown == Buttons.LEFT)
+		if ((!D.android() && buttonDown == Buttons.LEFT) || GameLayer.instance.activeAction.equals("rect|android"))
 		{
 			if (dragStart.x == -1)
 			{
@@ -481,6 +511,7 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			return true;
 		}
+		
 		return false;
 	}
 	

@@ -76,13 +76,12 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public Chunk(Vector3 index, Island island)
 	{
 		random = MathUtils.random(UNLOAD_TICKS);
+		
 		this.index = index;
 		this.island = island;
 		pos = index.cpy().scl(SIZE);
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
-		for (int i = 0; i < voxels.length; i++)
-			voxels[i] = Voxel.get("AIR").getId();
 		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;

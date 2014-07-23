@@ -13,6 +13,7 @@ public class StructureNode
 		entry(true),
 		exit(true),
 		deposit(true),
+		build(true),
 		pickup(true);
 		
 		public boolean useGhostTarget;

@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.job;
 
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
+
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
 
@@ -15,6 +17,10 @@ public abstract class Job implements Tickable
 	boolean done;
 	boolean persistent;
 	
+	int startTick;
+	int durationInTicks;
+	Class<?> tool;
+	
 	Human human;
 	
 	public Job(Human human, String animation, String text, int repeats, boolean persistent)
@@ -28,9 +34,21 @@ public abstract class Job implements Tickable
 		active = false;
 	}
 	
-	public void trigger()
+	public boolean isUsingTool()
 	{
-		human.getAnimationController().animate(animation, repeats, human, 0.2f);
+		return tool != null;
+	}
+	
+	public Class<?> getTool()
+	{
+		return tool;
+	}
+	
+	public void trigger(int tick)
+	{
+		startTick = tick;
+		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, human, 0.2f);
+		durationInTicks = (int) Math.ceil(ad.duration * 60);
 		active = true;
 	}
 	

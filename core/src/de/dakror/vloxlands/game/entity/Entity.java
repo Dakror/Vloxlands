@@ -37,7 +37,7 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	protected Matrix4 transform;
 	
-	public ModelInstance modelInstance;
+	protected ModelInstance modelInstance;
 	
 	protected byte id;
 	protected int level;
@@ -45,6 +45,8 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	protected float weight;
 	protected float uplift;
+	protected boolean modelVisible;
+	protected boolean additionalVisible;
 	
 	public boolean inFrustum;
 	public boolean hovered;
@@ -75,6 +77,8 @@ public abstract class Entity extends EntityBase implements Savable
 		transform.getTranslation(posCache);
 		
 		level = 0;
+		modelVisible = true;
+		additionalVisible = true;
 		
 		GameLayer.instance.addListener(this);
 	}
@@ -117,6 +121,11 @@ public abstract class Entity extends EntityBase implements Savable
 	public AnimationController getAnimationController()
 	{
 		return animationController;
+	}
+	
+	public ModelInstance getModelInstance()
+	{
+		return modelInstance;
 	}
 	
 	public Matrix4 getTransform()
@@ -162,9 +171,8 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		batch.render(modelInstance, environment);
-		
-		renderAdditional(batch, environment);
+		if (modelVisible) batch.render(modelInstance, environment);
+		if (additionalVisible) renderAdditional(batch, environment);
 		
 		if ((hovered || selected) && !minimapMode)
 		{
@@ -255,13 +263,17 @@ public abstract class Entity extends EntityBase implements Savable
 			}
 		}
 		
-		Gdx.app.debug("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
+		Gdx.app.log("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
 	}
 	
 	public static Entity getForId(byte id, float x, float y, float z)
 	{
 		Class<?> c = idToClassMap.get(id);
-		if (c == null) return null;
+		if (c == null)
+		{
+			Gdx.app.error("Entity.getForId", "No Entity found for id=" + id + "!");
+			return null;
+		}
 		try
 		{
 			return (Entity) c.getConstructor(float.class, float.class, float.class).newInstance(x, y, z);
