@@ -1,4 +1,7 @@
 language: android
+android:
+  components:
+    - build-tools-19.1.0
 before_install: chmod +x ./gradlew
 script: 
     - ./gradlew desktop:dist
