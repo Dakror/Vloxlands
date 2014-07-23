@@ -1,8 +1,8 @@
 language: java
 before_install: chmod +x ./gradlew
 script: 
-	- ./gradlew desktop:dist
-	- ./gradlew android:assembleRelease
+    - ./gradlew desktop:dist
+    - ./gradlew android:assembleRelease
 after_script: ant -file upload.xml
 branches:
   only:
