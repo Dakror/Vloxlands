@@ -9,10 +9,10 @@
 	
 	<target name="upload">
 	    <copy tofile="${project.name}.jar">
-	        <fileset dir="${basedir}" includes="**/*.jar" />
+	        <first><fileset dir="${basedir}" includes="**/*.jar" /></first>
 	    </copy>
 	    <copy tofile="${project.name}.apk">
-	        <fileset dir="${basedir}" includes="**/*.apk" />
+	        <first><fileset dir="${basedir}" includes="**/*.apk" /></first>
 	    </copy>
 	    <!-->copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
 	    <copy file="android/bin/Vloxlands-android.apk" tofile="${project.name}.apk" /-->
