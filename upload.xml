@@ -8,14 +8,10 @@
 	<property name="source" value="1.7" />
 	
 	<target name="upload">
-	    <copy tofile="${project.name}.jar">
-	        <first><fileset dir="${basedir}" includes="**/*.jar" /></first>
-	    </copy>
+	    <copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
 	    <copy tofile="${project.name}.apk">
 	        <first><fileset dir="${basedir}" includes="**/*.apk" /></first>
 	    </copy>
-	    <!-->copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
-	    <copy file="android/bin/Vloxlands-android.apk" tofile="${project.name}.apk" /-->
 	    
    		<signjar jar="${project.name}.jar" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
 			storepass="dakrorKeystore" />
