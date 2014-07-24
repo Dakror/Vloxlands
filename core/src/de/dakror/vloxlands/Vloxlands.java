@@ -31,12 +31,9 @@ import de.dakror.vloxlands.util.math.MathHelper;
 
 public class Vloxlands extends GameBase
 {
-	public static Vloxlands currentGame;
+	public static Vloxlands instance;
 	public static AssetManager assets;
 	public static Skin skin;
-	
-	long last;
-	int tick;
 	
 	public static boolean showPathDebug;
 	public static boolean wireframe;
@@ -44,7 +41,7 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
-		currentGame = this;
+		instance = this;
 		
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		Dialog.fadeDuration = 0;
@@ -67,6 +64,8 @@ public class Vloxlands extends GameBase
 		getMultiplexer().addProcessor(0, this);
 		Gdx.input.setInputProcessor(getMultiplexer());
 		
+		new Updater();
+		
 		addLayer(new LoadingLayer());
 	}
 	
@@ -77,17 +76,6 @@ public class Vloxlands extends GameBase
 		
 		for (Layer l : layers)
 			l.render(Gdx.graphics.getDeltaTime());
-		
-		if (last == 0) last = System.currentTimeMillis();
-		
-		if (System.currentTimeMillis() - last >= 16) // ~60 a sec
-		{
-			tick++;
-			
-			for (Layer l : layers)
-				l.tick(tick);
-			last = System.currentTimeMillis();
-		}
 	}
 	
 	@Override

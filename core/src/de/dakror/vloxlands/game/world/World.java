@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.world;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -17,7 +18,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.ai.AStar;
@@ -52,7 +52,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static final float gap = 0.01f;
 	
-	Array<Entity> entities = new Array<Entity>();
+	CopyOnWriteArrayList<Entity> entities = new CopyOnWriteArrayList<Entity>();
 	
 	public World(int width, int depth)
 	{
@@ -83,11 +83,8 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public void update()
 	{
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
-		{
-			Entity e = iter.next();
+		for (Entity e : entities)
 			e.update();
-		}
 	}
 	
 	@Override
@@ -113,7 +110,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		return islands;
 	}
 	
-	public Array<Entity> getEntities()
+	public CopyOnWriteArrayList<Entity> getEntities()
 	{
 		return entities;
 	}
@@ -155,10 +152,9 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	{
 		batch.render(this, environment);
 		visibleEntities = 0;
-		totalEntities = entities.size;
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
+		totalEntities = entities.size();
+		for (Entity e : entities)
 		{
-			Entity e = iter.next();
 			if (e.inFrustum)
 			{
 				e.render(batch, environment, false);
@@ -202,9 +198,8 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			}
 			Vector3 v = query.sourceCreature.getVoxelBelow();
 			
-			for (Iterator<Structure> iter = new ArrayIterator<Structure>(islands[query.island].structures); iter.hasNext();)
+			for (Structure s : islands[query.island].structures)
 			{
-				Structure s = iter.next();
 				if (s == query.sourceStructure) continue;
 				if (!query.searchedClass.isAssignableFrom(s.getClass())) continue;
 				if (query.mustWork && !s.isWorking()) continue;
@@ -234,9 +229,8 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		{
 			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 			
-			for (Iterator<Entity> iter = new ArrayIterator<Entity>(entities); iter.hasNext();)
+			for (Entity e : entities)
 			{
-				Entity e = iter.next();
 				if (!(e instanceof Creature)) continue;
 				if (e == query.sourceCreature) continue;
 				if (!e.getClass().equals(query.searchedClass)) continue;

@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.world;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -53,7 +54,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	public boolean initFBO;
 	
-	Array<Structure> structures = new Array<Structure>();
+	CopyOnWriteArrayList<Structure> structures = new CopyOnWriteArrayList<Structure>();
 	
 	BiomeType biome;
 	
@@ -130,7 +131,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 		this.tick = tick;
 		
 		float delta = getDelta();
-		if (GameLayer.instance.activeIsland == this)
+		
+		if (GameLayer.instance.activeIsland == this && delta != 0)
 		{
 			GameLayer.camera.position.y += delta;
 			GameLayer.instance.controller.target.y += delta;
@@ -294,10 +296,10 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	public int getStructureCount()
 	{
-		return structures.size;
+		return structures.size();
 	}
 	
-	public Array<Structure> getStructures()
+	public CopyOnWriteArrayList<Structure> getStructures()
 	{
 		return structures;
 	}
@@ -310,9 +312,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	protected void renderStructures(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		for (Structure s : structures)
 		{
-			Structure s = iter.next();
 			if (s.inFrustum || minimapMode)
 			{
 				s.render(batch, environment, minimapMode);
@@ -565,6 +566,6 @@ public class Island implements RenderableProvider, Tickable, Savable
 		Bits.putShort(baos, i); // maximum of i is 8³ = 512 so 1 byte is not enough
 		baos.write(baos1.toByteArray());
 		
-		Bits.putInt(baos, structures.size);
+		Bits.putInt(baos, structures.size());
 	}
 }

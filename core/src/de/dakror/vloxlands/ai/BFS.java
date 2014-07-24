@@ -18,7 +18,7 @@ public class BFS
 	public static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	public static BFSNode lastTarget;
 	
-	// TODO: multi island support
+	// TODO multi island support
 	public static Path findClosestVoxel(Vector3 pos, byte voxel, Creature c)
 	{
 		queue.clear();

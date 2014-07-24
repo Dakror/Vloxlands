@@ -52,15 +52,15 @@ public class LoadingLayer extends Layer
 			}
 			if (!worldGen)
 			{
-				Vloxlands.currentGame.addLayer(new GameLayer());
+				Vloxlands.instance.addLayer(new GameLayer());
 				worldGenerator.start();
 				worldGen = true;
 			}
 			else if (worldGenerator.done && percent > 0.99)
 			{
-				Vloxlands.currentGame.addLayer(new HudLayer());
-				if (D.android()) Vloxlands.currentGame.addLayer(new DebugLayer());
-				Vloxlands.currentGame.removeLayer(this);
+				Vloxlands.instance.addLayer(new HudLayer());
+				if (D.android()) Vloxlands.instance.addLayer(new DebugLayer());
+				Vloxlands.instance.removeLayer(this);
 				GameLayer.instance.doneLoading();
 				return;
 			}
@@ -119,7 +119,7 @@ public class LoadingLayer extends Layer
 		for (String i : icons)
 			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
 		
-		// TODO: Add all models wanting to be loaded
+		// TODO Add all models wanting to be loaded
 		Vloxlands.assets.load("models/creature/humanblend/humanblend.g3db", Model.class);
 		Vloxlands.assets.load("models/structure/PH_tent_red/PH_tent_red.g3db", Model.class);
 		Vloxlands.assets.load("models/structure/PH_tent_green/PH_tent_green.g3db", Model.class);

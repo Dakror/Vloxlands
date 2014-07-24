@@ -145,8 +145,6 @@ public class GameLayer extends Layer
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
-		if (D.android()) pickRayMaxDistance = 80;
-		
 		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
@@ -195,7 +193,7 @@ public class GameLayer extends Layer
 		controller.translateButton = -1;
 		if (D.android()) controller.pinchZoomFactor = 50;
 		controller.rotateButton = D.android() ? Buttons.LEFT : Buttons.MIDDLE;
-		Vloxlands.currentGame.getMultiplexer().addProcessor(controller);
+		Vloxlands.instance.getMultiplexer().addProcessor(controller);
 		
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		minimapCamera.near = 0.1f;
@@ -221,7 +219,7 @@ public class GameLayer extends Layer
 		// int w = MathUtils.random(1, 5);
 		// int d = MathUtils.random(1, 5);
 		
-		world = new World(1, 1); // TODO: multi island support
+		world = new World(1, 1); // TODO multi island support
 		// world = new World(w, d);
 		// Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}

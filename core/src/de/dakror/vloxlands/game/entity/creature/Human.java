@@ -36,6 +36,7 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -220,7 +221,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && !lmb)
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
 			selected = true;
 			
@@ -295,7 +296,7 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (wasSelected && !lmb)
+		if (wasSelected && (!lmb || D.android()))
 		{
 			CurserCommand c = structure.getCommandForEntity(this);
 			Vector3 pathStart = getVoxelBelow();
@@ -332,7 +333,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
 	{
-		if ((wasSelected || selected) && !lmb)
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
 			selected = true;
 			
@@ -341,7 +342,7 @@ public class Human extends Creature
 				if (GameLayer.instance.activeAction.equals("clear"))
 				{
 					if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
-					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // TODO: finish clear region action
+					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // FIXME finish clear region action
 				}
 			}
 			

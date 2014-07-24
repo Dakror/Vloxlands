@@ -31,7 +31,7 @@ public class AStar
 	static AStarNode target;
 	static Vector3 neighbor;
 	
-	// TODO: multi island support
+	// TODO multi island support
 	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
 		if (!GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
