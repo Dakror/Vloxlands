@@ -2,8 +2,6 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -15,12 +13,12 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntMap;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.render.Face;
-import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.Compressor;
@@ -325,8 +323,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	private void getVertices()
 	{
-		ObjectMap<FaceKey, Face> faces = new ObjectMap<FaceKey, Face>();
-		ObjectMap<FaceKey, Face> transpFaces = new ObjectMap<FaceKey, Face>();
+		IntMap<Face> faces = new IntMap<Face>();
+		IntMap<Face> transpFaces = new IntMap<Face>();
 		
 		int i = 0;
 		for (int x = 0; x < SIZE; x++)
@@ -348,9 +346,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
 							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
-							FaceKey key = new FaceKey(x + (int) pos.x, y + (int) pos.y, z + (int) pos.z, d.ordinal());
-							if (v.isOpaque()) faces.put(key, face);
-							else transpFaces.put(key, face);
+							if (v.isOpaque()) faces.put(face.hashCode(), face);
+							else transpFaces.put(face.hashCode(), face);
 						}
 					}
 				}
@@ -360,27 +357,14 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
 		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
 		
-		for (Face vf : faces.values())
-			vf.getVertexData(opaqueMeshData);
+		for (IntMap.Entry<Face> f : faces)
+			f.value.getVertexData(opaqueMeshData);
 		
-		FaceKey[] vfks = transpFaces.keys().toArray().toArray(FaceKey.class);
+		IntArray transpKeys = transpFaces.keys().toArray();
+		transpKeys.sort();
 		
-		try
-		{
-			Arrays.sort(vfks, new Comparator<FaceKey>()
-			{
-				@Override
-				public int compare(FaceKey o1, FaceKey o2)
-				{
-					return o1.compareTo(o2);
-				}
-			});
-		}
-		catch (IllegalArgumentException e)
-		{}
-		
-		for (FaceKey vfk : vfks)
-			transpFaces.get(vfk).getVertexData(transpMeshData);
+		for (int index : transpKeys.toArray())
+			transpFaces.get(index).getVertexData(transpMeshData);
 	}
 	
 	@Override

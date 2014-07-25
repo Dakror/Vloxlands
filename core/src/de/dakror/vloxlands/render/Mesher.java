@@ -4,11 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntMap;
 
 import de.dakror.vloxlands.game.world.Chunk;
-import de.dakror.vloxlands.render.Face.FaceKey;
 import de.dakror.vloxlands.util.Direction;
 
 /**
@@ -16,18 +15,19 @@ import de.dakror.vloxlands.util.Direction;
  */
 public class Mesher
 {
-	public static final Vector3[] directions = { Vector3.X, Vector3.Y, Vector3.Z };
+	public static final Vector3[] directions = { Vector3.X, /* Vector3.Y, */Vector3.Z };
 	
-	public static void generateGreedyMesh(int cx, int cy, int cz, ObjectMap<FaceKey, Face> faces)
+	static long millis;
+	static int count;
+	
+	public static void generateGreedyMesh(int cx, int cy, int cz, IntMap<Face> faces)
 	{
 		if (faces.size == 0) return;
 		
-		FaceKey faceKey = new FaceKey(0, 0, 0, 0);
-		
-		
 		for (Vector3 direction : directions)
 		{
-			Array<FaceKey> removedByMe = new Array<FaceKey>();
+			IntArray removedByMe = new IntArray();
+			
 			for (Direction dir : Direction.values())
 			{
 				if (!canFace(dir, direction)) continue;
@@ -45,10 +45,13 @@ public class Mesher
 							int y = direction.y == 1 ? k : direction.z == 1 ? j : i;
 							int z = direction.z == 1 ? k : direction.x == 1 ? j : i;
 							
-							Face face = faces.get(faceKey.set(x + cx * Chunk.SIZE, y + cy * Chunk.SIZE, z + cz * Chunk.SIZE, dir.ordinal()));
+							int hash = Face.getHashCode(x + cx * Chunk.SIZE, y + cy * Chunk.SIZE, z + cz * Chunk.SIZE, dir.ordinal());
+							Face face = faces.get(hash);
+							
+							
 							if (face == null)
 							{
-								if (!removedByMe.contains(faceKey, false))
+								if (!removedByMe.contains(hash))
 								{
 									activeI = -1;
 									activeJ = -1;
@@ -59,9 +62,9 @@ public class Mesher
 							
 							if (activeFace != null && i == activeI && j == activeJ && face.tex.equals(activeFace.tex) && face.isSameSize(activeFace, direction))
 							{
-								activeFace.increaseSize(direction.cpy().scl(face.sizeX, face.sizeY, face.sizeZ));
-								removedByMe.add(new FaceKey(0, 0, 0, 0).set(faceKey));
-								faces.remove(faceKey);
+								activeFace.increaseSize(direction.x * face.sizeX, direction.y * face.sizeY, direction.z * face.sizeZ);
+								removedByMe.add(hash);
+								faces.remove(hash);
 							}
 							else
 							{
@@ -74,6 +77,10 @@ public class Mesher
 				}
 			}
 		}
+		// long l = System.currentTimeMillis();
+		// count++;
+		// millis += (System.currentTimeMillis() - l);
+		// D.p(millis / (float) count);
 	}
 	
 	public static boolean canFace(Direction dir, Vector3 direction)

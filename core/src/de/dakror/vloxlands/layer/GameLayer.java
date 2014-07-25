@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.layer;
 
+import java.nio.IntBuffer;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
@@ -14,10 +15,13 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -32,6 +36,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
@@ -64,7 +69,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 @SuppressWarnings("deprecation")
 public class GameLayer extends Layer
 {
-	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
+	public static long seed = 6730719671722338304l;// (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
@@ -142,6 +147,9 @@ public class GameLayer extends Layer
 		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
 		MathUtils.random = new Random(seed);
 		
+		IntBuffer ib = BufferUtils.newIntBuffer(16);
+		Gdx.gl.glGetIntegerv(GL20.GL_MAX_VIEWPORT_DIMS, ib);
+		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
@@ -203,7 +211,16 @@ public class GameLayer extends Layer
 		minimapEnv.add(new DirectionalLight().set(1f, 1f, 1f, -0.5f, -0.5f, -0.5f));
 		minimapEnv.add(new DirectionalLight().set(0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f));
 		
-		shadowBatch = new ModelBatch(new DepthShaderProvider());
+		shadowBatch = new ModelBatch(new DepthShaderProvider()
+		{
+			@Override
+			protected Shader createShader(Renderable renderable)
+			{
+				Shader s = super.createShader(renderable);
+				D.p("Lines prev:", DepthShader.createPrefix(renderable, config).split("\n").length);
+				return s;
+			}
+		});
 		
 		shapeRenderer = new ShapeRenderer();
 		
@@ -213,7 +230,7 @@ public class GameLayer extends Layer
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		env.add((shadowLight = new DirectionalShadowLight(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.add((shadowLight = new DirectionalShadowLight(ib.get(0) / 2, ib.get(1) / 2, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
 		env.shadowMap = shadowLight;
 		
 		// int w = MathUtils.random(1, 5);

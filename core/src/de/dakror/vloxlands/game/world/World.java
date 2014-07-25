@@ -153,14 +153,14 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		batch.render(this, environment);
 		visibleEntities = 0;
 		totalEntities = entities.size();
-		for (Entity e : entities)
-		{
-			if (e.inFrustum)
-			{
-				e.render(batch, environment, false);
-				visibleEntities++;
-			}
-		}
+		// for (Entity e : entities)
+		// {
+		// if (e.inFrustum)
+		// {
+		// e.render(batch, environment, false);
+		// visibleEntities++;
+		// }
+		// }
 		
 		for (Island island : islands)
 		{
