@@ -141,6 +141,7 @@ public class Human extends Creature
 	public void tick(int tick)
 	{
 		super.tick(tick);
+		
 		if (!carryingItemStack.isNull())
 		{
 			carryingItemTransform.setToRotation(Vector3.Y, 0).translate(posCache);

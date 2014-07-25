@@ -101,7 +101,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				e.dispose();
 				iter.remove();
 			}
-			else e.tick(tick);
+			else if (e.isSpawned()) e.tick(tick);
 		}
 	}
 	
@@ -162,11 +162,11 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			}
 		}
 		
-		// for (Island island : islands)
-		// {
-		// island.render(batch, environment);
-		// totalEntities += island.getStructureCount();
-		// }
+		for (Island island : islands)
+		{
+			island.render(batch, environment);
+			totalEntities += island.getStructureCount();
+		}
 	}
 	
 	@Override

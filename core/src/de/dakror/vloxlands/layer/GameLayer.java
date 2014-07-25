@@ -189,7 +189,6 @@ public class GameLayer extends Layer
 		if (D.android()) controller.pinchZoomFactor = 50;
 		controller.rotateButton = D.android() ? Buttons.LEFT : Buttons.MIDDLE;
 		Vloxlands.instance.getMultiplexer().addProcessor(controller);
-		System.out.println(Config.fov);
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		minimapCamera.near = 0.1f;
 		minimapCamera.far = pickRayMaxDistance;

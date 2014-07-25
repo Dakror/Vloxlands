@@ -143,6 +143,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	@Override
 	public void onSpawn()
 	{
+		super.onSpawn();
 		if (!built)
 		{
 			int width = (int) Math.ceil(boundingBox.getDimensions().x);

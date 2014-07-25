@@ -47,6 +47,7 @@ public abstract class Entity extends EntityBase implements Savable
 	protected float uplift;
 	protected boolean modelVisible;
 	protected boolean additionalVisible;
+	protected boolean spawned;
 	
 	public boolean inFrustum;
 	public boolean hovered;
@@ -221,6 +222,11 @@ public abstract class Entity extends EntityBase implements Savable
 		markedForRemoval = true;
 	}
 	
+	public boolean isSpawned()
+	{
+		return spawned;
+	}
+	
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{}
@@ -228,7 +234,9 @@ public abstract class Entity extends EntityBase implements Savable
 	// -- events -- //
 	
 	public void onSpawn()
-	{}
+	{
+		spawned = true;
+	}
 	
 	// -- abstracts -- //
 	

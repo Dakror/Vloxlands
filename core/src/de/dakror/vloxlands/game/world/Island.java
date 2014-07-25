@@ -154,7 +154,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 				s.dispose();
 				iter.remove();
 			}
-			else
+			else if (s.isSpawned())
 			{
 				s.tick(tick);
 				if (delta != 0) s.getTransform().translate(0, delta, 0);
