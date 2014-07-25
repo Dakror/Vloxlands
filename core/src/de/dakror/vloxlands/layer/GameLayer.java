@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.layer;
 
-import java.nio.IntBuffer;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
@@ -15,13 +14,10 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -36,7 +32,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.BufferUtils;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
@@ -58,6 +53,7 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.D;
+import de.dakror.vloxlands.util.DDirectionalShadowLight;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -147,25 +143,16 @@ public class GameLayer extends Layer
 		Gdx.app.log("GameLayer.show", "Seed: " + seed + "");
 		MathUtils.random = new Random(seed);
 		
-		IntBuffer ib = BufferUtils.newIntBuffer(16);
-		Gdx.gl.glGetIntegerv(GL20.GL_MAX_VIEWPORT_DIMS, ib);
-		
 		modelBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		minimapBatch = new ModelBatch(Gdx.files.internal("shader/shader.vs"), Gdx.files.internal("shader/shader.fs"));
 		
-		camera = new PerspectiveCamera(Config.pref.getInteger("fov"), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera = new PerspectiveCamera(Config.fov, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
 		controller = new CameraInputController(camera)
 		{
 			private final Vector3 tmpV1 = new Vector3();
 			private final Vector3 tmpV2 = new Vector3();
-			
-			@Override
-			public String toString()
-			{
-				return "CameraInputController";
-			}
 			
 			@Override
 			protected boolean process(float deltaX, float deltaY, int button)
@@ -202,7 +189,7 @@ public class GameLayer extends Layer
 		if (D.android()) controller.pinchZoomFactor = 50;
 		controller.rotateButton = D.android() ? Buttons.LEFT : Buttons.MIDDLE;
 		Vloxlands.instance.getMultiplexer().addProcessor(controller);
-		
+		System.out.println(Config.fov);
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		minimapCamera.near = 0.1f;
 		minimapCamera.far = pickRayMaxDistance;
@@ -211,16 +198,7 @@ public class GameLayer extends Layer
 		minimapEnv.add(new DirectionalLight().set(1f, 1f, 1f, -0.5f, -0.5f, -0.5f));
 		minimapEnv.add(new DirectionalLight().set(0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f));
 		
-		shadowBatch = new ModelBatch(new DepthShaderProvider()
-		{
-			@Override
-			protected Shader createShader(Renderable renderable)
-			{
-				Shader s = super.createShader(renderable);
-				D.p("Lines prev:", DepthShader.createPrefix(renderable, config).split("\n").length);
-				return s;
-			}
-		});
+		shadowBatch = new ModelBatch(new DepthShaderProvider());
 		
 		shapeRenderer = new ShapeRenderer();
 		
@@ -230,7 +208,7 @@ public class GameLayer extends Layer
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
 		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		env.add((shadowLight = new DirectionalShadowLight(ib.get(0) / 2, ib.get(1) / 2, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.add((shadowLight = new DDirectionalShadowLight(Config.shadowQuality, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
 		env.shadowMap = shadowLight;
 		
 		// int w = MathUtils.random(1, 5);
@@ -319,6 +297,7 @@ public class GameLayer extends Layer
 	{
 		if (!doneLoading) return;
 		controller.update();
+		((PerspectiveCamera) camera).fieldOfView = Config.fov;
 		world.update();
 		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

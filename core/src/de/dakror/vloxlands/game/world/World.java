@@ -153,20 +153,20 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		batch.render(this, environment);
 		visibleEntities = 0;
 		totalEntities = entities.size();
-		// for (Entity e : entities)
-		// {
-		// if (e.inFrustum)
-		// {
-		// e.render(batch, environment, false);
-		// visibleEntities++;
-		// }
-		// }
-		
-		for (Island island : islands)
+		for (Entity e : entities) // does not create NPE
 		{
-			island.render(batch, environment);
-			totalEntities += island.getStructureCount();
+			if (e.inFrustum)
+			{
+				e.render(batch, environment, false);
+				visibleEntities++;
+			}
 		}
+		
+		// for (Island island : islands)
+		// {
+		// island.render(batch, environment);
+		// totalEntities += island.getStructureCount();
+		// }
 	}
 	
 	@Override
