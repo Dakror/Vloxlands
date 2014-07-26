@@ -79,6 +79,7 @@ public class Vloxlands extends GameBase
 			l.render(Gdx.graphics.getDeltaTime());
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean keyUp(int keycode)
 	{
