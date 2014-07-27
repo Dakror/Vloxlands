@@ -2,7 +2,6 @@ package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -25,8 +24,6 @@ public abstract class Creature extends Entity implements AnimationListener
 	protected boolean canFly;
 	
 	public Path path;
-	
-	final Matrix4 tmp = new Matrix4();
 	
 	public Creature(float x, float y, float z, String model)
 	{
@@ -52,18 +49,15 @@ public abstract class Creature extends Entity implements AnimationListener
 					Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
-					tmp.set(transform);
-					
-					tmp.setToRotation(Vector3.Y, 0).translate(posCache);
-					tmp.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+					transform.setToRotation(Vector3.Y, 0).translate(posCache);
+					transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 					if (dif.len() > speed) dif.limit(speed);
 					else
 					{
 						if (path.isDone()) onReachTarget();
 						else path.next();
 					}
-					tmp.trn(dif);
-					transform.set(tmp);
+					transform.trn(dif);
 				}
 				else onReachTarget();
 			}

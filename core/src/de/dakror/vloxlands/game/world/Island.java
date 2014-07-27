@@ -2,7 +2,6 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -143,16 +142,15 @@ public class Island implements RenderableProvider, Tickable, Savable
 		for (Chunk c : chunks)
 			if (c != null) c.tick(tick);
 		
-		for (Iterator<Structure> iter = structures.iterator(); iter.hasNext();)
+		for (Structure s : structures)
 		{
-			Structure s = iter.next();
 			if (s.isMarkedForRemoval())
 			{
 				s.selected = false;
 				for (SelectionListener sl : GameLayer.instance.listeners)
 					sl.onStructureSelection(null, true);
 				s.dispose();
-				iter.remove();
+				structures.remove(s);
 			}
 			else if (s.isSpawned())
 			{
