@@ -69,6 +69,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	int[] resources;
 	int ticksInvisible;
 	
+	boolean requestsUnload;
+	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
 	public Chunk(Vector3 index, Island island)
@@ -373,13 +375,19 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		if (!inFrustum && loaded && drawn && GameLayer.instance.activeIsland != island)
 		{
 			ticksInvisible++;
-			if (ticksInvisible > UNLOAD_TICKS + random)
-			{
-				unload();
-				ticksInvisible = 0;
-			}
+			if (ticksInvisible > UNLOAD_TICKS + random) requestsUnload = true;
 		}
 		else ticksInvisible = 0;
+	}
+	
+	public void render()
+	{
+		if (requestsUnload)
+		{
+			unload();
+			ticksInvisible = 0;
+			requestsUnload = false;
+		}
 	}
 	
 	@Override

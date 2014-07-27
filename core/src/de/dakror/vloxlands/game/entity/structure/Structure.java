@@ -43,6 +43,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	int buildProgress;
 	
 	final Vector3 tmp = new Vector3();
+	final Vector3 dim = new Vector3();
 	
 	public Structure(float x, float y, float z, String model)
 	{
@@ -68,6 +69,8 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		inventory = new Inventory();
 		resourceList = new ResourceList();
 		working = true;
+		
+		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
 		
 		setBuilt(false);
 	}
@@ -120,6 +123,9 @@ public abstract class Structure extends Entity implements IInventory, Savable
 					if (j == -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) == 0) return false;
 					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
 				}
+		
+		for (Structure s : island.getStructures())
+			if (intersects(s)) return false;
 		
 		return true;
 	}
@@ -268,6 +274,20 @@ public abstract class Structure extends Entity implements IInventory, Savable
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			GameLayer.world.addEntity(i);
 		}
+	}
+	
+	public boolean intersects(Structure o)
+	{
+		float lx = Math.abs(posCache.x - o.posCache.x);
+		float sumx = (dim.x / 2.0f) + (o.dim.x / 2.0f);
+		
+		float ly = Math.abs(posCache.y - o.posCache.y);
+		float sumy = (dim.y / 2.0f) + (o.dim.y / 2.0f);
+		
+		float lz = Math.abs(posCache.z - o.posCache.z);
+		float sumz = (dim.z / 2.0f) + (o.dim.z / 2.0f);
+		
+		return (lx <= sumx && ly <= sumy && lz <= sumz);
 	}
 	
 	public CurserCommand getDefaultCommand()

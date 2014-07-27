@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import de.dakror.vloxlands.Config;
+import de.dakror.vloxlands.Updater;
 
 /**
  * @author Dakror
@@ -27,7 +28,7 @@ public class DebugLayer extends Layer
 		spriteBatch.begin();
 		
 		font.draw(spriteBatch, "Vloxlands " + Config.version, 0, Gdx.graphics.getHeight());
-		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 0, Gdx.graphics.getHeight() - 20);
+		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond() + ", UPS: " + Updater.instance.ticksPerSecond, 0, Gdx.graphics.getHeight() - 20);
 		if (GameLayer.world != null)
 		{
 			font.draw(spriteBatch, "C: " + GameLayer.world.visibleChunks + " / " + GameLayer.world.loadedChunks + " / " + GameLayer.world.chunks, 0, Gdx.graphics.getHeight() - 40);

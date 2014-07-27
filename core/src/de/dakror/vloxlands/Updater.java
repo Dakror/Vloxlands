@@ -7,11 +7,18 @@ import de.dakror.vloxlands.layer.Layer;
  */
 public class Updater extends Thread
 {
+	public static Updater instance;
+	
+	public int ticksPerSecond;
+	long last;
 	int tick;
+	int ticks;
 	
 	public Updater()
 	{
+		instance = this;
 		setName("Updater Thread");
+		last = System.currentTimeMillis();
 		start();
 	}
 	
@@ -21,13 +28,21 @@ public class Updater extends Thread
 		while (true)
 		{
 			tick++;
+			ticks++;
 			
 			for (Layer l : Vloxlands.instance.layers)
 				l.tick(tick);
 			
+			if (System.currentTimeMillis() - last >= 1000)
+			{
+				ticksPerSecond = ticks;
+				ticks = 0;
+				last = System.currentTimeMillis();
+			}
+			
 			try
 			{
-				Thread.sleep(16, 667);
+				Thread.sleep(16, 700);
 			}
 			catch (InterruptedException e)
 			{

@@ -30,12 +30,10 @@ public class DDirectionalShadowLight extends DirectionalShadowLight
 	
 	public void setShadowQuality(int shadowQuality)
 	{
-		int sh = Math.max(0, shadowQuality);
-		
 		int size = Gdx.graphics.getWidth() * (shadowQuality + 1);
 		
 		fbo = new FrameBuffer(Format.RGBA8888, size, size, true);
 		
-		Gdx.app.log("DDirectionalShadowLight.setShadowQuality", "Setting Shadow quality to " + sh);
+		Gdx.app.log("DDirectionalShadowLight.setShadowQuality", "Setting Shadow quality to " + shadowQuality);
 	}
 }

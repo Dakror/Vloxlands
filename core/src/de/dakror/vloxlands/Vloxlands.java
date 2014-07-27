@@ -107,6 +107,7 @@ public class Vloxlands extends GameBase
 			if (keycode == Keys.F10) Config.shadowQuality--;
 			if (keycode == Keys.F9 || keycode == Keys.F10)
 			{
+				Config.shadowQuality = Math.max(0, Config.shadowQuality);
 				((DDirectionalShadowLight) GameLayer.instance.env.shadowMap).setShadowQuality(Config.shadowQuality);
 			}
 		}

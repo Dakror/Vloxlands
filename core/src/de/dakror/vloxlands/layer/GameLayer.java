@@ -65,7 +65,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 @SuppressWarnings("deprecation")
 public class GameLayer extends Layer
 {
-	public static long seed = 6730719671722338304l;// (long) (Math.random() * Long.MAX_VALUE);
+	public static long seed = 7485357831030295552l;// (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
