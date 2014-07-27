@@ -56,6 +56,8 @@ public class Human extends Creature
 	
 	Array<Job> jobQueue = new Array<Job>();
 	
+	final Matrix4 tmp = new Matrix4();
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -144,17 +146,19 @@ public class Human extends Creature
 		
 		if (!carryingItemStack.isNull())
 		{
-			carryingItemTransform.setToRotation(Vector3.Y, 0).translate(posCache);
-			carryingItemTransform.rotate(Vector3.Y, rotCache.getYaw());
-			carryingItemTransform.translate(resourceTrn);
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.translate(resourceTrn);
+			carryingItemTransform.set(tmp);
 		}
 		
 		if (!tool.isNull())
 		{
-			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
-			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			
-			((Tool) tool.getItem()).transformInHand(toolTransform, this);
+			((Tool) tool.getItem()).transformInHand(tmp, this);
+			toolTransform.set(tmp);
 		}
 		
 		if (jobQueue.size > 0)

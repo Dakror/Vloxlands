@@ -49,8 +49,9 @@ public abstract class Creature extends Entity implements AnimationListener
 					Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
-					transform.setToRotation(Vector3.Y, 0).translate(posCache);
-					transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
+					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
+					
+					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 					if (dif.len() > speed) dif.limit(speed);
 					else
 					{
