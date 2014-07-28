@@ -16,7 +16,6 @@ public class IslandGenerator
 	{
 		try
 		{
-			
 			float yPos = 256 * MathUtils.random();
 			int radius = MathUtils.random(MIN, MAX);
 			
