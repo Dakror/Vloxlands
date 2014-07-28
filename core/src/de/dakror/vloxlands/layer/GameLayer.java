@@ -295,9 +295,6 @@ public class GameLayer extends Layer
 	public void render(float delta)
 	{
 		if (!doneLoading) return;
-		controller.update();
-		((PerspectiveCamera) camera).fieldOfView = Config.fov;
-		world.update();
 		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -313,11 +310,7 @@ public class GameLayer extends Layer
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
 		// modelBatch.render(sky, env);
-		if (cursorStructure != null)
-		{
-			cursorStructure.update();
-			cursorStructure.render(modelBatch, env, false);
-		}
+		if (cursorStructure != null) cursorStructure.render(modelBatch, env, false);
 		modelBatch.end();
 		
 		if (Vloxlands.showPathDebug)

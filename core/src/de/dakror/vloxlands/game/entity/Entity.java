@@ -157,6 +157,8 @@ public abstract class Entity extends EntityBase implements Savable
 	@Override
 	public void tick(int tick)
 	{
+		animationController.update(Gdx.graphics.getDeltaTime());
+		
 		transform.getTranslation(posCache);
 		transform.getRotation(rotCache);
 		inFrustum = GameLayer.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
@@ -205,11 +207,6 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
-	
-	public void update()
-	{
-		animationController.update(Gdx.graphics.getDeltaTime());
-	}
 	
 	@Override
 	public void dispose()
