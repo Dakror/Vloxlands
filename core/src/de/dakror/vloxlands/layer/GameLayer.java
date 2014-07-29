@@ -235,8 +235,6 @@ public class GameLayer extends Layer
 		tc.setBuilt(true);
 		world.getIslands()[0].addStructure(tc, false, true);
 		
-		world.getIslands()[0].calculateInitBalance();
-		
 		focusIsland(world.getIslands()[0], true);
 		
 		doneLoading = true;
