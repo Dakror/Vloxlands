@@ -81,6 +81,12 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
 	
+	public void update()
+	{
+		for (Entity e : entities)
+			e.update();
+	}
+	
 	@Override
 	public void tick(int tick)
 	{
