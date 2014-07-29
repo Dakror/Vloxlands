@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CSVReader;
@@ -56,6 +57,7 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
+	protected Island island;
 	
 	protected AnimationController animationController;
 	
@@ -82,6 +84,11 @@ public abstract class Entity extends EntityBase implements Savable
 		additionalVisible = true;
 		
 		GameLayer.instance.addListener(this);
+	}
+	
+	public void setIsland(Island island)
+	{
+		this.island = island;
 	}
 	
 	public String getName()
@@ -172,6 +179,8 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
+		if (!minimapMode && environment != null) update();
+		
 		if (modelVisible) batch.render(modelInstance, environment);
 		if (additionalVisible) renderAdditional(batch, environment);
 		

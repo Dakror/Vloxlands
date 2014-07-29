@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
@@ -53,7 +54,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	public boolean initFBO;
 	
-	CopyOnWriteArrayList<Structure> structures = new CopyOnWriteArrayList<Structure>();
+	CopyOnWriteArrayList<Entity> entities = new CopyOnWriteArrayList<Entity>();
 	
 	BiomeType biome;
 	
@@ -100,7 +101,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			weight += c.weight;
 		}
 		
-		for (Structure s : structures)
+		for (Entity s : entities)
 			weight += s.getWeight();
 	}
 	
@@ -114,7 +115,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			uplift += c.uplift;
 		}
 		
-		for (Structure s : structures)
+		for (Entity s : entities)
 			uplift += s.getUplift();
 	}
 	
@@ -142,20 +143,20 @@ public class Island implements RenderableProvider, Tickable, Savable
 		for (Chunk c : chunks)
 			if (c != null) c.tick(tick);
 		
-		for (Structure s : structures)
+		for (Entity e : entities)
 		{
-			if (s.isMarkedForRemoval())
+			if (e.isMarkedForRemoval())
 			{
-				s.selected = false;
+				e.selected = false;
 				for (SelectionListener sl : GameLayer.instance.listeners)
 					sl.onStructureSelection(null, true);
-				s.dispose();
-				structures.remove(s);
+				e.dispose();
+				entities.remove(e);
 			}
-			else if (s.isSpawned())
+			else if (e.isSpawned())
 			{
-				s.tick(tick);
-				if (delta != 0) s.getTransform().translate(0, delta, 0);
+				e.tick(tick);
+				if (delta != 0) e.getTransform().translate(0, delta, 0);
 			}
 		}
 		
@@ -172,18 +173,18 @@ public class Island implements RenderableProvider, Tickable, Savable
 		return getDelta() * 60f;
 	}
 	
-	public void addStructure(Structure s, boolean user, boolean clearArea)
+	public void addEntity(Entity s, boolean user, boolean clearArea)
 	{
 		s.setIsland(this);
 		s.onSpawn();
 		s.getTransform().translate(pos);
-		structures.add(s);
+		entities.add(s);
 		
-		if (!user && clearArea)
+		if (!user && clearArea && (s instanceof Structure))
 		{
 			byte air = Voxel.get("AIR").getId();
 			
-			Vector3 vp = s.getVoxelPos();
+			Vector3 vp = ((Structure) s).getVoxelPos();
 			
 			for (int i = -1; i < Math.ceil(s.getBoundingBox().getDimensions().x) + 1; i++)
 				for (int j = 0; j < Math.ceil(s.getBoundingBox().getDimensions().y); j++)
@@ -294,12 +295,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	public int getStructureCount()
 	{
-		return structures.size();
+		return entities.size();
 	}
 	
-	public CopyOnWriteArrayList<Structure> getStructures()
+	public CopyOnWriteArrayList<Entity> getEntities()
 	{
-		return structures;
+		return entities;
 	}
 	
 	public void grassify()
@@ -308,10 +309,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 			if (c != null) c.grassify(this);
 	}
 	
-	protected void renderStructures(ModelBatch batch, Environment environment, boolean minimapMode)
+	protected void renderEntities(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		for (Structure s : structures)
+		for (Entity s : entities)
 		{
+			if (minimapMode && !(s instanceof Structure)) continue;
+			
 			if (s.inFrustum || minimapMode)
 			{
 				s.render(batch, environment, minimapMode);
@@ -322,7 +325,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
-		renderStructures(batch, environment, false);
+		renderEntities(batch, environment, false);
 		
 		if (GameLayer.instance.activeIsland == this && GameLayer.instance.selectedVoxel.x > -1)
 		{
@@ -355,7 +358,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 			
 			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
 			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-			renderStructures(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
+			renderEntities(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
 			GameLayer.instance.minimapBatch.end();
 			fbo.end();
 			initFBO = wasDrawnOnce();
@@ -564,6 +567,6 @@ public class Island implements RenderableProvider, Tickable, Savable
 		Bits.putShort(baos, i); // maximum of i is 8³ = 512 so 1 byte is not enough
 		baos.write(baos1.toByteArray());
 		
-		Bits.putInt(baos, structures.size());
+		Bits.putInt(baos, entities.size());
 	}
 }

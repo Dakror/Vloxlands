@@ -33,7 +33,6 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	Vector3 voxelPos;
 	Inventory inventory;
 	ResourceList resourceList;
-	Island island;
 	boolean working;
 	
 	boolean dismantleRequested;
@@ -73,11 +72,6 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
 		
 		setBuilt(false);
-	}
-	
-	public void setIsland(Island island)
-	{
-		this.island = island;
 	}
 	
 	public Vector3 getVoxelPos()
@@ -124,8 +118,8 @@ public abstract class Structure extends Entity implements IInventory, Savable
 					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
 				}
 		
-		for (Structure s : island.getStructures())
-			if (intersects(s)) return false;
+		for (Entity s : island.getEntities())
+			if (s instanceof Structure && intersects((Structure) s)) return false;
 		
 		return true;
 	}
@@ -270,9 +264,9 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		if (e.getName().equals("onDismantle"))
 		{
 			kill();
-			Vector3 p = GameLayer.world.getIslands()[0].pos;
+			Vector3 p = GameLayer.instance.activeIsland.pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
-			GameLayer.world.addEntity(i);
+			island.addEntity(i, false, false);
 		}
 	}
 	
