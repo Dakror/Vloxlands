@@ -204,7 +204,7 @@ public abstract class Generator
 				VoxelPos vp = island.getHighestVoxel(x, z);
 				if (vp.y <= 0 || vp.b != Voxel.get("DIRT").getId()) continue;
 				
-				int height = (int) (Math.random() * 5 + 5);
+				int height = (int) (MathUtils.random() * 5 + 5);
 				
 				byte wood = Voxel.get("WOOD").getId();
 				

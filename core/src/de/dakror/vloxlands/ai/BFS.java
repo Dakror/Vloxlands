@@ -18,11 +18,11 @@ public class BFS
 	public static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	public static BFSNode lastTarget;
 	
-	// TODO: multi island support
+	// TODO multi island support
 	public static Path findClosestVoxel(Vector3 pos, byte voxel, Creature c)
 	{
 		queue.clear();
-		queue.add(new BFSNode(pos.x, pos.y, pos.z, GameLayer.world.getIslands()[0].get(pos.x, pos.y, pos.z), null));
+		queue.add(new BFSNode(pos.x, pos.y, pos.z, GameLayer.instance.activeIsland.get(pos.x, pos.y, pos.z), null));
 		
 		while (queue.size() > 0)
 		{
@@ -57,9 +57,9 @@ public class BFS
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!GameLayer.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) break;
+					if (!GameLayer.instance.activeIsland.isTargetable(v.x, v.y, v.z)) break;
 					
-					byte vxl = GameLayer.world.getIslands()[0].get(v.x, v.y, v.z);
+					byte vxl = GameLayer.instance.activeIsland.get(v.x, v.y, v.z);
 					if (vxl == air && !c.canFly()) continue;
 					
 					// don't need parents here
@@ -71,8 +71,8 @@ public class BFS
 					
 					if (vxl == voxel)
 					{
-						if (GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false;
-						if (GameLayer.world.getIslands()[0].get(v.x, v.y + 1, v.z) == voxel && !GameLayer.world.getIslands()[0].isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false; // first mine available blocks above
+						if (GameLayer.instance.activeIsland.isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false;
+						if (GameLayer.instance.activeIsland.get(v.x, v.y + 1, v.z) == voxel && !GameLayer.instance.activeIsland.isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false; // first mine available blocks above
 					}
 					
 					if (free) queue.add(node);

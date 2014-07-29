@@ -6,71 +6,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.util.Direction;
 
 public class Face
 {
-	public static class FaceKey implements Comparable<FaceKey>
-	{
-		public int x, y, z, d;
-		
-		public FaceKey(int x, int y, int z, int d)
-		{
-			set(x, y, z, d);
-		}
-		
-		public FaceKey set(FaceKey k)
-		{
-			x = k.x;
-			y = k.y;
-			z = k.z;
-			d = k.d;
-			
-			return this;
-		}
-		
-		public FaceKey set(int x, int y, int z, int d)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.d = d;
-			
-			return this;
-		}
-		
-		@Override
-		public int hashCode()
-		{
-			return ((x * Chunk.SIZE + y) * Chunk.SIZE + z) * Chunk.SIZE + d;
-		}
-		
-		@Override
-		public boolean equals(Object o)
-		{
-			if (!(o instanceof FaceKey)) return false;
-			
-			return hashCode() == o.hashCode();
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "[" + x + ", " + y + ", " + z + ", " + Direction.values()[d] + "]";
-		}
-		
-		@Override
-		public int compareTo(FaceKey o)
-		{
-			if (x != o.x) return x - o.x;
-			else if (y != o.x) return y - o.y;
-			else if (z != o.z) return z - o.z;
-			
-			return d - o.d;
-		}
-	}
-	
 	public Direction dir;
 	public Vector3 pos, tl, tr, bl, br, n;
 	
@@ -79,6 +18,9 @@ public class Face
 	public float texHeight = Voxel.TEXSIZE;
 	
 	public float sizeX, sizeY, sizeZ;
+	
+	int hash;
+	boolean hashDirty = true;
 	
 	public Face(Direction dir, Vector3 pos, Vector2 tex)
 	{
@@ -233,6 +175,11 @@ public class Face
 		setSize(sizeX + direction.x, sizeY + direction.y, sizeZ + direction.z);
 	}
 	
+	public void increaseSize(float x, float y, float z)
+	{
+		setSize(sizeX + x, sizeY + y, sizeZ + z);
+	}
+	
 	@Override
 	public String toString()
 	{
@@ -249,6 +196,29 @@ public class Face
 	@Override
 	public boolean equals(Object obj)
 	{
-		return toString().equals(obj.toString());
+		if (!(obj instanceof Face)) return false;
+		return hashCode() == obj.hashCode() && sizeX == ((Face) obj).sizeX && sizeY == ((Face) obj).sizeY && sizeZ == ((Face) obj).sizeZ;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		if (hashDirty)
+		{
+			hash = getHashCode((int) pos.x, (int) pos.y, (int) pos.z, dir.ordinal());
+			hashDirty = false;
+		}
+		return hash;
+	}
+	
+	public static int getHashCode(int x, int y, int z, int d)
+	{
+		int hash = 0;
+		hash += x << 24;
+		hash += y << 16;
+		hash += z << 8;
+		hash += d;
+		
+		return hash;
 	}
 }

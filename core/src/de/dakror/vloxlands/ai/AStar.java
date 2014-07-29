@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import de.dakror.vloxlands.ai.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;
 
@@ -31,10 +32,10 @@ public class AStar
 	static AStarNode target;
 	static Vector3 neighbor;
 	
-	// TODO: multi island support
+	// TODO multi island support
 	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
-		if (!GameLayer.world.getIslands()[0].isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
+		if (!GameLayer.instance.activeIsland.isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
 		
 		openList.clear();
 		closedList.clear();
@@ -114,12 +115,12 @@ public class AStar
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!GameLayer.world.getIslands()[0].isTargetable(v.x, v.y, v.z)) continue;
-					if (GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air && !c.canFly()) continue;
+					if (!GameLayer.instance.activeIsland.isTargetable(v.x, v.y, v.z)) continue;
+					if (GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air && !c.canFly()) continue;
 					
 					if (from.dst(v) > maxDistance || to.dst(v) > maxDistance) continue;
 					
-					float g = GameLayer.world.getIslands()[0].get(v.x, v.y, v.z) == air ? 1.5f : 1;
+					float g = GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air ? 1.5f : 1;
 					
 					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g * v.dst(selected.x, selected.y, selected.z), v.dst(to), selected);
 					
@@ -137,27 +138,29 @@ public class AStar
 					{
 						boolean free = true;
 						
-						if (!GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, v.z, height)) free = false;
+						if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height)) free = false;
 						
 						if (x != 0 && z != 0 && free)
 						{
-							if (!GameLayer.world.getIslands()[0].isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
-							else if (!GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
+							if (!GameLayer.instance.activeIsland.isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
+							else if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
 						if (y != 0)
 						{
-							if (y < 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
-							else if (y > 0 && !GameLayer.world.getIslands()[0].isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
+							if (y < 0 && !GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
+							else if (y > 0 && !GameLayer.instance.activeIsland.isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
 						}
 						
 						if (free)
 						{
-							for (Entity e : GameLayer.world.getIslands()[0].getStructures())
+							for (Entity e : GameLayer.instance.activeIsland.getEntities())
 							{
+								if (!(e instanceof Structure)) continue;
+								
 								e.getWorldBoundingBox(b);
 								
-								b2.min.set(v).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
+								b2.min.set(v).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
 								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 								b2.set(b2.min, b2.max);
 								if (b.intersects(b2))
@@ -167,7 +170,7 @@ public class AStar
 								}
 								if (x != 0 && z != 0 && free)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.min.set(selected.x, v.y, v.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -177,7 +180,7 @@ public class AStar
 										break;
 									}
 									
-									b2.min.set(v.x, v.y, selected.z).add(GameLayer.world.getIslands()[0].pos).add(malus, 1, malus);
+									b2.min.set(v.x, v.y, selected.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									

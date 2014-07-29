@@ -36,6 +36,7 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -54,6 +55,8 @@ public class Human extends Creature
 	Matrix4 toolTransform;
 	
 	Array<Job> jobQueue = new Array<Job>();
+	
+	final Matrix4 tmp = new Matrix4();
 	
 	public Human(float x, float y, float z)
 	{
@@ -140,19 +143,22 @@ public class Human extends Creature
 	public void tick(int tick)
 	{
 		super.tick(tick);
+		
 		if (!carryingItemStack.isNull())
 		{
-			carryingItemTransform.setToRotation(Vector3.Y, 0).translate(posCache);
-			carryingItemTransform.rotate(Vector3.Y, rotCache.getYaw());
-			carryingItemTransform.translate(resourceTrn);
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.translate(resourceTrn);
+			carryingItemTransform.set(tmp);
 		}
 		
 		if (!tool.isNull())
 		{
-			toolTransform.setToRotation(Vector3.Y, 0).translate(posCache);
-			toolTransform.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			
-			((Tool) tool.getItem()).transformInHand(toolTransform, this);
+			((Tool) tool.getItem()).transformInHand(tmp, this);
+			toolTransform.set(tmp);
 		}
 		
 		if (jobQueue.size > 0)
@@ -220,7 +226,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && !lmb)
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
 			selected = true;
 			
@@ -295,7 +301,7 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (wasSelected && !lmb)
+		if (wasSelected && (!lmb || D.android()))
 		{
 			CurserCommand c = structure.getCommandForEntity(this);
 			Vector3 pathStart = getVoxelBelow();
@@ -332,7 +338,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
 	{
-		if ((wasSelected || selected) && !lmb)
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
 			selected = true;
 			
@@ -341,7 +347,7 @@ public class Human extends Creature
 				if (GameLayer.instance.activeAction.equals("clear"))
 				{
 					if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
-					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // TODO: finish clear region action
+					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // FIXME finish clear region action
 				}
 			}
 			

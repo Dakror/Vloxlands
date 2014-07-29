@@ -519,7 +519,7 @@ public class HudLayer extends Layer implements SelectionListener
 	public void render(float delta)
 	{
 		stage.act();
-		if (Vloxlands.currentGame.getActiveLayer() == this || !Vloxlands.currentGame.getActiveLayer().isModal())
+		if (Vloxlands.instance.getActiveLayer() == this || !Vloxlands.instance.getActiveLayer().isModal())
 		{
 			stage.draw();
 			if (dragStart.x > -1)

@@ -2,7 +2,6 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.ai.AStar;
@@ -52,8 +50,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static final float gap = 0.01f;
 	
-	Array<Entity> entities = new Array<Entity>();
-	
 	public World(int width, int depth)
 	{
 		this.width = width;
@@ -81,41 +77,16 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
 	
-	public void update()
-	{
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
-		{
-			Entity e = iter.next();
-			e.update();
-		}
-	}
-	
 	@Override
 	public void tick(int tick)
 	{
 		for (Island island : islands)
 			if (island != null) island.tick(tick);
-		
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
-		{
-			Entity e = iter.next();
-			if (e.isMarkedForRemoval())
-			{
-				e.dispose();
-				iter.remove();
-			}
-			else e.tick(tick);
-		}
 	}
 	
 	public Island[] getIslands()
 	{
 		return islands;
-	}
-	
-	public Array<Entity> getEntities()
-	{
-		return entities;
 	}
 	
 	public int getWidth()
@@ -126,13 +97,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	public int getDepth()
 	{
 		return depth;
-	}
-	
-	public void addEntity(Entity e)
-	{
-		if (e instanceof Structure) Gdx.app.log("World.addEntity", "Discouraged! Structures should be added to a specific island!");
-		e.onSpawn();
-		entities.add(e);
 	}
 	
 	@Override
@@ -155,16 +119,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	{
 		batch.render(this, environment);
 		visibleEntities = 0;
-		totalEntities = entities.size;
-		for (Iterator<Entity> iter = entities.iterator(); iter.hasNext();)
-		{
-			Entity e = iter.next();
-			if (e.inFrustum)
-			{
-				e.render(batch, environment, false);
-				visibleEntities++;
-			}
-		}
+		totalEntities = 0;
 		
 		for (Island island : islands)
 		{
@@ -202,23 +157,23 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			}
 			Vector3 v = query.sourceCreature.getVoxelBelow();
 			
-			for (Iterator<Structure> iter = new ArrayIterator<Structure>(islands[query.island].structures); iter.hasNext();)
+			for (Entity s : islands[query.island].entities)
 			{
-				Structure s = iter.next();
+				if (!(s instanceof Structure)) continue;
 				if (s == query.sourceStructure) continue;
 				if (!query.searchedClass.isAssignableFrom(s.getClass())) continue;
-				if (query.mustWork && !s.isWorking()) continue;
-				if (query.mustBeEmpty && s.getInventory().getCount() > 0) continue;
-				if (query.mustBeFull && !s.getInventory().isFull()) continue;
-				if (query.mustHaveCapacity && s.getInventory().isFull()) continue;
-				if (query.mustHaveCapacityForTransportedItemStack && query.transportedItemStack != null && s.getInventory().getCount() + query.transportedItemStack.getAmount() > s.getInventory().getCapacity()) continue;
-				if (query.searchedNodeType != null && !s.hasStructureNode(query.searchedNodeType)) continue;
-				if (query.searchedNodeName != null && !s.hasStructureNode(query.searchedNodeName)) continue;
-				if (query.searchedItemStack != null && !s.getInventory().contains(query.searchedItemStack)) continue;
-				if (query.searchedToolType != null && !s.getInventory().contains(query.searchedToolType)) continue;
+				if (query.mustWork && !((Structure) s).isWorking()) continue;
+				if (query.mustBeEmpty && ((Structure) s).getInventory().getCount() > 0) continue;
+				if (query.mustBeFull && !((Structure) s).getInventory().isFull()) continue;
+				if (query.mustHaveCapacity && ((Structure) s).getInventory().isFull()) continue;
+				if (query.mustHaveCapacityForTransportedItemStack && query.transportedItemStack != null && ((Structure) s).getInventory().getCount() + query.transportedItemStack.getAmount() > ((Structure) s).getInventory().getCapacity()) continue;
+				if (query.searchedNodeType != null && !((Structure) s).hasStructureNode(query.searchedNodeType)) continue;
+				if (query.searchedNodeName != null && !((Structure) s).hasStructureNode(query.searchedNodeName)) continue;
+				if (query.searchedItemStack != null && !((Structure) s).getInventory().contains(query.searchedItemStack)) continue;
+				if (query.searchedToolType != null && !((Structure) s).getInventory().contains(query.searchedToolType)) continue;
 				
 				NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
-				Path p = AStar.findPath(v, s.getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(s.getVoxelPos()), query.sourceCreature, type.useGhostTarget);
+				Path p = AStar.findPath(v, ((Structure) s).getStructureNode(v, type, query.searchedNodeName).pos.cpy().add(((Structure) s).getVoxelPos()), query.sourceCreature, type.useGhostTarget);
 				if (p == null) continue;
 				
 				float dist = p.length();
@@ -226,7 +181,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				{
 					distance = dist;
 					path = p;
-					structure = s;
+					structure = (Structure) s;
 				}
 			}
 		}
@@ -234,9 +189,8 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		{
 			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 			
-			for (Iterator<Entity> iter = new ArrayIterator<Entity>(entities); iter.hasNext();)
+			for (Entity e : islands[query.island].entities)
 			{
-				Entity e = iter.next();
 				if (!(e instanceof Creature)) continue;
 				if (e == query.sourceCreature) continue;
 				if (!e.getClass().equals(query.searchedClass)) continue;

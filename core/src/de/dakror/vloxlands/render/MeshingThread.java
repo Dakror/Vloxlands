@@ -38,14 +38,6 @@ public class MeshingThread extends Thread
 		{
 			for (Meshable m : meshables)
 				if (m != null) m.mesh();
-			try
-			{
-				Thread.sleep(16);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
 		}
 	}
 }

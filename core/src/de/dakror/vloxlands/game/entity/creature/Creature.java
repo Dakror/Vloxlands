@@ -31,7 +31,7 @@ public abstract class Creature extends Entity implements AnimationListener
 		
 		speedAmp = 1;
 		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
-		modelInstance.transform.translate(blockTrn);
+		transform.translate(blockTrn);
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
@@ -46,11 +46,12 @@ public abstract class Creature extends Entity implements AnimationListener
 			{
 				if (path.size() > 0)
 				{
-					Vector3 target = path.get().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+					Vector3 target = path.get().cpy().add(GameLayer.instance.activeIsland.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
-					transform.setToRotation(Vector3.Y, 0).translate(posCache);
-					transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 					
+					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
+					
+					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 					if (dif.len() > speed) dif.limit(speed);
 					else
 					{
@@ -80,7 +81,7 @@ public abstract class Creature extends Entity implements AnimationListener
 	
 	public Vector3 getVoxelBelow()
 	{
-		Vector3 v = posCache.cpy().sub(GameLayer.world.getIslands()[0].pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2); // TODO: multi island support
+		Vector3 v = posCache.cpy().sub(GameLayer.instance.activeIsland.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2); // TODO multi island support
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;
@@ -113,7 +114,7 @@ public abstract class Creature extends Entity implements AnimationListener
 	{
 		if (path != null && path.getGhostTarget() != null)
 		{
-			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.world.getIslands()[0].pos).add(blockTrn);
+			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.instance.activeIsland.pos).add(blockTrn);
 			transform.setToRotation(Vector3.Y, 0).translate(posCache);
 			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
 		}

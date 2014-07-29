@@ -25,18 +25,16 @@ import de.dakror.vloxlands.layer.LoadingLayer;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.D;
+import de.dakror.vloxlands.util.DDirectionalShadowLight;
 import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
 
 public class Vloxlands extends GameBase
 {
-	public static Vloxlands currentGame;
+	public static Vloxlands instance;
 	public static AssetManager assets;
 	public static Skin skin;
-	
-	long last;
-	int tick;
 	
 	public static boolean showPathDebug;
 	public static boolean wireframe;
@@ -44,7 +42,7 @@ public class Vloxlands extends GameBase
 	@Override
 	public void create()
 	{
-		currentGame = this;
+		instance = this;
 		
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		Dialog.fadeDuration = 0;
@@ -67,6 +65,8 @@ public class Vloxlands extends GameBase
 		getMultiplexer().addProcessor(0, this);
 		Gdx.input.setInputProcessor(getMultiplexer());
 		
+		new Updater();
+		
 		addLayer(new LoadingLayer());
 	}
 	
@@ -77,19 +77,9 @@ public class Vloxlands extends GameBase
 		
 		for (Layer l : layers)
 			l.render(Gdx.graphics.getDeltaTime());
-		
-		if (last == 0) last = System.currentTimeMillis();
-		
-		if (System.currentTimeMillis() - last >= 16) // ~60 a sec
-		{
-			tick++;
-			
-			for (Layer l : layers)
-				l.tick(tick);
-			last = System.currentTimeMillis();
-		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean keyUp(int keycode)
 	{
@@ -107,9 +97,19 @@ public class Vloxlands extends GameBase
 			
 			return true;
 		}
-		if (keycode == Keys.F6 && GameLayer.world != null)
+		
+		if (GameLayer.world != null)
 		{
-			saveGame();
+			if (keycode == Keys.F6) saveGame();
+			if (keycode == Keys.F7) Config.fov++;
+			if (keycode == Keys.F8) Config.fov--;
+			if (keycode == Keys.F9) Config.shadowQuality++;
+			if (keycode == Keys.F10) Config.shadowQuality--;
+			if (keycode == Keys.F9 || keycode == Keys.F10)
+			{
+				Config.shadowQuality = Math.max(0, Config.shadowQuality);
+				((DDirectionalShadowLight) GameLayer.instance.env.shadowMap).setShadowQuality(Config.shadowQuality);
+			}
 		}
 		
 		return false;
