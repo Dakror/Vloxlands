@@ -1,22 +1,22 @@
 package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.util.IInventory;
+import de.dakror.vloxlands.util.InventoryProvider;
 
 /**
  * @author Dakror
  */
 public class DepositJob extends Job
 {
-	private IInventory target;
+	private InventoryProvider target;
 	
-	public DepositJob(Human human, IInventory target, boolean persistent)
+	public DepositJob(Human human, InventoryProvider target, boolean persistent)
 	{
 		super(human, "deposit", "Depositing carried items", 1, persistent);
 		this.target = target;
 	}
 	
-	public IInventory getTarget()
+	public InventoryProvider getTarget()
 	{
 		return target;
 	}

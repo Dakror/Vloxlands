@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.item;
 
+import java.util.HashMap;
+
 
 /**
  * Functions as pre-requisites array as well as costs list
@@ -8,7 +10,7 @@ package de.dakror.vloxlands.game.item;
  */
 public class ResourceList
 {
-	int[] items;
+	HashMap<Byte, Integer> items;
 	
 	int minBuildings;
 	int maxBuildings;
@@ -21,7 +23,7 @@ public class ResourceList
 	
 	public ResourceList()
 	{
-		items = new int[Item.ITEMS];
+		items = new HashMap<Byte, Integer>();
 	}
 	
 	public ResourceList add(ItemStack stack)
@@ -32,7 +34,8 @@ public class ResourceList
 	
 	public ResourceList add(Item item, int amount)
 	{
-		items[item.getId() + 128] = amount;
+		int o = items.containsKey(item.getId()) ? get(item) : 0;
+		items.put(item.getId(), o + amount);
 		count += amount;
 		return this;
 	}
@@ -49,7 +52,12 @@ public class ResourceList
 	
 	public int get(byte itemId)
 	{
-		return items[itemId + 128];
+		return items.get(itemId);
+	}
+	
+	public HashMap<Byte, Integer> getAll()
+	{
+		return items;
 	}
 	
 	public int getMinBuildings()
@@ -116,5 +124,10 @@ public class ResourceList
 	{
 		this.costPopulation = costPopulation;
 		return this;
+	}
+	
+	public boolean hasRequirements()
+	{
+		return maxBuildings > 0 || minBuildings > 0 || maxPopulation > 0 || minPopulation > 0;
 	}
 }

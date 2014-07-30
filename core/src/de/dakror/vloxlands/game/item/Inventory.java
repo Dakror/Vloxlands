@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.util.Savable;
+import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
@@ -16,6 +17,8 @@ public class Inventory implements Savable
 	protected Array<ItemStack> stacks;
 	protected int capacity;
 	protected int count;
+	
+	public Array<InventoryListener> listeners = new Array<InventoryListener>();
 	
 	public Inventory(int capacity)
 	{
@@ -51,6 +54,14 @@ public class Inventory implements Savable
 		return amount;
 	}
 	
+	public int get(byte id)
+	{
+		int amount = 0;
+		for (ItemStack stack : stacks)
+			if (stack.getItem().getId() == id) amount += stack.amount;
+		return amount;
+	}
+	
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
@@ -74,6 +85,7 @@ public class Inventory implements Savable
 		}
 		
 		count -= is.getAmount();
+		dispatchInventoryChanged();
 		return is;
 	}
 	
@@ -104,6 +116,8 @@ public class Inventory implements Savable
 		if (amount != 0) stacks.add(new ItemStack(stack.getItem(), amount));
 		
 		count += amount;
+		
+		dispatchInventoryChanged();
 	}
 	
 	/**
@@ -163,6 +177,23 @@ public class Inventory implements Savable
 	public void setCapacity(int capacity)
 	{
 		this.capacity = capacity;
+		dispatchInventoryChanged();
+	}
+	
+	protected void dispatchInventoryChanged()
+	{
+		for (InventoryListener isl : listeners)
+			isl.onInventoryChanged();
+	}
+	
+	public void addListener(InventoryListener listener)
+	{
+		listeners.insert(0, listener);
+	}
+	
+	public void removeListener(InventoryListener listener)
+	{
+		listeners.removeValue(listener, true);
 	}
 	
 	@Override

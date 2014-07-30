@@ -19,6 +19,7 @@ public class Lumberjack extends Structure
 		name = "Lumberjack";
 		
 		resourceList.add(Item.get("WOODEN_LOG"), 10);
+		resourceList.add(Item.get("AXE"), 1);
 		resourceList.setCostPopulation(1);
 		
 		inventory = new Inventory(20);

@@ -14,5 +14,7 @@ public class Towncenter extends Warehouse
 		name = "Towncenter";
 		inventory = new NonStackingInventory(300);
 		confirmDismante = true;
+		
+		resourceList.setMaxBuildings(1);
 	}
 }

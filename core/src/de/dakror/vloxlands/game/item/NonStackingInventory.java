@@ -29,6 +29,7 @@ public class NonStackingInventory extends Inventory
 	{
 		storage[stack.getItem().getId() + 128] += amount;
 		count += amount;
+		dispatchInventoryChanged();
 	}
 	
 	@Override
@@ -41,6 +42,12 @@ public class NonStackingInventory extends Inventory
 	public int get(Item item)
 	{
 		return storage[item.getId() + 128];
+	}
+	
+	@Override
+	public int get(byte id)
+	{
+		return storage[id + 128];
 	}
 	
 	@Override
@@ -75,6 +82,8 @@ public class NonStackingInventory extends Inventory
 		int am = Math.min(amount, storage[item.getId() + 128]);
 		count -= am;
 		storage[item.getId() + 128] -= am;
+		
+		dispatchInventoryChanged();
 		return new ItemStack(item, am);
 	}
 	

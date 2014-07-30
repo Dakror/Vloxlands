@@ -1,10 +1,15 @@
 package de.dakror.vloxlands.layer;
 
+import java.util.HashMap;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -16,9 +21,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
@@ -31,6 +38,7 @@ import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
+import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.IdleJob;
@@ -151,6 +159,7 @@ public class HudLayer extends Layer implements SelectionListener
 		s.getTooltip().set("Build", "Build various building and structures.");
 		actions.addSlot(0, null, s);
 		s = new RevolverSlot(stage, new Vector2(1, 5), "entity:129");
+		s.setDisabled(true);
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
 		actions.addSlot(1, "build", s);
 		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
@@ -248,6 +257,7 @@ public class HudLayer extends Layer implements SelectionListener
 				style.imageDown.setMinWidth(ItemSlot.size);
 				style.imageDown.setMinHeight(ItemSlot.size);
 				final TooltipImageButton job = new TooltipImageButton(stage, style);
+				stage.addActor(job.getTooltip());
 				job.setName("job");
 				job.getStyle().checked = Vloxlands.skin.getDrawable("default-round-down");
 				ClickListener cl = new ClickListener()
@@ -324,6 +334,7 @@ public class HudLayer extends Layer implements SelectionListener
 			style.imageDown.setMinWidth(ItemSlot.size);
 			style.imageDown.setMinHeight(ItemSlot.size);
 			final TooltipImageButton dismantle = new TooltipImageButton(stage, style);
+			stage.addActor(dismantle.getTooltip());
 			dismantle.addListener(new ClickListener()
 			{
 				@Override
@@ -384,8 +395,40 @@ public class HudLayer extends Layer implements SelectionListener
 			queue.pad(4);
 			
 			if (!structure.isBuilt())
-			{	
-				
+			{
+				Table res = new Table();
+				HashMap<Byte, Integer> items = structure.getResourceList().getAll();
+				Inventory inv = structure.getInventory();
+				Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
+				int i = 0;
+				for (Byte b : items.keySet())
+				{
+					if (i % 4 == 0 && i > 0) res.row();
+					Item item = Item.getForId(b);
+					Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
+					res.add(img);
+					
+					Label l = new Label(inv.get(b) + " / " + items.get(b), Vloxlands.skin);
+					l.setName(b + "");
+					l.setWrap(true);
+					res.add(l).width(50);
+					i++;
+				}
+				selectedStructureWindow.add(res).minWidth(200);
+				final ProgressBar progress = new ProgressBar(0, structure.getResourceList().getCount(), 1, false, Vloxlands.skin);
+				progress.setAnimateDuration(0.2f);
+				progress.setAnimateInterpolation(Interpolation.pow3);
+				selectedStructureWindow.addAction(new Action()
+				{
+					@Override
+					public boolean act(float delta)
+					{
+						progress.setValue(structure.getBuildProgress());
+						return false;
+					}
+				});
+				selectedStructureWindow.row();
+				selectedStructureWindow.add(progress).width(190);
 			}
 			else
 			{
@@ -454,8 +497,6 @@ public class HudLayer extends Layer implements SelectionListener
 					selectedStructureWindow.add(rightSide).top().width(200);
 				}
 			}
-			
-			
 			
 			selectedStructureWindow.pack();
 			selectedStructureWindow.setVisible(true);
@@ -532,5 +573,7 @@ public class HudLayer extends Layer implements SelectionListener
 				shapeRenderer.end();
 			}
 		}
+		
+		Table.drawDebug(stage);
 	}
 }

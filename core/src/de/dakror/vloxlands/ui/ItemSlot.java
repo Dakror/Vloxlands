@@ -34,13 +34,14 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 		addActor(amount);
 		
 		setItemStack(stack);
+		stage.addActor(tooltip);
 	}
 	
 	private static ImageButtonStyle createStyle(ItemStack stack)
 	{
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = null;
-		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getTextureX() * Item.SIZE, stack.getItem().getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
+		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getIconX() * Item.SIZE, stack.getItem().getIconY() * Item.SIZE, Item.SIZE, Item.SIZE);
 		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default transparent space
 		
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));

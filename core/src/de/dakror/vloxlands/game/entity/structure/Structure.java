@@ -10,6 +10,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.NonStackingInventory;
 import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.job.Job;
@@ -19,19 +20,21 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
-import de.dakror.vloxlands.util.IInventory;
+import de.dakror.vloxlands.util.InventoryProvider;
+import de.dakror.vloxlands.util.ResourceListProvider;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.IEvent;
 
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity implements IInventory, Savable
+public abstract class Structure extends Entity implements InventoryProvider, ResourceListProvider, Savable
 {
 	Array<StructureNode> nodes;
 	Array<Human> workers;
 	Vector3 voxelPos;
 	Inventory inventory;
+	Inventory buildInventory;
 	ResourceList resourceList;
 	boolean working;
 	
@@ -66,6 +69,7 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
+		buildInventory = new NonStackingInventory(256 /* That should be enough... */);
 		resourceList = new ResourceList();
 		working = true;
 		
@@ -136,8 +140,12 @@ public abstract class Structure extends Entity implements IInventory, Savable
 		}
 		buildProgress++;
 		
-		if (!built && buildProgress == resourceList.getCount()) setBuilt(true);
-		return buildProgress == resourceList.getCount();
+		return false;
+	}
+	
+	public int getBuildProgress()
+	{
+		return buildProgress;
 	}
 	
 	@Override
@@ -219,9 +227,20 @@ public abstract class Structure extends Entity implements IInventory, Savable
 	@Override
 	public Inventory getInventory()
 	{
+		return built ? inventory : buildInventory;
+	}
+	
+	public Inventory getBuildInventory()
+	{
+		return buildInventory;
+	}
+	
+	public Inventory getInnerInventory()
+	{
 		return inventory;
 	}
 	
+	@Override
 	public ResourceList getResourceList()
 	{
 		return resourceList;
