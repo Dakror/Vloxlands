@@ -25,6 +25,14 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
+	public void clear()
+	{
+		Arrays.fill(storage, 0);
+		count = 0;
+		dispatchInventoryChanged();
+	}
+	
+	@Override
 	protected void addStack(ItemStack stack, int amount)
 	{
 		storage[stack.getItem().getId() + 128] += amount;

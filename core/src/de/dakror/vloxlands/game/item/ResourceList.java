@@ -1,6 +1,7 @@
 package de.dakror.vloxlands.game.item;
 
 import java.util.HashMap;
+import java.util.Set;
 
 
 /**
@@ -55,9 +56,9 @@ public class ResourceList
 		return items.get(itemId);
 	}
 	
-	public HashMap<Byte, Integer> getAll()
+	public Set<Byte> getAll()
 	{
-		return items;
+		return items.keySet();
 	}
 	
 	public int getMinBuildings()

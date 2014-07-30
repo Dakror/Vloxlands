@@ -10,6 +10,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.NonStackingInventory;
 import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
@@ -34,6 +35,9 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	Array<Human> workers;
 	Vector3 voxelPos;
 	Inventory inventory;
+	/**
+	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
+	 */
 	Inventory buildInventory;
 	ResourceList resourceList;
 	boolean working;
@@ -93,6 +97,13 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		this.built = built;
 		modelVisible = built;
 		additionalVisible = built;
+		
+		if (!built)
+		{
+			buildInventory.clear();
+			for (Byte b : resourceList.getAll())
+				buildInventory.add(new ItemStack(Item.getForId(b), resourceList.get(b)));
+		}
 	}
 	
 	public Vector3 getCenter()

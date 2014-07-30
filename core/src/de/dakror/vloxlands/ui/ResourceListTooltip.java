@@ -1,7 +1,5 @@
 package de.dakror.vloxlands.ui;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -45,11 +43,10 @@ public class ResourceListTooltip extends Tooltip
 		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		
-		HashMap<Byte, Integer> items = rl.getAll();
-		for (Byte b : items.keySet())
+		for (Byte b : provider.getResourceList().getAll())
 		{
 			Item item = Item.getForId(b);
-			addItem(tex, items.get(b) + "", item.getIconX(), item.getIconY());
+			addItem(tex, provider.getResourceList().get(b) + "", item.getIconX(), item.getIconY());
 		}
 		
 		if (rl.getCostPopulation() > 0) addItem(tex, rl.getCostPopulation() + "", 3, 6);

@@ -31,6 +31,13 @@ public class Inventory implements Savable
 		this(10);
 	}
 	
+	public void clear()
+	{
+		stacks.clear();
+		count = 0;
+		dispatchInventoryChanged();
+	}
+	
 	public ItemStack add(ItemStack stack)
 	{
 		if (count + stack.getAmount() > capacity)
@@ -205,4 +212,5 @@ public class Inventory implements Savable
 		for (ItemStack is : stacks)
 			is.save(baos);
 	}
+	
 }

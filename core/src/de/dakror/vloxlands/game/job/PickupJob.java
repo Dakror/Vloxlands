@@ -54,21 +54,24 @@ public class PickupJob extends Job
 			human.setTool(null);
 		}
 		
-		target.getInventory().take(stack.getItem(), stack.getAmount());
-		
-		if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
+		if (!stack.isNull())
 		{
-			human.setTool(stack.getItem());
-		}
-		else if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().canAdd(stack))
-		{
-			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(stack);
-			else human.getCarryingItemStack().add(stack.getAmount());
-		}
-		else
-		{
-			Gdx.app.error("PickupJob.tick", "Welp, this Human can't pickup those items! Putting 'em back.");
-			target.getInventory().add(stack);
+			target.getInventory().take(stack.getItem(), stack.getAmount());
+			
+			if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
+			{
+				human.setTool(stack.getItem());
+			}
+			else if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().canAdd(stack))
+			{
+				if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(stack);
+				else human.getCarryingItemStack().add(stack.getAmount());
+			}
+			else
+			{
+				Gdx.app.error("PickupJob.tick", "Welp, this Human can't pickup those items! Putting 'em back.");
+				target.getInventory().add(stack);
+			}
 		}
 	}
 }

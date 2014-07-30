@@ -1,7 +1,5 @@
 package de.dakror.vloxlands.layer;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Color;
@@ -397,18 +395,19 @@ public class HudLayer extends Layer implements SelectionListener
 			if (!structure.isBuilt())
 			{
 				Table res = new Table();
-				HashMap<Byte, Integer> items = structure.getResourceList().getAll();
 				Inventory inv = structure.getInventory();
 				Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 				int i = 0;
-				for (Byte b : items.keySet())
+				for (Byte b : structure.getResourceList().getAll())
 				{
 					if (i % 4 == 0 && i > 0) res.row();
 					Item item = Item.getForId(b);
 					Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
 					res.add(img);
 					
-					Label l = new Label(inv.get(b) + " / " + items.get(b), Vloxlands.skin);
+					int max = structure.getResourceList().get(b);
+					
+					Label l = new Label((max - inv.get(b)) + " / " + max, Vloxlands.skin);
 					l.setName(b + "");
 					l.setWrap(true);
 					res.add(l).width(50);
@@ -573,7 +572,5 @@ public class HudLayer extends Layer implements SelectionListener
 				shapeRenderer.end();
 			}
 		}
-		
-		Table.drawDebug(stage);
 	}
 }

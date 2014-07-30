@@ -319,10 +319,17 @@ public class Human extends Creature
 			}
 			else if (c == CurserCommand.BUILD && !structure.isBuilt())
 			{
-				job = new BuildJob(this, structure, false);
-				type = NodeType.build;
-				
-				queue = equipCorrectToolForJob(job, false, pathStart);
+				if (structure.getBuildInventory().getCount() == 0)
+				{
+					job = new BuildJob(this, structure, false);
+					type = NodeType.build;
+					
+					queue = equipCorrectToolForJob(job, false, pathStart);
+				}
+				else
+				{
+					queue = equipCorrectToolForJob(job, false, pathStart);
+				}
 			}
 			
 			Vector3 v = structure.getStructureNode(posCache, type).pos.cpy().add(structure.getVoxelPos());
@@ -398,20 +405,37 @@ public class Human extends Creature
 	
 	public boolean equipCorrectToolForJob(Job job, boolean queue, Vector3 pathStart)
 	{
-		if (!job.isUsingTool()) return false;
+		if (!job.isUsingTool() && tool.isNull()) return false;
 		
-		if (tool.isNull() || !(tool.getItem().getClass().isAssignableFrom(job.getTool())))
+		if (!job.isUsingTool() && !tool.isNull())
 		{
-			PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(job.getTool()).node(NodeType.pickup).island(0));
+			PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(tool).node(NodeType.deposit).island(0));
 			if (pb != null)
 			{
-				PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(job.getTool()), 1), true, false);
+				PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(), true, false);
 				if (!queue) setJob(pb.path, pj);
 				else queueJob(pb.path, pj);
 				
 				if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
 				
 				return true;
+			}
+		}
+		else
+		{
+			if (tool.isNull() || !(tool.getItem().getClass().isAssignableFrom(job.getTool())))
+			{
+				PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(job.getTool()).node(NodeType.pickup).island(0));
+				if (pb != null)
+				{
+					PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(job.getTool()), 1), true, false);
+					if (!queue) setJob(pb.path, pj);
+					else queueJob(pb.path, pj);
+					
+					if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
+					
+					return true;
+				}
 			}
 		}
 		
