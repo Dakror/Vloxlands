@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.util.event;
 
-public interface IEvent
+public interface Payload
 {
 	public String getName();
 	

@@ -174,7 +174,7 @@ public class Human extends Creature
 				if (j.isDone())
 				{
 					j.onEnd();
-					
+					j.triggerEndEvent();
 					jobQueue.removeIndex(0);
 					onJobDone(j);
 					

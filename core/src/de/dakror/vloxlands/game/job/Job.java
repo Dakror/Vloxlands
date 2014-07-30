@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.event.Event;
 
 /**
  * @author Dakror
@@ -22,6 +23,8 @@ public abstract class Job implements Tickable
 	Class<?> tool;
 	
 	Human human;
+	
+	Event endEvent;
 	
 	public Job(Human human, String animation, String text, int repeats, boolean persistent)
 	{
@@ -55,6 +58,16 @@ public abstract class Job implements Tickable
 	public void onEnd()
 	{
 		human.getAnimationController().animate(null, 0.2f); // TODO replace with idle animation
+	}
+	
+	public void triggerEndEvent()
+	{
+		if (endEvent != null) endEvent.trigger();
+	}
+	
+	public void setEndEvent(Event event)
+	{
+		endEvent = event;
 	}
 	
 	public void setDone()

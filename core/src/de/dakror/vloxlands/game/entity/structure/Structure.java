@@ -24,7 +24,7 @@ import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.InventoryProvider;
 import de.dakror.vloxlands.util.ResourceListProvider;
 import de.dakror.vloxlands.util.Savable;
-import de.dakror.vloxlands.util.event.IEvent;
+import de.dakror.vloxlands.util.event.Payload;
 
 /**
  * @author Dakror
@@ -289,7 +289,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		this.working = working;
 	}
 	
-	public void handleEvent(IEvent e)
+	public void handleEvent(Payload e)
 	{
 		if (e.getName().equals("onDismantle"))
 		{
