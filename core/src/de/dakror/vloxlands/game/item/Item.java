@@ -51,8 +51,8 @@ public class Item
 	protected String custom;
 	protected byte id;
 	protected int stack;
-	protected int textureX;
-	protected int textureY;
+	protected int iconX;
+	protected int iconY;
 	protected boolean resource;
 	protected boolean tool;
 	protected boolean equipable;
@@ -87,14 +87,14 @@ public class Item
 		return id;
 	}
 	
-	public int getTextureX()
+	public int getIconX()
 	{
-		return textureX;
+		return iconX;
 	}
 	
-	public int getTextureY()
+	public int getIconY()
 	{
-		return textureY;
+		return iconY;
 	}
 	
 	public boolean isResource()
@@ -150,6 +150,7 @@ public class Item
 	
 	public static Item get(String name)
 	{
+		if (!items.containsKey(name)) throw new IllegalArgumentException("item not found: " + name);
 		return items.get(name);
 	}
 	
@@ -211,14 +212,14 @@ public class Item
 				}
 				case textureX:
 				{
-					if (cell.length() > 0) item.textureX = Integer.parseInt(cell);
-					else item.textureX = Integer.parseInt(defaults[csv.getIndex()]);
+					if (cell.length() > 0) item.iconX = Integer.parseInt(cell);
+					else item.iconX = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case textureY:
 				{
-					if (cell.length() > 0) item.textureY = Integer.parseInt(cell);
-					else item.textureY = Integer.parseInt(defaults[csv.getIndex()]);
+					if (cell.length() > 0) item.iconY = Integer.parseInt(cell);
+					else item.iconY = Integer.parseInt(defaults[csv.getIndex()]);
 					break;
 				}
 				case resource:

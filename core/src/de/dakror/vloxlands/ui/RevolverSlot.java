@@ -7,7 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.util.ResourceListProvider;
 
 /**
  * @author Dakror
@@ -22,6 +24,14 @@ public class RevolverSlot extends TooltipImageButton
 		super(stage, createStyle(icon));
 		setName(name);
 		pad(12 * (SIZE / DEFAULT_SIZE));
+		
+		if (name.startsWith("entity:"))
+		{
+			Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").trim()), 0, 0, 0);
+			if (e instanceof ResourceListProvider) tooltip = new ResourceListTooltip("", "", (ResourceListProvider) e, this);
+		}
+		
+		stage.addActor(tooltip);
 	}
 	
 	private static ImageButtonStyle createStyle(Vector2 icon)

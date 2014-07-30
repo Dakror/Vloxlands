@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.util.IInventory;
+import de.dakror.vloxlands.util.InventoryProvider;
 
 /**
  * @author Dakror
@@ -13,10 +13,10 @@ import de.dakror.vloxlands.util.IInventory;
 public class PickupJob extends Job
 {
 	ItemStack stack;
-	IInventory target;
+	InventoryProvider target;
 	boolean equip;
 	
-	public PickupJob(Human human, IInventory target, ItemStack stack, boolean equip, boolean persistent)
+	public PickupJob(Human human, InventoryProvider target, ItemStack stack, boolean equip, boolean persistent)
 	{
 		super(human, "deposit", human.getTool().isNull() && equip || !equip ? "Picking up " + (stack.getItem() instanceof Tool ? "tool" : "item") : "Changing tool", 1, persistent);
 		this.stack = stack;
@@ -29,7 +29,7 @@ public class PickupJob extends Job
 		return stack;
 	}
 	
-	public IInventory getTarget()
+	public InventoryProvider getTarget()
 	{
 		return target;
 	}
@@ -54,21 +54,24 @@ public class PickupJob extends Job
 			human.setTool(null);
 		}
 		
-		target.getInventory().take(stack.getItem(), stack.getAmount());
-		
-		if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
+		if (!stack.isNull())
 		{
-			human.setTool(stack.getItem());
-		}
-		else if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().canAdd(stack))
-		{
-			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(stack);
-			else human.getCarryingItemStack().add(stack.getAmount());
-		}
-		else
-		{
-			Gdx.app.error("PickupJob.tick", "Welp, this Human can't pickup those items! Putting 'em back.");
-			target.getInventory().add(stack);
+			target.getInventory().take(stack.getItem(), stack.getAmount());
+			
+			if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
+			{
+				human.setTool(stack.getItem());
+			}
+			else if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().canAdd(stack))
+			{
+				if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(stack);
+				else human.getCarryingItemStack().add(stack.getAmount());
+			}
+			else
+			{
+				Gdx.app.error("PickupJob.tick", "Welp, this Human can't pickup those items! Putting 'em back.");
+				target.getInventory().add(stack);
+			}
 		}
 	}
 }

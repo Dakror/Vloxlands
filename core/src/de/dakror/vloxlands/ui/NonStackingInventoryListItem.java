@@ -70,7 +70,7 @@ public class NonStackingInventoryListItem extends HorizontalGroup
 		tooltip.set(amount + "x " + item.getName(), item.getDescription());
 		label.setText(amount + "x " + item.getName());
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
-		TextureRegion region = new TextureRegion(tex, item.getTextureX() * Item.SIZE, item.getTextureY() * Item.SIZE, Item.SIZE, Item.SIZE);
+		TextureRegion region = new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE);
 		image.setDrawable(new TextureRegionDrawable(region));
 		image.setSize(24, 24);
 		

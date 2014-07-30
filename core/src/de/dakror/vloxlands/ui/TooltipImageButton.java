@@ -3,6 +3,8 @@ package de.dakror.vloxlands.ui;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 
+import de.dakror.vloxlands.util.ResourceListProvider;
+
 /**
  * @author Dakror
  */
@@ -15,7 +17,13 @@ public class TooltipImageButton extends ImageButton
 		super(style);
 		
 		tooltip = new Tooltip("", "", this);
-		stage.addActor(tooltip);
+	}
+	
+	public TooltipImageButton(Stage stage, ImageButtonStyle style, ResourceListProvider provider)
+	{
+		super(style);
+		
+		tooltip = new ResourceListTooltip("", "", provider, this);
 	}
 	
 	public Tooltip getTooltip()
