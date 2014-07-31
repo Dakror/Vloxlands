@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.game.query;
 
+import com.badlogic.gdx.math.Vector3;
+
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
@@ -45,6 +47,7 @@ public class Query
 	public ItemStack transportedItemStack;
 	public Creature sourceCreature;
 	public Structure sourceStructure;
+	public Vector3 pathStart;
 	public int island;
 	
 	private Query()
@@ -63,6 +66,12 @@ public class Query
 	{
 		this();
 		this.sourceStructure = sourceStructure;
+	}
+	
+	public Query start(Vector3 pathStart)
+	{
+		this.pathStart = pathStart;
+		return this;
 	}
 	
 	public Query island(int island)

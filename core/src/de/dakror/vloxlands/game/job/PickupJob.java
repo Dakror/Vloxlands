@@ -34,6 +34,11 @@ public class PickupJob extends Job
 		return target;
 	}
 	
+	public void setTarget(InventoryProvider provider)
+	{
+		target = provider;
+	}
+	
 	public boolean isEquip()
 	{
 		return equip;

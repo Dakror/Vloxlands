@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -12,10 +11,6 @@ import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.ResourceList;
-import de.dakror.vloxlands.game.job.DismantleJob;
-import de.dakror.vloxlands.game.job.Job;
-import de.dakror.vloxlands.game.query.PathBundle;
-import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -264,17 +259,18 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	public boolean requestDismantle()
 	{
 		if (dismantleRequested) return false;
-		PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
-		if (pb == null || pb.creature == null) return false;
-		
-		Human human = (Human) pb.creature;
-		Job job = new DismantleJob((Human) pb.creature, this, false);
-		Vector3 pathStart = human.getVoxelBelow();
-		
-		human.equipCorrectToolForJob(job, false, pathStart);
-		
-		((Human) pb.creature).queueJob(AStar.findPath(pathStart, pb.path.getGhostTarget() != null ? pb.path.getGhostTarget() : pb.path.getLast(), human, NodeType.build.useGhostTarget), job);
-		dismantleRequested = true;
+		// TODO: fix Structure.requestDismantle
+		// PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
+		// if (pb == null || pb.creature == null) return false;
+		//
+		// Human human = (Human) pb.creature;
+		// Job job = new DismantleJob((Human) pb.creature, this, false);
+		// Vector3 pathStart = human.getVoxelBelow();
+		//
+		// human.equipCorrectToolForJob(job, false, pathStart);
+		//
+		// ((Human) pb.creature).queueJob(AStar.findPath(pathStart, pb.path.getGhostTarget() != null ? pb.path.getGhostTarget() : pb.path.getLast(), human, NodeType.build.useGhostTarget), job);
+		// dismantleRequested = true;
 		return true;
 	}
 	

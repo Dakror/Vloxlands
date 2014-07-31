@@ -1,7 +1,6 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -14,7 +13,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.ai.state.HumanState;
@@ -27,7 +25,6 @@ import de.dakror.vloxlands.game.item.tool.Tool;
 import de.dakror.vloxlands.game.job.DepositJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.MineJob;
-import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
@@ -35,6 +32,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -67,7 +65,7 @@ public class Human extends Creature
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
-		stateMachine.setInitialState(HumanState.idle);
+		stateMachine.setInitialState(HumanState.IDLE);
 	}
 	
 	public void setTool(Item tool)
@@ -225,15 +223,38 @@ public class Human extends Creature
 	
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{}
+	{
+		if ((wasSelected || selected) && (!lmb || D.android()))
+		{
+			selected = true;
+			
+			changeState(HumanState.WALK_TO_TARGET, vs.voxelPos.getPos());
+		}
+	}
 	
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (wasSelected && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
-			stateMachine.changeState(HumanState.transport);
-			MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.state_param0.ordinal(), structure);
+			selected = true;
+			
+			CurserCommand c = structure.getCommandForEntity(this);
+			if (c == CurserCommand.BUILD && !structure.isBuilt())
+			{
+				if (structure.getBuildInventory().getCount() == 0)
+				{	
+					
+				}
+				else
+				{
+					changeState(HumanState.GET_RESOURCES_FOR_BUILD, structure);
+				}
+			}
+			else if (c == CurserCommand.WALK)
+			{
+				changeState(HumanState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
+			}
 		}
 	}
 	
@@ -280,45 +301,6 @@ public class Human extends Creature
 				}
 			}
 		}
-	}
-	
-	public boolean equipCorrectToolForJob(Job job, boolean queue, Vector3 pathStart)
-	{
-		if (!job.isUsingTool() && tool.isNull()) return false;
-		
-		if (!job.isUsingTool() && !tool.isNull())
-		{
-			PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(tool).node(NodeType.deposit).island(0));
-			if (pb != null)
-			{
-				PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(), true, false);
-				if (!queue) setJob(pb.path, pj);
-				else queueJob(pb.path, pj);
-				
-				if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-				
-				return true;
-			}
-		}
-		else
-		{
-			if (tool.isNull() || !(tool.getItem().getClass().isAssignableFrom(job.getTool())))
-			{
-				PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(job.getTool()).node(NodeType.pickup).island(0));
-				if (pb != null)
-				{
-					PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(job.getTool()), 1), true, false);
-					if (!queue) setJob(pb.path, pj);
-					else queueJob(pb.path, pj);
-					
-					if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-					
-					return true;
-				}
-			}
-		}
-		
-		return false;
 	}
 	
 	public Array<Job> getJobQueue()
