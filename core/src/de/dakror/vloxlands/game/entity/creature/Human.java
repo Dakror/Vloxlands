@@ -53,6 +53,8 @@ public class Human extends Creature
 	
 	Array<Job> jobQueue = new Array<Job>();
 	
+	boolean createModelInstanceForCarryiedItemStack;
+	
 	final Matrix4 tmp = new Matrix4();
 	
 	public Human(float x, float y, float z)
@@ -103,61 +105,13 @@ public class Human extends Creature
 			carryingItemModelInstance = null;
 			carryingItemTransform = null;
 		}
-		else
-		{
-			Model model = null;
-			Vector3 scale = new Vector3();
-			Vector3 tr = new Vector3();
-			if (carryingItemStack.getItem().isModel())
-			{
-				model = Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class);
-			}
-			else if (carryingItemStack.getItem().getModel().startsWith("voxel:"))
-			{
-				Voxel v = Voxel.getForId(Integer.parseInt(carryingItemStack.getItem().getModel().replace("voxel:", "").trim()));
-				
-				ModelBuilder mb = new ModelBuilder();
-				mb.begin();
-				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, World.opaque);
-				model = mb.end();
-				scale.set(0.4f, 0.4f, 0.4f);
-				tr.set(-0.2f, 0, -0.3f);
-			}
-			else
-			{
-				Gdx.app.error("Human.setCarryingItemStack", "Can't handle item model!");
-				return;
-			}
-			
-			carryingItemModelInstance = new ModelInstance(model, new Matrix4());
-			if (!scale.isZero()) carryingItemModelInstance.nodes.get(0).scale.set(scale);
-			carryingItemModelInstance.nodes.get(0).translation.set(tr);
-			carryingItemModelInstance.calculateTransforms();
-			carryingItemTransform = carryingItemModelInstance.transform;
-		}
+		else createModelInstanceForCarryiedItemStack = true;
 	}
 	
 	@Override
 	public void tick(int tick)
 	{
 		super.tick(tick);
-		
-		if (!carryingItemStack.isNull())
-		{
-			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
-			tmp.rotate(Vector3.Y, rotCache.getYaw());
-			tmp.translate(resourceTrn);
-			carryingItemTransform.set(tmp);
-		}
-		
-		if (!tool.isNull())
-		{
-			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
-			tmp.rotate(Vector3.Y, rotCache.getYaw());
-			
-			((Tool) tool.getItem()).transformInHand(tmp, this);
-			toolTransform.set(tmp);
-		}
 		
 		if (jobQueue.size > 0)
 		{
@@ -191,6 +145,57 @@ public class Human extends Creature
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
+		if (!carryingItemStack.isNull() && carryingItemTransform != null)
+		{
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.translate(resourceTrn);
+			carryingItemTransform.set(tmp);
+		}
+		
+		if (!tool.isNull() && toolTransform != null)
+		{
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			
+			((Tool) tool.getItem()).transformInHand(tmp, this);
+			toolTransform.set(tmp);
+		}
+		
+		if (createModelInstanceForCarryiedItemStack)
+		{
+			Model model = null;
+			Vector3 scale = new Vector3();
+			Vector3 tr = new Vector3();
+			if (carryingItemStack.getItem().isModel())
+			{
+				model = Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class);
+			}
+			else if (carryingItemStack.getItem().getModel().startsWith("voxel:"))
+			{
+				Voxel v = Voxel.getForId(Integer.parseInt(carryingItemStack.getItem().getModel().replace("voxel:", "").trim()));
+				
+				ModelBuilder mb = new ModelBuilder();
+				mb.begin();
+				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, World.opaque);
+				model = mb.end();
+				scale.set(0.4f, 0.4f, 0.4f);
+				tr.set(-0.2f, 0, -0.3f);
+			}
+			else
+			{
+				Gdx.app.error("Human.setCarryingItemStack", "Can't handle item model!");
+				return;
+			}
+			
+			carryingItemModelInstance = new ModelInstance(model, new Matrix4());
+			if (!scale.isZero()) carryingItemModelInstance.nodes.get(0).scale.set(scale);
+			carryingItemModelInstance.nodes.get(0).translation.set(tr);
+			carryingItemModelInstance.calculateTransforms();
+			carryingItemTransform = carryingItemModelInstance.transform;
+			createModelInstanceForCarryiedItemStack = false;
+		}
+		
 		if (((jobQueue.size > 0 && firstJob().isUsingTool()) || (jobQueue.size > 1 && jobQueue.get(1).isUsingTool())) && toolModelInstance != null) batch.render(toolModelInstance, environment);
 		else if (!carryingItemStack.isNull() && carryingItemModelInstance != null) batch.render(carryingItemModelInstance, environment);
 	}

@@ -394,7 +394,7 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			if (!structure.isBuilt())
 			{
-				Table res = new Table();
+				final Table res = new Table();
 				Inventory inv = structure.getInventory();
 				Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 				int i = 0;
@@ -422,7 +422,23 @@ public class HudLayer extends Layer implements SelectionListener
 					@Override
 					public boolean act(float delta)
 					{
+						Inventory inv = structure.getInventory();
 						progress.setValue(structure.getBuildProgress());
+						for (Byte b : structure.getResourceList().getAll())
+						{
+							Actor a = res.findActor(b + "");
+							if (a instanceof Label)
+							{
+								int max = structure.getResourceList().get(b);
+								((Label) a).setText((max - inv.get(b)) + " / " + max);
+							}
+						}
+						
+						if (structure.isBuilt())
+						{
+							onStructureSelection(structure, true);
+							return true;
+						}
 						return false;
 					}
 				});
