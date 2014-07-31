@@ -35,10 +35,10 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
-import de.dakror.vloxlands.ai.node.AStarNode;
-import de.dakror.vloxlands.ai.node.BFSNode;
+import de.dakror.vloxlands.ai.path.AStar;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.node.AStarNode;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -312,7 +312,7 @@ public class GameLayer extends Layer
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
-			cursorStructure.update();
+			cursorStructure.update(Gdx.graphics.getDeltaTime());
 			cursorStructure.render(modelBatch, env, false);
 		}
 		modelBatch.end();

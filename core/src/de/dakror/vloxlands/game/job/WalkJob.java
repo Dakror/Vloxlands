@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.game.job;
 
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
 
 /**

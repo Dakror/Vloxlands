@@ -1,6 +1,7 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -13,17 +14,16 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.ai.state.HumanState;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.job.BuildJob;
-import de.dakror.vloxlands.game.job.ClearRegionJob;
 import de.dakror.vloxlands.game.job.DepositJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.MineJob;
@@ -35,7 +35,6 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
-import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -68,6 +67,7 @@ public class Human extends Creature
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
+		stateMachine.setInitialState(HumanState.idle);
 	}
 	
 	public void setTool(Item tool)
@@ -194,7 +194,7 @@ public class Human extends Creature
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
 		if (((jobQueue.size > 0 && firstJob().isUsingTool()) || (jobQueue.size > 1 && jobQueue.get(1).isUsingTool())) && toolModelInstance != null) batch.render(toolModelInstance, environment);
-		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
+		else if (!carryingItemStack.isNull() && carryingItemModelInstance != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
 	public void queueJob(Path path, Job job)
@@ -225,142 +225,21 @@ public class Human extends Creature
 	
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
-		{
-			selected = true;
-			
-			if (GameLayer.instance.activeAction.length() > 0)
-			{
-				// if (action[0].equals("Mine"))
-				// {
-				// if (action[action.length - 1].startsWith("voxel"))
-				// {
-				// String[] voxels = action[action.length - 1].replace("voxel:", "").trim().split("\\|");
-				// for (String s : voxels)
-				// {
-				// if (s.trim().length() == 0) continue;
-				// Voxel v = Voxel.getForId(Integer.parseInt(s));
-				// try
-				// {
-				// Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
-				// if (v.getId() == vs.type.getId())
-				// {
-				// PathBundle pb = null;
-				// boolean setJob = false;
-				// if (!carryingItemStack.isNull() && !carryingItemStack.canAdd(new ItemStack(Item.getForId(vs.type.getItemdrop()), 1)))
-				// {
-				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).capacityForTransported(true).node(NodeType.deposit).island(0));
-				// setJob(pb.path, new DepositJob(this, pb.structure, false));
-				// setJob = true;
-				// }
-				// if (equipCorrectToolForJob(job, !setJob, ))
-				// {
-				// setJob = true;
-				// }
-				// if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
-				// {
-				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));
-				// if (pb != null)
-				// {
-				// Job pickup = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(v.getTool()), 1), true, false);
-				// if (!setJob)
-				// {
-				// setJob(pb.path, pickup);
-				// setJob = true;
-				// }
-				// else queueJob(pb.path, pickup);
-				// }
-				// }
-				//
-				// Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxelPos.getPos(), this, true);
-				// if (setJob) queueJob(p, job);
-				// else setJob(p, job);
-				//
-				// break;
-				// }
-				// }
-				// catch (Exception e)
-				// {
-				// e.printStackTrace();
-				// }
-				// }
-				// }
-				// }
-				
-				GameLayer.instance.activeAction = "";
-			}
-			else
-			{
-				Path path = AStar.findPath(getVoxelBelow(), vs.voxelPos.getPos(), this, false);
-				if (path != null) setJob(path, null);
-			}
-		}
-	}
+	{}
 	
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
 		if (wasSelected && (!lmb || D.android()))
 		{
-			CurserCommand c = structure.getCommandForEntity(this);
-			Vector3 pathStart = getVoxelBelow();
-			boolean queue = false;
-			
-			Job job = null;
-			NodeType type = NodeType.target;
-			if (c == CurserCommand.DEPOSIT)
-			{
-				if (structure.isWorking())
-				{
-					job = new DepositJob(this, structure, false);
-					type = NodeType.deposit;
-				}
-			}
-			else if (c == CurserCommand.BUILD && !structure.isBuilt())
-			{
-				if (structure.getBuildInventory().getCount() == 0)
-				{
-					job = new BuildJob(this, structure, false);
-					type = NodeType.build;
-					
-					queue = equipCorrectToolForJob(job, false, pathStart);
-				}
-				else
-				{
-					queue = equipCorrectToolForJob(job, false, pathStart);
-				}
-			}
-			
-			Vector3 v = structure.getStructureNode(posCache, type).pos.cpy().add(structure.getVoxelPos());
-			Path path = AStar.findPath(pathStart, v, this, type.useGhostTarget);
-			if (path != null || job != null)
-			{
-				if (!queue) setJob(path, job);
-				else queueJob(path, job);
-			}
+			stateMachine.changeState(HumanState.transport);
+			MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.state_param0.ordinal(), structure);
 		}
 	}
 	
 	@Override
 	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
-	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
-		{
-			selected = true;
-			
-			if (GameLayer.instance.activeAction.length() > 0)
-			{
-				if (GameLayer.instance.activeAction.equals("clear"))
-				{
-					if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
-					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // FIXME finish clear region action
-				}
-			}
-			
-			GameLayer.instance.activeAction = "";
-		}
-	}
+	{}
 	
 	@Override
 	public void onReachTarget()

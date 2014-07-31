@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.ai;
+package de.dakror.vloxlands.ai.path;
 
 import java.util.Comparator;
 
@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.ai.node.AStarNode;
+import de.dakror.vloxlands.ai.path.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;

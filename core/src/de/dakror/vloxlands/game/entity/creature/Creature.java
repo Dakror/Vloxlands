@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.layer.GameLayer;
 

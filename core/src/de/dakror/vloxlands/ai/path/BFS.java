@@ -1,11 +1,11 @@
-package de.dakror.vloxlands.ai;
+package de.dakror.vloxlands.ai.path;
 
 import java.util.ArrayDeque;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
-import de.dakror.vloxlands.ai.node.BFSNode;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.layer.GameLayer;

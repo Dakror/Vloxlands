@@ -3,7 +3,7 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.ai.AStar;
+import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -11,7 +11,6 @@ import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.item.NonStackingInventory;
 import de.dakror.vloxlands.game.item.ResourceList;
 import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.job.Job;
@@ -73,7 +72,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
-		buildInventory = new NonStackingInventory(256 /* That should be enough... */);
+		buildInventory = new Inventory(256 /* That should be enough... */);
 		resourceList = new ResourceList();
 		working = true;
 		

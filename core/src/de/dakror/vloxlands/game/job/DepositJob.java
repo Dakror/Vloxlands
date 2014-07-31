@@ -1,6 +1,8 @@
 package de.dakror.vloxlands.game.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.util.InventoryProvider;
 
 /**
@@ -8,9 +10,9 @@ import de.dakror.vloxlands.util.InventoryProvider;
  */
 public class DepositJob extends Job
 {
-	private InventoryProvider target;
+	private Structure target;
 	
-	public DepositJob(Human human, InventoryProvider target, boolean persistent)
+	public DepositJob(Human human, Structure target, boolean persistent)
 	{
 		super(human, "deposit", "Depositing carried items", 1, persistent);
 		this.target = target;
@@ -30,6 +32,11 @@ public class DepositJob extends Job
 	{
 		super.onEnd();
 		
-		human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
+		if (!target.isBuilt())
+		{
+			target.getInventory().take(human.getCarryingItemStack().getItem(), human.getCarryingItemStack().getAmount());
+			human.setCarryingItemStack(new ItemStack());
+		}
+		else human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
 	}
 }

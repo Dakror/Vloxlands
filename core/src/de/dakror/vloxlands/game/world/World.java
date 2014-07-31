@@ -18,8 +18,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.path.AStar;
+import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;

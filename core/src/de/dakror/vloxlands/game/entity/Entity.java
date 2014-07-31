@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.Agent;
+import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
+import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -29,7 +33,7 @@ import de.dakror.vloxlands.util.base.EntityBase;
 /**
  * @author Dakror
  */
-public abstract class Entity extends EntityBase implements Savable
+public class Entity extends EntityBase implements Agent, Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -60,6 +64,7 @@ public abstract class Entity extends EntityBase implements Savable
 	protected Island island;
 	
 	protected AnimationController animationController;
+	protected StateMachine<Entity> stateMachine;
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
@@ -78,6 +83,8 @@ public abstract class Entity extends EntityBase implements Savable
 		transform = modelInstance.transform;
 		
 		transform.getTranslation(posCache);
+		
+		stateMachine = new DefaultStateMachine<Entity>(this);
 		
 		level = 0;
 		modelVisible = true;
@@ -179,7 +186,7 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		if (!minimapMode && environment != null) update();
+		if (!minimapMode && environment != null) update(Gdx.graphics.getDeltaTime());
 		
 		if (modelVisible) batch.render(modelInstance, environment);
 		if (additionalVisible) renderAdditional(batch, environment);
@@ -215,9 +222,11 @@ public abstract class Entity extends EntityBase implements Savable
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
 	
-	public void update()
+	@Override
+	public void update(float delta)
 	{
-		animationController.update(Gdx.graphics.getDeltaTime());
+		stateMachine.update();
+		animationController.update(delta);
 	}
 	
 	@Override
@@ -234,6 +243,12 @@ public abstract class Entity extends EntityBase implements Savable
 	public boolean isSpawned()
 	{
 		return spawned;
+	}
+	
+	@Override
+	public boolean handleMessage(Telegram msg)
+	{
+		return false;
 	}
 	
 	@Override
@@ -301,4 +316,5 @@ public abstract class Entity extends EntityBase implements Savable
 			return null;
 		}
 	}
+	
 }
