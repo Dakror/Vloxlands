@@ -20,17 +20,17 @@ public class DDirectionalShadowLight extends DirectionalShadowLight
 	public DDirectionalShadowLight(int shadowQuality, float shadowViewportWidth, float shadowViewportHeight, float shadowNear, float shadowFar)
 	{
 		super(Gdx.graphics.getWidth(), Gdx.graphics.getWidth(), shadowViewportWidth, shadowViewportHeight, shadowNear, shadowFar);
-		setShadowQuality(shadowQuality);
-		
 		
 		IntBuffer ib = BufferUtils.newIntBuffer(16);
 		Gdx.gl.glGetIntegerv(GL20.GL_MAX_VIEWPORT_DIMS, ib);
 		maxSize = ib.get(0);
+		
+		setShadowQuality(shadowQuality);
 	}
 	
 	public void setShadowQuality(int shadowQuality)
 	{
-		int size = Gdx.graphics.getWidth() * (shadowQuality + 1);
+		int size = Math.min(maxSize, Gdx.graphics.getWidth() * (shadowQuality + 1));
 		
 		fbo = new FrameBuffer(Format.RGBA8888, size, size, true);
 		

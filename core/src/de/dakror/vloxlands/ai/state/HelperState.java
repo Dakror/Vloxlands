@@ -10,48 +10,26 @@ import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.job.BuildJob;
 import de.dakror.vloxlands.game.job.DepositJob;
-import de.dakror.vloxlands.game.job.Job;
+import de.dakror.vloxlands.game.job.DismantleJob;
 import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;
 
-public enum HumanState implements State<Entity>
+public enum HelperState implements State<Entity>
 {
 	IDLE
-	{
-		@Override
-		public void enter(Entity entity)
-		{}
-		
-		@Override
-		public void update(Entity entity)
-		{}
-		
-		@Override
-		public void exit(Entity entity)
-		{}
-		
-		@Override
-		public boolean onMessage(Telegram telegram)
-		{
-			return false;
-		}
-	},
+	{},
 	GET_RESOURCES_FOR_BUILD
 	{
 		Structure structure;
 		boolean force = false;
-		
-		@Override
-		public void enter(Entity entity)
-		{}
 		
 		@Override
 		public void update(Entity entity)
@@ -63,7 +41,7 @@ public enum HumanState implements State<Entity>
 				if (is.isNull())
 				{
 					if (structure.isBuilt()) entity.changeState(IDLE);
-					else entity.changeState(BUILDING, structure);
+					else entity.changeState(BUILD, structure);
 					return;
 				}
 				
@@ -71,7 +49,7 @@ public enum HumanState implements State<Entity>
 				
 				PickupJob pj = new PickupJob((Human) entity, null, is, false, false);
 				
-				boolean queue = equipCorrectToolForJob((Human) entity, pj, false, pathStart);
+				boolean queue = equipTool((Human) entity, pj.getTool(), false, pathStart);
 				
 				PathBundle pb = GameLayer.world.query(new Query((Human) entity).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).island(0));
 				if (pb != null)
@@ -102,10 +80,6 @@ public enum HumanState implements State<Entity>
 		}
 		
 		@Override
-		public void exit(Entity entity)
-		{}
-		
-		@Override
 		public boolean onMessage(Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
@@ -124,18 +98,6 @@ public enum HumanState implements State<Entity>
 	WALK_TO_TARGET
 	{
 		@Override
-		public void enter(Entity entity)
-		{}
-		
-		@Override
-		public void update(Entity entity)
-		{}
-		
-		@Override
-		public void exit(Entity entity)
-		{}
-		
-		@Override
 		public boolean onMessage(Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
@@ -152,19 +114,19 @@ public enum HumanState implements State<Entity>
 			}
 		}
 	},
-	BUILDING
+	BUILD
 	{
-		@Override
-		public void enter(Entity entity)
-		{}
+		Structure target;
 		
 		@Override
 		public void update(Entity entity)
-		{}
-		
-		@Override
-		public void exit(Entity entity)
-		{}
+		{
+			if (((Human) entity).isIdle())
+			{
+				target.addWorker((Human) entity);
+				entity.changeState(IDLE);
+			}
+		}
 		
 		@Override
 		public boolean onMessage(Telegram telegram)
@@ -173,10 +135,11 @@ public enum HumanState implements State<Entity>
 			{
 				case PARAM0:
 				{
-					BuildJob bj = new BuildJob(((Human) telegram.sender), (Structure) telegram.extraInfo, false);
+					target = (Structure) telegram.extraInfo;
+					BuildJob bj = new BuildJob(((Human) telegram.sender), target, false);
 					Vector3 pathStart = ((Human) telegram.sender).getVoxelBelow();
-					boolean queue = equipCorrectToolForJob(((Human) telegram.sender), bj, false, pathStart);
-					Path p = AStar.findPath(pathStart, ((Structure) telegram.extraInfo).getStructureNode(pathStart, NodeType.build).pos.cpy().add(((Structure) telegram.extraInfo).getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
+					boolean queue = equipTool(((Human) telegram.sender), bj.getTool(), false, pathStart);
+					Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
 					
 					if (queue) ((Human) telegram.sender).queueJob(p, bj);
 					else ((Human) telegram.sender).setJob(p, bj);
@@ -186,13 +149,81 @@ public enum HumanState implements State<Entity>
 					return false;
 			}
 		}
-	};
-	
-	public boolean equipCorrectToolForJob(Human human, Job job, boolean queue, Vector3 pathStart)
+	},
+	DISMANTLE
 	{
-		if (!job.isUsingTool() && human.getTool().isNull()) return false;
+		Structure target;
 		
-		if (!job.isUsingTool() && !human.getTool().isNull())
+		@Override
+		public boolean onMessage(Telegram telegram)
+		{
+			switch (MessageType.values()[telegram.message])
+			{
+				case PARAM0:
+				{
+					target = (Structure) telegram.extraInfo;
+					return true;
+				}
+				case PARAM1:
+				{
+					DismantleJob dj = new DismantleJob((Human) telegram.receiver, target, false);
+					Vector3 pathStart = ((Human) telegram.receiver).getVoxelBelow();
+					boolean queue = equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
+					
+					if (!queue) ((Human) telegram.receiver).setJob((Path) telegram.extraInfo, dj);
+					else
+					{
+						Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
+						((Human) telegram.receiver).queueJob(p, dj);
+					}
+					return true;
+				}
+				default:
+					return false;
+			}
+		}
+	},
+	
+	;
+	
+	@Override
+	public void enter(Entity entity)
+	{}
+	
+	@Override
+	public void exit(Entity entity)
+	{}
+	
+	@Override
+	public void update(Entity entity)
+	{
+		if (((Human) entity).isIdle()) entity.changeState(IDLE);
+	}
+	
+	@Override
+	public boolean onMessage(Telegram telegram)
+	{
+		switch (MessageType.values()[telegram.message])
+		{
+			case DISMANTLE_ME:
+			{
+				if (telegram.sender instanceof Structure)
+				{
+					((Human) telegram.receiver).changeState(DISMANTLE, telegram.sender, telegram.extraInfo);
+					return true;
+				}
+				else return false;
+			}
+			default:
+				return false;
+		}
+	}
+	
+	public static boolean equipTool(Human human, Class<?> tool, boolean queue, Vector3 pathStart)
+	{
+		if (tool == null && human.getTool().isNull()) return false;
+		
+		if (tool == null && !human.getTool().isNull())
 		{
 			PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit).island(0));
 			if (pb != null)
@@ -208,12 +239,12 @@ public enum HumanState implements State<Entity>
 		}
 		else
 		{
-			if (human.getTool().isNull() || !(human.getTool().getItem().getClass().isAssignableFrom(job.getTool())))
+			if (human.getTool().isNull() || !(human.getTool().getItem().getClass().isAssignableFrom(tool)))
 			{
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(job.getTool()).node(NodeType.pickup).island(0));
+				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup).island(0));
 				if (pb != null)
 				{
-					PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(job.getTool()), 1), true, false);
+					PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(tool), 1), true, false);
 					if (!queue) human.setJob(pb.path, pj);
 					else human.queueJob(pb.path, pj);
 					

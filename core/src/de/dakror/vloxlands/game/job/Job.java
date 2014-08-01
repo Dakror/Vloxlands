@@ -51,7 +51,8 @@ public abstract class Job implements Tickable
 	{
 		startTick = tick;
 		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, human, 0.2f);
-		durationInTicks = (int) Math.ceil(ad.duration * 60);
+		if (ad != null) durationInTicks = (int) Math.ceil(ad.duration * 60);
+		else done = true;
 		active = true;
 	}
 	

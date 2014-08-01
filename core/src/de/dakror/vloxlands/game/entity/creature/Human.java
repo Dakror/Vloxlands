@@ -15,9 +15,9 @@ import com.badlogic.gdx.utils.Array;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.Path;
-import de.dakror.vloxlands.ai.state.HumanState;
+import de.dakror.vloxlands.ai.state.HelperState;
+import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
@@ -53,6 +53,9 @@ public class Human extends Creature
 	
 	Array<Job> jobQueue = new Array<Job>();
 	
+	Structure workPlace;
+	Structure location;
+	
 	boolean createModelInstanceForCarryiedItemStack;
 	
 	final Matrix4 tmp = new Matrix4();
@@ -60,14 +63,14 @@ public class Human extends Creature
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
-		name = "Human";
+		name = "Helper";
 		
 		speed = 0.025f;
 		climbHeight = 1;
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
-		stateMachine.setInitialState(HumanState.IDLE);
+		stateMachine.setInitialState(HelperState.IDLE);
 	}
 	
 	public void setTool(Item tool)
@@ -233,7 +236,7 @@ public class Human extends Creature
 		{
 			selected = true;
 			
-			changeState(HumanState.WALK_TO_TARGET, vs.voxelPos.getPos());
+			changeState(HelperState.WALK_TO_TARGET, vs.voxelPos.getPos());
 		}
 	}
 	
@@ -253,12 +256,12 @@ public class Human extends Creature
 				}
 				else
 				{
-					changeState(HumanState.GET_RESOURCES_FOR_BUILD, structure);
+					changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
 				}
 			}
 			else if (c == CurserCommand.WALK)
 			{
-				changeState(HumanState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
+				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
 			}
 		}
 	}
@@ -322,5 +325,25 @@ public class Human extends Creature
 	public void onEnd(AnimationDesc animation)
 	{
 		if (jobQueue.size > 0) firstJob().setDone();
+	}
+	
+	public Structure getWorkPlace()
+	{
+		return workPlace;
+	}
+	
+	public void setWorkPlace(Structure workPlace)
+	{
+		this.workPlace = workPlace;
+	}
+	
+	public Structure getLocation()
+	{
+		return location;
+	}
+	
+	public void setLocation(Structure location)
+	{
+		this.location = location;
 	}
 }

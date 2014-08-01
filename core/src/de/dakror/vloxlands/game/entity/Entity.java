@@ -55,6 +55,7 @@ public class Entity extends EntityBase implements Agent, Savable
 	protected float uplift;
 	protected boolean modelVisible;
 	protected boolean additionalVisible;
+	protected boolean visible;
 	protected boolean spawned;
 	
 	public boolean inFrustum;
@@ -92,6 +93,7 @@ public class Entity extends EntityBase implements Agent, Savable
 		level = 0;
 		modelVisible = true;
 		additionalVisible = true;
+		visible = true;
 		
 		GameLayer.instance.addListener(this);
 	}
@@ -191,6 +193,8 @@ public class Entity extends EntityBase implements Agent, Savable
 	{
 		if (!minimapMode && environment != null) update(Gdx.graphics.getDeltaTime());
 		
+		if (!visible) return;
+		
 		if (modelVisible) batch.render(modelInstance, environment);
 		if (additionalVisible) renderAdditional(batch, environment);
 		
@@ -248,6 +252,16 @@ public class Entity extends EntityBase implements Agent, Savable
 		return spawned;
 	}
 	
+	public boolean isVisible()
+	{
+		return visible;
+	}
+	
+	public void setVisible(boolean visible)
+	{
+		this.visible = visible;
+	}
+	
 	@Override
 	public boolean handleMessage(Telegram msg)
 	{
@@ -263,7 +277,7 @@ public class Entity extends EntityBase implements Agent, Savable
 		
 		stateMachine.changeState(newState);
 		if (params.length > 0 && params[0] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[0]);
-		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[1]);
+		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
 	}
 	
 	@Override
