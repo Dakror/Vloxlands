@@ -36,6 +36,6 @@ public class Lumberjack extends Structure
 	@Override
 	public CurserCommand getDefaultCommand()
 	{
-		return CurserCommand.PICKUP;
+		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
 	}
 }

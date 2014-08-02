@@ -20,6 +20,8 @@ public abstract class Job implements Tickable
 	boolean persistent;
 	
 	int startTick;
+	long startTime;
+	int gameSpeedAtStart;
 	int durationInTicks;
 	Class<?> tool;
 	
@@ -50,11 +52,22 @@ public abstract class Job implements Tickable
 	
 	public void trigger(int tick)
 	{
+		gameSpeedAtStart = Config.getGameSpeed();
 		startTick = tick;
+		startTime = System.currentTimeMillis();
 		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), human, 0.2f);
 		if (ad != null) durationInTicks = (int) Math.ceil(ad.duration * 60);
 		else done = true;
 		active = true;
+	}
+	
+	public void update(float delta)
+	{
+		if (Config.getGameSpeed() != gameSpeedAtStart)
+		{
+			float timepPassed = (startTime - System.currentTimeMillis()) / 1000.0f * gameSpeedAtStart;
+			human.getAnimationController().setAnimation(animation, delta, -1, repeats, Config.getGameSpeed(), human);
+		}
 	}
 	
 	public void onEnd()

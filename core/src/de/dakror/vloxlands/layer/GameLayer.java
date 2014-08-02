@@ -507,6 +507,7 @@ public class GameLayer extends Layer
 			for (Entity e : activeIsland.getEntities())
 			{
 				e.hovered = false;
+				if (!e.isVisible()) continue;
 				if (!e.inFrustum) continue;
 				
 				e.getWorldBoundingBox(bb);
@@ -537,7 +538,7 @@ public class GameLayer extends Layer
 				e.wasSelected = e.selected;
 				if (lmb) e.selected = false;
 				float dst = ray.origin.dst(e.posCache);
-				if (e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance)
+				if (e.isVisible() && e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance)
 				{
 					distance = dst;
 					selectedEntity = e;
@@ -662,7 +663,7 @@ public class GameLayer extends Layer
 		for (Entity entity : activeIsland.getEntities())
 		{
 			if (entity instanceof Structure) continue;
-			
+			if (!entity.isVisible()) continue;
 			entity.wasSelected = entity.selected;
 			entity.selected = false;
 			entity.getWorldBoundingBox(bb);
