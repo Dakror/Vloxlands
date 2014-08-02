@@ -65,8 +65,8 @@ public abstract class Job implements Tickable
 	{
 		if (Config.getGameSpeed() != gameSpeedAtStart)
 		{
-			float timepPassed = (startTime - System.currentTimeMillis()) / 1000.0f * gameSpeedAtStart;
-			human.getAnimationController().setAnimation(animation, delta, -1, repeats, Config.getGameSpeed(), human);
+			float timePassed = (startTime - System.currentTimeMillis()) / 1000.0f * gameSpeedAtStart;
+			human.getAnimationController().setAnimation(animation, timePassed, -1, repeats, Config.getGameSpeed(), human);
 		}
 	}
 	

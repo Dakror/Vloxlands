@@ -12,7 +12,6 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.dakror.vloxlands.game.entity.Entity;
@@ -45,7 +44,6 @@ public class Vloxlands extends GameBase
 		instance = this;
 		
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-		Dialog.fadeDuration = 0;
 		
 		Config.init();
 		
