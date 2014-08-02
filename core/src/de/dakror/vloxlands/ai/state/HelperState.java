@@ -49,7 +49,7 @@ public enum HelperState implements State<Entity>
 				
 				PickupJob pj = new PickupJob((Human) entity, null, is, false, false);
 				
-				boolean queue = equipTool((Human) entity, pj.getTool(), false, pathStart);
+				boolean queue = StateTools.equipTool((Human) entity, pj.getTool(), false, pathStart);
 				
 				PathBundle pb = GameLayer.world.query(new Query((Human) entity).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).island(0));
 				if (pb != null)
@@ -138,7 +138,7 @@ public enum HelperState implements State<Entity>
 					target = (Structure) telegram.extraInfo;
 					BuildJob bj = new BuildJob(((Human) telegram.sender), target, false);
 					Vector3 pathStart = ((Human) telegram.sender).getVoxelBelow();
-					boolean queue = equipTool(((Human) telegram.sender), bj.getTool(), false, pathStart);
+					boolean queue = StateTools.equipTool(((Human) telegram.sender), bj.getTool(), false, pathStart);
 					Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
 					
 					if (queue) ((Human) telegram.sender).queueJob(p, bj);
@@ -168,7 +168,7 @@ public enum HelperState implements State<Entity>
 				{
 					DismantleJob dj = new DismantleJob((Human) telegram.receiver, target, false);
 					Vector3 pathStart = ((Human) telegram.receiver).getVoxelBelow();
-					boolean queue = equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
+					boolean queue = StateTools.equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
 					
 					if (!queue) ((Human) telegram.receiver).setJob((Path) telegram.extraInfo, dj);
 					else
@@ -217,44 +217,5 @@ public enum HelperState implements State<Entity>
 			default:
 				return false;
 		}
-	}
-	
-	public static boolean equipTool(Human human, Class<?> tool, boolean queue, Vector3 pathStart)
-	{
-		if (tool == null && human.getTool().isNull()) return false;
-		
-		if (tool == null && !human.getTool().isNull())
-		{
-			PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit).island(0));
-			if (pb != null)
-			{
-				PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(), true, false);
-				if (!queue) human.setJob(pb.path, pj);
-				else human.queueJob(pb.path, pj);
-				
-				if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-				
-				return true;
-			}
-		}
-		else
-		{
-			if (human.getTool().isNull() || !(human.getTool().getItem().getClass().isAssignableFrom(tool)))
-			{
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup).island(0));
-				if (pb != null)
-				{
-					PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(tool), 1), true, false);
-					if (!queue) human.setJob(pb.path, pj);
-					else human.queueJob(pb.path, pj);
-					
-					if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-					
-					return true;
-				}
-			}
-		}
-		
-		return false;
 	}
 }

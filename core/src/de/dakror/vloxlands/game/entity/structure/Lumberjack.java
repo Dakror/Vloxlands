@@ -1,9 +1,11 @@
 package de.dakror.vloxlands.game.entity.structure;
 
-import de.dakror.vloxlands.ai.state.LumberjackState;
+import de.dakror.vloxlands.ai.state.HelperState;
+import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.tool.ChopTool;
 import de.dakror.vloxlands.util.CurserCommand;
 
 /**
@@ -30,7 +32,8 @@ public class Lumberjack extends Structure
 	@Override
 	protected void onWorkerAdded(Human human)
 	{
-		human.changeState(LumberjackState.INIT);
+		StateTools.initForWorkplace(human, ChopTool.class);
+		human.changeState(HelperState.IDLE);
 	}
 	
 	@Override
