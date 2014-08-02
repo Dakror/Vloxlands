@@ -75,6 +75,7 @@ public class GameLayer extends Layer
 	public static World world;
 	public static Camera camera;
 	public static ShapeRenderer shapeRenderer;
+	public static float time = 0.99999999999f;
 	
 	public Environment env;
 	
@@ -91,6 +92,7 @@ public class GameLayer extends Layer
 	public String activeAction = "";
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
+	DirectionalLight directionalLight;
 	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
@@ -118,6 +120,7 @@ public class GameLayer extends Layer
 	Vector3 targetUp = new Vector3();
 	
 	Vector2 mouseDown = new Vector2();
+	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -205,9 +208,9 @@ public class GameLayer extends Layer
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+		env.add(directionalLight = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		env.add((shadowLight = new DDirectionalShadowLight(Config.shadowQuality, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.add((shadowLight = new DDirectionalShadowLight(Config.shadowQuality, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0, -0.5f, time));
 		env.shadowMap = shadowLight;
 		
 		// int w = MathUtils.random(1, 5);
@@ -444,6 +447,19 @@ public class GameLayer extends Layer
 	public void tick(int tick)
 	{
 		this.tick = tick;
+		
+		time -= 0.000025f;
+		if (time <= -0.99999999999f) time = 0.99999999999f;
+		
+		float t = time * MathUtils.PI;
+		
+		float x = MathUtils.sin(t) * 0.5f;
+		float z = MathUtils.cos(t);
+		
+		float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
+		
+		shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
+		directionalLight.set(light, light, light, x, -0.5f, z);
 		world.tick(tick);
 		if (cursorStructure != null) cursorStructure.tick(tick);
 		

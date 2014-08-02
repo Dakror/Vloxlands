@@ -110,6 +110,8 @@ public class Vloxlands extends GameBase
 				Config.shadowQuality = Math.max(0, Config.shadowQuality);
 				((DDirectionalShadowLight) GameLayer.instance.env.shadowMap).setShadowQuality(Config.shadowQuality);
 			}
+			if (keycode == Keys.UP) Config.changeGameSpeed(true);
+			if (keycode == Keys.DOWN) Config.changeGameSpeed(false);
 		}
 		
 		return false;

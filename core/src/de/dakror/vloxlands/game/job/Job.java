@@ -2,6 +2,7 @@ package de.dakror.vloxlands.game.job;
 
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.Event;
@@ -50,7 +51,7 @@ public abstract class Job implements Tickable
 	public void trigger(int tick)
 	{
 		startTick = tick;
-		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, human, 0.2f);
+		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), human, 0.2f);
 		if (ad != null) durationInTicks = (int) Math.ceil(ad.duration * 60);
 		else done = true;
 		active = true;

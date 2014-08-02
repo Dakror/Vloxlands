@@ -14,11 +14,27 @@ public class Config
 	
 	public static int fov;
 	public static int shadowQuality;
+	private static int gameSpeed = 0;
+	public static int[] gameSpeeds = { 1, 2, 5, 10, 25 };
 	public static FileHandle dir;
 	static Preferences pref;
 	public static String savegameName;
 	
 	public static boolean debug = false;
+	
+	public static void changeGameSpeed(boolean increase)
+	{
+		if (increase && gameSpeed < gameSpeeds.length - 1) gameSpeed++;
+		else if (!increase && gameSpeed > 0) gameSpeed--;
+		else return;
+		
+		Gdx.app.log("Config.changeGameSpeed", "Setting Game speed to " + getGameSpeed());
+	}
+	
+	public static int getGameSpeed()
+	{
+		return gameSpeeds[gameSpeed];
+	}
 	
 	public static void init()
 	{
