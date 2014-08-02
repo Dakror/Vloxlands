@@ -209,6 +209,11 @@ public class HudLayer extends Layer implements SelectionListener
 				public boolean act(float delta)
 				{
 					selectedEntityWindow.setTitle(creature.getName());
+					if (!creature.isVisible())
+					{
+						onCreatureSelection(null, true);
+						return true;
+					}
 					return false;
 				}
 			});
