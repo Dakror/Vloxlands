@@ -7,23 +7,6 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class StructureNode
 {
-	public static enum NodeType
-	{
-		target(false),
-		entry(true),
-		exit(true),
-		deposit(true),
-		build(true),
-		pickup(true);
-		
-		public boolean useGhostTarget;
-		
-		private NodeType(boolean useGhostTarget)
-		{
-			this.useGhostTarget = useGhostTarget;
-		}
-	}
-	
 	/**
 	 * An unique name, should be name of a item
 	 */

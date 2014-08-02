@@ -3,7 +3,7 @@ package de.dakror.vloxlands.game.job;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.tool.BuildTool;
-import de.dakror.vloxlands.util.event.IEvent;
+import de.dakror.vloxlands.util.event.Payload;
 
 /**
  * @author Dakror
@@ -27,7 +27,7 @@ public class DismantleJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
-		target.handleEvent(new IEvent()
+		target.handleEvent(new Payload()
 		{
 			
 			@Override

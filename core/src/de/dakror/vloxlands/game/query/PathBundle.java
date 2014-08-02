@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.game.query;
 
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 

@@ -36,8 +36,13 @@ public class DebugLayer extends Layer
 			font.draw(spriteBatch, "X: " + GameLayer.camera.position.x, 0, Gdx.graphics.getHeight() - 80);
 			font.draw(spriteBatch, "Y: " + GameLayer.camera.position.y, 0, Gdx.graphics.getHeight() - 100);
 			font.draw(spriteBatch, "Z: " + GameLayer.camera.position.z, 0, Gdx.graphics.getHeight() - 120);
+			
+			int minutes = (int) (-GameLayer.time * 12 * 60 + 12 * 60 + 6 * 60);
+			
+			font.draw(spriteBatch, "Time: " + String.format("%1$02d:%2$02d", (minutes / 60) % 24, minutes % 60), 0, Gdx.graphics.getHeight() - 140);
+			font.draw(spriteBatch, "Speed: " + Config.getGameSpeed(), 0, Gdx.graphics.getHeight() - 160);
 		}
-		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 160);
+		font.draw(spriteBatch, "Seed: " + GameLayer.seed, 0, Gdx.graphics.getHeight() - 180);
 		
 		spriteBatch.end();
 	}

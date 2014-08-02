@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.Agent;
+import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
+import com.badlogic.gdx.ai.fsm.State;
+import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -19,6 +25,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -29,7 +36,7 @@ import de.dakror.vloxlands.util.base.EntityBase;
 /**
  * @author Dakror
  */
-public abstract class Entity extends EntityBase implements Savable
+public class Entity extends EntityBase implements Agent, Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -48,6 +55,7 @@ public abstract class Entity extends EntityBase implements Savable
 	protected float uplift;
 	protected boolean modelVisible;
 	protected boolean additionalVisible;
+	protected boolean visible;
 	protected boolean spawned;
 	
 	public boolean inFrustum;
@@ -60,6 +68,7 @@ public abstract class Entity extends EntityBase implements Savable
 	protected Island island;
 	
 	protected AnimationController animationController;
+	protected StateMachine<Entity> stateMachine;
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
@@ -79,9 +88,12 @@ public abstract class Entity extends EntityBase implements Savable
 		
 		transform.getTranslation(posCache);
 		
+		stateMachine = new DefaultStateMachine<Entity>(this);
+		
 		level = 0;
 		modelVisible = true;
 		additionalVisible = true;
+		visible = true;
 		
 		GameLayer.instance.addListener(this);
 	}
@@ -179,7 +191,9 @@ public abstract class Entity extends EntityBase implements Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		if (!minimapMode && environment != null) update();
+		if (!minimapMode && environment != null) update(Gdx.graphics.getDeltaTime());
+		
+		if (!visible) return;
 		
 		if (modelVisible) batch.render(modelInstance, environment);
 		if (additionalVisible) renderAdditional(batch, environment);
@@ -215,9 +229,11 @@ public abstract class Entity extends EntityBase implements Savable
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
 	
-	public void update()
+	@Override
+	public void update(float delta)
 	{
-		animationController.update(Gdx.graphics.getDeltaTime());
+		stateMachine.update();
+		animationController.update(delta);
 	}
 	
 	@Override
@@ -234,6 +250,34 @@ public abstract class Entity extends EntityBase implements Savable
 	public boolean isSpawned()
 	{
 		return spawned;
+	}
+	
+	public boolean isVisible()
+	{
+		return visible;
+	}
+	
+	public void setVisible(boolean visible)
+	{
+		this.visible = visible;
+	}
+	
+	@Override
+	public boolean handleMessage(Telegram msg)
+	{
+		return stateMachine.handleMessage(msg);
+	}
+	
+	public void changeState(State<Entity> newState, Object... params)
+	{
+		if (params.length > 2)
+		{
+			throw new IllegalArgumentException("Can only pass up to 2 parameters to a state");
+		}
+		
+		stateMachine.changeState(newState);
+		if (params.length > 0 && params[0] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[0]);
+		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
 	}
 	
 	@Override
@@ -301,4 +345,5 @@ public abstract class Entity extends EntityBase implements Savable
 			return null;
 		}
 	}
+	
 }

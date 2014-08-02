@@ -59,10 +59,20 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
+	public ItemStack getFirst()
+	{
+		if (count == 0) return new ItemStack();
+		
+		for (int i = 0; i < storage.length; i++)
+			if (storage[i] > 0) return new ItemStack(Item.getForId(i), storage[i]);
+		
+		return null;
+	}
+	
+	@Override
 	public boolean contains(ItemStack stack)
 	{
-		if (stack.getAmount() == 0) return get(stack.getItem()) > 0;
-		else return get(stack.getItem()) == stack.getAmount();
+		return get(stack.getItem()) >= stack.getAmount();
 	}
 	
 	@Override

@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.ai.node;
+package de.dakror.vloxlands.ai.path.node;
 
 /**
  * @author Dakror

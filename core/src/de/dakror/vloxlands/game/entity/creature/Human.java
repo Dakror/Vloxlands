@@ -13,21 +13,18 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
-import de.dakror.vloxlands.ai.Path;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.ai.state.HelperState;
+import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.StructureNode.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.job.BuildJob;
-import de.dakror.vloxlands.game.job.ClearRegionJob;
 import de.dakror.vloxlands.game.job.DepositJob;
 import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.job.MineJob;
-import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
@@ -56,18 +53,24 @@ public class Human extends Creature
 	
 	Array<Job> jobQueue = new Array<Job>();
 	
+	Structure workPlace;
+	Structure location;
+	
+	boolean createModelInstanceForCarryiedItemStack;
+	
 	final Matrix4 tmp = new Matrix4();
 	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
-		name = "Human";
+		name = "Helper";
 		
 		speed = 0.025f;
 		climbHeight = 1;
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
+		stateMachine.setInitialState(HelperState.IDLE);
 	}
 	
 	public void setTool(Item tool)
@@ -105,7 +108,64 @@ public class Human extends Creature
 			carryingItemModelInstance = null;
 			carryingItemTransform = null;
 		}
-		else
+		else createModelInstanceForCarryiedItemStack = true;
+	}
+	
+	@Override
+	public void tick(int tick)
+	{
+		super.tick(tick);
+		
+		if (jobQueue.size > 0)
+		{
+			Job j = firstJob();
+			if (j.isActive())
+			{
+				if (j instanceof WalkJob)
+				{
+					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
+				}
+				
+				if (j.isDone())
+				{
+					j.onEnd();
+					j.triggerEndEvent();
+					jobQueue.removeIndex(0);
+					onJobDone(j);
+					
+					if (j.isPersistent())
+					{
+						j.resetState();
+						queueJob(null, j);
+					}
+				}
+				else j.tick(tick);
+			}
+			else j.trigger(tick);
+		}
+	}
+	
+	@Override
+	public void renderAdditional(ModelBatch batch, Environment environment)
+	{
+		if (!carryingItemStack.isNull() && carryingItemTransform != null)
+		{
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			tmp.translate(resourceTrn);
+			carryingItemTransform.set(tmp);
+		}
+		
+		if (!tool.isNull() && toolTransform != null)
+		{
+			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
+			tmp.rotate(Vector3.Y, rotCache.getYaw());
+			
+			((Tool) tool.getItem()).transformInHand(tmp, this);
+			toolTransform.set(tmp);
+		}
+		
+		if (createModelInstanceForCarryiedItemStack)
 		{
 			Model model = null;
 			Vector3 scale = new Vector3();
@@ -136,65 +196,11 @@ public class Human extends Creature
 			carryingItemModelInstance.nodes.get(0).translation.set(tr);
 			carryingItemModelInstance.calculateTransforms();
 			carryingItemTransform = carryingItemModelInstance.transform;
-		}
-	}
-	
-	@Override
-	public void tick(int tick)
-	{
-		super.tick(tick);
-		
-		if (!carryingItemStack.isNull())
-		{
-			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
-			tmp.rotate(Vector3.Y, rotCache.getYaw());
-			tmp.translate(resourceTrn);
-			carryingItemTransform.set(tmp);
+			createModelInstanceForCarryiedItemStack = false;
 		}
 		
-		if (!tool.isNull())
-		{
-			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
-			tmp.rotate(Vector3.Y, rotCache.getYaw());
-			
-			((Tool) tool.getItem()).transformInHand(tmp, this);
-			toolTransform.set(tmp);
-		}
-		
-		if (jobQueue.size > 0)
-		{
-			Job j = firstJob();
-			if (j.isActive())
-			{
-				if (j instanceof WalkJob)
-				{
-					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
-				}
-				
-				if (j.isDone())
-				{
-					j.onEnd();
-					
-					jobQueue.removeIndex(0);
-					onJobDone(j);
-					
-					if (j.isPersistent())
-					{
-						j.resetState();
-						queueJob(null, j);
-					}
-				}
-				else j.tick(tick);
-			}
-			else j.trigger(tick);
-		}
-	}
-	
-	@Override
-	public void renderAdditional(ModelBatch batch, Environment environment)
-	{
 		if (((jobQueue.size > 0 && firstJob().isUsingTool()) || (jobQueue.size > 1 && jobQueue.get(1).isUsingTool())) && toolModelInstance != null) batch.render(toolModelInstance, environment);
-		else if (!carryingItemStack.isNull()) batch.render(carryingItemModelInstance, environment);
+		else if (!carryingItemStack.isNull() && carryingItemModelInstance != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
 	public void queueJob(Path path, Job job)
@@ -230,137 +236,39 @@ public class Human extends Creature
 		{
 			selected = true;
 			
-			if (GameLayer.instance.activeAction.length() > 0)
-			{
-				// if (action[0].equals("Mine"))
-				// {
-				// if (action[action.length - 1].startsWith("voxel"))
-				// {
-				// String[] voxels = action[action.length - 1].replace("voxel:", "").trim().split("\\|");
-				// for (String s : voxels)
-				// {
-				// if (s.trim().length() == 0) continue;
-				// Voxel v = Voxel.getForId(Integer.parseInt(s));
-				// try
-				// {
-				// Job job = (Job) Class.forName("de.dakror.vloxlands.game.job." + v.getTool().getSimpleName().replace("Tool", "Job")).getConstructor(Human.class, VoxelSelection.class, boolean.class).newInstance(this, vs, !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT));
-				// if (v.getId() == vs.type.getId())
-				// {
-				// PathBundle pb = null;
-				// boolean setJob = false;
-				// if (!carryingItemStack.isNull() && !carryingItemStack.canAdd(new ItemStack(Item.getForId(vs.type.getItemdrop()), 1)))
-				// {
-				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).capacityForTransported(true).node(NodeType.deposit).island(0));
-				// setJob(pb.path, new DepositJob(this, pb.structure, false));
-				// setJob = true;
-				// }
-				// if (equipCorrectToolForJob(job, !setJob, ))
-				// {
-				// setJob = true;
-				// }
-				// if (tool.isNull() || !v.getTool().isAssignableFrom(tool.getItem().getClass()))
-				// {
-				// pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(v.getTool()).node(NodeType.pickup).island(0));
-				// if (pb != null)
-				// {
-				// Job pickup = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(v.getTool()), 1), true, false);
-				// if (!setJob)
-				// {
-				// setJob(pb.path, pickup);
-				// setJob = true;
-				// }
-				// else queueJob(pb.path, pickup);
-				// }
-				// }
-				//
-				// Path p = AStar.findPath(pb != null ? pb.path.getLast() : getVoxelBelow(), vs.voxelPos.getPos(), this, true);
-				// if (setJob) queueJob(p, job);
-				// else setJob(p, job);
-				//
-				// break;
-				// }
-				// }
-				// catch (Exception e)
-				// {
-				// e.printStackTrace();
-				// }
-				// }
-				// }
-				// }
-				
-				GameLayer.instance.activeAction = "";
-			}
-			else
-			{
-				Path path = AStar.findPath(getVoxelBelow(), vs.voxelPos.getPos(), this, false);
-				if (path != null) setJob(path, null);
-			}
+			changeState(HelperState.WALK_TO_TARGET, vs.voxelPos.getPos());
 		}
 	}
 	
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if (wasSelected && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()))
 		{
-			CurserCommand c = structure.getCommandForEntity(this);
-			Vector3 pathStart = getVoxelBelow();
-			boolean queue = false;
+			selected = true;
 			
-			Job job = null;
-			NodeType type = NodeType.target;
-			if (c == CurserCommand.DEPOSIT)
-			{
-				if (structure.isWorking())
-				{
-					job = new DepositJob(this, structure, false);
-					type = NodeType.deposit;
-				}
-			}
-			else if (c == CurserCommand.BUILD && !structure.isBuilt())
+			CurserCommand c = structure.getCommandForEntity(this);
+			if (c == CurserCommand.BUILD && !structure.isBuilt())
 			{
 				if (structure.getBuildInventory().getCount() == 0)
-				{
-					job = new BuildJob(this, structure, false);
-					type = NodeType.build;
+				{	
 					
-					queue = equipCorrectToolForJob(job, false, pathStart);
 				}
 				else
 				{
-					queue = equipCorrectToolForJob(job, false, pathStart);
+					changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
 				}
 			}
-			
-			Vector3 v = structure.getStructureNode(posCache, type).pos.cpy().add(structure.getVoxelPos());
-			Path path = AStar.findPath(pathStart, v, this, type.useGhostTarget);
-			if (path != null || job != null)
+			else if (c == CurserCommand.WALK)
 			{
-				if (!queue) setJob(path, job);
-				else queueJob(path, job);
+				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
 			}
 		}
 	}
 	
 	@Override
 	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
-	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
-		{
-			selected = true;
-			
-			if (GameLayer.instance.activeAction.length() > 0)
-			{
-				if (GameLayer.instance.activeAction.equals("clear"))
-				{
-					if (jobQueue.size > 1 || (jobQueue.size > 0 && !(jobQueue.get(0) instanceof WalkJob))) setJob(null, new ClearRegionJob(this, island, start, end, false));
-					else queueJob(null, new ClearRegionJob(this, island, start, end, false)); // FIXME finish clear region action
-				}
-			}
-			
-			GameLayer.instance.activeAction = "";
-		}
-	}
+	{}
 	
 	@Override
 	public void onReachTarget()
@@ -403,45 +311,6 @@ public class Human extends Creature
 		}
 	}
 	
-	public boolean equipCorrectToolForJob(Job job, boolean queue, Vector3 pathStart)
-	{
-		if (!job.isUsingTool() && tool.isNull()) return false;
-		
-		if (!job.isUsingTool() && !tool.isNull())
-		{
-			PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(tool).node(NodeType.deposit).island(0));
-			if (pb != null)
-			{
-				PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(), true, false);
-				if (!queue) setJob(pb.path, pj);
-				else queueJob(pb.path, pj);
-				
-				if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-				
-				return true;
-			}
-		}
-		else
-		{
-			if (tool.isNull() || !(tool.getItem().getClass().isAssignableFrom(job.getTool())))
-			{
-				PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).tool(job.getTool()).node(NodeType.pickup).island(0));
-				if (pb != null)
-				{
-					PickupJob pj = new PickupJob(this, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(job.getTool()), 1), true, false);
-					if (!queue) setJob(pb.path, pj);
-					else queueJob(pb.path, pj);
-					
-					if (pb.path.getLast() != null) pathStart.set(pb.path.getLast());
-					
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
 	public Array<Job> getJobQueue()
 	{
 		return jobQueue;
@@ -456,5 +325,25 @@ public class Human extends Creature
 	public void onEnd(AnimationDesc animation)
 	{
 		if (jobQueue.size > 0) firstJob().setDone();
+	}
+	
+	public Structure getWorkPlace()
+	{
+		return workPlace;
+	}
+	
+	public void setWorkPlace(Structure workPlace)
+	{
+		this.workPlace = workPlace;
+	}
+	
+	public Structure getLocation()
+	{
+		return location;
+	}
+	
+	public void setLocation(Structure location)
+	{
+		this.location = location;
 	}
 }

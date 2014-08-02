@@ -161,7 +161,7 @@ public class HudLayer extends Layer implements SelectionListener
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
 		actions.addSlot(1, "build", s);
 		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
-		s.getTooltip().set("Lumberjack", "Chops nearby trees for wooden logs.");
+		s.getTooltip().set("Lumberjack", "Chops nearby trees for wooden logs using an axe.");
 		actions.addSlot(1, "build", s);
 		
 		if (D.android())
@@ -203,6 +203,15 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 			selectedEntityWindow.addActor(selectedEntityWindow.getButtonTable());
+			selectedEntityWindow.addAction(new Action()
+			{
+				@Override
+				public boolean act(float delta)
+				{
+					selectedEntityWindow.setTitle(creature.getName());
+					return false;
+				}
+			});
 			
 			if (creature instanceof Human)
 			{
@@ -368,6 +377,7 @@ public class HudLayer extends Layer implements SelectionListener
 			style.imageChecked.setMinWidth(ItemSlot.size);
 			style.imageChecked.setMinHeight(ItemSlot.size);
 			final TooltipImageButton sleep = new TooltipImageButton(stage, style);
+			stage.addActor(sleep.getTooltip());
 			sleep.setChecked(structure.isWorking());
 			sleep.addListener(new ClickListener()
 			{
@@ -381,20 +391,29 @@ public class HudLayer extends Layer implements SelectionListener
 			sleep.pad(4);
 			sleep.getTooltip().set("Production is " + (structure.isWorking() ? "running" : "paused"), "Toggle the building's production activity.");
 			
-			style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
-			style.imageUp = Vloxlands.skin.getDrawable("queue");
-			style.imageUp.setMinWidth(ItemSlot.size);
-			style.imageUp.setMinHeight(ItemSlot.size);
-			style.imageChecked = Vloxlands.skin.getDrawable("queue");
-			style.imageChecked.setMinWidth(ItemSlot.size);
-			style.imageChecked.setMinHeight(ItemSlot.size);
-			TooltipImageButton queue = new TooltipImageButton(stage, style);
-			queue.getTooltip().set("Job Queue", "Toggle Job Queue display");
-			queue.pad(4);
+			final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
+			capacity.setAlignment(Align.center, Align.center);
+			capacity.addAction(new Action()
+			{
+				@Override
+				public boolean act(float delta)
+				{
+					capacity.setText("Capacity: " + structure.getInventory().getCount() + " / " + structure.getInventory().getCapacity() + " Items");
+					
+					float percent = structure.getInventory().getCount() / (float) structure.getInventory().getCapacity();
+					
+					if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
+					else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
+					else if (percent == 1) capacity.setColor(1, 0, 0, 1);
+					else capacity.setColor(1, 1, 1, 1);
+					
+					return false;
+				}
+			});
 			
 			if (!structure.isBuilt())
 			{
-				Table res = new Table();
+				final Table res = new Table();
 				Inventory inv = structure.getInventory();
 				Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 				int i = 0;
@@ -422,7 +441,23 @@ public class HudLayer extends Layer implements SelectionListener
 					@Override
 					public boolean act(float delta)
 					{
+						Inventory inv = structure.getInventory();
 						progress.setValue(structure.getBuildProgress());
+						for (Byte b : structure.getResourceList().getAll())
+						{
+							Actor a = res.findActor(b + "");
+							if (a instanceof Label)
+							{
+								int max = structure.getResourceList().get(b);
+								((Label) a).setText((max - inv.get(b)) + " / " + max);
+							}
+						}
+						
+						if (structure.isBuilt())
+						{
+							onStructureSelection(structure, true);
+							return true;
+						}
 						return false;
 					}
 				});
@@ -467,26 +502,16 @@ public class HudLayer extends Layer implements SelectionListener
 					itemsWrap.setFadeScrollBars(false);
 					selectedStructureWindow.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
 					
-					final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
-					capacity.setAlignment(Align.center, Align.center);
-					capacity.addAction(new Action()
-					{
-						@Override
-						public boolean act(float delta)
-						{
-							capacity.setText("Capacity: " + structure.getInventory().getCount() + " / " + structure.getInventory().getCapacity() + " Items");
-							
-							float percent = structure.getInventory().getCount() / (float) structure.getInventory().getCapacity();
-							
-							if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
-							else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
-							else if (percent == 1) capacity.setColor(1, 0, 0, 1);
-							else capacity.setColor(1, 1, 1, 1);
-							
-							return false;
-						}
-					});
-					
+					Table rightSide = new Table(Vloxlands.skin);
+					rightSide.row();
+					rightSide.add(capacity).colspan(2);
+					rightSide.row().spaceTop(5);
+					rightSide.add(dismantle);
+					rightSide.add(sleep);
+					selectedStructureWindow.add(rightSide).top().width(200);
+				}
+				else
+				{
 					Table rightSide = new Table(Vloxlands.skin);
 					rightSide.row();
 					rightSide.add(capacity).colspan(2);

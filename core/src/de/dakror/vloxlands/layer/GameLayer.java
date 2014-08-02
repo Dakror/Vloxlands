@@ -35,10 +35,10 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.AStar;
-import de.dakror.vloxlands.ai.BFS;
-import de.dakror.vloxlands.ai.node.AStarNode;
-import de.dakror.vloxlands.ai.node.BFSNode;
+import de.dakror.vloxlands.ai.path.AStar;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.node.AStarNode;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -75,6 +75,7 @@ public class GameLayer extends Layer
 	public static World world;
 	public static Camera camera;
 	public static ShapeRenderer shapeRenderer;
+	public static float time = 0.99999999999f;
 	
 	public Environment env;
 	
@@ -91,6 +92,7 @@ public class GameLayer extends Layer
 	public String activeAction = "";
 	public Island activeIsland;
 	public DirectionalShadowLight shadowLight;
+	DirectionalLight directionalLight;
 	public CameraInputController controller;
 	
 	ModelBatch modelBatch;
@@ -118,6 +120,7 @@ public class GameLayer extends Layer
 	Vector3 targetUp = new Vector3();
 	
 	Vector2 mouseDown = new Vector2();
+	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -205,9 +208,9 @@ public class GameLayer extends Layer
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f), new ColorAttribute(ColorAttribute.Fog, 0.5f, 0.8f, 0.85f, 1.f));
-		env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
+		env.add(directionalLight = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -0.5f, -0.5f, -0.5f));
 		
-		env.add((shadowLight = new DDirectionalShadowLight(Config.shadowQuality, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0.5f, -0.5f, 0.5f));
+		env.add((shadowLight = new DDirectionalShadowLight(Config.shadowQuality, 128, 128, camera.near, camera.far)).set(0.6f, 0.6f, 0.6f, 0, -0.5f, time));
 		env.shadowMap = shadowLight;
 		
 		// int w = MathUtils.random(1, 5);
@@ -312,7 +315,7 @@ public class GameLayer extends Layer
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
-			cursorStructure.update();
+			cursorStructure.update(Gdx.graphics.getDeltaTime());
 			cursorStructure.render(modelBatch, env, false);
 		}
 		modelBatch.end();
@@ -444,6 +447,19 @@ public class GameLayer extends Layer
 	public void tick(int tick)
 	{
 		this.tick = tick;
+		
+		time -= 0.000025f;
+		if (time <= -0.99999999999f) time = 0.99999999999f;
+		
+		float t = time * MathUtils.PI;
+		
+		float x = MathUtils.sin(t) * 0.5f;
+		float z = MathUtils.cos(t);
+		
+		float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
+		
+		shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
+		directionalLight.set(light, light, light, x, -0.5f, z);
 		world.tick(tick);
 		if (cursorStructure != null) cursorStructure.tick(tick);
 		
@@ -491,6 +507,7 @@ public class GameLayer extends Layer
 			for (Entity e : activeIsland.getEntities())
 			{
 				e.hovered = false;
+				if (!e.isVisible()) continue;
 				if (!e.inFrustum) continue;
 				
 				e.getWorldBoundingBox(bb);
@@ -521,7 +538,7 @@ public class GameLayer extends Layer
 				e.wasSelected = e.selected;
 				if (lmb) e.selected = false;
 				float dst = ray.origin.dst(e.posCache);
-				if (e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance)
+				if (e.isVisible() && e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance)
 				{
 					distance = dst;
 					selectedEntity = e;
@@ -646,7 +663,7 @@ public class GameLayer extends Layer
 		for (Entity entity : activeIsland.getEntities())
 		{
 			if (entity instanceof Structure) continue;
-			
+			if (!entity.isVisible()) continue;
 			entity.wasSelected = entity.selected;
 			entity.selected = false;
 			entity.getWorldBoundingBox(bb);
