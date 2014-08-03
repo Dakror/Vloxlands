@@ -15,8 +15,7 @@ import de.dakror.vloxlands.layer.GameLayer;
  */
 public class BFS
 {
-	public static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
-	public static BFSNode lastTarget;
+	static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	
 	// TODO multi island support
 	public static Path findClosestVoxel(Vector3 pos, byte voxel, Creature c)
@@ -28,11 +27,7 @@ public class BFS
 		{
 			BFSNode v = queue.poll();
 			
-			if (v.voxel == voxel)
-			{
-				lastTarget = v;
-				return AStar.findPath(pos, new Vector3(v.x, v.y, v.z), c, true);
-			}
+			if (v.voxel == voxel) return AStar.findPath(pos, new Vector3(v.x, v.y, v.z), c, true);
 			
 			addNeighbors(v, voxel, c);
 		}

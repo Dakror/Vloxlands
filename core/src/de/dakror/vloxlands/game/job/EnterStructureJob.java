@@ -24,6 +24,5 @@ public class EnterStructureJob extends Job
 	public void onEnd()
 	{
 		human.setLocation(target);
-		human.setVisible(false);
 	}
 }

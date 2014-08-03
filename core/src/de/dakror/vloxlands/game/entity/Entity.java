@@ -280,6 +280,11 @@ public class Entity extends EntityBase implements Agent, Savable
 		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
 	}
 	
+	public State<Entity> getState()
+	{
+		return stateMachine.getCurrentState();
+	}
+	
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{}

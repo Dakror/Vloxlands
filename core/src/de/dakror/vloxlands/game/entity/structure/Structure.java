@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -38,6 +39,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	Inventory buildInventory;
 	ResourceList resourceList;
 	String workerName;
+	State<Entity> workerState;
 	boolean working;
 	
 	boolean dismantleRequested;
@@ -326,6 +328,11 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	
 	protected void onWorkerAdded(Human human)
 	{}
+	
+	public State<Entity> getWorkerState()
+	{
+		return workerState;
+	}
 	
 	public CurserCommand getDefaultCommand()
 	{

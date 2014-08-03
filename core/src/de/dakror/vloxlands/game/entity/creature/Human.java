@@ -345,5 +345,6 @@ public class Human extends Creature
 	public void setLocation(Structure location)
 	{
 		this.location = location;
+		visible = location == null;
 	}
 }

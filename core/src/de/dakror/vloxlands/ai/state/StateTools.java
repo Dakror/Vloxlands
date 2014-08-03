@@ -75,4 +75,14 @@ public class StateTools
 		}
 		else human.setJob(null, esj);
 	}
+	
+	public static Path getHomePath(Human human, NodeType nodeType)
+	{
+		return AStar.findPath(human.getVoxelBelow(), human.getWorkPlace().getStructureNode(human.getVoxelBelow(), nodeType).pos.cpy().add(human.getWorkPlace().getVoxelPos()), human, nodeType.useGhostTarget);
+	}
+	
+	public static boolean isWorkingTime()
+	{
+		return GameLayer.time > 0;
+	}
 }

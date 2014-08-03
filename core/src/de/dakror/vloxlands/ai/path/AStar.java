@@ -18,7 +18,7 @@ import de.dakror.vloxlands.layer.GameLayer;
  */
 public class AStar
 {
-	public static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
+	static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
 	{
 		@Override
 		public int compare(AStarNode o1, AStarNode o2)
@@ -26,9 +26,8 @@ public class AStar
 			return Float.compare(o1.F, o2.F);
 		}
 	};
-	public static Array<AStarNode> openList = new Array<AStarNode>();
-	public static Array<AStarNode> closedList = new Array<AStarNode>();
-	public static Array<Vector3> lastPath;
+	static Array<AStarNode> openList = new Array<AStarNode>();
+	static Array<AStarNode> closedList = new Array<AStarNode>();
 	static AStarNode target;
 	static Vector3 neighbor;
 	
@@ -82,8 +81,6 @@ public class AStar
 		Vector3 firstNode = v.removeIndex(0); // remove start vector
 		
 		if (neighbor != null) v.add(neighbor);
-		
-		lastPath = v;
 		
 		Path p = new Path(v);
 		p.removedFirstNode = firstNode;
