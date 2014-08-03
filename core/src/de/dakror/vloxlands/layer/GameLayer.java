@@ -345,7 +345,7 @@ public class GameLayer extends Layer
 	{
 		this.tick = tick;
 		
-		time -= 0.000025f;
+		time -= 0.00002777f;
 		if (time <= -0.99999999999f) time = 0.99999999999f;
 		
 		float t = time * MathUtils.PI;
