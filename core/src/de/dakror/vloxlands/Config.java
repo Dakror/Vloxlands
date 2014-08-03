@@ -13,7 +13,7 @@ public class Config
 	public static final String version = "infdev 0.1";
 	
 	public static int fov;
-	public static int shadowQuality;
+	public static int shadowQuality = 1;
 	private static int gameSpeed = 0;
 	public static int[] gameSpeeds = { 1, 2, 5, 10, 25 };
 	public static FileHandle dir;

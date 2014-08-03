@@ -258,7 +258,7 @@ public class GameLayer extends Layer
 				return;
 			}
 			
-			ticksForTravel = (int) camera.position.dst(target);
+			ticksForTravel = (int) camera.position.dst(target) * Config.getGameSpeed();
 			
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
@@ -362,9 +362,9 @@ public class GameLayer extends Layer
 		
 		if (activeIsland != null && startTick > 0)
 		{
-			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
-			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
-			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.position.interpolate(target, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
+			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
+			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
 			
 			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
 			{

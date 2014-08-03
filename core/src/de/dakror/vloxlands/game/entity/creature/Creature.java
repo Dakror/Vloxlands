@@ -1,12 +1,20 @@
 package de.dakror.vloxlands.game.entity.creature;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 
 /**
@@ -33,6 +41,36 @@ public abstract class Creature extends Entity implements AnimationListener
 		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
 		transform.translate(blockTrn);
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
+	}
+	
+	@Override
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
+	{
+		super.render(batch, environment, minimapMode);
+		
+		if (path != null && Vloxlands.showPathDebug && !minimapMode)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glLineWidth(2);
+			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
+			GameLayer.shapeRenderer.identity();
+			GameLayer.shapeRenderer.translate(island.pos.x, island.pos.y, island.pos.z);
+			GameLayer.shapeRenderer.rotate(1, 0, 0, 90);
+			GameLayer.shapeRenderer.begin(ShapeType.Line);
+			GameLayer.shapeRenderer.setColor(Color.WHITE);
+			
+			GameLayer.shapeRenderer.translate(0, 0, -path.getLast().y - 1.0f - World.gap);
+			GameLayer.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
+			GameLayer.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
+			
+			for (int i = path.getIndex(); i < path.size() - 1; i++)
+			{
+				Vector3 start = path.get(i);
+				Vector3 end = path.get(i + 1);
+				GameLayer.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
+			}
+			GameLayer.shapeRenderer.end();
+		}
 	}
 	
 	@Override
