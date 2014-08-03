@@ -6,10 +6,6 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.Agent;
-import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
-import com.badlogic.gdx.ai.fsm.State;
-import com.badlogic.gdx.ai.fsm.StateMachine;
-import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -25,7 +21,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -68,7 +63,6 @@ public class Entity extends EntityBase implements Agent, Savable
 	protected Island island;
 	
 	protected AnimationController animationController;
-	protected StateMachine<Entity> stateMachine;
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
@@ -87,8 +81,6 @@ public class Entity extends EntityBase implements Agent, Savable
 		transform = modelInstance.transform;
 		
 		transform.getTranslation(posCache);
-		
-		stateMachine = new DefaultStateMachine<Entity>(this);
 		
 		level = 0;
 		modelVisible = true;
@@ -232,7 +224,6 @@ public class Entity extends EntityBase implements Agent, Savable
 	@Override
 	public void update(float delta)
 	{
-		stateMachine.update();
 		animationController.update(delta);
 	}
 	
@@ -265,24 +256,7 @@ public class Entity extends EntityBase implements Agent, Savable
 	@Override
 	public boolean handleMessage(Telegram msg)
 	{
-		return stateMachine.handleMessage(msg);
-	}
-	
-	public void changeState(State<Entity> newState, Object... params)
-	{
-		if (params.length > 2)
-		{
-			throw new IllegalArgumentException("Can only pass up to 2 parameters to a state");
-		}
-		
-		stateMachine.changeState(newState);
-		if (params.length > 0 && params[0] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[0]);
-		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
-	}
-	
-	public State<Entity> getState()
-	{
-		return stateMachine.getCurrentState();
+		return false;
 	}
 	
 	@Override

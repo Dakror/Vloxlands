@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -39,7 +40,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	Inventory buildInventory;
 	ResourceList resourceList;
 	String workerName;
-	State<Entity> workerState;
+	State<Human> workerState;
+	Class<?> workerTool;
 	boolean working;
 	
 	boolean dismantleRequested;
@@ -173,6 +175,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		human.setWorkPlace(this);
 		human.setName(workerName);
 		workers.add(human);
+		StateTools.initForWorkplace(human);
 		onWorkerAdded(human);
 		return true;
 	}
@@ -329,9 +332,14 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	protected void onWorkerAdded(Human human)
 	{}
 	
-	public State<Entity> getWorkerState()
+	public State<Human> getWorkerState()
 	{
 		return workerState;
+	}
+	
+	public Class<?> getWorkerTool()
+	{
+		return workerTool;
 	}
 	
 	public CurserCommand getDefaultCommand()

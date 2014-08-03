@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector3;
 import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
-import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -22,7 +21,7 @@ import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;
 
-public enum HelperState implements State<Entity>
+public enum HelperState implements State<Human>
 {
 	IDLE
 	{},
@@ -32,43 +31,43 @@ public enum HelperState implements State<Entity>
 		boolean force = false;
 		
 		@Override
-		public void update(Entity entity)
+		public void update(Human human)
 		{
 			if (structure == null) return;
-			if (((Human) entity).isIdle() || force)
+			if (human.isIdle() || force)
 			{
 				ItemStack is = structure.getBuildInventory().getFirst();
 				if (is.isNull())
 				{
-					if (structure.isBuilt()) entity.changeState(IDLE);
-					else entity.changeState(BUILD, structure);
+					if (structure.isBuilt()) human.changeState(IDLE);
+					else human.changeState(BUILD, structure);
 					return;
 				}
 				
-				Vector3 pathStart = ((Human) entity).getVoxelBelow();
+				Vector3 pathStart = human.getVoxelBelow();
 				
-				PickupJob pj = new PickupJob((Human) entity, null, is, false, false);
+				PickupJob pj = new PickupJob(human, null, is, false, false);
 				
-				boolean queue = StateTools.equipTool((Human) entity, pj.getTool(), false, pathStart);
+				boolean queue = StateTools.equipTool(human, pj.getTool(), false, pathStart);
 				
-				PathBundle pb = GameLayer.world.query(new Query((Human) entity).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).island(0));
+				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).island(0));
 				if (pb != null)
 				{
 					pj.setTarget(pb.structure);
 					
-					if (queue) ((Human) entity).queueJob(pb.path, pj);
-					else ((Human) entity).setJob(pb.path, pj);
+					if (queue) human.queueJob(pb.path, pj);
+					else human.setJob(pb.path, pj);
 				}
 				else
 				{
 					Gdx.app.error("HumanState.GET_RESOURCES_FOR_BUILD.update", "Didn't find a Warehouse containing the needed resources on island: 0!");
 				}
 				
-				Path p = AStar.findPath(pb.path.getLast(), structure.getStructureNode(pb.path.getLast(), NodeType.deposit).pos.cpy().add(structure.getVoxelPos()), (Human) entity, NodeType.deposit.useGhostTarget);
+				Path p = AStar.findPath(pb.path.getLast(), structure.getStructureNode(pb.path.getLast(), NodeType.deposit).pos.cpy().add(structure.getVoxelPos()), human, NodeType.deposit.useGhostTarget);
 				if (p != null)
 				{
-					DepositJob dj = new DepositJob((Human) entity, structure, false);
-					((Human) entity).queueJob(p, dj);
+					DepositJob dj = new DepositJob(human, structure, false);
+					human.queueJob(p, dj);
 				}
 				else
 				{
@@ -119,12 +118,12 @@ public enum HelperState implements State<Entity>
 		Structure target;
 		
 		@Override
-		public void update(Entity entity)
+		public void update(Human human)
 		{
-			if (((Human) entity).isIdle())
+			if (human.isIdle())
 			{
-				target.addWorker((Human) entity);
-				entity.changeState(IDLE);
+				target.addWorker(human);
+				human.changeState(IDLE);
 			}
 		}
 		
@@ -187,17 +186,17 @@ public enum HelperState implements State<Entity>
 	;
 	
 	@Override
-	public void enter(Entity entity)
+	public void enter(Human human)
 	{}
 	
 	@Override
-	public void exit(Entity entity)
+	public void exit(Human human)
 	{}
 	
 	@Override
-	public void update(Entity entity)
+	public void update(Human human)
 	{
-		if (((Human) entity).isIdle()) entity.changeState(IDLE);
+		if (human.isIdle()) human.changeState(IDLE);
 	}
 	
 	@Override

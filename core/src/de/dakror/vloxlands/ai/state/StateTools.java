@@ -9,12 +9,12 @@ import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.item.tool.ChopTool;
 import de.dakror.vloxlands.game.job.EnterStructureJob;
 import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.event.Event;
 
 /**
  * @author Dakror
@@ -60,14 +60,21 @@ public class StateTools
 		return false;
 	}
 	
-	public static void initForWorkplace(Human human, Class<?> tool)
+	public static void initForWorkplace(final Human human)
 	{
 		Vector3 pathStart = human.getVoxelBelow();
-		boolean queue = StateTools.equipTool(human, ChopTool.class, false, pathStart);
+		boolean queue = StateTools.equipTool(human, human.getWorkPlace().getWorkerTool(), false, pathStart);
 		
 		Structure workPlace = human.getWorkPlace();
 		EnterStructureJob esj = new EnterStructureJob(human, workPlace, false);
-		
+		esj.setEndEvent(new Event()
+		{
+			@Override
+			public void trigger()
+			{
+				human.changeState(human.getWorkPlace().getWorkerState());
+			}
+		});
 		if (queue)
 		{
 			Path p = AStar.findPath(pathStart, workPlace.getStructureNode(pathStart, NodeType.entry).pos.cpy().add(workPlace.getVoxelPos()), human, NodeType.entry.useGhostTarget);

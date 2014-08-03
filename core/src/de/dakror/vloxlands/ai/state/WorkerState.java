@@ -3,7 +3,6 @@ package de.dakror.vloxlands.ai.state;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 
-import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.job.DepositJob;
@@ -12,85 +11,90 @@ import de.dakror.vloxlands.game.job.Job;
 /**
  * @author Dakror
  */
-public enum WorkerState implements State<Entity>
+public enum WorkerState implements State<Human>
 {
 	LUMBERJACK
 	{
 		@Override
-		public void enter(Entity entity)
+		public void enter(Human human)
 		{
-			super.enter(entity);
+			super.enter(human);
 			
-			((Human) entity).setLocation(null);
+			human.setLocation(null);
 		}
 		
 		@Override
-		public void update(Entity entity)
+		public void update(Human human)
 		{
-			super.update(entity);
+			super.update(human);
 			
-			if (((Human) entity).getCarryingItemStack().isFull())
+			if (human.getCarryingItemStack().isFull())
 			{
-				((Human) entity).setJob(StateTools.getHomePath((Human) entity, NodeType.deposit), new DepositJob((Human) entity, ((Human) entity).getWorkPlace(), false));
+				human.setJob(StateTools.getHomePath(human, NodeType.deposit), new DepositJob(human, human.getWorkPlace(), false));
+			}
+			
+			if (human.isIdle())
+			{	
+				
 			}
 		}
 	},
 	TIDY_UP
 	{
 		@Override
-		public void enter(final Entity entity)
+		public void enter(final Human human)
 		{
 			Job job = null;
-			if (!((Human) entity).getCarryingItemStack().isNull())
+			if (!human.getCarryingItemStack().isNull())
 			{
-				job = new DepositJob((Human) entity, ((Human) entity).getWorkPlace(), false);
+				job = new DepositJob(human, human.getWorkPlace(), false);
 			}
-			((Human) entity).setJob(StateTools.getHomePath((Human) entity, NodeType.deposit), job);
+			human.setJob(StateTools.getHomePath(human, NodeType.deposit), job);
 		}
 		
 		@Override
-		public void update(Entity entity)
+		public void update(Human human)
 		{
-			if (((Human) entity).isIdle()) entity.changeState(REST);
+			if (human.isIdle()) human.changeState(REST);
 		}
 	},
 	REST
 	{
 		@Override
-		public void enter(Entity entity)
+		public void enter(Human human)
 		{
-			((Human) entity).setLocation(((Human) entity).getWorkPlace());
+			human.setLocation(human.getWorkPlace());
 		}
 		
 		@Override
-		public void update(Entity entity)
+		public void update(Human human)
 		{
-			if (StateTools.isWorkingTime() && !((Human) entity).getWorkPlace().getInventory().isFull()) entity.changeState(((Human) entity).getWorkPlace().getWorkerState());
+			if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.changeState(human.getWorkPlace().getWorkerState());
 		}
 	},
 	
 	;
 	
 	@Override
-	public void enter(Entity entity)
+	public void enter(Human human)
 	{
-		if (((Human) entity).getWorkPlace().getInventory().isFull())
+		if (human.getWorkPlace().getInventory().isFull())
 		{
-			entity.changeState(REST);
+			human.changeState(REST);
 		}
 	}
 	
 	@Override
-	public void update(Entity entity)
+	public void update(Human human)
 	{
 		if (!StateTools.isWorkingTime())
 		{
-			if (entity.getState() != TIDY_UP && entity.getState() != REST) entity.changeState(TIDY_UP);
+			if (human.getState() != TIDY_UP && human.getState() != REST) human.changeState(TIDY_UP);
 		}
 	}
 	
 	@Override
-	public void exit(Entity entity)
+	public void exit(Human human)
 	{}
 	
 	@Override

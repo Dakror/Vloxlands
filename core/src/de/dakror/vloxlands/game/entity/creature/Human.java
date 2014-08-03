@@ -1,6 +1,11 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
+import com.badlogic.gdx.ai.fsm.State;
+import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -13,6 +18,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.ai.state.HelperState;
@@ -60,6 +66,8 @@ public class Human extends Creature
 	
 	final Matrix4 tmp = new Matrix4();
 	
+	StateMachine<Human> stateMachine;
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -70,6 +78,9 @@ public class Human extends Creature
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
+		
+		
+		stateMachine = new DefaultStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
 	}
 	
@@ -143,6 +154,13 @@ public class Human extends Creature
 			}
 			else j.trigger(tick);
 		}
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		stateMachine.update();
 	}
 	
 	@Override
@@ -232,7 +250,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
 		{
 			selected = true;
 			
@@ -243,7 +261,7 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
 		{
 			selected = true;
 			
@@ -347,4 +365,28 @@ public class Human extends Creature
 		this.location = location;
 		visible = location == null;
 	}
+	
+	@Override
+	public boolean handleMessage(Telegram msg)
+	{
+		return stateMachine.handleMessage(msg);
+	}
+	
+	public void changeState(State<Human> newState, Object... params)
+	{
+		if (params.length > 2)
+		{
+			throw new IllegalArgumentException("Can only pass up to 2 parameters to a state");
+		}
+		
+		stateMachine.changeState(newState);
+		if (params.length > 0 && params[0] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[0]);
+		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
+	}
+	
+	public State<Human> getState()
+	{
+		return stateMachine.getCurrentState();
+	}
+	
 }

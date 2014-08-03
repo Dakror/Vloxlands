@@ -1,8 +1,6 @@
 package de.dakror.vloxlands.game.entity.structure;
 
-import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.ai.state.WorkerState;
-import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.tool.ChopTool;
@@ -23,18 +21,12 @@ public class Lumberjack extends Structure
 		name = "Lumberjack";
 		workerName = "Lumberjack";
 		workerState = WorkerState.LUMBERJACK;
+		workerTool = ChopTool.class;
 		
 		resourceList.add(Item.get("WOODEN_LOG"), 10);
 		resourceList.setCostPopulation(1);
 		
 		inventory = new Inventory(20);
-	}
-	
-	@Override
-	protected void onWorkerAdded(Human human)
-	{
-		StateTools.initForWorkplace(human, ChopTool.class);
-		human.changeState(workerState);
 	}
 	
 	@Override
