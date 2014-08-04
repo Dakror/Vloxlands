@@ -13,7 +13,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
  */
 public class BFS
 {
-	public static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
+	static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	final static Vector3 start = new Vector3();
 	static boolean allowLowest;
 	

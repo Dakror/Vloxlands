@@ -166,7 +166,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				if (query.mustBeEmpty && ((Structure) s).getInventory().getCount() > 0) continue;
 				if (query.mustBeFull && !((Structure) s).getInventory().isFull()) continue;
 				if (query.mustHaveCapacity && ((Structure) s).getInventory().isFull()) continue;
-				if (query.mustHaveCapacityForTransportedItemStack && query.transportedItemStack != null && ((Structure) s).getInventory().getCount() + query.transportedItemStack.getAmount() > ((Structure) s).getInventory().getCapacity()) continue;
+				if (query.mustHaveCapacityForTransportedItemStack && query.transportedItemStack != null && !query.transportedItemStack.isNull() && ((Structure) s).getInventory().getCount() + query.transportedItemStack.getAmount() > ((Structure) s).getInventory().getCapacity()) continue;
 				if (query.searchedNodeType != null && !((Structure) s).hasStructureNode(query.searchedNodeType)) continue;
 				if (query.searchedNodeName != null && !((Structure) s).hasStructureNode(query.searchedNodeName)) continue;
 				if (query.searchedItemStack != null && !((Structure) s).getInventory().contains(query.searchedItemStack)) continue;

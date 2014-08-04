@@ -251,8 +251,8 @@ public class Human extends Creature
 			if (c == CurserCommand.BUILD && !structure.isBuilt())
 			{
 				if (structure.getBuildInventory().getCount() == 0)
-				{	
-					
+				{
+					changeState(HelperState.BUILD, structure);
 				}
 				else
 				{

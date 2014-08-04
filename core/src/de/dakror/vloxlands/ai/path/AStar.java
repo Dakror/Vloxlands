@@ -1,5 +1,7 @@
 package de.dakror.vloxlands.ai.path;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 import com.badlogic.gdx.math.Vector3;
@@ -25,8 +27,8 @@ public class AStar
 			return Float.compare(o1.F, o2.F);
 		}
 	};
-	static Array<AStarNode> openList = new Array<AStarNode>();
-	static Array<AStarNode> closedList = new Array<AStarNode>();
+	static ArrayList<AStarNode> openList = new ArrayList<AStarNode>();
+	static ArrayList<AStarNode> closedList = new ArrayList<AStarNode>();
 	static AStarNode target;
 	static Vector3 neighbor;
 	
@@ -59,15 +61,15 @@ public class AStar
 		AStarNode ghostNode = null;
 		while (true)
 		{
-			if (openList.size == 0) return null; // no way
+			if (openList.size() == 0) return null; // no way
 			
-			openList.sort(COMPARATOR);
+			Collections.sort(openList, COMPARATOR);
 			selected = openList.get(0);
-			openList.removeIndex(0);
-			while (selected.cantBeNeighborForGhostTarget && openList.size > 0)
+			openList.remove(0);
+			while (selected.cantBeNeighborForGhostTarget && openList.size() > 0)
 			{
 				selected = openList.get(0);
-				openList.removeIndex(0);
+				openList.remove(0);
 			}
 			
 			closedList.add(selected);
@@ -127,10 +129,10 @@ public class AStar
 					
 					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g * v.dst(selected.x, selected.y, selected.z), v.dst(to), selected);
 					
-					if (closedList.contains(node, false)) continue;
+					if (closedList.contains(node)) continue;
 					
-					int index = openList.indexOf(node, false);
-					boolean ctn = openList.contains(node, false);
+					int index = openList.indexOf(node);
+					boolean ctn = openList.contains(node);
 					
 					if (ctn && openList.get(index).G > node.G)
 					{
@@ -202,7 +204,8 @@ public class AStar
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
-							// TODO: needed for anything? if (y == 1) close = false;
+							if (y == 1) close = false;
+							// TODO ^ needed for anything?
 							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;

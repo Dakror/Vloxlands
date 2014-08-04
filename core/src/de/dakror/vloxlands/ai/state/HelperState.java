@@ -45,29 +45,54 @@ public enum HelperState implements State<Human>
 				}
 				
 				Vector3 pathStart = human.getVoxelBelow();
-				
-				PickupJob pj = new PickupJob(human, null, is, false, false);
-				
-				boolean queue = StateTools.equipTool(human, pj.getTool(), false, pathStart);
-				
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).island(0));
-				if (pb != null)
+				boolean queue = false;
+				if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().getItem().getId() != is.getItem().getId())
 				{
-					pj.setTarget(pb.structure);
+					PickupJob pj = new PickupJob(human, null, is, false, false);
 					
-					if (queue) human.queueJob(pb.path, pj);
-					else human.setJob(pb.path, pj);
-				}
-				else
-				{
-					Gdx.app.error("HumanState.GET_RESOURCES_FOR_BUILD.update", "Didn't find a Warehouse containing the needed resources on island: 0!");
+					queue = StateTools.equipTool(human, pj.getTool(), queue, pathStart);
+					
+					PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()).island(0));
+					if (pb != null)
+					{
+						pj.setTarget(pb.structure);
+						
+						if (!human.getCarryingItemStack().isNull())
+						{
+							DepositJob dj = new DepositJob(human, pb.structure, false);
+							if (queue) human.queueJob(pb.path, dj);
+							else
+							{
+								human.setJob(pb.path, dj);
+								queue = true;
+							}
+							
+							human.queueJob(null, pj);
+						}
+						else
+						{
+							if (queue) human.queueJob(pb.path, pj);
+							else
+							{
+								human.setJob(pb.path, pj);
+								queue = true;
+							}
+						}
+						
+						pathStart = pb.path.getLast();
+					}
+					else
+					{
+						Gdx.app.error("HumanState.GET_RESOURCES_FOR_BUILD.update", "Didn't find a Warehouse containing the needed resources on island: 0!");
+					}
 				}
 				
-				Path p = AStar.findPath(pb.path.getLast(), structure.getStructureNode(pb.path.getLast(), NodeType.deposit).pos.cpy().add(structure.getVoxelPos()), human, NodeType.deposit.useGhostTarget);
+				Path p = AStar.findPath(pathStart, structure.getStructureNode(pathStart, NodeType.deposit).pos.cpy().add(structure.getVoxelPos()), human, NodeType.deposit.useGhostTarget);
 				if (p != null)
 				{
 					DepositJob dj = new DepositJob(human, structure, false);
-					human.queueJob(p, dj);
+					if (queue) human.queueJob(p, dj);
+					else human.setJob(p, dj);
 				}
 				else
 				{
@@ -85,8 +110,11 @@ public enum HelperState implements State<Human>
 			{
 				case PARAM0:
 				{
-					structure = (Structure) telegram.extraInfo;
-					force = true;
+					if (structure != (Structure) telegram.extraInfo)
+					{
+						structure = (Structure) telegram.extraInfo;
+						force = true;
+					}
 					return true;
 				}
 				default:
