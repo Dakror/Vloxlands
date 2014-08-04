@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import de.dakror.vloxlands.ai.job.ChopJob;
 import de.dakror.vloxlands.ai.job.DepositJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.Path;
@@ -23,6 +24,7 @@ public enum WorkerState implements State<Human>
 {
 	LUMBERJACK
 	{
+		int lastTargetInitialMetadata = 0;
 		int lastTargetMetadata = 0;
 		final Vector3 lastTarget = new Vector3(-1, 0, 0);
 		final float range = 30;
@@ -41,6 +43,7 @@ public enum WorkerState implements State<Human>
 		
 		public boolean chop(final Human human)
 		{
+			if (human.getWorkPlace().getInventory().isFull()) return false;
 			Path path = null;
 			
 			if (lastTarget.x == -1)
@@ -49,7 +52,7 @@ public enum WorkerState implements State<Human>
 				if (path == null) return false;
 				
 				lastTarget.set(path.getGhostTarget());
-				lastTargetMetadata = getTreeHeight(human, lastTarget);
+				lastTargetMetadata = lastTargetInitialMetadata = getTreeHeight(human, lastTarget);
 			}
 			else
 			{
@@ -61,6 +64,7 @@ public enum WorkerState implements State<Human>
 				}
 			}
 			
+			RemoveLeavesJob rmj = new RemoveLeavesJob(human, lastTarget, lastTargetInitialMetadata, false);
 			ChopJob cj = new ChopJob(human, lastTarget, lastTargetMetadata, false);
 			cj.setEndEvent(new Event()
 			{
@@ -71,7 +75,8 @@ public enum WorkerState implements State<Human>
 				}
 			});
 			
-			human.setJob(path, cj);
+			human.setJob(path, rmj);
+			human.queueJob(null, cj);
 			
 			return true;
 		}
@@ -79,7 +84,7 @@ public enum WorkerState implements State<Human>
 		public void afterChop(Human human)
 		{
 			lastTargetMetadata--;
-			if (lastTargetMetadata <= 0) lastTarget.x = -1;
+			if (lastTargetMetadata < 0) lastTarget.x = -1;
 			
 			human.changeState(BRING_STUFF_HOME);
 		}
@@ -96,8 +101,6 @@ public enum WorkerState implements State<Human>
 			return height;
 		}
 	},
-	
-	
 	BRING_STUFF_HOME
 	{
 		@Override
