@@ -1,10 +1,12 @@
-package de.dakror.vloxlands.game.item;
+package de.dakror.vloxlands.game.item.inv;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.math.Bits;
@@ -57,7 +59,7 @@ public class Inventory implements Savable
 	{
 		int amount = 0;
 		for (ItemStack stack : stacks)
-			if (stack.getItem().getId() == item.getId()) amount += stack.amount;
+			if (stack.getItem().getId() == item.getId()) amount += stack.getAmount();
 		return amount;
 	}
 	
@@ -65,7 +67,7 @@ public class Inventory implements Savable
 	{
 		int amount = 0;
 		for (ItemStack stack : stacks)
-			if (stack.getItem().getId() == id) amount += stack.amount;
+			if (stack.getItem().getId() == id) amount += stack.getAmount();
 		return amount;
 	}
 	

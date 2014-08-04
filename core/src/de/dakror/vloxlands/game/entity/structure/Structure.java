@@ -10,10 +10,11 @@ import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.item.ResourceList;
+import de.dakror.vloxlands.game.item.inv.Inventory;
+import de.dakror.vloxlands.game.item.inv.ManagedInventory;
+import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
@@ -37,7 +38,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	/**
 	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
 	 */
-	Inventory buildInventory;
+	ManagedInventory buildInventory;
 	ResourceList resourceList;
 	String workerName;
 	State<Human> workerState;
@@ -75,7 +76,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
-		buildInventory = new Inventory(256 /* That should be enough... */);
+		buildInventory = new ManagedInventory(256 /* That should be enough... */);
 		resourceList = new ResourceList();
 		working = true;
 		
@@ -262,7 +263,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		return built ? inventory : buildInventory;
 	}
 	
-	public Inventory getBuildInventory()
+	public ManagedInventory getBuildInventory()
 	{
 		return buildInventory;
 	}

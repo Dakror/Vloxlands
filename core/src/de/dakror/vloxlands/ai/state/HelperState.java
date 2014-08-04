@@ -39,8 +39,9 @@ public enum HelperState implements State<Human>
 				ItemStack is = structure.getBuildInventory().getFirst();
 				if (is.isNull())
 				{
-					if (structure.isBuilt()) human.changeState(IDLE);
-					else human.changeState(BUILD, structure);
+					// if (structure.isBuilt())
+					human.changeState(IDLE);
+					// else human.changeState(BUILD, structure);
 					return;
 				}
 				

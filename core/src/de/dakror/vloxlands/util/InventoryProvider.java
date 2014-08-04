@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.util;
 
-import de.dakror.vloxlands.game.item.Inventory;
+import de.dakror.vloxlands.game.item.inv.Inventory;
 
 public interface InventoryProvider
 {

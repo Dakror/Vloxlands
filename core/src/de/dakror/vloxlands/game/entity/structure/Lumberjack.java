@@ -1,8 +1,8 @@
 package de.dakror.vloxlands.game.entity.structure;
 
 import de.dakror.vloxlands.ai.state.WorkerState;
-import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.tool.ChopTool;
 import de.dakror.vloxlands.util.CurserCommand;
 
