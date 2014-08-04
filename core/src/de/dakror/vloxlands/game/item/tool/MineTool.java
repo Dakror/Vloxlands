@@ -2,9 +2,9 @@ package de.dakror.vloxlands.game.item.tool;
 
 import com.badlogic.gdx.math.Matrix4;
 
+import de.dakror.vloxlands.ai.job.MineJob;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.game.job.MineJob;
 
 /**
  * @author Dakror

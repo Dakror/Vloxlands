@@ -32,6 +32,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.job.IdleJob;
+import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -39,8 +41,6 @@ import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Inventory;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.job.IdleJob;
-import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.IslandInfo;
 import de.dakror.vloxlands.ui.ItemSlot;

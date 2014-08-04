@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
+import de.dakror.vloxlands.ai.job.EnterStructureJob;
+import de.dakror.vloxlands.ai.job.PickupJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -11,8 +13,6 @@ import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.job.EnterStructureJob;
-import de.dakror.vloxlands.game.job.PickupJob;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;

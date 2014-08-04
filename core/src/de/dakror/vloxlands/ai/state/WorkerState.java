@@ -4,14 +4,14 @@ import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.ai.job.ChopJob;
+import de.dakror.vloxlands.ai.job.DepositJob;
+import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
-import de.dakror.vloxlands.game.job.ChopJob;
-import de.dakror.vloxlands.game.job.DepositJob;
-import de.dakror.vloxlands.game.job.Job;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.util.event.Event;
@@ -96,6 +96,8 @@ public enum WorkerState implements State<Human>
 			return height;
 		}
 	},
+	
+	
 	BRING_STUFF_HOME
 	{
 		@Override

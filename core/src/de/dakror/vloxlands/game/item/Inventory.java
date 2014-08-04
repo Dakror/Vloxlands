@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.math.Bits;
@@ -41,7 +40,6 @@ public class Inventory implements Savable
 	
 	public ItemStack add(ItemStack stack)
 	{
-		D.p(stack);
 		if (count + stack.getAmount() > capacity)
 		{
 			addStack(stack, capacity - count);
@@ -120,6 +118,7 @@ public class Inventory implements Savable
 	
 	protected void addStack(ItemStack stack, int amount)
 	{
+		int amount2 = amount;
 		for (ItemStack s : stacks)
 		{
 			if (s.getItem().getId() != stack.getItem().getId() || s.isFull()) continue;
@@ -130,7 +129,7 @@ public class Inventory implements Savable
 		
 		if (amount != 0) stacks.add(new ItemStack(stack.getItem(), amount));
 		
-		count += amount;
+		count += amount2;
 		
 		dispatchInventoryChanged();
 	}

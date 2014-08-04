@@ -204,7 +204,7 @@ public class AStar
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
-							if (y == 1) close = false;
+							// if (y == 1) close = false;
 							// TODO ^ needed for anything?
 							if (targetable && close)
 							{

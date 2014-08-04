@@ -18,6 +18,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
@@ -25,8 +27,6 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.job.Job;
-import de.dakror.vloxlands.game.job.WalkJob;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;

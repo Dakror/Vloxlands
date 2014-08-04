@@ -169,7 +169,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	
 	public boolean addWorker(Human human)
 	{
-		if (workers.size == resourceList.getCostPopulation()) return false;
+		if (workers.size >= resourceList.getCostPopulation()) return false;
 		if (human.getWorkPlace() != null) return false;
 		
 		human.setWorkPlace(this);
@@ -350,6 +350,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	public CurserCommand getCommandForEntity(Entity selectedEntity)
 	{
 		if (selectedEntity instanceof Human && !built) return CurserCommand.BUILD;
+		if (selectedEntity instanceof Human && built) addWorker((Human) selectedEntity);
+		
 		return getDefaultCommand();
 	}
 	
