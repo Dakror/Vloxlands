@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -20,7 +18,7 @@ import de.dakror.vloxlands.layer.GameLayer;
 /**
  * @author Dakror
  */
-public abstract class Creature extends Entity implements AnimationListener
+public abstract class Creature extends Entity
 {
 	protected boolean airborne;
 	protected float climbHeight;
@@ -84,7 +82,7 @@ public abstract class Creature extends Entity implements AnimationListener
 			{
 				if (path.size() > 0)
 				{
-					Vector3 target = path.get().cpy().add(GameLayer.instance.activeIsland.pos).add(blockTrn);
+					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
 					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
@@ -119,7 +117,7 @@ public abstract class Creature extends Entity implements AnimationListener
 	
 	public Vector3 getVoxelBelow()
 	{
-		Vector3 v = posCache.cpy().sub(GameLayer.instance.activeIsland.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2); // TODO multi island support
+		Vector3 v = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
 		
 		return v;
@@ -150,19 +148,12 @@ public abstract class Creature extends Entity implements AnimationListener
 	
 	protected void rotateTowardsGhostTarget(Path path)
 	{
-		if (path != null && path.getGhostTarget() != null)
-		{
-			Vector3 target = path.getGhostTarget().cpy().add(GameLayer.instance.activeIsland.pos).add(blockTrn);
-			transform.setToRotation(Vector3.Y, 0).translate(posCache);
-			transform.rotate(Vector3.Y, new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180);
-		}
+		// FIXME rotateTowardsGhostTarget
+		// if (path != null && path.getGhostTarget() != null)
+		// {
+		// Vector3 target = path.getGhostTarget().cpy().add(island.pos).add(blockTrn);
+		// float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
+		// transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+		// }
 	}
-	
-	@Override
-	public void onEnd(AnimationDesc animation)
-	{}
-	
-	@Override
-	public void onLoop(AnimationDesc animation)
-	{}
 }

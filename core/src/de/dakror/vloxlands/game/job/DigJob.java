@@ -29,10 +29,6 @@ public class DigJob extends Job
 	}
 	
 	@Override
-	public void tick(int tick)
-	{}
-	
-	@Override
 	public void onEnd()
 	{
 		super.onEnd();

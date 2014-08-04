@@ -13,8 +13,4 @@ public class IdleJob extends Job
 	{
 		super(human, "idle", "Idling...", -1, false);
 	}
-	
-	@Override
-	public void tick(int tick)
-	{}
 }

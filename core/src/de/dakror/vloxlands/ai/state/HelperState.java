@@ -196,7 +196,7 @@ public enum HelperState implements State<Human>
 	@Override
 	public void update(Human human)
 	{
-		if (human.isIdle()) human.changeState(IDLE);
+		if (human.isIdle() && human.getState() != IDLE) human.changeState(IDLE);
 	}
 	
 	@Override

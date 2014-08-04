@@ -23,6 +23,8 @@ public class EnterStructureJob extends Job
 	@Override
 	public void onEnd()
 	{
+		super.onEnd();
+		
 		human.setLocation(target);
 	}
 }

@@ -35,6 +35,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -316,6 +318,8 @@ public class GameLayer extends Layer
 		}
 		modelBatch.end();
 		
+		if (Vloxlands.showPathDebug) renderBFS();
+		
 		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -337,6 +341,24 @@ public class GameLayer extends Layer
 			shapeRenderer.setColor(0, 1, 0, 0.3f);
 			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
 			shapeRenderer.end();
+		}
+	}
+	
+	public void renderBFS()
+	{
+		for (BFSNode node : BFS.queue)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glLineWidth(2);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			shapeRenderer.identity();
+			shapeRenderer.translate(instance.activeIsland.pos.x + node.x, instance.activeIsland.pos.y + node.y + 1.01f, instance.activeIsland.pos.z + node.z);
+			shapeRenderer.rotate(1, 0, 0, 90);
+			shapeRenderer.begin(ShapeType.Line);
+			shapeRenderer.setColor(Color.WHITE);
+			shapeRenderer.circle(0.5f, 0.5f, 0.3f, 100);
+			shapeRenderer.end();
+			Gdx.gl.glLineWidth(1);
 		}
 	}
 	

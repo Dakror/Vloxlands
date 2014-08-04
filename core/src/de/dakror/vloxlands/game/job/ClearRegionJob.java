@@ -24,8 +24,4 @@ public class ClearRegionJob extends Job
 		
 		targets = new Array<Vector3>();
 	}
-	
-	@Override
-	public void tick(int tick)
-	{}
 }

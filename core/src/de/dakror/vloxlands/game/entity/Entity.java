@@ -95,6 +95,11 @@ public class Entity extends EntityBase implements Agent, Savable
 		this.island = island;
 	}
 	
+	public Island getIsland()
+	{
+		return island;
+	}
+	
 	public String getName()
 	{
 		return name;

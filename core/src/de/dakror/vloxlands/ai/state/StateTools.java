@@ -1,6 +1,8 @@
 package de.dakror.vloxlands.ai.state;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
@@ -72,7 +74,14 @@ public class StateTools
 			@Override
 			public void trigger()
 			{
-				human.changeState(human.getWorkPlace().getWorkerState());
+				Timer.schedule(new Task()
+				{
+					@Override
+					public void run()
+					{
+						human.changeState(human.getWorkPlace().getWorkerState());
+					}
+				}, 1);
 			}
 		});
 		if (queue)

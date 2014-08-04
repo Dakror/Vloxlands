@@ -24,11 +24,8 @@ public class BuildJob extends Job
 	}
 	
 	@Override
-	public void tick(int tick)
+	protected void onAnimationFinished()
 	{
-		if ((tick - startTick) % durationInTicks == 0 && tick > startTick)
-		{
-			if (target.progressBuild()) done = true;
-		}
+		if (target.progressBuild()) done = true;
 	}
 }

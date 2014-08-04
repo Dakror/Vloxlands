@@ -16,10 +16,6 @@ public class WalkJob extends Job
 		this.path = path;
 	}
 	
-	@Override
-	public void tick(int tick)
-	{}
-	
 	public Path getPath()
 	{
 		return path;

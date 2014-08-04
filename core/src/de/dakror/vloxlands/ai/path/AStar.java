@@ -11,7 +11,6 @@ import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -31,10 +30,18 @@ public class AStar
 	static AStarNode target;
 	static Vector3 neighbor;
 	
-	// TODO multi island support
 	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
-		if (!GameLayer.instance.activeIsland.isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
+		return findPath(from, to, c, 0, useGhostTarget);
+	}
+	
+	public static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
+	{
+		if (from == null || to == null) return null;
+		
+		if (maxRange == 0) maxRange = Math.max(from.dst(to), 1) * 5;
+		
+		if (!c.getIsland().isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
 		
 		openList.clear();
 		closedList.clear();
@@ -67,7 +74,7 @@ public class AStar
 			
 			if (selected.H == 0 && !useGhostTarget) break;
 			
-			if ((ghostNode = addNeighbors(selected, from, to, c, useGhostTarget)) != null) break;
+			if ((ghostNode = addNeighbors(selected, from, to, c, maxRange, useGhostTarget)) != null) break;
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
@@ -89,9 +96,8 @@ public class AStar
 		return p;
 	}
 	
-	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
+	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
 	{
-		float maxDistance = Math.max(from.dst(to), 1) * 5;
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -112,12 +118,12 @@ public class AStar
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!GameLayer.instance.activeIsland.isTargetable(v.x, v.y, v.z)) continue;
-					if (GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air && !c.canFly()) continue;
+					if (!c.getIsland().isTargetable(v.x, v.y, v.z)) continue;
+					if (c.getIsland().get(v.x, v.y, v.z) == air && !c.canFly()) continue;
 					
-					if (from.dst(v) > maxDistance || to.dst(v) > maxDistance) continue;
+					if (from.dst(v) > maxRange || to.dst(v) > maxRange) continue;
 					
-					float g = GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air ? 1.5f : 1;
+					float g = c.getIsland().get(v.x, v.y, v.z) == air ? 1.5f : 1;
 					
 					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g * v.dst(selected.x, selected.y, selected.z), v.dst(to), selected);
 					
@@ -135,29 +141,29 @@ public class AStar
 					{
 						boolean free = true;
 						
-						if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height)) free = false;
+						if (!c.getIsland().isSpaceAbove(v.x, v.y, v.z, height)) free = false;
 						
 						if (x != 0 && z != 0 && free)
 						{
-							if (!GameLayer.instance.activeIsland.isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
-							else if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
+							if (!c.getIsland().isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
+							else if (!c.getIsland().isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
 						if (y != 0)
 						{
-							if (y < 0 && !GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
-							else if (y > 0 && !GameLayer.instance.activeIsland.isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
+							if (y < 0 && !c.getIsland().isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
+							else if (y > 0 && !c.getIsland().isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
 						}
 						
 						if (free)
 						{
-							for (Entity e : GameLayer.instance.activeIsland.getEntities())
+							for (Entity e : c.getIsland().getEntities())
 							{
 								if (!(e instanceof Structure)) continue;
 								
 								e.getWorldBoundingBox(b);
 								
-								b2.min.set(v).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+								b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
 								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 								b2.set(b2.min, b2.max);
 								if (b.intersects(b2))
@@ -167,7 +173,7 @@ public class AStar
 								}
 								if (x != 0 && z != 0 && free)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+									b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -177,7 +183,7 @@ public class AStar
 										break;
 									}
 									
-									b2.min.set(v.x, v.y, selected.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+									b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -196,7 +202,7 @@ public class AStar
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
-							if (y == 1) close = false;
+							// TODO: needed for anything? if (y == 1) close = false;
 							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;
