@@ -15,6 +15,7 @@ public class ManagedInventory extends Inventory
 	@Override
 	protected void addStack(ItemStack stack, int amount)
 	{
+		int oldCount = count;
 		int amount2 = amount;
 		for (ItemStack s : stacks)
 		{
@@ -28,7 +29,7 @@ public class ManagedInventory extends Inventory
 		
 		count += amount2;
 		
-		dispatchInventoryChanged();
+		dispatchItemAdded(oldCount);
 	}
 	
 	@Override

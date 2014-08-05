@@ -59,6 +59,7 @@ public class Human extends Creature
 	final Matrix4 tmp = new Matrix4();
 	
 	StateMachine<Human> stateMachine;
+	public Array<Object> stateParams = new Array<Object>();
 	
 	public Human(float x, float y, float z)
 	{
@@ -250,18 +251,19 @@ public class Human extends Creature
 			selected = true;
 			
 			CurserCommand c = structure.getCommandForEntity(this);
-			if (c == CurserCommand.BUILD && !structure.isBuilt())
-			{
-				if (structure.getBuildInventory().getCount() == 0)
-				{
-					changeState(HelperState.BUILD, structure);
-				}
-				else
-				{
-					changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
-				}
-			}
-			else if (c == CurserCommand.WALK)
+			// if (c == CurserCommand.BUILD && !structure.isBuilt())
+			// {
+			// if (structure.getBuildInventory().getCount() == 0)
+			// {
+			// changeState(HelperState.BUILD, structure);
+			// }
+			// else
+			// {
+			// changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
+			// }
+			// }
+			// else
+			if (c == CurserCommand.WALK)
 			{
 				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
 			}
@@ -319,8 +321,9 @@ public class Human extends Creature
 	
 	public void changeState(State<Human> newState, Object... params)
 	{
+		stateParams.clear();
+		stateParams.addAll(params);
 		stateMachine.changeState(newState);
-		MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.STATE_PARAMS.ordinal(), params);
 	}
 	
 	public State<Human> getState()

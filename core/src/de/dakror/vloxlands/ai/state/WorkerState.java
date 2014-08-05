@@ -22,85 +22,6 @@ import de.dakror.vloxlands.util.event.Callback;
  */
 public enum WorkerState implements State<Human>
 {
-	LUMBERJACK
-	{
-		int lastTargetInitialMetadata = 0;
-		int lastTargetMetadata = 0;
-		final Vector3 lastTarget = new Vector3(-1, 0, 0);
-		final float range = 30;
-		byte wood;
-		
-		@Override
-		public void enter(Human human)
-		{
-			super.enter(human);
-			
-			wood = Voxel.get("WOOD").getId();
-			
-			if (chop(human)) human.setLocation(null);
-			else human.changeState(REST);
-		}
-		
-		public boolean chop(final Human human)
-		{
-			if (human.getWorkPlace().getInventory().isFull()) return false;
-			Path path = null;
-			
-			if (lastTarget.x == -1)
-			{
-				path = BFS.findClosestVoxel(human.getVoxelBelow(), wood, range, true, human);
-				if (path == null) return false;
-				
-				lastTarget.set(path.getGhostTarget());
-				lastTargetMetadata = lastTargetInitialMetadata = getTreeHeight(human, lastTarget);
-			}
-			else
-			{
-				path = AStar.findPath(human.getVoxelBelow(), lastTarget, human, range, true);
-				if (path == null)
-				{
-					lastTarget.x = -1;
-					return false;
-				}
-			}
-			
-			RemoveLeavesJob rmj = new RemoveLeavesJob(human, lastTarget, lastTargetInitialMetadata, false);
-			ChopJob cj = new ChopJob(human, lastTarget, lastTargetMetadata, false);
-			cj.setEndEvent(new Callback()
-			{
-				@Override
-				public void trigger()
-				{
-					afterChop(human);
-				}
-			});
-			
-			human.setJob(path, rmj);
-			human.queueJob(null, cj);
-			
-			return true;
-		}
-		
-		public void afterChop(Human human)
-		{
-			lastTargetMetadata--;
-			if (lastTargetMetadata < 0) lastTarget.x = -1;
-			
-			human.changeState(BRING_STUFF_HOME);
-		}
-		
-		public int getTreeHeight(Human human, Vector3 pos)
-		{
-			int height = 0;
-			for (int y = (int) pos.y; y < Island.SIZE; y++)
-			{
-				if (human.getIsland().get(pos.x, y, pos.z) == wood) height++;
-				else break;
-			}
-			
-			return height;
-		}
-	},
 	BRING_STUFF_HOME
 	{
 		@Override
@@ -126,24 +47,105 @@ public enum WorkerState implements State<Human>
 			}
 		}
 	},
-	REST
+	LUMBERJACK
 	{
-		long lastCheck = 0;
+		final float range = 30;
+		byte wood;
 		
 		@Override
 		public void enter(Human human)
 		{
+			super.enter(human);
+			
+			wood = Voxel.get("WOOD").getId();
+			
+			human.stateParams.set(0, 0); // lastTargetInitialMetadata
+			human.stateParams.set(1, 0); // lastTargetMetadata
+			human.stateParams.set(2, new Vector3(-1, 0, 0)); // lastTarget
+			
+			if (chop(human)) human.setLocation(null);
+			else human.changeState(REST);
+		}
+		
+		public boolean chop(final Human human)
+		{
+			if (human.getWorkPlace().getInventory().isFull()) return false;
+			Path path = null;
+			
+			if (((Vector3) human.stateParams.get(2)).x == -1)
+			{
+				path = BFS.findClosestVoxel(human.getVoxelBelow(), wood, range, true, human);
+				if (path == null) return false;
+				
+				((Vector3) human.stateParams.get(2)).set(path.getGhostTarget());
+				int height = getTreeHeight(human, path.getGhostTarget());
+				human.stateParams.set(0, height);
+				human.stateParams.set(1, height);
+			}
+			else
+			{
+				path = AStar.findPath(human.getVoxelBelow(), ((Vector3) human.stateParams.get(2)), human, range, true);
+				if (path == null)
+				{
+					((Vector3) human.stateParams.get(2)).x = -1;
+					return false;
+				}
+			}
+			
+			RemoveLeavesJob rmj = new RemoveLeavesJob(human, ((Vector3) human.stateParams.get(2)), ((Integer) human.stateParams.get(0)), false);
+			ChopJob cj = new ChopJob(human, ((Vector3) human.stateParams.get(2)), ((Integer) human.stateParams.get(1)), false);
+			cj.setEndEvent(new Callback()
+			{
+				@Override
+				public void trigger()
+				{
+					afterChop(human);
+				}
+			});
+			
+			human.setJob(path, rmj);
+			human.queueJob(null, cj);
+			
+			return true;
+		}
+		
+		public void afterChop(Human human)
+		{
+			human.stateParams.set(1, (Integer) human.stateParams.get(1) - 1);
+			if ((Integer) human.stateParams.get(1) < 0) ((Vector3) human.stateParams.get(2)).x = -1;
+			
+			human.changeState(BRING_STUFF_HOME);
+		}
+		
+		public int getTreeHeight(Human human, Vector3 pos)
+		{
+			int height = 0;
+			for (int y = (int) pos.y; y < Island.SIZE; y++)
+			{
+				if (human.getIsland().get(pos.x, y, pos.z) == wood) height++;
+				else break;
+			}
+			
+			return height;
+		}
+	},
+	REST
+	{
+		@Override
+		public void enter(Human human)
+		{
+			human.stateParams.set(0, 0l);
 			human.setLocation(human.getWorkPlace());
 		}
 		
 		@Override
 		public void update(Human human)
 		{
-			if (System.currentTimeMillis() - lastCheck >= 5000)
+			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000)
 			{
 				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.changeState(human.getWorkPlace().getWorkerState());
 				
-				lastCheck = System.currentTimeMillis();
+				human.stateParams.set(0, System.currentTimeMillis());
 			}
 		}
 	},
@@ -153,10 +155,7 @@ public enum WorkerState implements State<Human>
 	@Override
 	public void enter(Human human)
 	{
-		if (human.getWorkPlace().getInventory().isFull())
-		{
-			human.changeState(REST);
-		}
+		if (human.getWorkPlace().getInventory().isFull()) human.changeState(REST);
 	}
 	
 	@Override

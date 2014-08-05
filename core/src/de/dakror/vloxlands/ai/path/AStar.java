@@ -13,6 +13,7 @@ import de.dakror.vloxlands.ai.path.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
@@ -34,12 +35,12 @@ public class AStar
 	static Vector3 neighbor;
 	static boolean takeNeighbor; // because other human goes to target already
 	
-	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
 		return findPath(from, to, c, 0, useGhostTarget);
 	}
 	
-	public static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
 	{
 		if (from == null || to == null) return null;
 		
@@ -180,6 +181,7 @@ public class AStar
 						{
 							for (Entity e : c.getIsland().getEntities())
 							{
+								if (!(e instanceof Structure)) continue;
 								e.getWorldBoundingBox(b);
 								
 								b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);

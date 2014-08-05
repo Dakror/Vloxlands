@@ -176,9 +176,9 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public void addEntity(Entity s, boolean user, boolean clearArea)
 	{
 		s.setIsland(this);
-		s.onSpawn();
 		s.getTransform().translate(pos);
 		entities.add(s);
+		s.onSpawn();
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{

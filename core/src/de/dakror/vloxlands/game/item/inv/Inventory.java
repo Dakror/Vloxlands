@@ -36,8 +36,9 @@ public class Inventory implements Savable
 	public void clear()
 	{
 		stacks.clear();
+		int oldCount = count;
 		count = 0;
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 	}
 	
 	public ItemStack add(ItemStack stack)
@@ -80,6 +81,7 @@ public class Inventory implements Savable
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
+		int oldCount = count;
 		ItemStack is = new ItemStack(item, 0);
 		
 		for (ItemStack stack : stacks)
@@ -100,7 +102,7 @@ public class Inventory implements Savable
 		}
 		
 		count -= is.getAmount();
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 		return is;
 	}
 	
@@ -120,6 +122,7 @@ public class Inventory implements Savable
 	
 	protected void addStack(ItemStack stack, int amount)
 	{
+		int oldCount = count;
 		int amount2 = amount;
 		for (ItemStack s : stacks)
 		{
@@ -133,7 +136,7 @@ public class Inventory implements Savable
 		
 		count += amount2;
 		
-		dispatchInventoryChanged();
+		dispatchItemAdded(oldCount);
 	}
 	
 	public boolean contains(ItemStack stack)
@@ -184,13 +187,18 @@ public class Inventory implements Savable
 	public void setCapacity(int capacity)
 	{
 		this.capacity = capacity;
-		dispatchInventoryChanged();
 	}
 	
-	protected void dispatchInventoryChanged()
+	protected void dispatchItemAdded(int countBefore)
 	{
 		for (InventoryListener isl : listeners)
-			isl.onInventoryChanged();
+			isl.onItemAdded(countBefore, this);
+	}
+	
+	protected void dispatchItemRemoved(int countBefore)
+	{
+		for (InventoryListener isl : listeners)
+			isl.onItemRemoved(countBefore, this);
 	}
 	
 	public void addListener(InventoryListener listener)

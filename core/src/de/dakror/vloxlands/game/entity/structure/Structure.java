@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
@@ -26,11 +27,12 @@ import de.dakror.vloxlands.util.InventoryProvider;
 import de.dakror.vloxlands.util.ResourceListProvider;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
+import de.dakror.vloxlands.util.event.InventoryListener;
 
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity implements InventoryProvider, ResourceListProvider, Savable
+public abstract class Structure extends Entity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
 {
 	Array<StructureNode> nodes;
 	Array<Human> workers;
@@ -45,6 +47,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	State<Human> workerState;
 	Class<?> workerTool;
 	Array<State<Human>> requestedHumanStates;
+	Array<State<Human>> handledHumanStates;
 	
 	boolean working;
 	
@@ -52,6 +55,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	boolean built;
 	
 	int buildProgress;
+	int lastStateRequest;
 	
 	final Vector3 tmp = new Vector3();
 	final Vector3 dim = new Vector3();
@@ -79,8 +83,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		
 		inventory = new Inventory();
 		buildInventory = new ManagedInventory(256 /* That should be enough... */);
+		buildInventory.addListener(this);
 		resourceList = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
+		handledHumanStates = new Array<State<Human>>();
 		working = true;
 		
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
@@ -198,13 +204,29 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < depth; j++)
 					island.set(i + voxelPos.x, voxelPos.y, j + voxelPos.z, gr);
+			
+			broadcast(HelperState.GET_RESOURCES_FOR_BUILD);
+		}
+	}
+	
+	@Override
+	public void tick(int tick)
+	{
+		super.tick(tick);
+		
+		if (lastStateRequest == 0) lastStateRequest = tick;
+		
+		if ((tick - lastStateRequest) % 300 == 0)
+		{
+			for (State<Human> s : requestedHumanStates)
+				broadcast(s);
 		}
 	}
 	
 	/**
 	 * @param from expected to be in world space
 	 */
-	public StructureNode getStructureNode(Vector3 from, NodeType type, String name)
+	public synchronized StructureNode getStructureNode(Vector3 from, NodeType type, String name)
 	{
 		if (name != null)
 		{
@@ -294,17 +316,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		return working;
 	}
 	
-	// public boolean requestDismantle()
-	// {
-	// if (dismantleRequested) return false;
-	// PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
-	// if (pb == null || pb.creature == null) return false;
-	// MessageDispatcher.getInstance().dispatchMessage(0, this, pb.creature, MessageType.DISMANTLE_ME.ordinal(), pb.path);
-	//
-	// dismantleRequested = true;
-	// return true;
-	// }
-	
 	public boolean isConfirmDismantle()
 	{
 		return confirmDismante;
@@ -315,6 +326,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		this.working = working;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean handleMessage(Telegram msg)
 	{
@@ -325,6 +337,12 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			island.addEntity(i, false, false);
 			return true;
+		}
+		
+		if (msg.message == MessageType.STRUCTURE_BROADCAST_HANDLED.ordinal())
+		{
+			int index = requestedHumanStates.indexOf((State<Human>) msg.extraInfo, true);
+			handledHumanStates.add(index != -1 ? requestedHumanStates.removeIndex(index) : (State<Human>) msg.extraInfo);
 		}
 		
 		return false;
@@ -359,13 +377,26 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	
 	public void broadcast(State<Human> requestedState, Object... params)
 	{
-		if (requestedHumanStates.contains(requestedState, true)) return;
+		if (handledHumanStates.contains(requestedState, true)) return;
 		
 		Array<Object> array = new Array<Object>(params);
 		array.insert(0, this);
 		
 		MessageDispatcher.getInstance().dispatchMessage(0, this, null, MessageType.STRUCTURE_BROADCAST.ordinal(), new BroadcastPayload(requestedState, array.items));
 		requestedHumanStates.add(requestedState);
+	}
+	
+	@Override
+	public void onItemAdded(int countBefore, Inventory inventory)
+	{}
+	
+	@Override
+	public void onItemRemoved(int countBefore, Inventory inventory)
+	{
+		if (inventory instanceof ManagedInventory)
+		{
+			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(HelperState.BUILD);
+		}
 	}
 	
 	public CurserCommand getDefaultCommand()
