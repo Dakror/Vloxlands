@@ -3,6 +3,9 @@ package de.dakror.vloxlands.util;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * @author Dakror
+ */
 public enum Direction
 {
 	NORTH(1, 0, 0, 0, -90, 0),

@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.render;
 
 import java.nio.IntBuffer;
 

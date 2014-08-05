@@ -12,6 +12,9 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+/**
+ * @author Dakror
+ */
 public class Compressor
 {
 	public static void compressFile(File f, String s)
