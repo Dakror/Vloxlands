@@ -121,7 +121,6 @@ public class Human extends Creature
 	public void tick(int tick)
 	{
 		super.tick(tick);
-		stateMachine.update();
 		
 		Job j = firstJob();
 		if (j != null)
@@ -146,6 +145,13 @@ public class Human extends Creature
 			}
 			else j.trigger(tick);
 		}
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		stateMachine.update();
 	}
 	
 	@Override

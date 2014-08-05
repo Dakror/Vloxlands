@@ -84,6 +84,12 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			if (island != null) island.tick(tick);
 	}
 	
+	public void update(float delta)
+	{
+		for (Island island : islands)
+			if (island != null) island.update(delta);
+	}
+	
 	public Island[] getIslands()
 	{
 		return islands;
@@ -236,4 +242,5 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
+	
 }

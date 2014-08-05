@@ -47,7 +47,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	State<Human> workerState;
 	Class<?> workerTool;
 	Array<State<Human>> requestedHumanStates;
-	Array<State<Human>> handledHumanStates;
 	
 	boolean working;
 	
@@ -86,7 +85,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		buildInventory.addListener(this);
 		resourceList = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
-		handledHumanStates = new Array<State<Human>>();
 		working = true;
 		
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
@@ -220,13 +218,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		{
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
+			
+			lastStateRequest = tick;
 		}
 	}
 	
 	/**
 	 * @param from expected to be in world space
 	 */
-	public synchronized StructureNode getStructureNode(Vector3 from, NodeType type, String name)
+	public StructureNode getStructureNode(Vector3 from, NodeType type, String name)
 	{
 		if (name != null)
 		{
@@ -341,8 +341,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		if (msg.message == MessageType.STRUCTURE_BROADCAST_HANDLED.ordinal())
 		{
-			int index = requestedHumanStates.indexOf((State<Human>) msg.extraInfo, true);
-			handledHumanStates.add(index != -1 ? requestedHumanStates.removeIndex(index) : (State<Human>) msg.extraInfo);
+			requestedHumanStates.removeValue((State<Human>) msg.extraInfo, true);
 		}
 		
 		return false;
@@ -377,13 +376,17 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	
 	public void broadcast(State<Human> requestedState, Object... params)
 	{
-		if (handledHumanStates.contains(requestedState, true)) return;
-		
+		broadcast(0, requestedState, params);
+	}
+	
+	public void broadcast(float delay, State<Human> requestedState, Object... params)
+	{
 		Array<Object> array = new Array<Object>(params);
 		array.insert(0, this);
 		
-		MessageDispatcher.getInstance().dispatchMessage(0, this, null, MessageType.STRUCTURE_BROADCAST.ordinal(), new BroadcastPayload(requestedState, array.items));
-		requestedHumanStates.add(requestedState);
+		if (!requestedHumanStates.contains(requestedState, true)) requestedHumanStates.add(requestedState);
+		
+		MessageDispatcher.getInstance().dispatchMessage(delay, this, null, MessageType.STRUCTURE_BROADCAST.ordinal(), new BroadcastPayload(requestedState, array.items));
 	}
 	
 	@Override
@@ -395,7 +398,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	{
 		if (inventory instanceof ManagedInventory)
 		{
-			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(HelperState.BUILD);
+			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(1, HelperState.BUILD);
 		}
 	}
 	

@@ -310,10 +310,11 @@ public class GameLayer extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
+		world.update(delta);
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
-			cursorStructure.update(Gdx.graphics.getDeltaTime());
+			cursorStructure.update(delta);
 			cursorStructure.render(modelBatch, env, false);
 		}
 		modelBatch.end();

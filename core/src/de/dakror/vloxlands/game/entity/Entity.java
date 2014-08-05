@@ -188,8 +188,6 @@ public class Entity extends EntityBase implements Agent, Savable
 	
 	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
-		if (!minimapMode && environment != null) update(Gdx.graphics.getDeltaTime());
-		
 		if (!visible) return;
 		
 		if (modelVisible) batch.render(modelInstance, environment);

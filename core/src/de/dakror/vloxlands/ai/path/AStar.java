@@ -35,12 +35,12 @@ public class AStar
 	static Vector3 neighbor;
 	static boolean takeNeighbor; // because other human goes to target already
 	
-	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
+	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
 		return findPath(from, to, c, 0, useGhostTarget);
 	}
 	
-	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
+	public static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
 	{
 		if (from == null || to == null) return null;
 		
