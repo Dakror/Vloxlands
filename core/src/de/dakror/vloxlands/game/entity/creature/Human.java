@@ -317,14 +317,8 @@ public class Human extends Creature
 	
 	public void changeState(State<Human> newState, Object... params)
 	{
-		if (params.length > 2)
-		{
-			throw new IllegalArgumentException("Can only pass up to 2 parameters to a state");
-		}
-		
 		stateMachine.changeState(newState);
-		if (params.length > 0 && params[0] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM0.ordinal(), params[0]);
-		if (params.length > 1 && params[1] != null) MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.PARAM1.ordinal(), params[1]);
+		MessageDispatcher.getInstance().dispatchMessage(0, this, this, MessageType.STATE_PARAMS.ordinal(), params);
 	}
 	
 	public State<Human> getState()

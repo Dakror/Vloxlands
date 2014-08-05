@@ -39,9 +39,7 @@ public enum HelperState implements State<Human>
 				ItemStack is = structure.getBuildInventory().getFirst();
 				if (is.isNull())
 				{
-					// if (structure.isBuilt())
 					human.changeState(IDLE);
-					// else human.changeState(BUILD, structure);
 					return;
 				}
 				
@@ -108,20 +106,13 @@ public enum HelperState implements State<Human>
 		@Override
 		public boolean onMessage(Human human, Telegram telegram)
 		{
-			switch (MessageType.values()[telegram.message])
+			if (telegram.message == MessageType.STATE_PARAMS.ordinal() && structure != (Structure) ((Object[]) telegram.extraInfo)[0])
 			{
-				case PARAM0:
-				{
-					if (structure != (Structure) telegram.extraInfo)
-					{
-						structure = (Structure) telegram.extraInfo;
-						force = true;
-					}
-					return true;
-				}
-				default:
-					return false;
+				structure = (Structure) ((Object[]) telegram.extraInfo)[0];
+				force = true;
+				return true;
 			}
+			return false;
 		}
 	},
 	WALK_TO_TARGET
@@ -129,18 +120,14 @@ public enum HelperState implements State<Human>
 		@Override
 		public boolean onMessage(Human human, Telegram telegram)
 		{
-			switch (MessageType.values()[telegram.message])
+			if (telegram.message == MessageType.STATE_PARAMS.ordinal())
 			{
-				case PARAM0:
-				{
-					Human h = (Human) telegram.sender;
-					Path p = AStar.findPath(h.getVoxelBelow(), (Vector3) telegram.extraInfo, h, false);
-					if (p != null) h.setJob(p, null);
-					return true;
-				}
-				default:
-					return false;
+				Human h = (Human) telegram.sender;
+				Path p = AStar.findPath(h.getVoxelBelow(), (Vector3) ((Object[]) telegram.extraInfo)[0], h, false);
+				if (p != null) h.setJob(p, null);
+				return true;
 			}
+			return false;
 		}
 	},
 	BUILD
@@ -160,23 +147,19 @@ public enum HelperState implements State<Human>
 		@Override
 		public boolean onMessage(Human human, Telegram telegram)
 		{
-			switch (MessageType.values()[telegram.message])
+			if (telegram.message == MessageType.STATE_PARAMS.ordinal())
 			{
-				case PARAM0:
-				{
-					target = (Structure) telegram.extraInfo;
-					BuildJob bj = new BuildJob(((Human) telegram.sender), target, false);
-					Vector3 pathStart = ((Human) telegram.sender).getVoxelBelow();
-					boolean queue = StateTools.equipTool(((Human) telegram.sender), bj.getTool(), false, pathStart);
-					Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
-					
-					if (queue) ((Human) telegram.sender).queueJob(p, bj);
-					else ((Human) telegram.sender).setJob(p, bj);
-					return true;
-				}
-				default:
-					return false;
+				target = (Structure) ((Object[]) telegram.extraInfo)[0];
+				BuildJob bj = new BuildJob(((Human) telegram.sender), target, false);
+				Vector3 pathStart = ((Human) telegram.sender).getVoxelBelow();
+				boolean queue = StateTools.equipTool(((Human) telegram.sender), bj.getTool(), false, pathStart);
+				Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
+				
+				if (queue) ((Human) telegram.sender).queueJob(p, bj);
+				else ((Human) telegram.sender).setJob(p, bj);
+				return true;
 			}
+			return false;
 		}
 	},
 	DISMANTLE
@@ -186,30 +169,23 @@ public enum HelperState implements State<Human>
 		@Override
 		public boolean onMessage(Human human, Telegram telegram)
 		{
-			switch (MessageType.values()[telegram.message])
+			if (telegram.message == MessageType.STATE_PARAMS.ordinal())
 			{
-				case PARAM0:
+				target = (Structure) ((Object[]) telegram.extraInfo)[0];
+				
+				DismantleJob dj = new DismantleJob((Human) telegram.receiver, target, false);
+				Vector3 pathStart = ((Human) telegram.receiver).getVoxelBelow();
+				boolean queue = StateTools.equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
+				
+				if (!queue) ((Human) telegram.receiver).setJob((Path) ((Object[]) telegram.extraInfo)[1], dj);
+				else
 				{
-					target = (Structure) telegram.extraInfo;
-					return true;
+					Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
+					((Human) telegram.receiver).queueJob(p, dj);
 				}
-				case PARAM1:
-				{
-					DismantleJob dj = new DismantleJob((Human) telegram.receiver, target, false);
-					Vector3 pathStart = ((Human) telegram.receiver).getVoxelBelow();
-					boolean queue = StateTools.equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
-					
-					if (!queue) ((Human) telegram.receiver).setJob((Path) telegram.extraInfo, dj);
-					else
-					{
-						Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
-						((Human) telegram.receiver).queueJob(p, dj);
-					}
-					return true;
-				}
-				default:
-					return false;
+				return true;
 			}
+			return false;
 		}
 	},
 	
