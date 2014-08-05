@@ -117,7 +117,6 @@ public class GameLayer extends Layer
 	
 	Vector2 mouseDown = new Vector2();
 	
-	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
 	public final Vector3 tmp1 = new Vector3();
@@ -235,7 +234,7 @@ public class GameLayer extends Layer
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
+		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 400));
 		instance.activeIsland.addEntity(tc, false, true);
 		
 		doneLoading = true;
@@ -348,19 +347,22 @@ public class GameLayer extends Layer
 	{
 		this.tick = tick;
 		
-		time -= 0.00002777f;
-		if (time <= -0.99999999999f) time = 0.99999999999f;
-		
-		float t = time * MathUtils.PI;
-		
-		float x = MathUtils.sin(t) * 0.5f;
-		float z = MathUtils.cos(t);
-		
-		float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
-		
-		shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
-		directionalLight.set(light, light, light, x, -0.5f, z);
-		world.tick(tick);
+		if (!Config.paused)
+		{
+			time -= 0.00002777f;
+			if (time <= -0.99999999999f) time = 0.99999999999f;
+			
+			float t = time * MathUtils.PI;
+			
+			float x = MathUtils.sin(t) * 0.5f;
+			float z = MathUtils.cos(t);
+			
+			float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
+			
+			shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
+			directionalLight.set(light, light, light, x, -0.5f, z);
+			world.tick(tick);
+		}
 		if (cursorStructure != null) cursorStructure.tick(tick);
 		
 		if (activeIsland != null && startTick > 0)

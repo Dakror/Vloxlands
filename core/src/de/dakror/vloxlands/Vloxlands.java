@@ -110,6 +110,7 @@ public class Vloxlands extends GameBase
 			}
 			if (keycode == Keys.UP) Config.changeGameSpeed(true);
 			if (keycode == Keys.DOWN) Config.changeGameSpeed(false);
+			if (keycode == Keys.SPACE) Config.paused = !Config.paused;
 		}
 		
 		return false;
