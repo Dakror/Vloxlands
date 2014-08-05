@@ -16,7 +16,7 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;
-import de.dakror.vloxlands.util.event.Event;
+import de.dakror.vloxlands.util.event.Callback;
 
 /**
  * @author Dakror
@@ -69,7 +69,7 @@ public class StateTools
 		
 		Structure workPlace = human.getWorkPlace();
 		EnterStructureJob esj = new EnterStructureJob(human, workPlace, false);
-		esj.setEndEvent(new Event()
+		esj.setEndEvent(new Callback()
 		{
 			@Override
 			public void trigger()

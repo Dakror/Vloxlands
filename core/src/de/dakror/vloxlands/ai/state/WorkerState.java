@@ -15,7 +15,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.util.event.Event;
+import de.dakror.vloxlands.util.event.Callback;
 
 /**
  * @author Dakror
@@ -66,7 +66,7 @@ public enum WorkerState implements State<Human>
 			
 			RemoveLeavesJob rmj = new RemoveLeavesJob(human, lastTarget, lastTargetInitialMetadata, false);
 			ChopJob cj = new ChopJob(human, lastTarget, lastTargetMetadata, false);
-			cj.setEndEvent(new Event()
+			cj.setEndEvent(new Callback()
 			{
 				@Override
 				public void trigger()
@@ -173,7 +173,7 @@ public enum WorkerState implements State<Human>
 	{}
 	
 	@Override
-	public boolean onMessage(Telegram telegram)
+	public boolean onMessage(Human human, Telegram telegram)
 	{
 		return false;
 	}

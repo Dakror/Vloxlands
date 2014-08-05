@@ -1,7 +1,10 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import java.util.NoSuchElementException;
+
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
@@ -24,7 +27,6 @@ import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.InventoryProvider;
 import de.dakror.vloxlands.util.ResourceListProvider;
 import de.dakror.vloxlands.util.Savable;
-import de.dakror.vloxlands.util.event.Payload;
 
 /**
  * @author Dakror
@@ -230,8 +232,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	
 	public boolean hasStructureNode(NodeType type)
 	{
-		for (StructureNode sn : nodes)
-			if (sn.type == type) return true;
+		try
+		{
+			for (StructureNode sn : nodes)
+				if (sn.type == type) return true;
+		}
+		catch (NoSuchElementException e)
+		{
+			return false;
+		}
 		
 		return false;
 	}
@@ -305,15 +314,19 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		this.working = working;
 	}
 	
-	public void handleEvent(Payload e)
+	@Override
+	public boolean handleMessage(Telegram msg)
 	{
-		if (e.getName().equals("onDismantle"))
+		if (msg.message == MessageType.YOU_ARE_DISMANTLED.ordinal())
 		{
 			kill();
 			Vector3 p = GameLayer.instance.activeIsland.pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			island.addEntity(i, false, false);
+			return true;
 		}
+		
+		return false;
 	}
 	
 	public boolean intersects(Structure o)

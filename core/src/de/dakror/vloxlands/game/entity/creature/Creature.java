@@ -87,7 +87,7 @@ public abstract class Creature extends Entity
 					
 					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
 					
-					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+					// transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 					if (dif.len() > speed) dif.limit(speed);
 					else
 					{

@@ -1,9 +1,11 @@
 package de.dakror.vloxlands.ai.job;
 
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
+
+import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.tool.BuildTool;
-import de.dakror.vloxlands.util.event.Payload;
 
 /**
  * @author Dakror
@@ -23,20 +25,6 @@ public class DismantleJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
-		target.handleEvent(new Payload()
-		{
-			
-			@Override
-			public Object getSender()
-			{
-				return DismantleJob.this;
-			}
-			
-			@Override
-			public String getName()
-			{
-				return "onDismantle";
-			}
-		});
+		MessageDispatcher.getInstance().dispatchMessage(0, human, target, MessageType.YOU_ARE_DISMANTLED.ordinal());
 	}
 }

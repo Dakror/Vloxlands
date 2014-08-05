@@ -56,6 +56,7 @@ public enum HelperState implements State<Human>
 					PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()).island(0));
 					if (pb != null)
 					{
+						structure.getBuildInventory().manageNext();
 						pj.setTarget(pb.structure);
 						
 						if (!human.getCarryingItemStack().isNull())
@@ -105,7 +106,7 @@ public enum HelperState implements State<Human>
 		}
 		
 		@Override
-		public boolean onMessage(Telegram telegram)
+		public boolean onMessage(Human human, Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
 			{
@@ -126,7 +127,7 @@ public enum HelperState implements State<Human>
 	WALK_TO_TARGET
 	{
 		@Override
-		public boolean onMessage(Telegram telegram)
+		public boolean onMessage(Human human, Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
 			{
@@ -157,7 +158,7 @@ public enum HelperState implements State<Human>
 		}
 		
 		@Override
-		public boolean onMessage(Telegram telegram)
+		public boolean onMessage(Human human, Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
 			{
@@ -183,7 +184,7 @@ public enum HelperState implements State<Human>
 		Structure target;
 		
 		@Override
-		public boolean onMessage(Telegram telegram)
+		public boolean onMessage(Human human, Telegram telegram)
 		{
 			switch (MessageType.values()[telegram.message])
 			{
@@ -229,7 +230,7 @@ public enum HelperState implements State<Human>
 	}
 	
 	@Override
-	public boolean onMessage(Telegram telegram)
+	public boolean onMessage(Human human, Telegram telegram)
 	{
 		switch (MessageType.values()[telegram.message])
 		{

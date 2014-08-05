@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
-import de.dakror.vloxlands.util.event.Event;
+import de.dakror.vloxlands.util.event.Callback;
 
 /**
  * @author Dakror
@@ -25,7 +25,7 @@ public abstract class Job implements Tickable
 	
 	Human human;
 	
-	Event endEvent;
+	Callback endEvent;
 	
 	public Job(Human human, String animation, String text, int repeats, boolean persistent)
 	{
@@ -92,7 +92,7 @@ public abstract class Job implements Tickable
 		if (endEvent != null) endEvent.trigger();
 	}
 	
-	public void setEndEvent(Event event)
+	public void setEndEvent(Callback event)
 	{
 		endEvent = event;
 	}
