@@ -34,6 +34,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.job.IdleJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -359,7 +360,7 @@ public class HudLayer extends Layer implements SelectionListener
 							@Override
 							protected void result(Object object)
 							{
-								if (object != null) structure.requestDismantle();
+								if (object != null) structure.broadcast(HelperState.DISMANTLE);
 							}
 						};
 						d.text("Are you sure you want todismantle\nthis building? All perks given by\nit will be gone after deconstruction!");
@@ -368,7 +369,7 @@ public class HudLayer extends Layer implements SelectionListener
 						
 						d.show(stage);
 					}
-					else structure.requestDismantle();
+					else structure.broadcast(HelperState.DISMANTLE);
 				}
 			});
 			dismantle.pad(4);

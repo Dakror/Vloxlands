@@ -74,6 +74,8 @@ public class Human extends Creature
 		
 		stateMachine = new DefaultStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
+		
+		MessageDispatcher.getInstance().addListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
 	}
 	
 	public void setTool(Item tool)
@@ -329,5 +331,12 @@ public class Human extends Creature
 	public StateMachine<Human> getStateMachine()
 	{
 		return stateMachine;
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		MessageDispatcher.getInstance().removeListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
 	}
 }

@@ -2,6 +2,7 @@ package de.dakror.vloxlands.ai.state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.Vector3;
 
@@ -20,11 +21,30 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.util.event.BroadcastPayload;
 
 public enum HelperState implements State<Human>
 {
 	IDLE
-	{},
+	{
+		@Override
+		public boolean onMessage(Human human, Telegram telegram)
+		{
+			if (telegram.message == MessageType.STRUCTURE_BROADCAST.ordinal())
+			{
+				BroadcastPayload payload = (BroadcastPayload) telegram.extraInfo;
+				if (payload.handled) return false;
+				
+				payload.handled = true;
+				MessageDispatcher.getInstance().dispatchMessage(0, human, (Structure) payload.params[0], MessageType.STRUCTURE_BROADCAST_HANDLED.ordinal(), human);
+				human.changeState(payload.state, payload.params);
+				
+				return true;
+			}
+			
+			return false;
+		}
+	},
 	GET_RESOURCES_FOR_BUILD
 	{
 		Structure structure;
@@ -173,16 +193,13 @@ public enum HelperState implements State<Human>
 			{
 				target = (Structure) ((Object[]) telegram.extraInfo)[0];
 				
-				DismantleJob dj = new DismantleJob((Human) telegram.receiver, target, false);
-				Vector3 pathStart = ((Human) telegram.receiver).getVoxelBelow();
-				boolean queue = StateTools.equipTool((Human) telegram.receiver, dj.getTool(), false, pathStart);
+				DismantleJob dj = new DismantleJob(human, target, false);
+				Vector3 pathStart = human.getVoxelBelow();
+				boolean queue = StateTools.equipTool(human, dj.getTool(), false, pathStart);
 				
-				if (!queue) ((Human) telegram.receiver).setJob((Path) ((Object[]) telegram.extraInfo)[1], dj);
-				else
-				{
-					Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), ((Human) telegram.sender), NodeType.build.useGhostTarget);
-					((Human) telegram.receiver).queueJob(p, dj);
-				}
+				Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), human, NodeType.build.useGhostTarget);
+				if (!queue) human.setJob(p, dj);
+				else human.queueJob(p, dj);
 				return true;
 			}
 			return false;
@@ -208,19 +225,6 @@ public enum HelperState implements State<Human>
 	@Override
 	public boolean onMessage(Human human, Telegram telegram)
 	{
-		switch (MessageType.values()[telegram.message])
-		{
-			case DISMANTLE_ME:
-			{
-				if (telegram.sender instanceof Structure)
-				{
-					((Human) telegram.receiver).changeState(DISMANTLE, telegram.sender, telegram.extraInfo);
-					return true;
-				}
-				else return false;
-			}
-			default:
-				return false;
-		}
+		return false;
 	}
 }

@@ -18,8 +18,6 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.inv.ManagedInventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
-import de.dakror.vloxlands.game.query.PathBundle;
-import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
@@ -27,6 +25,7 @@ import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.InventoryProvider;
 import de.dakror.vloxlands.util.ResourceListProvider;
 import de.dakror.vloxlands.util.Savable;
+import de.dakror.vloxlands.util.event.BroadcastPayload;
 
 /**
  * @author Dakror
@@ -45,9 +44,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	String workerName;
 	State<Human> workerState;
 	Class<?> workerTool;
+	Array<State<Human>> requestedHumanStates;
+	
 	boolean working;
 	
-	boolean dismantleRequested;
 	boolean confirmDismante;
 	boolean built;
 	
@@ -80,6 +80,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		inventory = new Inventory();
 		buildInventory = new ManagedInventory(256 /* That should be enough... */);
 		resourceList = new ResourceList();
+		requestedHumanStates = new Array<State<Human>>();
 		working = true;
 		
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
@@ -293,16 +294,16 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 		return working;
 	}
 	
-	public boolean requestDismantle()
-	{
-		if (dismantleRequested) return false;
-		PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
-		if (pb == null || pb.creature == null) return false;
-		MessageDispatcher.getInstance().dispatchMessage(0, this, pb.creature, MessageType.DISMANTLE_ME.ordinal(), pb.path);
-		
-		dismantleRequested = true;
-		return true;
-	}
+	// public boolean requestDismantle()
+	// {
+	// if (dismantleRequested) return false;
+	// PathBundle pb = GameLayer.world.query(new Query(this).searchClass(Human.class).idle(true).empty(true).node(NodeType.build).island(0));
+	// if (pb == null || pb.creature == null) return false;
+	// MessageDispatcher.getInstance().dispatchMessage(0, this, pb.creature, MessageType.DISMANTLE_ME.ordinal(), pb.path);
+	//
+	// dismantleRequested = true;
+	// return true;
+	// }
 	
 	public boolean isConfirmDismantle()
 	{
@@ -354,6 +355,17 @@ public abstract class Structure extends Entity implements InventoryProvider, Res
 	public Class<?> getWorkerTool()
 	{
 		return workerTool;
+	}
+	
+	public void broadcast(State<Human> requestedState, Object... params)
+	{
+		if (requestedHumanStates.contains(requestedState, true)) return;
+		
+		Array<Object> array = new Array<Object>(params);
+		array.insert(0, this);
+		
+		MessageDispatcher.getInstance().dispatchMessage(0, this, null, MessageType.STRUCTURE_BROADCAST.ordinal(), new BroadcastPayload(requestedState, array.items));
+		requestedHumanStates.add(requestedState);
 	}
 	
 	public CurserCommand getDefaultCommand()
