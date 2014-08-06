@@ -56,6 +56,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	int buildProgress;
 	int lastStateRequest;
 	
+	public boolean tickRequestsEnabled = true;
+	
 	final Vector3 tmp = new Vector3();
 	final Vector3 dim = new Vector3();
 	
@@ -192,6 +194,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public void onSpawn()
 	{
 		super.onSpawn();
+		tickRequestsEnabled = true;
 		if (!built)
 		{
 			int width = (int) Math.ceil(boundingBox.getDimensions().x);
@@ -214,10 +217,13 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		if (lastStateRequest == 0) lastStateRequest = tick;
 		
-		if ((tick - lastStateRequest) % 300 == 0)
+		if ((tick - lastStateRequest) % 60 == 0 && tickRequestsEnabled)
 		{
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
+			
+			if (workers.size < resourceList.getCostPopulation() && built) broadcast(HelperState.START_WORK);
+			if (inventory.getCount() >= inventory.getCapacity() / 2) broadcast(HelperState.EMPTY_INVENTORY);
 			
 			lastStateRequest = tick;
 		}
@@ -410,7 +416,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public CurserCommand getCommandForEntity(Entity selectedEntity)
 	{
 		if (selectedEntity instanceof Human && !built) return CurserCommand.BUILD;
-		if (selectedEntity instanceof Human && built) addWorker((Human) selectedEntity);
+		if (selectedEntity instanceof Human && built) return CurserCommand.WORK;
 		
 		return getDefaultCommand();
 	}

@@ -12,5 +12,8 @@ public enum CurserCommand
 	PATROLE,
 	ENTER,
 	BUILD,
-	ATTACK;
+	ATTACK,
+	WORK,
+	
+	;
 }

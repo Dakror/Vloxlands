@@ -781,6 +781,7 @@ public class GameLayer extends Layer
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
 			if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
 			((Structure) e).setBuilt(true);
+			((Structure) e).tickRequestsEnabled = false;
 			GameLayer.instance.cursorStructure = (Structure) e;
 		}
 		

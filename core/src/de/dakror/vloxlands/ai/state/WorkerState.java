@@ -59,9 +59,9 @@ public enum WorkerState implements State<Human>
 			
 			wood = Voxel.get("WOOD").getId();
 			
-			human.stateParams.set(0, 0); // lastTargetInitialMetadata
-			human.stateParams.set(1, 0); // lastTargetMetadata
-			human.stateParams.set(2, new Vector3(-1, 0, 0)); // lastTarget
+			human.stateParams.add(0); // lastTargetInitialMetadata
+			human.stateParams.add(0); // lastTargetMetadata
+			human.stateParams.add(new Vector3(-1, 0, 0)); // lastTarget
 			
 			if (chop(human)) human.setLocation(null);
 			else human.changeState(REST);

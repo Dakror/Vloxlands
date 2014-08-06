@@ -170,6 +170,15 @@ public enum HelperState implements State<Human>
 			if (p != null) human.setJob(p, null);
 		}
 	},
+	START_WORK
+	{
+		@Override
+		public void enter(Human human)
+		{
+			Structure target = (Structure) human.stateParams.get(0);
+			if (!target.addWorker(human)) human.changeState(IDLE);
+		}
+	},
 	
 	;
 	
