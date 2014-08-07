@@ -1,24 +1,27 @@
 package de.dakror.vloxlands.ai.path;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
  */
 public class AStar
 {
-	public static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
+	static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
 	{
 		@Override
 		public int compare(AStarNode o1, AStarNode o2)
@@ -26,16 +29,41 @@ public class AStar
 			return Float.compare(o1.F, o2.F);
 		}
 	};
-	public static Array<AStarNode> openList = new Array<AStarNode>();
-	public static Array<AStarNode> closedList = new Array<AStarNode>();
-	public static Array<Vector3> lastPath;
+	static ArrayList<AStarNode> openList = new ArrayList<AStarNode>();
+	static ArrayList<AStarNode> closedList = new ArrayList<AStarNode>();
 	static AStarNode target;
 	static Vector3 neighbor;
+	static boolean takeNeighbor; // because other human goes to target already
 	
-	// TODO multi island support
-	public static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
 	{
-		if (!GameLayer.instance.activeIsland.isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
+		return findPath(from, to, c, 0, useGhostTarget);
+	}
+	
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
+	{
+		if (from == null || to == null) return null;
+		
+		if (maxRange == 0) maxRange = Math.max(from.dst(to), 1) * 5;
+		
+		if (!c.getIsland().isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
+		
+		takeNeighbor = false;
+		for (Entity e : c.getIsland().getEntities())
+		{
+			if (e instanceof Human)
+			{
+				if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
+				{
+					Path p = ((Human) e).path != null ? ((Human) e).path : ((WalkJob) ((Human) e).firstJob()).getPath();
+					if (p.getLast().equals(to) || (p.ghostTarget != null && p.ghostTarget.equals(to)))
+					{
+						takeNeighbor = true;
+						break;
+					}
+				}
+			}
+		}
 		
 		openList.clear();
 		closedList.clear();
@@ -44,7 +72,7 @@ public class AStar
 		
 		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
 		
-		if (useGhostTarget)
+		if (useGhostTarget || takeNeighbor)
 		{
 			if (from.equals(to)) target = openList.get(0);
 			else target = new AStarNode(to.x, to.y, to.z, 1, 0, null);
@@ -53,22 +81,22 @@ public class AStar
 		AStarNode ghostNode = null;
 		while (true)
 		{
-			if (openList.size == 0) return null; // no way
+			if (openList.size() == 0) return null; // no way
 			
-			openList.sort(COMPARATOR);
+			Collections.sort(openList, COMPARATOR);
 			selected = openList.get(0);
-			openList.removeIndex(0);
-			while (selected.cantBeNeighborForGhostTarget && openList.size > 0)
+			openList.remove(0);
+			while (selected.cantBeNeighborForGhostTarget && openList.size() > 0)
 			{
 				selected = openList.get(0);
-				openList.removeIndex(0);
+				openList.remove(0);
 			}
 			
 			closedList.add(selected);
 			
 			if (selected.H == 0 && !useGhostTarget) break;
 			
-			if ((ghostNode = addNeighbors(selected, from, to, c, useGhostTarget)) != null) break;
+			if ((ghostNode = addNeighbors(selected, from, to, c, maxRange, useGhostTarget)) != null) break;
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
@@ -83,18 +111,15 @@ public class AStar
 		
 		if (neighbor != null) v.add(neighbor);
 		
-		lastPath = v;
-		
 		Path p = new Path(v);
 		p.removedFirstNode = firstNode;
-		if (ghostNode != null) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
+		if (ghostNode != null && useGhostTarget) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
 		
 		return p;
 	}
 	
-	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
+	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
 	{
-		float maxDistance = Math.max(from.dst(to), 1) * 5;
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -115,19 +140,19 @@ public class AStar
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!GameLayer.instance.activeIsland.isTargetable(v.x, v.y, v.z)) continue;
-					if (GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air && !c.canFly()) continue;
+					if (!c.getIsland().isTargetable(v.x, v.y, v.z)) continue;
+					if (c.getIsland().get(v.x, v.y, v.z) == air && !c.canFly()) continue;
 					
-					if (from.dst(v) > maxDistance || to.dst(v) > maxDistance) continue;
+					if (from.dst(v) > maxRange || to.dst(v) > maxRange) continue;
 					
-					float g = GameLayer.instance.activeIsland.get(v.x, v.y, v.z) == air ? 1.5f : 1;
+					float g = c.getIsland().get(v.x, v.y, v.z) == air ? 1.5f : 1;
 					
 					AStarNode node = new AStarNode(v.x, v.y, v.z, selected.G + g * v.dst(selected.x, selected.y, selected.z), v.dst(to), selected);
 					
-					if (closedList.contains(node, false)) continue;
+					if (closedList.contains(node)) continue;
 					
-					int index = openList.indexOf(node, false);
-					boolean ctn = openList.contains(node, false);
+					int index = openList.indexOf(node);
+					boolean ctn = openList.contains(node);
 					
 					if (ctn && openList.get(index).G > node.G)
 					{
@@ -138,29 +163,28 @@ public class AStar
 					{
 						boolean free = true;
 						
-						if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height)) free = false;
+						if (!c.getIsland().isSpaceAbove(v.x, v.y, v.z, height)) free = false;
 						
 						if (x != 0 && z != 0 && free)
 						{
-							if (!GameLayer.instance.activeIsland.isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
-							else if (!GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
+							if (!c.getIsland().isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
+							else if (!c.getIsland().isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
 						if (y != 0)
 						{
-							if (y < 0 && !GameLayer.instance.activeIsland.isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
-							else if (y > 0 && !GameLayer.instance.activeIsland.isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
+							if (y < 0 && !c.getIsland().isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
+							else if (y > 0 && !c.getIsland().isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
 						}
 						
 						if (free)
 						{
-							for (Entity e : GameLayer.instance.activeIsland.getEntities())
+							for (Entity e : c.getIsland().getEntities())
 							{
 								if (!(e instanceof Structure)) continue;
-								
 								e.getWorldBoundingBox(b);
 								
-								b2.min.set(v).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+								b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
 								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 								b2.set(b2.min, b2.max);
 								if (b.intersects(b2))
@@ -170,7 +194,7 @@ public class AStar
 								}
 								if (x != 0 && z != 0 && free)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+									b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -180,7 +204,7 @@ public class AStar
 										break;
 									}
 									
-									b2.min.set(v.x, v.y, selected.z).add(GameLayer.instance.activeIsland.pos).add(malus, 1, malus);
+									b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
 									
@@ -193,13 +217,14 @@ public class AStar
 							}
 						}
 						
-						if (useGhostTarget)
+						if (useGhostTarget || takeNeighbor)
 						{
 							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free);
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
-							if (y == 1) close = false;
+							// if (y == 1) close = false;
+							// TODO ^ needed for anything?
 							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;
@@ -207,6 +232,7 @@ public class AStar
 							}
 							else if (targetable) node.cantBeNeighborForGhostTarget = true;
 						}
+						
 						if (free && y < 2) openList.add(node);
 					}
 				}

@@ -1,10 +1,12 @@
-package de.dakror.vloxlands.game.item;
+package de.dakror.vloxlands.game.item.inv;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.math.Bits;
@@ -34,8 +36,9 @@ public class Inventory implements Savable
 	public void clear()
 	{
 		stacks.clear();
+		int oldCount = count;
 		count = 0;
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 	}
 	
 	public ItemStack add(ItemStack stack)
@@ -57,7 +60,7 @@ public class Inventory implements Savable
 	{
 		int amount = 0;
 		for (ItemStack stack : stacks)
-			if (stack.getItem().getId() == item.getId()) amount += stack.amount;
+			if (stack.getItem().getId() == item.getId()) amount += stack.getAmount();
 		return amount;
 	}
 	
@@ -65,7 +68,7 @@ public class Inventory implements Savable
 	{
 		int amount = 0;
 		for (ItemStack stack : stacks)
-			if (stack.getItem().getId() == id) amount += stack.amount;
+			if (stack.getItem().getId() == id) amount += stack.getAmount();
 		return amount;
 	}
 	
@@ -78,6 +81,7 @@ public class Inventory implements Savable
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
+		int oldCount = count;
 		ItemStack is = new ItemStack(item, 0);
 		
 		for (ItemStack stack : stacks)
@@ -98,7 +102,7 @@ public class Inventory implements Savable
 		}
 		
 		count -= is.getAmount();
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 		return is;
 	}
 	
@@ -118,6 +122,8 @@ public class Inventory implements Savable
 	
 	protected void addStack(ItemStack stack, int amount)
 	{
+		int oldCount = count;
+		int amount2 = amount;
 		for (ItemStack s : stacks)
 		{
 			if (s.getItem().getId() != stack.getItem().getId() || s.isFull()) continue;
@@ -128,9 +134,9 @@ public class Inventory implements Savable
 		
 		if (amount != 0) stacks.add(new ItemStack(stack.getItem(), amount));
 		
-		count += amount;
+		count += amount2;
 		
-		dispatchInventoryChanged();
+		dispatchItemAdded(oldCount);
 	}
 	
 	public boolean contains(ItemStack stack)
@@ -181,13 +187,18 @@ public class Inventory implements Savable
 	public void setCapacity(int capacity)
 	{
 		this.capacity = capacity;
-		dispatchInventoryChanged();
 	}
 	
-	protected void dispatchInventoryChanged()
+	protected void dispatchItemAdded(int countBefore)
 	{
 		for (InventoryListener isl : listeners)
-			isl.onInventoryChanged();
+			isl.onItemAdded(countBefore, this);
+	}
+	
+	protected void dispatchItemRemoved(int countBefore)
+	{
+		for (InventoryListener isl : listeners)
+			isl.onItemRemoved(countBefore, this);
 	}
 	
 	public void addListener(InventoryListener listener)

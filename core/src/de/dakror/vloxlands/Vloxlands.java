@@ -21,10 +21,10 @@ import de.dakror.vloxlands.layer.DebugLayer;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
+import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.D;
-import de.dakror.vloxlands.util.DDirectionalShadowLight;
 import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
@@ -110,6 +110,7 @@ public class Vloxlands extends GameBase
 			}
 			if (keycode == Keys.UP) Config.changeGameSpeed(true);
 			if (keycode == Keys.DOWN) Config.changeGameSpeed(false);
+			if (keycode == Keys.SPACE) Config.paused = !Config.paused;
 		}
 		
 		return false;

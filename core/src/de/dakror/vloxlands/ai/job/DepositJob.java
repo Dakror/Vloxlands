@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -22,10 +22,6 @@ public class DepositJob extends Job
 	{
 		return target;
 	}
-	
-	@Override
-	public void tick(int tick)
-	{}
 	
 	@Override
 	public void onEnd()

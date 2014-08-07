@@ -35,10 +35,6 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.path.AStar;
-import de.dakror.vloxlands.ai.path.BFS;
-import de.dakror.vloxlands.ai.path.node.AStarNode;
-import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -51,9 +47,9 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.D;
-import de.dakror.vloxlands.util.DDirectionalShadowLight;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -120,7 +116,6 @@ public class GameLayer extends Layer
 	Vector3 targetUp = new Vector3();
 	
 	Vector2 mouseDown = new Vector2();
-	
 	
 	// -- temp -- //
 	public final Vector3 tmp = new Vector3();
@@ -230,6 +225,8 @@ public class GameLayer extends Layer
 		
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3, Island.SIZE / 2);
 		instance.activeIsland.addEntity(human, false, false);
+		human = new Human(Island.SIZE / 2 - 4, Island.SIZE / 4 * 3, Island.SIZE / 2);
+		instance.activeIsland.addEntity(human, false, false);
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.setBuilt(true);
@@ -262,7 +259,7 @@ public class GameLayer extends Layer
 				return;
 			}
 			
-			ticksForTravel = (int) camera.position.dst(target);
+			ticksForTravel = (int) camera.position.dst(target) * Config.getGameSpeed();
 			
 			Vector3 pos = camera.position.cpy();
 			Vector3 dir = camera.direction.cpy();
@@ -312,19 +309,14 @@ public class GameLayer extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
+		world.update(delta);
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
-			cursorStructure.update(Gdx.graphics.getDeltaTime());
+			cursorStructure.update(delta);
 			cursorStructure.render(modelBatch, env, false);
 		}
 		modelBatch.end();
-		
-		if (Vloxlands.showPathDebug)
-		{
-			renderBFS();
-			renderAStar();
-		}
 		
 		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
 		{
@@ -348,99 +340,6 @@ public class GameLayer extends Layer
 			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
 			shapeRenderer.end();
 		}
-		
-		if (BFS.lastTarget != null && Vloxlands.showPathDebug)
-		{
-			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(2);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(instance.activeIsland.pos.x + BFS.lastTarget.x, instance.activeIsland.pos.y + BFS.lastTarget.y + 1.01f, instance.activeIsland.pos.z + BFS.lastTarget.z);
-			shapeRenderer.rotate(1, 0, 0, 90);
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.setColor(Color.GREEN);
-			shapeRenderer.x(0.5f, 0.5f, 0.49f);
-			shapeRenderer.end();
-			Gdx.gl.glLineWidth(1);
-		}
-	}
-	
-	public void renderAStar()
-	{
-		for (AStarNode node : AStar.openList)
-		{
-			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(2);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(instance.activeIsland.pos.x + node.x, instance.activeIsland.pos.y + node.y + 1.01f, instance.activeIsland.pos.z + node.z);
-			shapeRenderer.rotate(1, 0, 0, 90);
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.setColor(Color.WHITE);
-			shapeRenderer.x(0.5f, 0.5f, 0.49f);
-			shapeRenderer.end();
-			Gdx.gl.glLineWidth(1);
-		}
-		for (AStarNode node : AStar.closedList)
-		{
-			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(instance.activeIsland.pos.x + node.x, instance.activeIsland.pos.y + node.y + 1.01f, instance.activeIsland.pos.z + node.z);
-			shapeRenderer.rotate(1, 0, 0, 90);
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.setColor(Color.BLUE);
-			shapeRenderer.x(0.5f, 0.5f, 0.49f);
-			shapeRenderer.end();
-		}
-		if (AStar.lastPath != null)
-		{
-			for (Vector3 v : AStar.lastPath)
-			{
-				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-				shapeRenderer.setProjectionMatrix(camera.combined);
-				shapeRenderer.identity();
-				shapeRenderer.translate(instance.activeIsland.pos.x + v.x, instance.activeIsland.pos.y + v.y + 1.01f, instance.activeIsland.pos.z + v.z);
-				shapeRenderer.rotate(1, 0, 0, 90);
-				shapeRenderer.begin(ShapeType.Line);
-				shapeRenderer.setColor(Color.RED);
-				shapeRenderer.x(0.5f, 0.5f, 0.49f);
-				shapeRenderer.end();
-			}
-		}
-	}
-	
-	public void renderBFS()
-	{
-		for (BFSNode node : BFS.queue)
-		{
-			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(2);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(instance.activeIsland.pos.x + node.x, instance.activeIsland.pos.y + node.y + 1.01f, instance.activeIsland.pos.z + node.z);
-			shapeRenderer.rotate(1, 0, 0, 90);
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.setColor(Color.BLACK);
-			shapeRenderer.x(0.5f, 0.5f, 0.49f);
-			shapeRenderer.end();
-			Gdx.gl.glLineWidth(1);
-		}
-		
-		if (BFS.lastTarget != null)
-		{
-			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Gdx.gl.glLineWidth(2);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(instance.activeIsland.pos.x + BFS.lastTarget.x, instance.activeIsland.pos.y + BFS.lastTarget.y + 1.01f, instance.activeIsland.pos.z + BFS.lastTarget.z);
-			shapeRenderer.rotate(1, 0, 0, 90);
-			shapeRenderer.begin(ShapeType.Line);
-			shapeRenderer.setColor(Color.MAGENTA);
-			shapeRenderer.x(0.5f, 0.5f, 0.49f);
-			shapeRenderer.end();
-			Gdx.gl.glLineWidth(1);
-		}
 	}
 	
 	@Override
@@ -448,26 +347,29 @@ public class GameLayer extends Layer
 	{
 		this.tick = tick;
 		
-		time -= 0.000025f;
-		if (time <= -0.99999999999f) time = 0.99999999999f;
-		
-		float t = time * MathUtils.PI;
-		
-		float x = MathUtils.sin(t) * 0.5f;
-		float z = MathUtils.cos(t);
-		
-		float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
-		
-		shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
-		directionalLight.set(light, light, light, x, -0.5f, z);
-		world.tick(tick);
+		if (!Config.paused)
+		{
+			time -= 0.00002777f;
+			if (time <= -0.99999999999f) time = 0.99999999999f;
+			
+			float t = time * MathUtils.PI;
+			
+			float x = MathUtils.sin(t) * 0.5f;
+			float z = MathUtils.cos(t);
+			
+			float light = MathUtils.cos(t - MathUtils.PI / 2) * 0.5f + 0.3f;
+			
+			shadowLight.set(light - 0.1f, light, light, x, -0.5f, z);
+			directionalLight.set(light, light, light, x, -0.5f, z);
+			world.tick(tick);
+		}
 		if (cursorStructure != null) cursorStructure.tick(tick);
 		
 		if (activeIsland != null && startTick > 0)
 		{
-			camera.position.interpolate(target, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
-			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
-			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) ticksForTravel, Interpolation.linear);
+			camera.position.interpolate(target, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
+			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
+			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
 			
 			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
 			{
@@ -879,6 +781,7 @@ public class GameLayer extends Layer
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
 			if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
 			((Structure) e).setBuilt(true);
+			((Structure) e).tickRequestsEnabled = false;
 			GameLayer.instance.cursorStructure = (Structure) e;
 		}
 		

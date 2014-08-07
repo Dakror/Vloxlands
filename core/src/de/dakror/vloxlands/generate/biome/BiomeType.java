@@ -4,7 +4,7 @@ public enum BiomeType
 {
 	moderate,
 	forest,
-	desert,
+	// desert,
 	// frost,
 	
 	;

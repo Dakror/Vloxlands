@@ -1,7 +1,10 @@
-package de.dakror.vloxlands.game.item;
+package de.dakror.vloxlands.game.item.inv;
 
 import java.util.HashMap;
 import java.util.Set;
+
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 
 
 /**

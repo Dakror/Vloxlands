@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import com.badlogic.gdx.Gdx;
 
@@ -43,10 +43,6 @@ public class PickupJob extends Job
 	{
 		return equip;
 	}
-	
-	@Override
-	public void tick(int tick)
-	{}
 	
 	@Override
 	public void onEnd()

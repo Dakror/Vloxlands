@@ -2,7 +2,7 @@ package de.dakror.vloxlands.game.entity.structure;
 
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.game.item.NonStackingInventory;
+import de.dakror.vloxlands.game.item.inv.NonStackingInventory;
 import de.dakror.vloxlands.util.CurserCommand;
 
 /**

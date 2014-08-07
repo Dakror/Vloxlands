@@ -1,5 +1,8 @@
 package de.dakror.vloxlands.util;
 
+/**
+ * @author Ichmed, Dakror
+ */
 public enum CurserCommand
 {
 	NO_OP,
@@ -9,5 +12,8 @@ public enum CurserCommand
 	PATROLE,
 	ENTER,
 	BUILD,
-	ATTACK;
+	ATTACK,
+	WORK,
+	
+	;
 }

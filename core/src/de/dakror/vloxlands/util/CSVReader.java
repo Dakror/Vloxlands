@@ -6,6 +6,9 @@ import java.io.IOException;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * @author Dakror
+ */
 public class CSVReader
 {
 	BufferedReader br;

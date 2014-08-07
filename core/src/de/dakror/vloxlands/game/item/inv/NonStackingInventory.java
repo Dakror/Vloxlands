@@ -1,9 +1,11 @@
-package de.dakror.vloxlands.game.item;
+package de.dakror.vloxlands.game.item.inv;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
@@ -28,16 +30,18 @@ public class NonStackingInventory extends Inventory
 	public void clear()
 	{
 		Arrays.fill(storage, 0);
+		int oldCount = count;
 		count = 0;
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 	}
 	
 	@Override
 	protected void addStack(ItemStack stack, int amount)
 	{
+		int oldCount = count;
 		storage[stack.getItem().getId() + 128] += amount;
 		count += amount;
-		dispatchInventoryChanged();
+		dispatchItemAdded(oldCount);
 	}
 	
 	@Override
@@ -97,11 +101,12 @@ public class NonStackingInventory extends Inventory
 	public ItemStack take(Item item, int amount)
 	{
 		if (amount == 0) return null;
+		int oldCount = count;
 		int am = Math.min(amount, storage[item.getId() + 128]);
 		count -= am;
 		storage[item.getId() + 128] -= am;
 		
-		dispatchInventoryChanged();
+		dispatchItemRemoved(oldCount);
 		return new ItemStack(item, am);
 	}
 	

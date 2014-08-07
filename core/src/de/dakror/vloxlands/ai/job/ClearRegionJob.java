@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -24,8 +24,4 @@ public class ClearRegionJob extends Job
 		
 		targets = new Array<Vector3>();
 	}
-	
-	@Override
-	public void tick(int tick)
-	{}
 }

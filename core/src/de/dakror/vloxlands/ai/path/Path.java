@@ -40,13 +40,23 @@ public class Path
 	
 	public Vector3 getLast()
 	{
-		if(nodes.size > 0)	return nodes.peek();
+		if (nodes.size > 0) return nodes.peek();
 		return null;
 	}
 	
 	public Vector3 get()
 	{
 		return nodes.get(index);
+	}
+	
+	public Vector3 get(int index)
+	{
+		return nodes.get(index);
+	}
+	
+	public int getIndex()
+	{
+		return index;
 	}
 	
 	public boolean isDone()

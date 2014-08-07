@@ -1,26 +1,26 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import com.badlogic.gdx.Gdx;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.game.item.tool.DigTool;
+import de.dakror.vloxlands.game.item.tool.MineTool;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
  */
-public class DigJob extends Job
+public class MineJob extends Job
 {
 	private VoxelSelection target;
 	
-	public DigJob(Human human, VoxelSelection target, boolean persistent)
+	public MineJob(Human human, VoxelSelection target, boolean persistent)
 	{
-		super(human, "walk" /* mine */, (persistent ? "Auto. d" : "d") + "iging " + target.type.getName(), target.type.getMining(), persistent);
+		super(human, "mine", (persistent ? "Auto. m" : "M") + "ining " + target.type.getName(), target.type.getMining(), persistent);
 		this.target = target;
-		tool = DigTool.class;
+		tool = MineTool.class;
 	}
 	
 	public VoxelSelection getTarget()
@@ -29,8 +29,12 @@ public class DigJob extends Job
 	}
 	
 	@Override
-	public void tick(int tick)
-	{}
+	public void trigger(int tick)
+	{
+		animation = "mine" + (target.voxelPos.y - (human.getVoxelBelow().y + 1) == 0 ? "" : target.voxelPos.y - (human.getVoxelBelow().y + 1) < 0 ? "_lower" : "_upper");
+		
+		super.trigger(tick);
+	}
 	
 	@Override
 	public void onEnd()
@@ -44,6 +48,6 @@ public class DigJob extends Job
 			if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(target.type.getItemdrop()), 1));
 			else human.getCarryingItemStack().add(1);
 		}
-		else Gdx.app.error("DigJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
+		else Gdx.app.error("MineJob.onEnd", "Voxel " + target.type.getName() + " has no ItemDrop!");
 	}
 }

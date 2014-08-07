@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.util.event;
 
-
 /**
  * @author Dakror
  */

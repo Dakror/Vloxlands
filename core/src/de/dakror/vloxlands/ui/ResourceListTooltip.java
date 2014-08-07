@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
-import de.dakror.vloxlands.game.item.ResourceList;
+import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.util.ResourceListProvider;
 
 /**

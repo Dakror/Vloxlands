@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -23,7 +23,8 @@ public class EnterStructureJob extends Job
 	@Override
 	public void onEnd()
 	{
+		super.onEnd();
+		
 		human.setLocation(target);
-		human.setVisible(false);
 	}
 }

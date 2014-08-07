@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.util;
 
-import de.dakror.vloxlands.game.item.ResourceList;
+import de.dakror.vloxlands.game.item.inv.ResourceList;
 
 /**
  * @author Dakror

@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -24,11 +24,8 @@ public class BuildJob extends Job
 	}
 	
 	@Override
-	public void tick(int tick)
+	protected void onAnimationFinished()
 	{
-		if ((tick - startTick) % durationInTicks == 0 && tick > startTick)
-		{
-			if (target.progressBuild()) done = true;
-		}
+		if (target.progressBuild()) done = true;
 	}
 }

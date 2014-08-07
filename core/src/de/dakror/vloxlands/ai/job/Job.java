@@ -1,11 +1,11 @@
-package de.dakror.vloxlands.game.job;
+package de.dakror.vloxlands.ai.job;
 
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.util.Tickable;
-import de.dakror.vloxlands.util.event.Event;
+import de.dakror.vloxlands.util.event.Callback;
 
 /**
  * @author Dakror
@@ -19,15 +19,13 @@ public abstract class Job implements Tickable
 	boolean done;
 	boolean persistent;
 	
-	int startTick;
-	long startTime;
-	int gameSpeedAtStart;
-	int durationInTicks;
+	float ticksLeft;
+	float duration;
 	Class<?> tool;
 	
 	Human human;
 	
-	Event endEvent;
+	Callback endEvent;
 	
 	public Job(Human human, String animation, String text, int repeats, boolean persistent)
 	{
@@ -52,23 +50,37 @@ public abstract class Job implements Tickable
 	
 	public void trigger(int tick)
 	{
-		gameSpeedAtStart = Config.getGameSpeed();
-		startTick = tick;
-		startTime = System.currentTimeMillis();
-		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), human, 0.2f);
-		if (ad != null) durationInTicks = (int) Math.ceil(ad.duration * 60);
+		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), null, 0.2f);
+		if (ad != null)
+		{
+			duration = ticksLeft = ad.duration * 60f / Config.getGameSpeed();
+		}
 		else done = true;
 		active = true;
 	}
 	
-	public void update(float delta)
+	@Override
+	public void tick(int tick)
 	{
-		if (Config.getGameSpeed() != gameSpeedAtStart)
+		ticksLeft -= 1f / Config.getGameSpeed();
+		if (ticksLeft <= 0)
 		{
-			float timePassed = (startTime - System.currentTimeMillis()) / 1000.0f * gameSpeedAtStart;
-			human.getAnimationController().setAnimation(animation, timePassed, -1, repeats, Config.getGameSpeed(), human);
+			if (repeats > -1) repeats = repeats > 0 ? repeats - 1 : 0;
+			
+			onAnimationFinished();
+			
+			if (repeats == 0) done = true;
+			else ticksLeft = duration;
 		}
 	}
+	
+	public void setDone()
+	{
+		done = true;
+	}
+	
+	protected void onAnimationFinished()
+	{}
 	
 	public void onEnd()
 	{
@@ -80,14 +92,9 @@ public abstract class Job implements Tickable
 		if (endEvent != null) endEvent.trigger();
 	}
 	
-	public void setEndEvent(Event event)
+	public void setEndEvent(Callback event)
 	{
 		endEvent = event;
-	}
-	
-	public void setDone()
-	{
-		done = true;
 	}
 	
 	public void resetState()

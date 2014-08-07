@@ -1,37 +1,35 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.fsm.State;
+import com.badlogic.gdx.ai.fsm.StateMachine;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
-import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.SyncedStateMachine;
+import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.game.job.DepositJob;
-import de.dakror.vloxlands.game.job.Job;
-import de.dakror.vloxlands.game.job.MineJob;
-import de.dakror.vloxlands.game.job.WalkJob;
-import de.dakror.vloxlands.game.query.PathBundle;
-import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -60,6 +58,9 @@ public class Human extends Creature
 	
 	final Matrix4 tmp = new Matrix4();
 	
+	StateMachine<Human> stateMachine;
+	public Array<Object> stateParams = new Array<Object>();
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -70,7 +71,12 @@ public class Human extends Creature
 		
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
+		
+		
+		stateMachine = new SyncedStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
+		
+		MessageDispatcher.getInstance().addListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
 	}
 	
 	public void setTool(Item tool)
@@ -116,22 +122,19 @@ public class Human extends Creature
 	{
 		super.tick(tick);
 		
-		if (jobQueue.size > 0)
+		Job j = firstJob();
+		if (j != null)
 		{
-			Job j = firstJob();
 			if (j.isActive())
 			{
-				if (j instanceof WalkJob)
-				{
-					if (path != ((WalkJob) j).getPath()) path = ((WalkJob) j).getPath();
-				}
+				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
 				
-				if (j.isDone())
+				if (!j.isDone()) j.tick(tick);
+				else
 				{
+					jobQueue.removeIndex(0);
 					j.onEnd();
 					j.triggerEndEvent();
-					jobQueue.removeIndex(0);
-					onJobDone(j);
 					
 					if (j.isPersistent())
 					{
@@ -139,10 +142,16 @@ public class Human extends Creature
 						queueJob(null, j);
 					}
 				}
-				else j.tick(tick);
 			}
 			else j.trigger(tick);
 		}
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		stateMachine.update();
 	}
 	
 	@Override
@@ -232,7 +241,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
 		{
 			selected = true;
 			
@@ -243,23 +252,24 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()))
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
 		{
 			selected = true;
 			
 			CurserCommand c = structure.getCommandForEntity(this);
-			if (c == CurserCommand.BUILD && !structure.isBuilt())
-			{
-				if (structure.getBuildInventory().getCount() == 0)
-				{	
-					
-				}
-				else
-				{
-					changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
-				}
-			}
-			else if (c == CurserCommand.WALK)
+			// if (c == CurserCommand.BUILD && !structure.isBuilt())
+			// {
+			// if (structure.getBuildInventory().getCount() == 0)
+			// {
+			// changeState(HelperState.BUILD, structure);
+			// }
+			// else
+			// {
+			// changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
+			// }
+			// }
+			// else
+			if (c == CurserCommand.WALK)
 			{
 				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
 			}
@@ -278,39 +288,6 @@ public class Human extends Creature
 		if (firstJob() instanceof WalkJob) firstJob().setDone();
 	}
 	
-	public void onJobDone(Job j)
-	{
-		if (j instanceof MineJob)
-		{
-			PathBundle pb = null;
-			
-			if (carryingItemStack.isFull())
-			{
-				pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).structure(true).transport(carryingItemStack).capacityForTransported(true).node(NodeType.deposit).island(0));
-				if (pb != null) queueJob(pb.path, new DepositJob(this, pb.structure, false));
-				else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
-			}
-			if (j.isPersistent())
-			{
-				Path path = BFS.findClosestVoxel(pb != null ? pb.path.getLast() : getVoxelBelow(), ((MineJob) j).getTarget().type.getId(), this);
-				
-				if (path != null)
-				{
-					((MineJob) j).getTarget().voxelPos.set(path.getGhostTarget());
-					queueJob(path, null);
-				}
-				else
-				{
-					Gdx.app.error("Human.onJobDone", "No more voxels of this type to mine / I am too stupid to find a path to one (more likely)!");
-					j.setPersistent(false);
-					if (pb == null) pb = GameLayer.world.query(new Query(this).searchClass(Warehouse.class).transport(carryingItemStack).capacityForTransported(true).structure(true).node(NodeType.deposit).island(0));
-					if (pb != null) queueJob(pb.path, new DepositJob(this, pb.structure, false));
-					else Gdx.app.error("Human.onJobDone", "Couldn't find a Warehouse to dump stuff");
-				}
-			}
-		}
-	}
-	
 	public Array<Job> getJobQueue()
 	{
 		return jobQueue;
@@ -319,12 +296,6 @@ public class Human extends Creature
 	public boolean isIdle()
 	{
 		return jobQueue.size == 0;
-	}
-	
-	@Override
-	public void onEnd(AnimationDesc animation)
-	{
-		if (jobQueue.size > 0) firstJob().setDone();
 	}
 	
 	public Structure getWorkPlace()
@@ -345,5 +316,36 @@ public class Human extends Creature
 	public void setLocation(Structure location)
 	{
 		this.location = location;
+		visible = location == null;
+	}
+	
+	@Override
+	public boolean handleMessage(Telegram msg)
+	{
+		return stateMachine.handleMessage(msg);
+	}
+	
+	public void changeState(State<Human> newState, Object... params)
+	{
+		stateParams.clear();
+		stateParams.addAll(params);
+		stateMachine.changeState(newState);
+	}
+	
+	public State<Human> getState()
+	{
+		return stateMachine.getCurrentState();
+	}
+	
+	public StateMachine<Human> getStateMachine()
+	{
+		return stateMachine;
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		MessageDispatcher.getInstance().removeListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
 	}
 }

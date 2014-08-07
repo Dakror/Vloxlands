@@ -163,6 +163,12 @@ public class Island implements RenderableProvider, Tickable, Savable
 		inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
 	}
 	
+	public void update(float delta)
+	{
+		for (Entity e : entities)
+			if (e.isSpawned() && !e.isMarkedForRemoval()) e.update(delta);
+	}
+	
 	public float getDelta()
 	{
 		return (int) (((uplift * World.calculateRelativeUplift(pos.y) - weight) / 100000f - initBalance) * 100f) / 100f;
@@ -176,9 +182,9 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public void addEntity(Entity s, boolean user, boolean clearArea)
 	{
 		s.setIsland(this);
-		s.onSpawn();
 		s.getTransform().translate(pos);
 		entities.add(s);
+		s.onSpawn();
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{
@@ -569,4 +575,5 @@ public class Island implements RenderableProvider, Tickable, Savable
 		
 		Bits.putInt(baos, entities.size());
 	}
+	
 }
