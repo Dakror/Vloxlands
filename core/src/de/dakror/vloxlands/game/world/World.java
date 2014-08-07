@@ -137,9 +137,9 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	@Override
 	public PathBundle query(Query query)
 	{
-		if (query.island == -1)
+		if (query.island == null)
 		{
-			Gdx.app.error("World.query", "You should specify an island index because they can't be connected yet! Return null.");
+			Gdx.app.error("World.query", "You must specify an island index because they can't be connected yet! Return null.");
 			return null;
 		}
 		
@@ -161,9 +161,9 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				Gdx.app.error("World.query", "You should specify a source Creature when querying a Structure! Return null.");
 				return null;
 			}
-			Vector3 v = query.sourceCreature.getVoxelBelow();
+			Vector3 v = query.pathStart != null ? query.pathStart : query.sourceCreature.getVoxelBelow();
 			
-			for (Entity s : islands[query.island].entities)
+			for (Entity s : query.island.entities)
 			{
 				if (!(s instanceof Structure)) continue;
 				if (s == query.sourceStructure) continue;
@@ -195,7 +195,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		{
 			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 			
-			for (Entity e : islands[query.island].entities)
+			for (Entity e : query.island.entities)
 			{
 				if (!(e instanceof Creature)) continue;
 				if (e == query.sourceCreature) continue;
@@ -242,5 +242,4 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	{
 		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
 	}
-	
 }

@@ -223,7 +223,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				broadcast(s);
 			
 			if (workers.size < resourceList.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2) broadcast(HelperState.EMPTY_INVENTORY);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && resourceList.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true)) requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 			
 			lastStateRequest = tick;
 		}

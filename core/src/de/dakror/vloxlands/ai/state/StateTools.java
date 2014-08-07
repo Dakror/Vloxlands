@@ -29,7 +29,7 @@ public class StateTools
 		
 		if (tool == null && !human.getTool().isNull())
 		{
-			PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit).island(0));
+			PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit));
 			if (pb != null)
 			{
 				PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(), true, false);
@@ -45,7 +45,7 @@ public class StateTools
 		{
 			if (human.getTool().isNull() || !(human.getTool().getItem().getClass().isAssignableFrom(tool)))
 			{
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup).island(0));
+				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup));
 				if (pb != null)
 				{
 					PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(tool), 1), true, false);
