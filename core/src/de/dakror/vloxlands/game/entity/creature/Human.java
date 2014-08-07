@@ -1,7 +1,6 @@
 package de.dakror.vloxlands.game.entity.creature;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
@@ -18,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.SyncedStateMachine;
 import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.Path;
@@ -73,7 +73,7 @@ public class Human extends Creature
 		carryingItemStack = new ItemStack();
 		
 		
-		stateMachine = new DefaultStateMachine<Human>(this);
+		stateMachine = new SyncedStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
 		
 		MessageDispatcher.getInstance().addListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
