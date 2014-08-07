@@ -52,7 +52,7 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         
-        compile "com.badlogicgames.gdx:gdx-ai:1.2.0"
+        compile fileTree(dir: '../libs', include: '*.jar')
     }
 }
 
@@ -62,7 +62,8 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-ai:1.2.0"
+        
+        compile fileTree(dir: '../libs', include: '*.jar')
     }
 }
 
