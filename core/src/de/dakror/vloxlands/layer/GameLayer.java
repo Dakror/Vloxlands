@@ -234,7 +234,7 @@ public class GameLayer extends Layer
 		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
 		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 400));
+		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		instance.activeIsland.addEntity(tc, false, true);
 		
 		doneLoading = true;
