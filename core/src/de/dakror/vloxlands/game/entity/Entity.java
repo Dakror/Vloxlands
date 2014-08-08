@@ -26,6 +26,7 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
@@ -269,6 +270,9 @@ public class Entity extends EntityBase implements Agent, Savable
 	{}
 	
 	public void setUI(PinnableWindow window, Object... params)
+	{}
+	
+	public void setActions(RevolverSlot parent)
 	{}
 	
 	// -- events -- //

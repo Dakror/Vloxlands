@@ -38,6 +38,7 @@ public class HudLayer extends Layer implements SelectionListener
 	
 	ShapeRenderer shapeRenderer;
 	RevolverSlot selected;
+	Revolver actions;
 	
 	int buttonDown = -1;
 	
@@ -81,7 +82,7 @@ public class HudLayer extends Layer implements SelectionListener
 	
 	public void addActionsMenu()
 	{
-		Revolver actions = new Revolver();
+		actions = new Revolver();
 		actions.setPosition(10, 10);
 		
 		RevolverSlot s = new RevolverSlot(stage, new Vector2(3, 0), "mine");
@@ -114,9 +115,6 @@ public class HudLayer extends Layer implements SelectionListener
 		
 		selected = new RevolverSlot(stage, new Vector2(5, 0), "selected");
 		actions.addSlot(0, null, selected);
-		
-		s = new RevolverSlot(stage, new Vector2(5, 0), "collapse");
-		actions.addSlot(0, null, s);
 		
 		stage.addActor(actions);
 	}
@@ -160,6 +158,9 @@ public class HudLayer extends Layer implements SelectionListener
 			});
 			
 			creature.setUI(selectedEntityWindow, jobsWereExpanded);
+			
+			actions.removeGroup("selected");
+			creature.setActions(selected);
 			
 			selectedEntityWindow.pack();
 			selectedEntityWindow.setVisible(true);
@@ -205,6 +206,9 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
 			
 			structure.setUI(selectedStructureWindow);
+			
+			actions.removeGroup("selected");
+			structure.setActions(selected);
 			
 			selectedStructureWindow.pack();
 			selectedStructureWindow.setVisible(true);

@@ -123,4 +123,10 @@ public class Revolver extends Group
 		
 		return (Group) getChildren().get(level);
 	}
+	
+	public void removeGroup(String parent)
+	{
+		Actor a = findActor(parent);
+		if (!(a instanceof RevolverSlot)) a.remove();
+	}
 }
