@@ -32,6 +32,10 @@ public abstract class EntityBase implements Tickable, Disposable, SelectionListe
 	{}
 	
 	@Override
+	public void onNoSelection(boolean lmb)
+	{}
+	
+	@Override
 	public void dispose()
 	{}
 	

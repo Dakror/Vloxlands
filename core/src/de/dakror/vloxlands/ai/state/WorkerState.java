@@ -109,8 +109,8 @@ public enum WorkerState implements State<Human>
 		
 		public void afterChop(Human human)
 		{
-			human.stateParams.set(1, (Integer) human.stateParams.get(0) - 1);
-			if ((Integer) human.stateParams.get(1) < 0) ((Vector3) human.stateParams.get(1)).x = -1;
+			human.stateParams.set(0, (Integer) human.stateParams.get(0) - 1);
+			if ((Integer) human.stateParams.get(0) < 0) ((Vector3) human.stateParams.get(0)).x = -1;
 			
 			human.changeState(BRING_STUFF_HOME);
 		}
@@ -132,7 +132,7 @@ public enum WorkerState implements State<Human>
 		@Override
 		public void enter(Human human)
 		{
-			human.stateParams.set(0, 0l);
+			human.stateParams.add(0l);
 			human.setLocation(human.getWorkPlace());
 		}
 		

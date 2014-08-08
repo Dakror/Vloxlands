@@ -34,6 +34,11 @@ public class RevolverSlot extends TooltipImageButton
 		stage.addActor(tooltip);
 	}
 	
+	public void setIcon(Vector2 icon)
+	{
+		setStyle(createStyle(icon));
+	}
+	
 	private static ImageButtonStyle createStyle(Vector2 icon)
 	{
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);

@@ -13,11 +13,20 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.ai.SyncedStateMachine;
+import de.dakror.vloxlands.ai.job.IdleJob;
 import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.Path;
@@ -30,6 +39,9 @@ import de.dakror.vloxlands.game.item.tool.Tool;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.ui.ItemSlot;
+import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -347,5 +359,83 @@ public class Human extends Creature
 	{
 		super.dispose();
 		MessageDispatcher.getInstance().removeListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
+	}
+	
+	@Override
+	public void setUI(final PinnableWindow window, Object... params)
+	{
+		window.row().pad(0).colspan(4).width(220);
+		final List<Job> jobs = new List<Job>(Vloxlands.skin);
+		jobs.setItems(new IdleJob(this));
+		jobs.addAction(new Action()
+		{
+			@Override
+			public boolean act(float delta)
+			{
+				if (jobQueue.size == 0 && jobs.getItems().get(0) instanceof IdleJob) return false;
+				
+				if (!jobQueue.equals(jobs.getItems()))
+				{
+					if (jobQueue.size > 0) jobs.setItems(jobQueue);
+					else jobs.setItems(new IdleJob(Human.this));
+					
+					jobs.getSelection().setDisabled(true);
+					jobs.setSelectedIndex(-1);
+					window.pack();
+				}
+				
+				return false;
+			}
+		});
+		jobs.getSelection().setDisabled(true);
+		jobs.setSelectedIndex(-1);
+		final ScrollPane jobsWrap = new ScrollPane(jobs, Vloxlands.skin);
+		jobsWrap.setVisible(false);
+		jobsWrap.setScrollbarsOnTop(false);
+		jobsWrap.setFadeScrollBars(false);
+		final Cell<?> cell = window.add(jobsWrap).height(0);
+		
+		window.row();
+		ItemSlot tool = new ItemSlot(window.getStage(), this.tool);
+		window.left().add(tool);
+		
+		ItemSlot slot = new ItemSlot(window.getStage(), carryingItemStack);
+		window.add(slot);
+		
+		ItemSlot armor = new ItemSlot(window.getStage(), new ItemStack());
+		window.add(armor);
+		
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style.imageUp = Vloxlands.skin.getDrawable("queue");
+		style.imageUp.setMinWidth(ItemSlot.size);
+		style.imageUp.setMinHeight(ItemSlot.size);
+		style.imageDown = Vloxlands.skin.getDrawable("queue");
+		style.imageDown.setMinWidth(ItemSlot.size);
+		style.imageDown.setMinHeight(ItemSlot.size);
+		final TooltipImageButton job = new TooltipImageButton(window.getStage(), style);
+		window.getStage().addActor(job.getTooltip());
+		job.setName("job");
+		job.getStyle().checked = Vloxlands.skin.getDrawable("default-round-down");
+		ClickListener cl = new ClickListener()
+		{
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
+				jobsWrap.setVisible(!jobsWrap.isVisible());
+				window.invalidateHierarchy();
+				window.pack();
+			}
+		};
+		job.addListener(cl);
+		job.pad(4);
+		job.getTooltip().set("Job Queue", "Toggle Job Queue display");
+		window.add(job);
+		
+		if (params[0] == Boolean.TRUE)
+		{
+			job.setChecked(true);
+			cl.clicked(null, 0, 0);
+		}
 	}
 }

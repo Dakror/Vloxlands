@@ -18,4 +18,6 @@ public interface SelectionListener
 	public void onStructureSelection(Structure structure, boolean lmb);
 	
 	public void onCreatureSelection(Creature creature, boolean lmb);
+	
+	public void onNoSelection(boolean lmb);
 }

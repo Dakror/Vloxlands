@@ -517,6 +517,11 @@ public class GameLayer extends Layer
 						sl.onCreatureSelection((Creature) selectedEntity, lmb);
 				}
 			}
+			else
+			{
+				for (SelectionListener sl : listeners)
+					sl.onNoSelection(lmb);
+			}
 		}
 	}
 	

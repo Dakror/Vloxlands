@@ -25,6 +25,7 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.util.CSVReader;
 import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
@@ -267,14 +268,15 @@ public class Entity extends EntityBase implements Agent, Savable
 	public void save(ByteArrayOutputStream baos) throws IOException
 	{}
 	
+	public void setUI(PinnableWindow window, Object... params)
+	{}
+	
 	// -- events -- //
 	
 	public void onSpawn()
 	{
 		spawned = true;
 	}
-	
-	// -- abstracts -- //
 	
 	// -- statics -- //
 	
