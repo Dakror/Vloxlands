@@ -412,7 +412,7 @@ public class Human extends Creature
 		style.imageDown = Vloxlands.skin.getDrawable("queue");
 		style.imageDown.setMinWidth(ItemSlot.size);
 		style.imageDown.setMinHeight(ItemSlot.size);
-		final TooltipImageButton job = new TooltipImageButton(window.getStage(), style);
+		final TooltipImageButton job = new TooltipImageButton(style);
 		window.getStage().addActor(job.getTooltip());
 		job.setName("job");
 		job.getStyle().checked = Vloxlands.skin.getDrawable("default-round-down");

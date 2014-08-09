@@ -27,9 +27,9 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.generate.biome.BiomeType;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
-import de.dakror.vloxlands.util.Savable;
-import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.SelectionListener;
+import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.interf.Tickable;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**

@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import java.util.Comparator;
 import java.util.NoSuchElementException;
 
 import com.badlogic.gdx.ai.fsm.State;
@@ -27,6 +28,7 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.ai.state.StateTools;
+import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -40,13 +42,14 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.CurserCommand;
-import de.dakror.vloxlands.util.InventoryProvider;
-import de.dakror.vloxlands.util.ResourceListProvider;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 import de.dakror.vloxlands.util.event.InventoryListener;
+import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
+import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
 /**
  * @author Dakror
@@ -67,6 +70,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	Class<?> workerTool;
 	Array<State<Human>> requestedHumanStates;
 	Array<State<Human>> handledHumanStates;
+	
+	Array<Task> tasks;
+	private Array<Task> taskQueue;
+	int taskTicksLeft;
 	
 	boolean working;
 	
@@ -109,6 +116,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		resourceList = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
 		handledHumanStates = new Array<State<Human>>();
+		tasks = new Array<Task>();
+		taskQueue = new Array<Task>();
 		working = true;
 		
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
@@ -237,6 +246,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	{
 		super.tick(tick);
 		
+		if (taskQueue.size > 0)
+		{
+			taskTicksLeft--;
+			if (taskTicksLeft <= 0)
+			{	
+				
+			}
+		}
+		
 		if (lastStateRequest == 0) lastStateRequest = tick;
 		
 		if ((tick - lastStateRequest) % 60 == 0 && tickRequestsEnabled)
@@ -338,9 +356,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	}
 	
 	@Override
-	public ResourceList getResourceList()
+	public ResourceList getCosts()
 	{
 		return resourceList;
+	}
+	
+	@Override
+	public ResourceList getResult()
+	{
+		return null;
 	}
 	
 	public boolean isWorking()
@@ -465,7 +489,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		style.imageDown = Vloxlands.skin.getDrawable("bomb");
 		style.imageDown.setMinWidth(ItemSlot.size);
 		style.imageDown.setMinHeight(ItemSlot.size);
-		final TooltipImageButton dismantle = new TooltipImageButton(window.getStage(), style);
+		final TooltipImageButton dismantle = new TooltipImageButton(style);
 		window.getStage().addActor(dismantle.getTooltip());
 		dismantle.addListener(new ClickListener()
 		{
@@ -501,7 +525,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		style.imageChecked = Vloxlands.skin.getDrawable("work");
 		style.imageChecked.setMinWidth(ItemSlot.size);
 		style.imageChecked.setMinHeight(ItemSlot.size);
-		final TooltipImageButton sleep = new TooltipImageButton(window.getStage(), style);
+		final TooltipImageButton sleep = new TooltipImageButton(style);
 		window.getStage().addActor(sleep.getTooltip());
 		sleep.setChecked(isWorking());
 		sleep.addListener(new ClickListener()
@@ -564,14 +588,14 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			Inventory inv = getInventory();
 			Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 			int i = 0;
-			for (Byte b : getResourceList().getAll())
+			for (Byte b : getCosts().getAll())
 			{
 				if (i % 4 == 0 && i > 0) res.row();
 				Item item = Item.getForId(b);
 				Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
 				res.add(img);
 				
-				int max = getResourceList().get(b);
+				int max = getCosts().get(b);
 				
 				Label l = new Label((max - inv.get(b)) + " / " + max, Vloxlands.skin);
 				l.setName(b + "");
@@ -580,7 +604,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				i++;
 			}
 			window.add(res).minWidth(200);
-			final ProgressBar progress = new ProgressBar(0, getResourceList().getCount(), 1, false, Vloxlands.skin);
+			final ProgressBar progress = new ProgressBar(0, getCosts().getCount(), 1, false, Vloxlands.skin);
 			progress.setAnimateDuration(0.2f);
 			progress.setAnimateInterpolation(Interpolation.pow3);
 			window.addAction(new Action()
@@ -590,12 +614,12 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				{
 					Inventory inv = getInventory();
 					progress.setValue(getBuildProgress());
-					for (Byte b : getResourceList().getAll())
+					for (Byte b : getCosts().getAll())
 					{
 						Actor a = res.findActor(b + "");
 						if (a instanceof Label)
 						{
-							int max = getResourceList().get(b);
+							int max = getCosts().get(b);
 							((Label) a).setText((max - inv.get(b)) + " / " + max);
 						}
 					}
@@ -611,5 +635,32 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			window.row();
 			window.add(progress).width(190);
 		}
+	}
+	
+	@Override
+	public void setActions(RevolverSlot parent)
+	{
+		tasks.sort(new Comparator<Task>()
+		{
+			
+			@Override
+			public int compare(Task o1, Task o2)
+			{
+				return o1.getTitle().compareTo(o2.getTitle());
+			}
+		});
+		for (Task task : tasks)
+		{
+			RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
+			s.getTooltip().set(task.getTitle(), task.getDescription());
+			parent.addSlot(s);
+		}
+	}
+	
+	public void queueTask(Task task)
+	{
+		if (!tasks.contains(task, true)) throw new IllegalArgumentException("Can't queue task '" + task + "' in structure '" + name + "'");
+		
+		taskQueue.add(task);
 	}
 }

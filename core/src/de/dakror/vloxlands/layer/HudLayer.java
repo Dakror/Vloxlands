@@ -159,6 +159,8 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			creature.setUI(selectedEntityWindow, jobsWereExpanded);
 			
+			selected.getTooltip().setTitle("");
+			selected.setIcon(new Vector2(5, 0));
 			actions.removeGroup("selected");
 			creature.setActions(selected);
 			
@@ -181,6 +183,10 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 		}
+		
+		selected.getTooltip().setTitle("");
+		selected.setIcon(new Vector2(5, 0));
+		actions.removeGroup("selected");
 	}
 	
 	@Override
@@ -207,6 +213,8 @@ public class HudLayer extends Layer implements SelectionListener
 			
 			structure.setUI(selectedStructureWindow);
 			
+			selected.getTooltip().setTitle("");
+			selected.setIcon(new Vector2(5, 0));
 			actions.removeGroup("selected");
 			structure.setActions(selected);
 			

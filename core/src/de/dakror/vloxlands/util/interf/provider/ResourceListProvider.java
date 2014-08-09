@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.util.interf.provider;
 
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 
@@ -7,5 +7,7 @@ import de.dakror.vloxlands.game.item.inv.ResourceList;
  */
 public interface ResourceListProvider
 {
-	public ResourceList getResourceList();
+	public ResourceList getCosts();
+	
+	public ResourceList getResult();
 }

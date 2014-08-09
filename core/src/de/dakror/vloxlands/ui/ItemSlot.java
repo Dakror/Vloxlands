@@ -27,7 +27,7 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	
 	public ItemSlot(Stage stage, ItemStack stack)
 	{
-		super(stage, createStyle(stack));
+		super(createStyle(stack));
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
 		amount.setZIndex(1);

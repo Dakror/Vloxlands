@@ -7,8 +7,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.InventoryListener;
+import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**

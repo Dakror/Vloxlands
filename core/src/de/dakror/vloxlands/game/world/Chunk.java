@@ -23,9 +23,9 @@ import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.Direction;
-import de.dakror.vloxlands.util.Meshable;
-import de.dakror.vloxlands.util.Savable;
-import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.interf.Meshable;
+import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.interf.Tickable;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**

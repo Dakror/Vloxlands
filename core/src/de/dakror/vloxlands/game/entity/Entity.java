@@ -28,8 +28,8 @@ import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.base.EntityBase;
+import de.dakror.vloxlands.util.interf.Savable;
 
 /**
  * @author Dakror

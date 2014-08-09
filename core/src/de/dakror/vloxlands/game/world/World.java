@@ -28,8 +28,8 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.game.query.Query.Queryable;
-import de.dakror.vloxlands.util.Savable;
-import de.dakror.vloxlands.util.Tickable;
+import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.interf.Tickable;
 
 /**
  * @author Dakror

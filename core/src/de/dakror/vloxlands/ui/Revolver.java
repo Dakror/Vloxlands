@@ -30,6 +30,7 @@ public class Revolver extends Group
 		float radius = getRadius(level);
 		float degrees = getDegrees(amount, level);
 		
+		slot.revolver = this;
 		slot.setUserObject(level);
 		slot.addListener(new InputListener()
 		{

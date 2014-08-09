@@ -1,6 +1,10 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import com.badlogic.gdx.math.Vector2;
+
+import de.dakror.vloxlands.ai.task.Tasks;
 import de.dakror.vloxlands.game.item.inv.NonStackingInventory;
+import de.dakror.vloxlands.ui.RevolverSlot;
 
 /**
  * @author Dakror
@@ -16,5 +20,16 @@ public class Towncenter extends Warehouse
 		confirmDismante = true;
 		
 		resourceList.setMaxBuildings(1);
+		
+		tasks.add(Tasks.human);
+	}
+	
+	@Override
+	public void setActions(RevolverSlot parent)
+	{
+		super.setActions(parent);
+		
+		parent.setIcon(new Vector2(1, 5));
+		parent.getTooltip().set("Towncenter", "Queue building specific tasks.");
 	}
 }

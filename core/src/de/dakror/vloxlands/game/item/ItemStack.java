@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.ItemStackListener;
+import de.dakror.vloxlands.util.interf.Savable;
 
 /**
  * @author Dakror

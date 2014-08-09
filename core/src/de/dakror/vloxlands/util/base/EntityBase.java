@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Disposable;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
+import de.dakror.vloxlands.util.interf.Tickable;
 
 /**
  * @author Dakror

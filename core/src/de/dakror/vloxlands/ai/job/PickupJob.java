@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
-import de.dakror.vloxlands.util.InventoryProvider;
+import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
 
 /**
  * @author Dakror

@@ -3,7 +3,7 @@ package de.dakror.vloxlands.ai.job;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.util.InventoryProvider;
+import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
 
 /**
  * @author Dakror
