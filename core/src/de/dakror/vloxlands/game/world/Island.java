@@ -25,6 +25,7 @@ import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.query.VoxelPos;
@@ -224,7 +225,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			grassify();
 		}
 		
-		recalculate();
+		if (s instanceof Structure || s.getWeight() != 0 || s.getUplift() != 0) recalculate();
 	}
 	
 	public byte get(float x, float y, float z)
@@ -494,8 +495,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			int delta = inventory.getCount() - countBefore;
 			totalResources.add(item, delta);
 		}
-		
-		totalResources.print();
+		else Gdx.app.error("Island.onItemAdded", "item = null, not handled!");
 	}
 	
 	@Override
@@ -506,8 +506,31 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			int delta = countBefore - inventory.getCount();
 			totalResources.remove(item, delta);
 		}
+		else Gdx.app.error("Island.onItemRemoved", "item = null, not handled!");
+	}
+	
+	public boolean takeItemsIslandWide(ItemStack stack)
+	{
+		return takeItemsIslandWide(stack.getItem(), stack.getAmount());
+	}
+	
+	public boolean takeItemsIslandWide(Item item, int amount)
+	{
+		if (totalResources.get(item) < amount) return false;
 		
-		totalResources.print();
+		for (Entity e : entities)
+		{
+			if (!(e instanceof Structure) || !((Structure) e).isBuilt()) continue;
+			
+			if (((Structure) e).getInventory().get(item) > 0)
+			{
+				amount -= ((Structure) e).getInventory().take(item, amount).getAmount();
+			}
+			
+			if (amount == 0) break;
+		}
+		
+		return amount == 0;
 	}
 	
 	// -- voxel queries -- //

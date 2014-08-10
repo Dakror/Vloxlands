@@ -3,6 +3,7 @@ package de.dakror.vloxlands.game.entity.structure;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
@@ -111,9 +112,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
-		inventory.addListener(this);
 		buildInventory = new ManagedInventory(256 /* That should be enough... */);
-		buildInventory.addListener(this);
 		resourceList = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
 		handledHumanStates = new Array<State<Human>>();
@@ -226,6 +225,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public void onSpawn()
 	{
 		super.onSpawn();
+		
+		inventory.addListener(this);
+		buildInventory.addListener(this);
+		
 		tickRequestsEnabled = true;
 		if (!built)
 		{
@@ -668,9 +671,22 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			s.addListener(new InputListener()
 			{
 				@Override
+				public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
+				{
+					return button == Buttons.LEFT;
+				}
+				
+				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					// TODO subtract costs from island wide resources
+					if (!GameLayer.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					
+					for (Byte b : copy.getCosts().getAll())
+					{
+						island.takeItemsIslandWide(Item.getForId(b), copy.getCosts().get(b));
+					}
+					
+					queueTask(copy);
 				}
 			});
 			s.addAction(new Action()
@@ -693,5 +709,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		task.setOrigin(this);
 		taskQueue.add(task);
+		if (taskQueue.size == 1) taskTicksLeft = task.getDuration();
 	}
 }
