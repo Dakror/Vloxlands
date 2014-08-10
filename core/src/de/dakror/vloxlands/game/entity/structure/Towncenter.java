@@ -20,6 +20,7 @@ public class Towncenter extends Warehouse
 		confirmDismante = true;
 		
 		resourceList.setMaxBuildings(1);
+		nodes.add(new StructureNode(NodeType.spawn, -2, 0, 1));
 		
 		tasks.add(Tasks.human);
 	}

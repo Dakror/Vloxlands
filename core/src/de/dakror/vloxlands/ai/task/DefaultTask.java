@@ -17,15 +17,6 @@ public class DefaultTask extends Task
 	}
 	
 	@Override
-	public void enter()
-	{
-		for (Byte b : costs.getAll())
-		{
-			origin.getInventory().take(Item.getForId(b), costs.get(b));
-		}
-	}
-	
-	@Override
 	public void exit()
 	{
 		for (Byte b : result.getAll())

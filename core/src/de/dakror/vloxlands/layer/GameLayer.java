@@ -776,18 +776,18 @@ public class GameLayer extends Layer
 	{
 		if (action.contains("|region"))
 		{
-			GameLayer.instance.selectionStartVoxel.set(-1, 0, 0);
-			GameLayer.instance.selectedVoxel.set(-1, 0, 0);
-			GameLayer.instance.regionSelectionMode = true;
+			selectionStartVoxel.set(-1, 0, 0);
+			selectedVoxel.set(-1, 0, 0);
+			regionSelectionMode = true;
 		}
 		if (action.contains("entity"))
 		{
 			String s = action.replace("entity:", "");
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
-			if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
+			if (!(e instanceof Structure)) Gdx.app.error("GameLayer.action", "Cant cast " + s + " to Structure!");
 			((Structure) e).setBuilt(true);
 			((Structure) e).tickRequestsEnabled = false;
-			GameLayer.instance.cursorStructure = (Structure) e;
+			cursorStructure = (Structure) e;
 		}
 		
 		activeAction = action;

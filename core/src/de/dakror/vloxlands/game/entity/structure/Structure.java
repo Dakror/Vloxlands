@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -250,8 +251,18 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		{
 			taskTicksLeft--;
 			if (taskTicksLeft <= 0)
-			{	
+			{
+				if (taskQueue.first().started)
+				{
+					taskQueue.first().exit();
+					taskQueue.removeIndex(0);
+				}
 				
+				if (taskQueue.size > 0)
+				{
+					taskTicksLeft = taskQueue.first().getDuration();
+					taskQueue.first().enter();
+				}
 			}
 		}
 		
@@ -653,6 +664,14 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		{
 			RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
 			s.getTooltip().set(task.getTitle(), task.getDescription());
+			s.addListener(new InputListener()
+			{
+				@Override
+				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
+				{
+					// TODO subtract costs from island wide resources
+				}
+			});
 			parent.addSlot(s);
 		}
 	}
@@ -661,6 +680,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	{
 		if (!tasks.contains(task, true)) throw new IllegalArgumentException("Can't queue task '" + task + "' in structure '" + name + "'");
 		
+		task.setOrigin(this);
 		taskQueue.add(task);
 	}
 }
