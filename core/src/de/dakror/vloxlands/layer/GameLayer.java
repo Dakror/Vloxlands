@@ -230,12 +230,12 @@ public class GameLayer extends Layer
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.setBuilt(true);
-		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		instance.activeIsland.addEntity(tc, false, true);
+		tc.getInnerInventory().add(new ItemStack(Item.get("AXE"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("HAMMER"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		
 		doneLoading = true;
 	}

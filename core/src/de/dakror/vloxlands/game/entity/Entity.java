@@ -334,5 +334,4 @@ public class Entity extends EntityBase implements Agent, Savable
 			return null;
 		}
 	}
-	
 }

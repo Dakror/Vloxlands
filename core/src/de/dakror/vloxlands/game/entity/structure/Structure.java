@@ -457,11 +457,11 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	}
 	
 	@Override
-	public void onItemAdded(int countBefore, Inventory inventory)
+	public void onItemAdded(int countBefore, Item item, Inventory inventory)
 	{}
 	
 	@Override
-	public void onItemRemoved(int countBefore, Inventory inventory)
+	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
 	{
 		if (inventory instanceof ManagedInventory)
 		{
@@ -662,7 +662,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		});
 		for (Task task : tasks)
 		{
-			RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
+			final Task copy = task;
+			final RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
 			s.getTooltip().set(task.getTitle(), task.getDescription());
 			s.addListener(new InputListener()
 			{
@@ -670,6 +671,16 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
 					// TODO subtract costs from island wide resources
+				}
+			});
+			s.addAction(new Action()
+			{
+				
+				@Override
+				public boolean act(float delta)
+				{
+					s.setDisabled(!GameLayer.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
+					return false;
 				}
 			});
 			parent.addSlot(s);

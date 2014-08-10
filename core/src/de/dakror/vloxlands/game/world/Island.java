@@ -21,12 +21,18 @@ import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.creature.Creature;
+import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
+import de.dakror.vloxlands.game.item.Item;
+import de.dakror.vloxlands.game.item.inv.Inventory;
+import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.generate.biome.BiomeType;
 import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
+import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.interf.Tickable;
@@ -35,7 +41,7 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Island implements RenderableProvider, Tickable, Savable
+public class Island implements RenderableProvider, Tickable, Savable, InventoryListener
 {
 	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
@@ -46,6 +52,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public FrameBuffer fbo;
 	public Vector3 index, pos;
 	public Chunk[] chunks;
+	public ResourceList totalResources;
 	
 	public int visibleChunks;
 	public int loadedChunks;
@@ -64,6 +71,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	
 	boolean minimapMode;
 	boolean inFrustum;
+	boolean resourceListUpdateRequested;
 	
 	public Island(BiomeType biome)
 	{
@@ -73,6 +81,8 @@ public class Island implements RenderableProvider, Tickable, Savable
 		minimapMode = false;
 		index = new Vector3();
 		pos = new Vector3();
+		
+		totalResources = new ResourceList();
 	}
 	
 	public void setPos(Vector3 pos)
@@ -148,10 +158,23 @@ public class Island implements RenderableProvider, Tickable, Savable
 			if (e.isMarkedForRemoval())
 			{
 				e.selected = false;
-				for (SelectionListener sl : GameLayer.instance.listeners)
-					sl.onStructureSelection(null, true);
+				if (e instanceof Structure)
+				{
+					for (SelectionListener sl : GameLayer.instance.listeners)
+						sl.onStructureSelection(null, true);
+					
+					totalResources.decreaseCostBuildings();
+				}
+				else if (e instanceof Creature)
+				{
+					for (SelectionListener sl : GameLayer.instance.listeners)
+						sl.onCreatureSelection(null, true);
+					
+					if (e instanceof Human) totalResources.decreaseCostPopulation();
+				}
 				e.dispose();
 				entities.remove(e);
+				
 			}
 			else if (e.isSpawned())
 			{
@@ -182,6 +205,7 @@ public class Island implements RenderableProvider, Tickable, Savable
 	public void addEntity(Entity s, boolean user, boolean clearArea)
 	{
 		s.setIsland(this);
+		if (s instanceof Structure) ((Structure) s).getInnerInventory().addListener(this);
 		s.getTransform().translate(pos);
 		entities.add(s);
 		s.onSpawn();
@@ -462,6 +486,30 @@ public class Island implements RenderableProvider, Tickable, Savable
 		}
 	}
 	
+	@Override
+	public void onItemAdded(int countBefore, Item item, Inventory inventory)
+	{
+		if (item != null)
+		{
+			int delta = inventory.getCount() - countBefore;
+			totalResources.add(item, delta);
+		}
+		
+		totalResources.print();
+	}
+	
+	@Override
+	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
+	{
+		if (item != null)
+		{
+			int delta = countBefore - inventory.getCount();
+			totalResources.remove(item, delta);
+		}
+		
+		totalResources.print();
+	}
+	
 	// -- voxel queries -- //
 	
 	public boolean isSurrounded(float x, float y, float z, boolean opaque)
@@ -575,5 +623,4 @@ public class Island implements RenderableProvider, Tickable, Savable
 		
 		Bits.putInt(baos, entities.size());
 	}
-	
 }
