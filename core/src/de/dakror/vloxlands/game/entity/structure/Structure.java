@@ -28,11 +28,13 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
@@ -228,6 +230,14 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		inventory.addListener(this);
 		buildInventory.addListener(this);
+		
+		for (Entity e : island.getEntities())
+		{
+			if (e instanceof Creature && ((Creature) e).path != null)
+			{
+				((Creature) e).path = AStar.findPath(((Creature) e).getVoxelBelow(), ((Creature) e).path.getGhostTarget() != null ? ((Creature) e).path.getGhostTarget() : ((Creature) e).path.getLast(), (Creature) e, ((Creature) e).path.getGhostTarget() != null);
+			}
+		}
 		
 		tickRequestsEnabled = true;
 		if (!built)
@@ -709,6 +719,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		task.setOrigin(this);
 		taskQueue.add(task);
-		if (taskQueue.size == 1) taskTicksLeft = task.getDuration();
+		if (taskQueue.size == 1)
+		{
+			taskTicksLeft = task.getDuration();
+			task.enter();
+		}
 	}
 }

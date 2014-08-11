@@ -139,7 +139,6 @@ public class Human extends Creature
 		{
 			if (j.isActive())
 			{
-				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
 				
 				if (!j.isDone()) j.tick(tick);
 				else
@@ -155,7 +154,11 @@ public class Human extends Creature
 					}
 				}
 			}
-			else j.trigger(tick);
+			else
+			{
+				j.trigger(tick);
+				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
+			}
 		}
 	}
 	

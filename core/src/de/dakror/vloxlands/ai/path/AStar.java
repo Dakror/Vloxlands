@@ -51,11 +51,11 @@ public class AStar
 		takeNeighbor = false;
 		for (Entity e : c.getIsland().getEntities())
 		{
-			if (e instanceof Human)
+			if (e instanceof Human && e != c)
 			{
 				if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
 				{
-					Path p = ((Human) e).path != null ? ((Human) e).path : ((WalkJob) ((Human) e).firstJob()).getPath();
+					Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
 					if (p.getLast().equals(to) || (p.ghostTarget != null && p.ghostTarget.equals(to)))
 					{
 						takeNeighbor = true;
@@ -181,37 +181,51 @@ public class AStar
 						{
 							for (Entity e : c.getIsland().getEntities())
 							{
-								if (!(e instanceof Structure)) continue;
-								e.getWorldBoundingBox(b);
-								
-								b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
-								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
-								b2.set(b2.min, b2.max);
-								if (b.intersects(b2))
+								if (e instanceof Human && e != c)
 								{
-									free = false;
-									break;
+									if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
+									{
+										Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
+										if (p.getLast().equals(v) || (p.ghostTarget != null && p.ghostTarget.equals(v)))
+										{
+											free = false;
+											break;
+										}
+									}
 								}
-								if (x != 0 && z != 0 && free)
+								else if (e instanceof Structure)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
+									e.getWorldBoundingBox(b);
+									
+									b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
-									
 									if (b.intersects(b2))
 									{
 										free = false;
 										break;
 									}
-									
-									b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
-									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
-									b2.set(b2.min, b2.max);
-									
-									if (b.intersects(b2))
+									if (x != 0 && z != 0 && free)
 									{
-										free = false;
-										break;
+										b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
+										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
+										b2.set(b2.min, b2.max);
+										
+										if (b.intersects(b2))
+										{
+											free = false;
+											break;
+										}
+										
+										b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
+										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
+										b2.set(b2.min, b2.max);
+										
+										if (b.intersects(b2))
+										{
+											free = false;
+											break;
+										}
 									}
 								}
 							}
