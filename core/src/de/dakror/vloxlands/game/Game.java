@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.layer;
+package de.dakror.vloxlands.game;
 
 import java.util.Random;
 
@@ -47,6 +47,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.D;
@@ -59,14 +60,14 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
  * @author Dakror
  */
 @SuppressWarnings("deprecation")
-public class GameLayer extends Layer
+public class Game extends Layer
 {
 	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
-	public static GameLayer instance;
+	public static Game instance;
 	
 	public static World world;
 	public static Camera camera;

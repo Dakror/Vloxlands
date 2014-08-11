@@ -16,8 +16,8 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
@@ -253,11 +253,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					
 					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
 					
-					GameLayer.instance.tmp3.set(GameLayer.instance.tmp1.cpy().add(x, y, z));
-					GameLayer.instance.tmp4.set(GameLayer.instance.tmp3.cpy().add(1, 1, 1));
-					GameLayer.instance.bb2.set(GameLayer.instance.tmp3, GameLayer.instance.tmp4);
+					Game.instance.tmp3.set(Game.instance.tmp1.cpy().add(x, y, z));
+					Game.instance.tmp4.set(Game.instance.tmp3.cpy().add(1, 1, 1));
+					Game.instance.bb2.set(Game.instance.tmp3, Game.instance.tmp4);
 					
-					if (Intersector.intersectRayBounds(ray, GameLayer.instance.bb2, is))
+					if (Intersector.intersectRayBounds(ray, Game.instance.bb2, is))
 					{
 						float dist = ray.origin.dst(is);
 						if (voxel == null || (dist = ray.origin.dst(is)) < distance)
@@ -372,7 +372,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	@Override
 	public void tick(int tick)
 	{
-		if (!inFrustum && loaded && drawn && GameLayer.instance.activeIsland != island)
+		if (!inFrustum && loaded && drawn && Game.instance.activeIsland != island)
 		{
 			ticksInvisible++;
 			if (ticksInvisible > UNLOAD_TICKS + random) requestsUnload = true;

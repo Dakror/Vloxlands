@@ -32,6 +32,7 @@ import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.ai.task.Task;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
 import de.dakror.vloxlands.game.entity.creature.Creature;
@@ -43,7 +44,6 @@ import de.dakror.vloxlands.game.item.inv.ManagedInventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
@@ -413,7 +413,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		if (msg.message == MessageType.YOU_ARE_DISMANTLED.ordinal())
 		{
 			kill();
-			Vector3 p = GameLayer.instance.activeIsland.pos;
+			Vector3 p = Game.instance.activeIsland.pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			island.addEntity(i, false, false);
 			return true;
@@ -689,7 +689,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					if (!GameLayer.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					if (!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
 					
 					for (Byte b : copy.getCosts().getAll())
 					{
@@ -705,7 +705,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				@Override
 				public boolean act(float delta)
 				{
-					s.setDisabled(!GameLayer.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
+					s.setDisabled(!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
 					return false;
 				}
 			});

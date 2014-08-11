@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -31,7 +32,6 @@ import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.generate.biome.BiomeType;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.event.SelectionListener;
@@ -143,11 +143,11 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		
 		float delta = getDelta();
 		
-		if (GameLayer.instance.activeIsland == this && delta != 0)
+		if (Game.instance.activeIsland == this && delta != 0)
 		{
-			GameLayer.camera.position.y += delta;
-			GameLayer.instance.controller.target.y += delta;
-			GameLayer.camera.update();
+			Game.camera.position.y += delta;
+			Game.instance.controller.target.y += delta;
+			Game.camera.update();
 		}
 		pos.y += delta;
 		
@@ -161,14 +161,14 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 				e.selected = false;
 				if (e instanceof Structure)
 				{
-					for (SelectionListener sl : GameLayer.instance.listeners)
+					for (SelectionListener sl : Game.instance.listeners)
 						sl.onStructureSelection(null, true);
 					
 					totalResources.decreaseCostBuildings();
 				}
 				else if (e instanceof Creature)
 				{
-					for (SelectionListener sl : GameLayer.instance.listeners)
+					for (SelectionListener sl : Game.instance.listeners)
 						sl.onCreatureSelection(null, true);
 					
 					if (e instanceof Human) totalResources.decreaseCostPopulation();
@@ -184,7 +184,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			}
 		}
 		
-		inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
+		inFrustum = Game.camera.frustum.boundsInFrustum(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2, SIZE / 2, SIZE / 2, SIZE / 2);
 	}
 	
 	public void update(float delta)
@@ -269,9 +269,9 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		
 		if (chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].set(x1, y1, z1, id, force))
 		{
-			if (GameLayer.instance.activeIsland == this && id == Voxel.get("AIR").getId() && x == GameLayer.instance.selectedVoxel.x && y == GameLayer.instance.selectedVoxel.y && z == GameLayer.instance.selectedVoxel.z)
+			if (Game.instance.activeIsland == this && id == Voxel.get("AIR").getId() && x == Game.instance.selectedVoxel.x && y == Game.instance.selectedVoxel.y && z == Game.instance.selectedVoxel.z)
 			{
-				GameLayer.instance.selectedVoxel.set(-1, 0, 0);
+				Game.instance.selectedVoxel.set(-1, 0, 0);
 			}
 			if (notify) notifySurroundingChunks(chunkX, chunkY, chunkZ);
 		}
@@ -349,7 +349,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			if (s.inFrustum || minimapMode)
 			{
 				s.render(batch, environment, minimapMode);
-				if (!minimapMode) GameLayer.world.visibleEntities++;
+				if (!minimapMode) Game.world.visibleEntities++;
 			}
 		}
 	}
@@ -358,19 +358,19 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	{
 		renderEntities(batch, environment, false);
 		
-		if (GameLayer.instance.activeIsland == this && GameLayer.instance.selectedVoxel.x > -1)
+		if (Game.instance.activeIsland == this && Game.instance.selectedVoxel.x > -1)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			GameLayer.shapeRenderer.setProjectionMatrix(GameLayer.camera.combined);
-			GameLayer.shapeRenderer.identity();
-			GameLayer.shapeRenderer.translate(pos.x + GameLayer.instance.selectedVoxel.x, pos.y + GameLayer.instance.selectedVoxel.y, pos.z + GameLayer.instance.selectedVoxel.z + 1);
-			GameLayer.shapeRenderer.begin(ShapeType.Line);
-			GameLayer.shapeRenderer.setColor(Color.WHITE);
-			GameLayer.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
-			GameLayer.shapeRenderer.end();
+			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Game.shapeRenderer.identity();
+			Game.shapeRenderer.translate(pos.x + Game.instance.selectedVoxel.x, pos.y + Game.instance.selectedVoxel.y, pos.z + Game.instance.selectedVoxel.z + 1);
+			Game.shapeRenderer.begin(ShapeType.Line);
+			Game.shapeRenderer.setColor(Color.WHITE);
+			Game.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
+			Game.shapeRenderer.end();
 		}
 		
-		if (((tick % 60 == 0 && GameLayer.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
+		if (((tick % 60 == 0 && Game.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
 		{
 			if (fbo == null || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 			
@@ -378,19 +378,19 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			Gdx.gl.glClearColor(0.5f, 0.8f, 0.85f, 0);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			
-			GameLayer.instance.minimapCamera.position.set(pos);
-			((OrthographicCamera) GameLayer.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
-			GameLayer.instance.minimapCamera.translate(0, SIZE, 0);
-			GameLayer.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
-			GameLayer.instance.minimapCamera.translate(0, 5, 0);
-			GameLayer.instance.minimapCamera.update();
+			Game.instance.minimapCamera.position.set(pos);
+			((OrthographicCamera) Game.instance.minimapCamera).zoom = 0.05f * Math.max(0.5f, Island.SIZE / 32f) / (Gdx.graphics.getWidth() / 1920f);
+			Game.instance.minimapCamera.translate(0, SIZE, 0);
+			Game.instance.minimapCamera.lookAt(pos.x + SIZE / 2, pos.y + SIZE / 2, pos.z + SIZE / 2);
+			Game.instance.minimapCamera.translate(0, 5, 0);
+			Game.instance.minimapCamera.update();
 			
 			minimapMode = true;
 			
-			GameLayer.instance.minimapBatch.begin(GameLayer.instance.minimapCamera);
-			GameLayer.instance.minimapBatch.render(this, GameLayer.instance.minimapEnv);
-			renderEntities(GameLayer.instance.minimapBatch, GameLayer.instance.minimapEnv, true);
-			GameLayer.instance.minimapBatch.end();
+			Game.instance.minimapBatch.begin(Game.instance.minimapCamera);
+			Game.instance.minimapBatch.render(this, Game.instance.minimapEnv);
+			renderEntities(Game.instance.minimapBatch, Game.instance.minimapEnv, true);
+			Game.instance.minimapBatch.end();
 			fbo.end();
 			initFBO = wasDrawnOnce();
 			minimapMode = false;
@@ -432,7 +432,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			
 			if (!chunk.onceLoaded) chunk.load();
 			
-			if (minimapMode || (chunk.inFrustum = GameLayer.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
+			if (minimapMode || (chunk.inFrustum = Game.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
 				if (!chunk.loaded && !minimapMode) chunk.load();
 				

@@ -10,8 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -25,24 +25,24 @@ public class Minimap extends Group
 		setBounds(Gdx.graphics.getWidth() - 250, Gdx.graphics.getHeight() - 250, 250, 250);
 		setOrigin(getX(), getY());
 		
-		float w1 = getWidth() / ((GameLayer.world.getWidth() + GameLayer.world.getDepth())) * 2;
+		float w1 = getWidth() / ((Game.world.getWidth() + Game.world.getDepth())) * 2;
 		
 		float width = w1;
 		float height = width / aspect;
 		
-		float mapWidth = width / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
-		float mapHeight = height / 2 * (GameLayer.world.getWidth() + GameLayer.world.getDepth());
+		float mapWidth = width / 2 * (Game.world.getWidth() + Game.world.getDepth());
+		float mapHeight = height / 2 * (Game.world.getWidth() + Game.world.getDepth());
 		
-		for (Island island : GameLayer.world.getIslands())
+		for (Island island : Game.world.getIslands())
 		{
 			if (island != null)
 			{
-				int ix = (int) (GameLayer.world.getWidth() - island.index.x);
+				int ix = (int) (Game.world.getWidth() - island.index.x);
 				
 				float x = width / 2 * (ix + island.index.z);
 				float y = height / 2 * (ix - island.index.z);
 				MinimapIsland mi = new MinimapIsland(island);
-				mi.setBounds(x + (getWidth() - mapWidth) / 2 - width / 2, -y + height / 2 * GameLayer.world.getWidth() + (getHeight() - mapHeight) / 2, width, height);
+				mi.setBounds(x + (getWidth() - mapWidth) / 2 - width / 2, -y + height / 2 * Game.world.getWidth() + (getHeight() - mapHeight) / 2, width, height);
 				addActor(mi);
 			}
 		}
@@ -60,10 +60,10 @@ public class Minimap extends Group
 				Actor actor = hit(x, y, true);
 				if (actor != null && actor instanceof MinimapIsland)
 				{
-					if (GameLayer.instance.cursorStructure == null && !GameLayer.instance.regionSelectionMode)
+					if (Game.instance.cursorStructure == null && !Game.instance.regionSelectionMode)
 					{
 						((MinimapIsland) actor).active = true;
-						GameLayer.instance.focusIsland(((MinimapIsland) actor).island, false);
+						Game.instance.focusIsland(((MinimapIsland) actor).island, false);
 					}
 				}
 				return false;

@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
 import de.dakror.vloxlands.util.D;
@@ -52,7 +53,7 @@ public class LoadingLayer extends Layer
 			}
 			if (!worldGen)
 			{
-				Vloxlands.instance.addLayer(new GameLayer());
+				Vloxlands.instance.addLayer(new Game());
 				worldGenerator.start();
 				worldGen = true;
 			}
@@ -61,7 +62,7 @@ public class LoadingLayer extends Layer
 				Vloxlands.instance.addLayer(new HudLayer());
 				if (D.android()) Vloxlands.instance.addLayer(new DebugLayer());
 				Vloxlands.instance.removeLayer(this);
-				GameLayer.instance.doneLoading();
+				Game.instance.doneLoading();
 				return;
 			}
 		}

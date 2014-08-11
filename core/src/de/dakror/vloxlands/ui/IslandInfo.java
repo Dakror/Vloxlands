@@ -8,8 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -34,13 +34,13 @@ public class IslandInfo extends Group
 			@Override
 			public boolean act(float d)
 			{
-				biome.setText(GameLayer.instance.activeIsland.getBiome().getName() + " Island");
+				biome.setText(Game.instance.activeIsland.getBiome().getName() + " Island");
 				biome.setPosition((500 - biome.getTextBounds().width) / 2f, 60);
 				
-				delta.setText("Moving by " + String.format("%2.2f", GameLayer.instance.activeIsland.getDeltaPerSecond()) + " m/s");
+				delta.setText("Moving by " + String.format("%2.2f", Game.instance.activeIsland.getDeltaPerSecond()) + " m/s");
 				delta.setPosition(10, 20);
 				
-				height.setText("Currrent Height: " + String.format("%2.2f", GameLayer.instance.activeIsland.pos.y + Island.SIZE / 2) + " m");
+				height.setText("Currrent Height: " + String.format("%2.2f", Game.instance.activeIsland.pos.y + Island.SIZE / 2) + " m");
 				height.setPosition(490 - height.getTextBounds().width, 20);
 				return false;
 			}

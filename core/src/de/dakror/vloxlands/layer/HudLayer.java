@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -49,7 +50,7 @@ public class HudLayer extends Layer implements SelectionListener
 	public void show()
 	{
 		modal = true;
-		GameLayer.instance.addListener(this);
+		Game.instance.addListener(this);
 		
 		stage = new Stage(new ScreenViewport());
 		
@@ -77,7 +78,7 @@ public class HudLayer extends Layer implements SelectionListener
 	public void dispose()
 	{
 		super.dispose();
-		GameLayer.instance.removeListener(this);
+		Game.instance.removeListener(this);
 	}
 	
 	public void addActionsMenu()
@@ -255,9 +256,9 @@ public class HudLayer extends Layer implements SelectionListener
 				float width = Math.abs(dragStart.x - dragEnd.x) / Gdx.graphics.getWidth();
 				float height = Math.abs(dragStart.y - dragEnd.y) / Gdx.graphics.getHeight();
 				
-				GameLayer.instance.selectionBox(new Rectangle(x, y, width, height));
+				Game.instance.selectionBox(new Rectangle(x, y, width, height));
 				
-				GameLayer.instance.activeAction = "";
+				Game.instance.activeAction = "";
 			}
 			dragStart.set(-1, -1);
 			dragEnd.set(-1, -1);
@@ -276,7 +277,7 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if ((!D.android() && buttonDown == Buttons.LEFT) || GameLayer.instance.activeAction.equals("rect|android"))
+		if ((!D.android() && buttonDown == Buttons.LEFT) || Game.instance.activeAction.equals("rect|android"))
 		{
 			if (dragStart.x == -1)
 			{

@@ -13,6 +13,7 @@ import de.dakror.vloxlands.ai.job.DismantleJob;
 import de.dakror.vloxlands.ai.job.PickupJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -20,7 +21,6 @@ import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 
 public enum HelperState implements State<Human>
@@ -80,7 +80,7 @@ public enum HelperState implements State<Human>
 				}
 				else human.queueJob(p, pj);
 				
-				PathBundle pb = GameLayer.world.query(new Query(human).structure(true).searchClass(Warehouse.class).node(NodeType.deposit).start(p.getLast()).capacityForTransported(true).transport(is));
+				PathBundle pb = Game.world.query(new Query(human).structure(true).searchClass(Warehouse.class).node(NodeType.deposit).start(p.getLast()).capacityForTransported(true).transport(is));
 				if (pb != null) human.queueJob(pb.path, new DepositJob(human, pb.structure, false));
 				else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a Warehouse to deposit stuff!");
 			}
@@ -114,7 +114,7 @@ public enum HelperState implements State<Human>
 				
 				queue = StateTools.equipTool(human, pj.getTool(), queue, pathStart);
 				
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()));
+				PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()));
 				if (pb != null)
 				{
 					target.getBuildInventory().manageNext();
