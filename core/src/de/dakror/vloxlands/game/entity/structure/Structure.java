@@ -16,12 +16,15 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
@@ -584,27 +587,96 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			}
 		});
 		
+		style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style.imageUp = Vloxlands.skin.getDrawable("queue");
+		style.imageUp.setMinWidth(ItemSlot.size);
+		style.imageUp.setMinHeight(ItemSlot.size);
+		style.imageDown = Vloxlands.skin.getDrawable("queue");
+		style.imageDown.setMinWidth(ItemSlot.size);
+		style.imageDown.setMinHeight(ItemSlot.size);
+		final TooltipImageButton queue = new TooltipImageButton(style);
+		window.getStage().addActor(queue.getTooltip());
+		ClickListener cl = new ClickListener()
+		{
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Actor actor = window.findActor("TaskWrap");
+				Cell<Actor> cell = window.getCell(actor);
+				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
+				actor.setVisible(!actor.isVisible());
+				window.invalidateHierarchy();
+				window.pack();
+			}
+		};
+		queue.addListener(cl);
+		queue.pad(4);
+		queue.getTooltip().set("Task Queue", "Toggle Task Queue display");
+		queue.setDisabled(tasks.size == 0);
+		
+		
 		Table rightSide = new Table(Vloxlands.skin);
 		rightSide.row();
-		rightSide.add(capacity).colspan(2);
+		rightSide.add(capacity).colspan(3);
 		rightSide.row().spaceTop(5);
 		rightSide.add(dismantle);
 		rightSide.add(sleep);
+		rightSide.add(queue);
 		
 		return rightSide;
 	}
 	
-	protected void setupUI(PinnableWindow window, Object... params)
+	protected void setupTaskQueueUI(final PinnableWindow window, Object... params)
 	{
-		window.add(getDefaultTable(window)).top().width(200);
+		final VerticalGroup tasks = new VerticalGroup();
+		tasks.left();
+		tasks.addAction(new Action()
+		{
+			@Override
+			public boolean act(float delta)
+			{
+				if (taskQueue.size != tasks.getChildren().size)
+				{
+					int size = tasks.getChildren().size;
+					for (Actor a : tasks.getChildren())
+					{
+						if (taskQueue.size < size)
+						{
+							a.remove();
+							size--;
+						}
+					}
+					
+					for (int i = Math.max(0, size - 1); i < taskQueue.size; i++)
+					{
+						Label l = new Label(taskQueue.get(i).getTitle(), Vloxlands.skin);
+						tasks.addActor(l);
+					}
+				}
+				return false;
+			}
+		});
+		
+		window.row().right().pad(5, 0, 5, 0).colspan(50).fillX();
+		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
+		tasksWrap.setScrollbarsOnTop(false);
+		tasksWrap.setFadeScrollBars(false);
+		tasksWrap.setVisible(false);
+		tasksWrap.setName("TaskWrap");
+		window.add(tasksWrap).height(0);
 	}
+	
+	protected void setupUI(PinnableWindow window, Object... params)
+	{}
 	
 	@Override
 	public final void setUI(PinnableWindow window, Object... params)
 	{
 		if (isBuilt())
 		{
+			setupTaskQueueUI(window, params);
 			setupUI(window, params);
+			window.add(getDefaultTable(window)).width(200);
 		}
 		else
 		{

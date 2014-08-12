@@ -40,6 +40,8 @@ public class Warehouse extends Structure
 	@Override
 	protected void setupUI(final PinnableWindow window, Object... params)
 	{
+		super.setupUI(window);
+		
 		final VerticalGroup items = new VerticalGroup();
 		items.left();
 		items.addAction(new Action()
@@ -73,7 +75,5 @@ public class Warehouse extends Structure
 		itemsWrap.setScrollbarsOnTop(false);
 		itemsWrap.setFadeScrollBars(false);
 		window.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
-		
-		super.setupUI(window);
 	}
 }
