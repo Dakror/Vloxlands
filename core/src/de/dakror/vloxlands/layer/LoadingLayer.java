@@ -49,6 +49,7 @@ public class LoadingLayer extends Layer
 				Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
 				Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
 				Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
+				Vloxlands.skin.add("progressBar", Vloxlands.assets.get("img/gui/progressBar.png", Texture.class));
 				iconsSet = true;
 			}
 			if (!worldGen)
@@ -113,6 +114,7 @@ public class LoadingLayer extends Layer
 		stage.addActor(logo);
 		
 		Vloxlands.assets.load("img/icons.png", Texture.class);
+		Vloxlands.assets.load("img/gui/progressBar.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);

@@ -50,6 +50,7 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
+import de.dakror.vloxlands.ui.TaskListItem;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
@@ -647,11 +648,17 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 						}
 					}
 					
-					for (int i = Math.max(0, size - 1); i < taskQueue.size; i++)
+					for (int i = size; i < taskQueue.size; i++)
 					{
-						Label l = new Label(taskQueue.get(i).getTitle(), Vloxlands.skin);
+						final TaskListItem l = new TaskListItem(taskQueue.get(i).getTitle(), Vloxlands.skin);
+						l.setWrap(true);
+						l.setWidth(tasks.getWidth());
+						l.structure = Structure.this;
 						tasks.addActor(l);
 					}
+					
+					for (int i = 0; i < tasks.getChildren().size; i++)
+						tasks.getChildren().get(i).setUserObject(i);
 				}
 				return false;
 			}
@@ -796,5 +803,16 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			taskTicksLeft = task.getDuration();
 			task.enter();
 		}
+	}
+	
+	public Task firstTask()
+	{
+		if (taskQueue.size == 0) return null;
+		return taskQueue.first();
+	}
+	
+	public int getTaskTicksLeft()
+	{
+		return taskTicksLeft;
 	}
 }
