@@ -7,8 +7,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.InventoryListener;
+import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
@@ -35,10 +35,9 @@ public class Inventory implements Savable
 	
 	public void clear()
 	{
+		dispatchItemRemoved(count, null);
 		stacks.clear();
-		int oldCount = count;
 		count = 0;
-		dispatchItemRemoved(oldCount);
 	}
 	
 	public ItemStack add(ItemStack stack)
@@ -102,7 +101,7 @@ public class Inventory implements Savable
 		}
 		
 		count -= is.getAmount();
-		dispatchItemRemoved(oldCount);
+		dispatchItemRemoved(oldCount, item);
 		return is;
 	}
 	
@@ -136,7 +135,7 @@ public class Inventory implements Savable
 		
 		count += amount2;
 		
-		dispatchItemAdded(oldCount);
+		dispatchItemAdded(oldCount, stack.getItem());
 	}
 	
 	public boolean contains(ItemStack stack)
@@ -189,16 +188,16 @@ public class Inventory implements Savable
 		this.capacity = capacity;
 	}
 	
-	protected void dispatchItemAdded(int countBefore)
+	protected void dispatchItemAdded(int countBefore, Item item)
 	{
 		for (InventoryListener isl : listeners)
-			isl.onItemAdded(countBefore, this);
+			isl.onItemAdded(countBefore, item, this);
 	}
 	
-	protected void dispatchItemRemoved(int countBefore)
+	protected void dispatchItemRemoved(int countBefore, Item item)
 	{
 		for (InventoryListener isl : listeners)
-			isl.onItemRemoved(countBefore, this);
+			isl.onItemRemoved(countBefore, item, this);
 	}
 	
 	public void addListener(InventoryListener listener)

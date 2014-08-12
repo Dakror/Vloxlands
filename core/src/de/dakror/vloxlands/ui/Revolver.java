@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 
-import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.game.Game;
 
 /**
  * @author Dakror
@@ -30,6 +30,7 @@ public class Revolver extends Group
 		float radius = getRadius(level);
 		float degrees = getDegrees(amount, level);
 		
+		slot.revolver = this;
 		slot.setUserObject(level);
 		slot.addListener(new InputListener()
 		{
@@ -77,9 +78,9 @@ public class Revolver extends Group
 				if (g != null) g.setVisible(true);
 				if (g == null)
 				{
-					GameLayer.instance.action(slot.getName());
+					Game.instance.action(slot.getName());
 				}
-				else GameLayer.instance.activeAction = "";
+				else Game.instance.activeAction = "";
 				
 				slot.setChecked(false);
 			}
@@ -122,5 +123,11 @@ public class Revolver extends Group
 		}
 		
 		return (Group) getChildren().get(level);
+	}
+	
+	public void removeGroup(String parent)
+	{
+		Actor a = findActor(parent);
+		if (!(a instanceof RevolverSlot)) a.remove();
 	}
 }

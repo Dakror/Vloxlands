@@ -29,10 +29,9 @@ public class ChopJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
+		human.getIsland().set(target.x, target.y + meta - 1, target.z, Voxel.get("AIR").getId());
 		
-		human.getIsland().set(target.x, target.y + meta, target.z, Voxel.get("AIR").getId());
-		
-		if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(Voxel.get("WOOD").getItemdrop()), 1));
-		else human.getCarryingItemStack().add(1);
+		if (human.getCarryingItemStack().isNull()) human.setCarryingItemStack(new ItemStack(Item.getForId(Voxel.get("WOOD").getItemdrop()), 2));
+		else human.getCarryingItemStack().add(2);
 	}
 }

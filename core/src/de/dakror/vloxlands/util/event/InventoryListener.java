@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.util.event;
 
+import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 
 /**
@@ -7,7 +8,7 @@ import de.dakror.vloxlands.game.item.inv.Inventory;
  */
 public interface InventoryListener
 {
-	public void onItemAdded(int countBefore, Inventory inventory);
+	public void onItemAdded(int countBefore, Item item, Inventory inventory);
 	
-	public void onItemRemoved(int countBefore, Inventory inventory);
+	public void onItemRemoved(int countBefore, Item item, Inventory inventory);
 }

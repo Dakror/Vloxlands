@@ -2,7 +2,7 @@ package de.dakror.vloxlands.render;
 
 import com.badlogic.gdx.utils.Array;
 
-import de.dakror.vloxlands.util.Meshable;
+import de.dakror.vloxlands.util.interf.Meshable;
 
 /**
  * @author Dakror

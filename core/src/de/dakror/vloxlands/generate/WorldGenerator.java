@@ -2,8 +2,8 @@ package de.dakror.vloxlands.generate;
 
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
 
 /**
  * @author Dakror
@@ -21,13 +21,13 @@ public class WorldGenerator extends Thread
 	@Override
 	public void run()
 	{
-		for (int i = 0; i < GameLayer.world.getWidth(); i++)
+		for (int i = 0; i < Game.world.getWidth(); i++)
 		{
-			for (int j = 0; j < GameLayer.world.getDepth(); j++)
+			for (int j = 0; j < Game.world.getDepth(); j++)
 			{
 				Island island = IslandGenerator.generate(this);
 				island.setPos(new Vector3(i * Island.SIZE, island.pos.y, j * Island.SIZE));
-				GameLayer.world.addIsland(i, j, island);
+				Game.world.addIsland(i, j, island);
 			}
 		}
 		done = true;
@@ -35,7 +35,7 @@ public class WorldGenerator extends Thread
 	
 	public void step()
 	{
-		int total = GameLayer.world.getWidth() * GameLayer.world.getDepth() * 6;
+		int total = Game.world.getWidth() * Game.world.getDepth() * 6;
 		progress += 1f / total;
 	}
 }

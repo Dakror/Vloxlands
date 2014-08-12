@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
-import de.dakror.vloxlands.util.ResourceListProvider;
+import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
 /**
  * @author Dakror
@@ -35,7 +35,7 @@ public class ResourceListTooltip extends Tooltip
 		l.setWrap(true);
 		add(l).width(200);
 		
-		ResourceList rl = provider.getResourceList();
+		ResourceList rl = provider.getCosts();
 		
 		l = new Label("Costs", Vloxlands.skin);
 		row();
@@ -43,10 +43,10 @@ public class ResourceListTooltip extends Tooltip
 		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		
-		for (Byte b : provider.getResourceList().getAll())
+		for (Byte b : provider.getCosts().getAll())
 		{
 			Item item = Item.getForId(b);
-			addItem(tex, provider.getResourceList().get(b) + "", item.getIconX(), item.getIconY());
+			addItem(tex, provider.getCosts().get(b) + "", item.getIconX(), item.getIconY());
 		}
 		
 		if (rl.getCostPopulation() > 0) addItem(tex, rl.getCostPopulation() + "", 3, 6);

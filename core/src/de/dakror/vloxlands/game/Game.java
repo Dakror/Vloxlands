@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.layer;
+package de.dakror.vloxlands.game;
 
 import java.util.Random;
 
@@ -47,6 +47,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
+import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.render.MeshingThread;
 import de.dakror.vloxlands.util.D;
@@ -59,14 +60,14 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
  * @author Dakror
  */
 @SuppressWarnings("deprecation")
-public class GameLayer extends Layer
+public class Game extends Layer
 {
 	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
-	public static GameLayer instance;
+	public static Game instance;
 	
 	public static World world;
 	public static Camera camera;
@@ -230,12 +231,12 @@ public class GameLayer extends Layer
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.setBuilt(true);
-		tc.getInventory().add(new ItemStack(Item.get("AXE"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("HAMMER"), 5));
-		tc.getInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		instance.activeIsland.addEntity(tc, false, true);
+		tc.getInnerInventory().add(new ItemStack(Item.get("AXE"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("HAMMER"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		
 		doneLoading = true;
 	}
@@ -517,6 +518,11 @@ public class GameLayer extends Layer
 						sl.onCreatureSelection((Creature) selectedEntity, lmb);
 				}
 			}
+			else
+			{
+				for (SelectionListener sl : listeners)
+					sl.onNoSelection(lmb);
+			}
 		}
 	}
 	
@@ -771,18 +777,18 @@ public class GameLayer extends Layer
 	{
 		if (action.contains("|region"))
 		{
-			GameLayer.instance.selectionStartVoxel.set(-1, 0, 0);
-			GameLayer.instance.selectedVoxel.set(-1, 0, 0);
-			GameLayer.instance.regionSelectionMode = true;
+			selectionStartVoxel.set(-1, 0, 0);
+			selectedVoxel.set(-1, 0, 0);
+			regionSelectionMode = true;
 		}
 		if (action.contains("entity"))
 		{
 			String s = action.replace("entity:", "");
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
-			if (!(e instanceof Structure)) Gdx.app.error("Revolver$1.touchUp", "Cant cast " + s + " to a Structure!");
+			if (!(e instanceof Structure)) Gdx.app.error("GameLayer.action", "Cant cast " + s + " to Structure!");
 			((Structure) e).setBuilt(true);
 			((Structure) e).tickRequestsEnabled = false;
-			GameLayer.instance.cursorStructure = (Structure) e;
+			cursorStructure = (Structure) e;
 		}
 		
 		activeAction = action;

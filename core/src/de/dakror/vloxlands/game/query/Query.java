@@ -6,6 +6,7 @@ import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.ItemStack;
+import de.dakror.vloxlands.game.world.Island;
 
 /**
  * @author Dakror
@@ -48,24 +49,26 @@ public class Query
 	public Creature sourceCreature;
 	public Structure sourceStructure;
 	public Vector3 pathStart;
-	public int island;
+	public Island island;
 	
 	private Query()
 	{
 		closest(true);
-		island = -1;
+		island = null;
 	}
 	
 	public Query(Creature sourceCreature)
 	{
 		this();
 		this.sourceCreature = sourceCreature;
+		island = sourceCreature.getIsland();
 	}
 	
 	public Query(Structure sourceStructure)
 	{
 		this();
 		this.sourceStructure = sourceStructure;
+		island = sourceStructure.getIsland();
 	}
 	
 	public Query start(Vector3 pathStart)
@@ -74,7 +77,7 @@ public class Query
 		return this;
 	}
 	
-	public Query island(int island)
+	public Query island(Island island)
 	{
 		this.island = island;
 		return this;

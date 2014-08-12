@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
 import de.dakror.vloxlands.util.D;
@@ -48,11 +49,12 @@ public class LoadingLayer extends Layer
 				Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
 				Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
 				Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
+				Vloxlands.skin.add("progressBar", Vloxlands.assets.get("img/gui/progressBar.png", Texture.class));
 				iconsSet = true;
 			}
 			if (!worldGen)
 			{
-				Vloxlands.instance.addLayer(new GameLayer());
+				Vloxlands.instance.addLayer(new Game());
 				worldGenerator.start();
 				worldGen = true;
 			}
@@ -61,7 +63,7 @@ public class LoadingLayer extends Layer
 				Vloxlands.instance.addLayer(new HudLayer());
 				if (D.android()) Vloxlands.instance.addLayer(new DebugLayer());
 				Vloxlands.instance.removeLayer(this);
-				GameLayer.instance.doneLoading();
+				Game.instance.doneLoading();
 				return;
 			}
 		}
@@ -112,6 +114,7 @@ public class LoadingLayer extends Layer
 		stage.addActor(logo);
 		
 		Vloxlands.assets.load("img/icons.png", Texture.class);
+		Vloxlands.assets.load("img/gui/progressBar.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);

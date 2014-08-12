@@ -14,6 +14,10 @@ public class Path
 	 * If the target is not walkable (e.g. a embeded resource in the ground) this is the actual target.
 	 */
 	Vector3 ghostTarget;
+	/**
+	 * If the target is already targeted by others this is the actual target
+	 */
+	Vector3 realTarget;
 	
 	int index;
 	
@@ -90,5 +94,15 @@ public class Path
 	public void setGhostTarget(Vector3 ghostTarget)
 	{
 		this.ghostTarget = ghostTarget;
+	}
+	
+	public Vector3 getRealTarget()
+	{
+		return realTarget;
+	}
+	
+	public void setRealTarget(Vector3 realTarget)
+	{
+		this.realTarget = realTarget;
 	}
 }

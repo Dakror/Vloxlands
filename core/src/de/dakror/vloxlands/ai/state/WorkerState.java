@@ -59,7 +59,6 @@ public enum WorkerState implements State<Human>
 			
 			wood = Voxel.get("WOOD").getId();
 			
-			human.stateParams.add(0); // lastTargetInitialMetadata
 			human.stateParams.add(0); // lastTargetMetadata
 			human.stateParams.add(new Vector3(-1, 0, 0)); // lastTarget
 			
@@ -72,28 +71,27 @@ public enum WorkerState implements State<Human>
 			if (human.getWorkPlace().getInventory().isFull()) return false;
 			Path path = null;
 			
-			if (((Vector3) human.stateParams.get(2)).x == -1)
+			if (((Vector3) human.stateParams.get(1)).x == -1)
 			{
 				path = BFS.findClosestVoxel(human.getVoxelBelow(), wood, range, true, human);
 				if (path == null) return false;
 				
-				((Vector3) human.stateParams.get(2)).set(path.getGhostTarget());
+				((Vector3) human.stateParams.get(1)).set(path.getGhostTarget());
 				int height = getTreeHeight(human, path.getGhostTarget());
 				human.stateParams.set(0, height);
-				human.stateParams.set(1, height);
 			}
 			else
 			{
-				path = AStar.findPath(human.getVoxelBelow(), ((Vector3) human.stateParams.get(2)), human, range, true);
+				path = AStar.findPath(human.getVoxelBelow(), ((Vector3) human.stateParams.get(1)), human, range, true);
 				if (path == null)
 				{
-					((Vector3) human.stateParams.get(2)).x = -1;
+					((Vector3) human.stateParams.get(1)).x = -1;
 					return false;
 				}
 			}
 			
-			RemoveLeavesJob rmj = new RemoveLeavesJob(human, ((Vector3) human.stateParams.get(2)), ((Integer) human.stateParams.get(0)), false);
-			ChopJob cj = new ChopJob(human, ((Vector3) human.stateParams.get(2)), ((Integer) human.stateParams.get(1)), false);
+			RemoveLeavesJob rmj = new RemoveLeavesJob(human, ((Vector3) human.stateParams.get(1)), ((Integer) human.stateParams.get(0)), false);
+			ChopJob cj = new ChopJob(human, ((Vector3) human.stateParams.get(1)), ((Integer) human.stateParams.get(0)), false);
 			cj.setEndEvent(new Callback()
 			{
 				@Override
@@ -111,8 +109,8 @@ public enum WorkerState implements State<Human>
 		
 		public void afterChop(Human human)
 		{
-			human.stateParams.set(1, (Integer) human.stateParams.get(1) - 1);
-			if ((Integer) human.stateParams.get(1) < 0) ((Vector3) human.stateParams.get(2)).x = -1;
+			human.stateParams.set(0, (Integer) human.stateParams.get(0) - 1);
+			if ((Integer) human.stateParams.get(0) < 0) ((Vector3) human.stateParams.get(0)).x = -1;
 			
 			human.changeState(BRING_STUFF_HOME);
 		}
@@ -134,7 +132,7 @@ public enum WorkerState implements State<Human>
 		@Override
 		public void enter(Human human)
 		{
-			human.stateParams.set(0, 0l);
+			human.stateParams.add(0l);
 			human.setLocation(human.getWorkPlace());
 		}
 		

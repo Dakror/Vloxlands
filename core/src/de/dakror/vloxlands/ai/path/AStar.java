@@ -33,6 +33,7 @@ public class AStar
 	static ArrayList<AStarNode> closedList = new ArrayList<AStarNode>();
 	static AStarNode target;
 	static Vector3 neighbor;
+	static int targetedOthers;
 	static boolean takeNeighbor; // because other human goes to target already
 	
 	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
@@ -49,17 +50,18 @@ public class AStar
 		if (!c.getIsland().isSpaceAbove(to.x, to.y, to.z, c.getHeight()) && !useGhostTarget) return null;
 		
 		takeNeighbor = false;
+		targetedOthers = 0;
 		for (Entity e : c.getIsland().getEntities())
 		{
-			if (e instanceof Human)
+			if (e instanceof Human && e != c)
 			{
 				if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
 				{
-					Path p = ((Human) e).path != null ? ((Human) e).path : ((WalkJob) ((Human) e).firstJob()).getPath();
-					if (p.getLast().equals(to) || (p.ghostTarget != null && p.ghostTarget.equals(to)))
+					Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
+					if ((p.realTarget != null && p.realTarget.equals(to)) || p.getLast().equals(to))
 					{
 						takeNeighbor = true;
-						break;
+						targetedOthers++;
 					}
 				}
 			}
@@ -109,10 +111,11 @@ public class AStar
 		v.reverse();
 		Vector3 firstNode = v.removeIndex(0); // remove start vector
 		
-		if (neighbor != null) v.add(neighbor);
+		if (neighbor != null && !takeNeighbor) v.add(neighbor);
 		
 		Path p = new Path(v);
 		p.removedFirstNode = firstNode;
+		if (takeNeighbor) p.realTarget = to;
 		if (ghostNode != null && useGhostTarget) p.setGhostTarget(new Vector3(ghostNode.x, ghostNode.y, ghostNode.z));
 		
 		return p;
@@ -181,37 +184,51 @@ public class AStar
 						{
 							for (Entity e : c.getIsland().getEntities())
 							{
-								if (!(e instanceof Structure)) continue;
-								e.getWorldBoundingBox(b);
-								
-								b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
-								b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
-								b2.set(b2.min, b2.max);
-								if (b.intersects(b2))
+								if (e instanceof Human && e != c)
 								{
-									free = false;
-									break;
+									if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
+									{
+										Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
+										if (p.getLast().equals(v) || (p.ghostTarget != null && p.ghostTarget.equals(v)))
+										{
+											free = false;
+											break;
+										}
+									}
 								}
-								if (x != 0 && z != 0 && free)
+								else if (e instanceof Structure)
 								{
-									b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
+									e.getWorldBoundingBox(b);
+									
+									b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
-									
 									if (b.intersects(b2))
 									{
 										free = false;
 										break;
 									}
-									
-									b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
-									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
-									b2.set(b2.min, b2.max);
-									
-									if (b.intersects(b2))
+									if (x != 0 && z != 0 && free)
 									{
-										free = false;
-										break;
+										b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
+										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
+										b2.set(b2.min, b2.max);
+										
+										if (b.intersects(b2))
+										{
+											free = false;
+											break;
+										}
+										
+										b2.min.set(v.x, v.y, selected.z).add(c.getIsland().pos).add(malus, 1, malus);
+										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
+										b2.set(b2.min, b2.max);
+										
+										if (b.intersects(b2))
+										{
+											free = false;
+											break;
+										}
 									}
 								}
 							}
@@ -219,7 +236,10 @@ public class AStar
 						
 						if (useGhostTarget || takeNeighbor)
 						{
-							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free);
+							int cd = chebyshevDistance(to, v) + 1;
+							boolean ringFull = targetedOthers % 9 == 0;
+							boolean takeThisAsNeighbor = takeNeighbor && (cd == Math.ceil(targetedOthers / 9f) || (ringFull && cd == Math.ceil(targetedOthers / 9f) + 1));
+							boolean targetable = v.equals(to) || (from.equals(to) && v.dst(to) < Math.sqrt(3) && free) || takeThisAsNeighbor;
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
@@ -228,7 +248,7 @@ public class AStar
 							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;
-								return v.equals(to) ? node : target;
+								return v.equals(to) || takeThisAsNeighbor ? node : target;
 							}
 							else if (targetable) node.cantBeNeighborForGhostTarget = true;
 						}
@@ -240,5 +260,10 @@ public class AStar
 		}
 		
 		return null;
+	}
+	
+	public static int chebyshevDistance(Vector3 o1, Vector3 o2)
+	{
+		return (int) Math.max(Math.abs(o1.x - o2.x), Math.abs(o1.z - o2.z));
 	}
 }

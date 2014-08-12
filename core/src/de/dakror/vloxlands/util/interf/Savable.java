@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.util.interf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

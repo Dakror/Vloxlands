@@ -29,10 +29,9 @@ public class NonStackingInventory extends Inventory
 	@Override
 	public void clear()
 	{
+		dispatchItemRemoved(count, null);
 		Arrays.fill(storage, 0);
-		int oldCount = count;
 		count = 0;
-		dispatchItemRemoved(oldCount);
 	}
 	
 	@Override
@@ -41,7 +40,7 @@ public class NonStackingInventory extends Inventory
 		int oldCount = count;
 		storage[stack.getItem().getId() + 128] += amount;
 		count += amount;
-		dispatchItemAdded(oldCount);
+		dispatchItemAdded(oldCount, stack.getItem());
 	}
 	
 	@Override
@@ -106,7 +105,7 @@ public class NonStackingInventory extends Inventory
 		count -= am;
 		storage[item.getId() + 128] -= am;
 		
-		dispatchItemRemoved(oldCount);
+		dispatchItemRemoved(oldCount, item);
 		return new ItemStack(item, am);
 	}
 	

@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.util;
+package de.dakror.vloxlands.util.interf;
 
 /**
  * @author Dakror

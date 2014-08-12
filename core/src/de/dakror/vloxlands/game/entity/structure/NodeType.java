@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+
 public enum NodeType
 {
 	target(false),
@@ -7,7 +8,10 @@ public enum NodeType
 	exit(true),
 	deposit(true),
 	build(true),
-	pickup(true);
+	pickup(true),
+	spawn(false),
+	
+	;
 	
 	public boolean useGhostTarget;
 	

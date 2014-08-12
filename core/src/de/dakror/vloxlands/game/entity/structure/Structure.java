@@ -1,18 +1,44 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import java.util.Comparator;
 import java.util.NoSuchElementException;
 
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.MessageType;
+import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.ai.state.StateTools;
+import de.dakror.vloxlands.ai.task.Task;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.EntityItem;
+import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
@@ -21,13 +47,17 @@ import de.dakror.vloxlands.game.item.inv.ManagedInventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.layer.GameLayer;
+import de.dakror.vloxlands.ui.ItemSlot;
+import de.dakror.vloxlands.ui.PinnableWindow;
+import de.dakror.vloxlands.ui.RevolverSlot;
+import de.dakror.vloxlands.ui.TaskListItem;
+import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.CurserCommand;
-import de.dakror.vloxlands.util.InventoryProvider;
-import de.dakror.vloxlands.util.ResourceListProvider;
-import de.dakror.vloxlands.util.Savable;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 import de.dakror.vloxlands.util.event.InventoryListener;
+import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
+import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
 /**
  * @author Dakror
@@ -47,6 +77,11 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	State<Human> workerState;
 	Class<?> workerTool;
 	Array<State<Human>> requestedHumanStates;
+	Array<State<Human>> handledHumanStates;
+	
+	Array<Task> tasks;
+	private Array<Task> taskQueue;
+	int taskTicksLeft;
 	
 	boolean working;
 	
@@ -84,9 +119,11 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		inventory = new Inventory();
 		buildInventory = new ManagedInventory(256 /* That should be enough... */);
-		buildInventory.addListener(this);
 		resourceList = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
+		handledHumanStates = new Array<State<Human>>();
+		tasks = new Array<Task>();
+		taskQueue = new Array<Task>();
 		working = true;
 		
 		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
@@ -194,6 +231,18 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public void onSpawn()
 	{
 		super.onSpawn();
+		
+		inventory.addListener(this);
+		buildInventory.addListener(this);
+		
+		for (Entity e : island.getEntities())
+		{
+			if (e instanceof Creature && ((Creature) e).path != null)
+			{
+				((Creature) e).path = AStar.findPath(((Creature) e).getVoxelBelow(), ((Creature) e).path.getGhostTarget() != null ? ((Creature) e).path.getGhostTarget() : ((Creature) e).path.getLast(), (Creature) e, ((Creature) e).path.getGhostTarget() != null);
+			}
+		}
+		
 		tickRequestsEnabled = true;
 		if (!built)
 		{
@@ -215,6 +264,25 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	{
 		super.tick(tick);
 		
+		if (taskQueue.size > 0)
+		{
+			taskTicksLeft--;
+			if (taskTicksLeft <= 0)
+			{
+				if (taskQueue.first().started)
+				{
+					taskQueue.first().exit();
+					taskQueue.removeIndex(0);
+				}
+				
+				if (taskQueue.size > 0)
+				{
+					taskTicksLeft = taskQueue.first().getDuration();
+					taskQueue.first().enter();
+				}
+			}
+		}
+		
 		if (lastStateRequest == 0) lastStateRequest = tick;
 		
 		if ((tick - lastStateRequest) % 60 == 0 && tickRequestsEnabled)
@@ -223,7 +291,11 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				broadcast(s);
 			
 			if (workers.size < resourceList.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2) broadcast(HelperState.EMPTY_INVENTORY);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && resourceList.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
+			{
+				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
+				handledHumanStates.add(HelperState.EMPTY_INVENTORY);
+			}
 			
 			lastStateRequest = tick;
 		}
@@ -312,9 +384,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	}
 	
 	@Override
-	public ResourceList getResourceList()
+	public ResourceList getCosts()
 	{
 		return resourceList;
+	}
+	
+	@Override
+	public ResourceList getResult()
+	{
+		return null;
 	}
 	
 	public boolean isWorking()
@@ -339,7 +417,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		if (msg.message == MessageType.YOU_ARE_DISMANTLED.ordinal())
 		{
 			kill();
-			Vector3 p = GameLayer.instance.activeIsland.pos;
+			Vector3 p = Game.instance.activeIsland.pos;
 			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			island.addEntity(i, false, false);
 			return true;
@@ -396,15 +474,19 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	}
 	
 	@Override
-	public void onItemAdded(int countBefore, Inventory inventory)
+	public void onItemAdded(int countBefore, Item item, Inventory inventory)
 	{}
 	
 	@Override
-	public void onItemRemoved(int countBefore, Inventory inventory)
+	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
 	{
 		if (inventory instanceof ManagedInventory)
 		{
 			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(1, HelperState.BUILD);
+		}
+		else
+		{
+			handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
 		}
 	}
 	
@@ -424,5 +506,313 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public CurserCommand getCommandForStructure(Structure selectedStructure)
 	{
 		return getDefaultCommand();
+	}
+	
+	protected Table getDefaultTable(final PinnableWindow window)
+	{
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style.imageUp = Vloxlands.skin.getDrawable("bomb");
+		style.imageUp.setMinWidth(ItemSlot.size);
+		style.imageUp.setMinHeight(ItemSlot.size);
+		style.imageDown = Vloxlands.skin.getDrawable("bomb");
+		style.imageDown.setMinWidth(ItemSlot.size);
+		style.imageDown.setMinHeight(ItemSlot.size);
+		final TooltipImageButton dismantle = new TooltipImageButton(style);
+		window.getStage().addActor(dismantle.getTooltip());
+		dismantle.addListener(new ClickListener()
+		{
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				if (isConfirmDismantle())
+				{
+					Dialog d = new Dialog("Confirm Dismantle", Vloxlands.skin)
+					{
+						@Override
+						protected void result(Object object)
+						{
+							if (object != null) broadcast(HelperState.DISMANTLE);
+						}
+					};
+					d.text("Are you sure you want todismantle\nthis building? All perks given by\nit will be gone after deconstruction!");
+					d.button("Cancel");
+					d.button("Yes", true);
+					
+					d.show(window.getStage());
+				}
+				else broadcast(HelperState.DISMANTLE);
+			}
+		});
+		dismantle.pad(4);
+		dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
+		
+		style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style.imageUp = Vloxlands.skin.getDrawable("sleep");
+		style.imageUp.setMinWidth(ItemSlot.size);
+		style.imageUp.setMinHeight(ItemSlot.size);
+		style.imageChecked = Vloxlands.skin.getDrawable("work");
+		style.imageChecked.setMinWidth(ItemSlot.size);
+		style.imageChecked.setMinHeight(ItemSlot.size);
+		final TooltipImageButton sleep = new TooltipImageButton(style);
+		window.getStage().addActor(sleep.getTooltip());
+		sleep.setChecked(isWorking());
+		sleep.addListener(new ClickListener()
+		{
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				setWorking(!isWorking());
+				sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
+			}
+		});
+		sleep.pad(4);
+		sleep.getTooltip().set("Production is " + (isWorking() ? "running" : "paused"), "Toggle the building's production activity.");
+		
+		final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
+		capacity.setAlignment(Align.center, Align.center);
+		capacity.addAction(new Action()
+		{
+			@Override
+			public boolean act(float delta)
+			{
+				capacity.setText("Capacity: " + getInventory().getCount() + " / " + getInventory().getCapacity() + " Items");
+				
+				float percent = getInventory().getCount() / (float) getInventory().getCapacity();
+				
+				if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
+				else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
+				else if (percent == 1) capacity.setColor(1, 0, 0, 1);
+				else capacity.setColor(1, 1, 1, 1);
+				
+				return false;
+			}
+		});
+		
+		style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style.imageUp = Vloxlands.skin.getDrawable("queue");
+		style.imageUp.setMinWidth(ItemSlot.size);
+		style.imageUp.setMinHeight(ItemSlot.size);
+		style.imageDown = Vloxlands.skin.getDrawable("queue");
+		style.imageDown.setMinWidth(ItemSlot.size);
+		style.imageDown.setMinHeight(ItemSlot.size);
+		final TooltipImageButton queue = new TooltipImageButton(style);
+		window.getStage().addActor(queue.getTooltip());
+		ClickListener cl = new ClickListener()
+		{
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Actor actor = window.findActor("TaskWrap");
+				Cell<Actor> cell = window.getCell(actor);
+				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
+				actor.setVisible(!actor.isVisible());
+				window.invalidateHierarchy();
+				window.pack();
+			}
+		};
+		queue.addListener(cl);
+		queue.pad(4);
+		queue.getTooltip().set("Task Queue", "Toggle Task Queue display");
+		queue.setDisabled(tasks.size == 0);
+		
+		
+		Table rightSide = new Table(Vloxlands.skin);
+		rightSide.row();
+		rightSide.add(capacity).colspan(3);
+		rightSide.row().spaceTop(5);
+		rightSide.add(dismantle);
+		rightSide.add(sleep);
+		rightSide.add(queue);
+		
+		return rightSide;
+	}
+	
+	protected void setupTaskQueueUI(final PinnableWindow window, Object... params)
+	{
+		final VerticalGroup tasks = new VerticalGroup();
+		tasks.left();
+		tasks.addAction(new Action()
+		{
+			@Override
+			public boolean act(float delta)
+			{
+				if (taskQueue.size != tasks.getChildren().size)
+				{
+					int size = tasks.getChildren().size;
+					for (Actor a : tasks.getChildren())
+					{
+						if (taskQueue.size < size)
+						{
+							a.remove();
+							size--;
+						}
+					}
+					
+					for (int i = size; i < taskQueue.size; i++)
+					{
+						final TaskListItem l = new TaskListItem(taskQueue.get(i).getTitle(), Vloxlands.skin);
+						l.setWrap(true);
+						l.setWidth(tasks.getWidth());
+						l.structure = Structure.this;
+						tasks.addActor(l);
+					}
+					
+					for (int i = 0; i < tasks.getChildren().size; i++)
+						tasks.getChildren().get(i).setUserObject(i);
+				}
+				return false;
+			}
+		});
+		
+		window.row().right().pad(5, 0, 5, 0).colspan(50).fillX();
+		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
+		tasksWrap.setScrollbarsOnTop(false);
+		tasksWrap.setFadeScrollBars(false);
+		tasksWrap.setVisible(false);
+		tasksWrap.setName("TaskWrap");
+		window.add(tasksWrap).height(0);
+	}
+	
+	protected void setupUI(PinnableWindow window, Object... params)
+	{}
+	
+	@Override
+	public final void setUI(PinnableWindow window, Object... params)
+	{
+		if (isBuilt())
+		{
+			setupTaskQueueUI(window, params);
+			setupUI(window, params);
+			window.add(getDefaultTable(window)).width(200);
+		}
+		else
+		{
+			final Table res = new Table();
+			Inventory inv = getInventory();
+			Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
+			int i = 0;
+			for (Byte b : getCosts().getAll())
+			{
+				if (i % 4 == 0 && i > 0) res.row();
+				Item item = Item.getForId(b);
+				Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
+				res.add(img);
+				
+				int max = getCosts().get(b);
+				
+				Label l = new Label((max - inv.get(b)) + " / " + max, Vloxlands.skin);
+				l.setName(b + "");
+				l.setWrap(true);
+				res.add(l).width(50);
+				i++;
+			}
+			window.add(res).minWidth(200);
+			final ProgressBar progress = new ProgressBar(0, getCosts().getCount(), 1, false, Vloxlands.skin);
+			progress.setAnimateDuration(0.2f);
+			progress.setAnimateInterpolation(Interpolation.pow3);
+			window.addAction(new Action()
+			{
+				@Override
+				public boolean act(float delta)
+				{
+					Inventory inv = getInventory();
+					progress.setValue(getBuildProgress());
+					for (Byte b : getCosts().getAll())
+					{
+						Actor a = res.findActor(b + "");
+						if (a instanceof Label)
+						{
+							int max = getCosts().get(b);
+							((Label) a).setText((max - inv.get(b)) + " / " + max);
+						}
+					}
+					
+					if (isBuilt())
+					{
+						onStructureSelection(Structure.this, true);
+						return true;
+					}
+					return false;
+				}
+			});
+			window.row();
+			window.add(progress).width(190);
+		}
+	}
+	
+	@Override
+	public void setActions(RevolverSlot parent)
+	{
+		tasks.sort(new Comparator<Task>()
+		{
+			
+			@Override
+			public int compare(Task o1, Task o2)
+			{
+				return o1.getTitle().compareTo(o2.getTitle());
+			}
+		});
+		for (Task task : tasks)
+		{
+			final Task copy = task;
+			final RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
+			s.getTooltip().set(task.getTitle(), task.getDescription());
+			s.addListener(new InputListener()
+			{
+				@Override
+				public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
+				{
+					return button == Buttons.LEFT;
+				}
+				
+				@Override
+				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
+				{
+					if (!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					
+					for (Byte b : copy.getCosts().getAll())
+					{
+						island.takeItemsIslandWide(Item.getForId(b), copy.getCosts().get(b));
+					}
+					
+					queueTask(copy);
+				}
+			});
+			s.addAction(new Action()
+			{
+				
+				@Override
+				public boolean act(float delta)
+				{
+					s.setDisabled(!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
+					return false;
+				}
+			});
+			parent.addSlot(s);
+		}
+	}
+	
+	public void queueTask(Task task)
+	{
+		if (!tasks.contains(task, true)) throw new IllegalArgumentException("Can't queue task '" + task + "' in structure '" + name + "'");
+		
+		task.setOrigin(this);
+		taskQueue.add(task);
+		if (taskQueue.size == 1)
+		{
+			taskTicksLeft = task.getDuration();
+			task.enter();
+		}
+	}
+	
+	public Task firstTask()
+	{
+		if (taskQueue.size == 0) return null;
+		return taskQueue.first();
+	}
+	
+	public int getTaskTicksLeft()
+	{
+		return taskTicksLeft;
 	}
 }

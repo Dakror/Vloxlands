@@ -7,9 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.task.Task;
+import de.dakror.vloxlands.ai.task.Tasks;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.item.Item;
-import de.dakror.vloxlands.util.ResourceListProvider;
+import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
 /**
  * @author Dakror
@@ -18,10 +20,11 @@ public class RevolverSlot extends TooltipImageButton
 {
 	public static final float DEFAULT_SIZE = 54f;
 	public static int SIZE = (int) DEFAULT_SIZE;
+	Revolver revolver;
 	
 	public RevolverSlot(Stage stage, Vector2 icon, String name)
 	{
-		super(stage, createStyle(icon));
+		super(createStyle(icon));
 		setName(name);
 		pad(12 * (SIZE / DEFAULT_SIZE));
 		
@@ -30,8 +33,32 @@ public class RevolverSlot extends TooltipImageButton
 			Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").trim()), 0, 0, 0);
 			if (e instanceof ResourceListProvider) tooltip = new ResourceListTooltip("", "", (ResourceListProvider) e, this);
 		}
+		if (name.startsWith("task:"))
+		{
+			try
+			{
+				Task t = (Task) Tasks.class.getField(name.replace("task:", "")).get(null);
+				tooltip = new ResourceListTooltip("", "", t, this);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
 		
 		stage.addActor(tooltip);
+	}
+	
+	public void setIcon(Vector2 icon)
+	{
+		setStyle(createStyle(icon));
+		pad(12 * (SIZE / DEFAULT_SIZE));
+	}
+	
+	public void addSlot(RevolverSlot slot)
+	{
+		revolver.addSlot(((Integer) getUserObject()) + 1, getName(), slot);
 	}
 	
 	private static ImageButtonStyle createStyle(Vector2 icon)

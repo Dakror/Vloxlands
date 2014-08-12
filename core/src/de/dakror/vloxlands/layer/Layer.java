@@ -13,8 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 public abstract class Layer implements Screen, InputProcessor, GestureListener
 {
 	public GestureDetector gestureDetector;
-	Stage stage;
-	boolean modal;
+	protected Stage stage;
+	protected boolean modal;
 	
 	public Layer()
 	{

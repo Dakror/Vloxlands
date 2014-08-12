@@ -29,7 +29,7 @@ public class ManagedInventory extends Inventory
 		
 		count += amount2;
 		
-		dispatchItemAdded(oldCount);
+		dispatchItemAdded(oldCount, stack.getItem());
 	}
 	
 	@Override

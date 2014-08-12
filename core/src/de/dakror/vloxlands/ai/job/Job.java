@@ -4,10 +4,12 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.game.entity.creature.Human;
-import de.dakror.vloxlands.util.Tickable;
 import de.dakror.vloxlands.util.event.Callback;
+import de.dakror.vloxlands.util.interf.Tickable;
 
 /**
+ * Jobs to be queued and done by Humans
+ * 
  * @author Dakror
  */
 public abstract class Job implements Tickable

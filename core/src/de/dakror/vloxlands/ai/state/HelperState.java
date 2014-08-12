@@ -13,6 +13,7 @@ import de.dakror.vloxlands.ai.job.DismantleJob;
 import de.dakror.vloxlands.ai.job.PickupJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -20,7 +21,6 @@ import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 
 public enum HelperState implements State<Human>
@@ -58,7 +58,35 @@ public enum HelperState implements State<Human>
 		}
 	},
 	EMPTY_INVENTORY
-	{},
+	{
+		@Override
+		public void enter(Human human)
+		{
+			Structure target = (Structure) human.stateParams.get(0);
+			
+			ItemStack is = target.getInventory().getFirst();
+			PickupJob pj = new PickupJob(human, target, is, false, false);
+			
+			Vector3 pathStart = human.getVoxelBelow();
+			boolean queue = StateTools.equipTool(human, pj.getTool(), false, pathStart);
+			
+			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.pickup).pos.cpy().add(target.getVoxelPos()), human, NodeType.pickup.useGhostTarget);
+			if (p != null)
+			{
+				if (!queue)
+				{
+					human.setJob(p, pj);
+					queue = true;
+				}
+				else human.queueJob(p, pj);
+				
+				PathBundle pb = Game.world.query(new Query(human).structure(true).searchClass(Warehouse.class).node(NodeType.deposit).start(p.getLast()).capacityForTransported(true).transport(is));
+				if (pb != null) human.queueJob(pb.path, new DepositJob(human, pb.structure, false));
+				else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a Warehouse to deposit stuff!");
+			}
+			else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a way to target structure!");
+		}
+	},
 	GET_RESOURCES_FOR_BUILD
 	{
 		@Override
@@ -86,7 +114,7 @@ public enum HelperState implements State<Human>
 				
 				queue = StateTools.equipTool(human, pj.getTool(), queue, pathStart);
 				
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()).island(0));
+				PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()));
 				if (pb != null)
 				{
 					target.getBuildInventory().manageNext();
@@ -116,10 +144,7 @@ public enum HelperState implements State<Human>
 					
 					pathStart = pb.path.getLast();
 				}
-				else
-				{
-					Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a Warehouse containing the needed resources on island: 0!");
-				}
+				else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a Warehouse containing the needed resources on island: 0!");
 			}
 			
 			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.deposit).pos.cpy().add(target.getVoxelPos()), human, NodeType.deposit.useGhostTarget);
@@ -129,10 +154,7 @@ public enum HelperState implements State<Human>
 				if (queue) human.queueJob(p, dj);
 				else human.setJob(p, dj);
 			}
-			else
-			{
-				Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a path to target structure!");
-			}
+			else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a path to target structure!");
 		}
 		
 		@Override

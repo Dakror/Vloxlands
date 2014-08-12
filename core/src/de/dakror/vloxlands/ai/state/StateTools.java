@@ -8,6 +8,7 @@ import de.dakror.vloxlands.ai.job.EnterStructureJob;
 import de.dakror.vloxlands.ai.job.PickupJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -15,7 +16,6 @@ import de.dakror.vloxlands.game.entity.structure.Warehouse;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
-import de.dakror.vloxlands.layer.GameLayer;
 import de.dakror.vloxlands.util.event.Callback;
 
 /**
@@ -29,7 +29,7 @@ public class StateTools
 		
 		if (tool == null && !human.getTool().isNull())
 		{
-			PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit).island(0));
+			PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).capacityForTransported(true).transport(human.getTool()).node(NodeType.deposit));
 			if (pb != null)
 			{
 				PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(), true, false);
@@ -45,7 +45,7 @@ public class StateTools
 		{
 			if (human.getTool().isNull() || !(human.getTool().getItem().getClass().isAssignableFrom(tool)))
 			{
-				PathBundle pb = GameLayer.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup).island(0));
+				PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).tool(tool).node(NodeType.pickup));
 				if (pb != null)
 				{
 					PickupJob pj = new PickupJob(human, pb.structure, new ItemStack(pb.structure.getInventory().getAnyItemForToolType(tool), 1), true, false);
@@ -99,6 +99,6 @@ public class StateTools
 	
 	public static boolean isWorkingTime()
 	{
-		return GameLayer.time > 0;
+		return Game.time > 0;
 	}
 }
