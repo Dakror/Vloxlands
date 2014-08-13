@@ -32,6 +32,8 @@ public class Lumberjack extends Structure
 		resourceList.add(Item.get("WOODEN_LOG"), 10);
 		resourceList.setCostPopulation(1);
 		
+		weight = 25f;
+		
 		inventory = new Inventory(20);
 	}
 	

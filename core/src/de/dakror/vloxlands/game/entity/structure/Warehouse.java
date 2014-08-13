@@ -32,6 +32,8 @@ public class Warehouse extends Structure
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
 		name = "Warehouse";
 		
+		weight = 25f;
+		
 		inventory = new NonStackingInventory(100);
 	}
 	

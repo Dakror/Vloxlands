@@ -29,6 +29,6 @@ public class Forester extends Structure
 		resourceList.add(Item.get("WOODEN_LOG"), 25);
 		resourceList.setCostPopulation(1);
 		
-		inventory = new Inventory(0);
+		inventory = new Inventory(20);
 	}
 }

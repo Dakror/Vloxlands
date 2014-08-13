@@ -2,6 +2,7 @@ package de.dakror.vloxlands.ai.state;
 
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.ai.job.ChopJob;
@@ -17,6 +18,7 @@ import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.Callback;
 
 /**
@@ -131,7 +133,65 @@ public enum WorkerState implements State<Human>
 		}
 	},
 	FORESTER
-	{},
+	{
+		final int checkHeight = 7;
+		final int checkRadius = 1;
+		final int range = 40;
+		
+		@Override
+		public void enter(Human human)
+		{
+			super.enter(human);
+			
+			Vector3 v = null;
+			if ((v = pickRandomSpot(human)) != null)
+			{
+				D.p("whoop whoop");
+				human.setLocation(null);
+			}
+			else
+			{
+				// D.p("no");
+				human.changeState(REST);
+			}
+		}
+		
+		public Vector3 pickRandomSpot(Human human)
+		{
+			Vector3 vp = human.getVoxelBelow();
+			Vector3 v = new Vector3(MathUtils.random(-range, range), 1337 /* hehe */, MathUtils.random(-range, range));
+			
+			for (int y = -2; y < 2; y++)
+			{
+				if (human.getIsland().isSpaceAbove(v.x + vp.x, y + vp.y, v.z + vp.z, human.getHeight()))
+				{
+					v.y = y;
+					break;
+				}
+			}
+			
+			if (v.y == 1337)
+			{
+				return null;
+			}
+			
+			for (int i = -checkRadius; i <= checkRadius; i++)
+			{
+				for (int j = -checkRadius; j <= checkRadius; j++)
+				{
+					for (int k = 0; k < checkHeight; k++)
+					{
+						if (Voxel.getForId(human.getIsland().get(vp.x + i, vp.y + k, vp.z + j)).isOpaque())
+						{
+							return null;
+						}
+					}
+				}
+			}
+			
+			return v;
+		}
+	},
 	REST
 	{
 		@Override
