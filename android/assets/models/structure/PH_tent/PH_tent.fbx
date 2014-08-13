@@ -9,11 +9,11 @@ FBXHeaderExtension:  {
 	CreationTimeStamp:  {
 		Version: 1000
 		Year: 2014
-		Month: 05
-		Day: 11
-		Hour: 12
-		Minute: 36
-		Second: 49
+		Month: 08
+		Day: 13
+		Hour: 20
+		Minute: 55
+		Second: 11
 		Millisecond: 0
 	}
 	Creator: "FBX SDK/FBX Plugins build 20070228"
@@ -21,7 +21,7 @@ FBXHeaderExtension:  {
 		FlagPLE: 0
 	}
 }
-CreationTime: "2014-05-11 12:36:49:000"
+CreationTime: "2014-08-13 20:55:11:000"
 Creator: "Blender version 2.68 (sub 0)"
 
 ; Object definitions
@@ -306,11 +306,11 @@ Objects:  {
 		Properties60:  {
 			Property: "ShadingModel", "KString", "", "Lambert"
 			Property: "MultiLayer", "bool", "",0
-			Property: "EmissiveColor", "ColorRGB", "",0.8000,0.0156,0.0000
+			Property: "EmissiveColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "EmissiveFactor", "double", "",0.0000
 			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "AmbientFactor", "double", "",1.0000
-			Property: "DiffuseColor", "ColorRGB", "",0.8000,0.0156,0.0000
+			Property: "DiffuseColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "DiffuseFactor", "double", "",0.8000
 			Property: "Bump", "Vector3D", "",0,0,0
 			Property: "TransparentColor", "ColorRGB", "",1,1,1
@@ -322,7 +322,7 @@ Objects:  {
 			Property: "ReflectionFactor", "double", "",1
 			Property: "Emissive", "ColorRGB", "",0,0,0
 			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
-			Property: "Diffuse", "ColorRGB", "",0.8,0.0,0.0
+			Property: "Diffuse", "ColorRGB", "",0.0,0.0,0.0
 			Property: "Specular", "ColorRGB", "",1.0,1.0,1.0
 			Property: "Shininess", "double", "",9.6
 			Property: "Opacity", "double", "",1.0
@@ -336,11 +336,11 @@ Objects:  {
 		Properties60:  {
 			Property: "ShadingModel", "KString", "", "Lambert"
 			Property: "MultiLayer", "bool", "",0
-			Property: "EmissiveColor", "ColorRGB", "",0.0835,0.0246,0.0192
+			Property: "EmissiveColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "EmissiveFactor", "double", "",0.0000
 			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "AmbientFactor", "double", "",1.0000
-			Property: "DiffuseColor", "ColorRGB", "",0.0835,0.0246,0.0192
+			Property: "DiffuseColor", "ColorRGB", "",0.0000,0.0000,0.0000
 			Property: "DiffuseFactor", "double", "",0.8000
 			Property: "Bump", "Vector3D", "",0,0,0
 			Property: "TransparentColor", "ColorRGB", "",1,1,1
@@ -352,7 +352,7 @@ Objects:  {
 			Property: "ReflectionFactor", "double", "",1
 			Property: "Emissive", "ColorRGB", "",0,0,0
 			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
-			Property: "Diffuse", "ColorRGB", "",0.1,0.0,0.0
+			Property: "Diffuse", "ColorRGB", "",0.0,0.0,0.0
 			Property: "Specular", "ColorRGB", "",1.0,1.0,1.0
 			Property: "Shininess", "double", "",9.6
 			Property: "Opacity", "double", "",1.0

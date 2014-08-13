@@ -130,6 +130,8 @@ public enum WorkerState implements State<Human>
 			return height;
 		}
 	},
+	FORESTER
+	{},
 	REST
 	{
 		@Override

@@ -1,5 +1,8 @@
 package de.dakror.vloxlands.game.entity.structure;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+
 import de.dakror.vloxlands.ai.state.WorkerState;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
@@ -13,7 +16,10 @@ public class Lumberjack extends Structure
 {
 	public Lumberjack(float x, float y, float z)
 	{
-		super(x, y, z, "models/structure/PH_tent_green/PH_tent_green.g3db");
+		super(x, y, z, "models/structure/PH_tent/PH_tent.g3db");
+		
+		modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(Color.valueOf("036108")));
+		modelInstance.materials.get(1).set(ColorAttribute.createDiffuse(Color.valueOf("274427")));
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));

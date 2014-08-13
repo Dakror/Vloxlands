@@ -676,7 +676,7 @@ public class Game extends Layer
 				
 				Color defaultColor = ((ColorAttribute) defaultCursorStructureMaterials.get(i).get(ColorAttribute.Diffuse)).color;
 				
-				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultColor) : defaultColor));
+				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED : defaultColor));
 				if (!cursorStructurePlacable) m.set(new BlendingAttribute(0.8f));
 				else
 				{
