@@ -35,6 +35,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -339,6 +341,22 @@ public class Game extends Layer
 			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
 			shapeRenderer.setColor(0, 1, 0, 0.3f);
 			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
+			shapeRenderer.end();
+		}
+		
+		if (Vloxlands.showPathDebug)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			for (BFSNode node : BFS.visited)
+			{
+				shapeRenderer.identity();
+				shapeRenderer.translate(activeIsland.pos.x + node.x, activeIsland.pos.y + node.y, activeIsland.pos.z + node.z + 1.01f);
+				shapeRenderer.setColor(1, 1, 1, 0.3f);
+				shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
+			}
 			shapeRenderer.end();
 		}
 	}

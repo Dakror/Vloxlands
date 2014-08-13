@@ -3,9 +3,9 @@ package de.dakror.vloxlands.ai.path;
 import java.util.ArrayDeque;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.ai.path.node.BFSNode;
-import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
@@ -13,35 +13,63 @@ import de.dakror.vloxlands.game.voxel.Voxel;
  */
 public class BFS
 {
+	public static Array<BFSNode> visited = new Array<BFSNode>();
 	static ArrayDeque<BFSNode> queue = new ArrayDeque<BFSNode>();
 	final static Vector3 start = new Vector3();
-	static boolean allowLowest;
+	static BFSConfig cfg;
 	
-	public static Path findClosestVoxel(Vector3 pos, byte voxel, boolean allowLowest, Creature c)
+	public synchronized static Path findClosestVoxel(Vector3 pos, BFSConfig cfg)
 	{
-		return findClosestVoxel(pos, voxel, 0, allowLowest, c);
-	}
-	
-	public static Path findClosestVoxel(Vector3 pos, byte voxel, float maxRange, boolean allowLowest, Creature c)
-	{
-		BFS.allowLowest = allowLowest;
+		BFS.cfg = cfg;
 		start.set(pos);
+		visited.clear();
 		queue.clear();
-		queue.add(new BFSNode(pos.x, pos.y, pos.z, c.getIsland().get(pos.x, pos.y, pos.z), null));
+		queue.add(new BFSNode(pos.x, pos.y, pos.z, cfg.creature.getIsland().get(pos.x, pos.y, pos.z), cfg.creature.getIsland().getMeta(pos.x, pos.y, pos.z), null));
 		
 		while (queue.size() > 0)
 		{
 			BFSNode v = queue.poll();
 			
-			if (v.voxel == voxel) return AStar.findPath(pos, new Vector3(v.x, v.y, v.z), c, maxRange, true);
+			boolean done = v.voxel == cfg.voxel;
+			if (cfg.meta != 0 && done)
+			{
+				boolean sameMeta = cfg.meta == v.meta;
+				done &= sameMeta != cfg.notMeta;
+			}
+			if (cfg.neighborMeta != 0 && done)
+			{
+				done &= checkNeighbors(v);
+			}
 			
-			addNeighbors(v, voxel, maxRange, c);
+			if (done)
+			{
+				Path p = AStar.findPath(pos, new Vector3(v.x, v.y, v.z), cfg.creature, cfg.maxRange, true);
+				if (p != null) return p;
+			}
+			
+			addNeighbors(v);
 		}
 		
 		return null;
 	}
 	
-	static void addNeighbors(BFSNode selected, byte voxel, float maxRange, Creature c)
+	static boolean checkNeighbors(BFSNode node)
+	{
+		for (int i = -cfg.neighborRangeX; i <= cfg.neighborRangeX; i++)
+		{
+			for (int j = -cfg.neighborRangeY; j <= cfg.neighborRangeY; j++)
+			{
+				for (int k = -cfg.neighborRangeZ; k <= cfg.neighborRangeZ; k++)
+				{
+					if ((cfg.creature.getIsland().getMeta(i + node.x, j + node.y, k + node.z) == cfg.neighborMeta) == cfg.notNeighbor) return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	static void addNeighbors(BFSNode selected)
 	{
 		byte air = Voxel.get("AIR").getId();
 		
@@ -57,27 +85,21 @@ public class BFS
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					if (!c.getIsland().isTargetable(v.x, v.y, v.z)) break;
 					
-					byte vxl = c.getIsland().get(v.x, v.y, v.z);
-					
-					if (vxl == air && !c.canFly()) continue;
-					if (maxRange > 0 && Math.sqrt((v.x - start.x) * (v.x - start.x) + (v.z - start.z) * (v.z - start.z)) > maxRange) continue;
+					byte vxl = cfg.creature.getIsland().get(v.x, v.y, v.z);
 					
 					// don't need parents here
-					BFSNode node = new BFSNode(v.x, v.y, v.z, vxl, null);
+					BFSNode node = new BFSNode(v.x, v.y, v.z, vxl, cfg.creature.getIsland().getMeta(v.x, v.y, v.z), null);
 					
-					if (queue.contains(node)) continue;
+					if (queue.contains(node) || visited.contains(node, false)) continue;
 					
-					boolean free = true;
+					if (vxl == air && !cfg.creature.canFly()) continue;
+					if (cfg.maxRange > 0 && Math.sqrt((v.x - start.x) * (v.x - start.x) + (v.z - start.z) * (v.z - start.z)) > cfg.maxRange) continue;
+					if (!cfg.creature.canFly() && (!cfg.creature.getIsland().hasNeighbors(v.x, v.y - 1, v.z) || !cfg.creature.getIsland().hasNeighbors(v.x, v.y - 2, v.z) || !cfg.creature.getIsland().hasNeighbors(v.x, v.y - 3, v.z))) continue;
+					if (!cfg.creature.getIsland().isTargetable(v.x, v.y, v.z)) continue;
 					
-					if (vxl == voxel)
-					{
-						// if (GameLayer.instance.activeIsland.isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false;
-						// if (!allowLowest && GameLayer.instance.activeIsland.get(v.x, v.y + 1, v.z) == voxel && !GameLayer.instance.activeIsland.isWrapped(v.x, v.y + 1, v.z, c.getHeight())) free = false; // first mine available blocks above
-					}
-					
-					if (free) queue.add(node);
+					queue.add(node);
+					visited.add(node);
 				}
 			}
 		}

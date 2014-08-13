@@ -10,9 +10,11 @@ import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.BFSConfig;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
+import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.util.event.Callback;
@@ -43,7 +45,7 @@ public enum WorkerState implements State<Human>
 			if (human.isIdle())
 			{
 				if (!StateTools.isWorkingTime()) human.changeState(REST);
-				else human.getStateMachine().revertToPreviousState();
+				else human.revertToPreviousState();
 			}
 		}
 	},
@@ -73,9 +75,10 @@ public enum WorkerState implements State<Human>
 			
 			if (((Vector3) human.stateParams.get(1)).x == -1)
 			{
-				path = BFS.findClosestVoxel(human.getVoxelBelow(), wood, range, true, human);
+				path = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).voxel(wood).range(range).closest(true).notmeta(MetaTags.LUMBERJACK_TARGET).notneighbor(MetaTags.LUMBERJACK_TARGET).neighborrange(2, 2, 2));
 				if (path == null) return false;
 				
+				human.getIsland().setMeta(path.getGhostTarget().x, path.getGhostTarget().y, path.getGhostTarget().z, MetaTags.LUMBERJACK_TARGET);
 				((Vector3) human.stateParams.get(1)).set(path.getGhostTarget());
 				int height = getTreeHeight(human, path.getGhostTarget());
 				human.stateParams.set(0, height);
@@ -141,9 +144,8 @@ public enum WorkerState implements State<Human>
 		{
 			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000)
 			{
-				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.changeState(human.getWorkPlace().getWorkerState());
-				
-				human.stateParams.set(0, System.currentTimeMillis());
+				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.revertToPreviousState();
+				else human.stateParams.set(0, System.currentTimeMillis());
 			}
 		}
 	},
