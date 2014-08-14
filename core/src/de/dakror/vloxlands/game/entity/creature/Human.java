@@ -85,7 +85,6 @@ public class Human extends Creature
 		tool = new ItemStack();
 		carryingItemStack = new ItemStack();
 		
-		
 		stateMachine = new SyncedStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
 		

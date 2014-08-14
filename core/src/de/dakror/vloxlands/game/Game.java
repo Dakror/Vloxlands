@@ -229,13 +229,13 @@ public class Game extends Layer
 		focusIsland(world.getIslands()[0], true);
 		
 		Human human = new Human(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3, Island.SIZE / 2);
-		instance.activeIsland.addEntity(human, false, false);
+		activeIsland.addEntity(human, false, false);
 		human = new Human(Island.SIZE / 2 - 4, Island.SIZE / 4 * 3, Island.SIZE / 2);
-		instance.activeIsland.addEntity(human, false, false);
+		activeIsland.addEntity(human, false, false);
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		tc.setBuilt(true);
-		instance.activeIsland.addEntity(tc, false, true);
+		activeIsland.addEntity(tc, false, true);
 		tc.getInnerInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
