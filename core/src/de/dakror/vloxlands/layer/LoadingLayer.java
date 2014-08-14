@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.item.Item;
@@ -32,7 +33,6 @@ public class LoadingLayer extends Layer
 	boolean worldGen;
 	
 	boolean iconsSet;
-	String[] icons = { "bomb", "gears", "queue", "sleep", "work" };
 	
 	@Override
 	public void render(float delta)
@@ -43,7 +43,7 @@ public class LoadingLayer extends Layer
 		{
 			if (!iconsSet)
 			{
-				for (String i : icons)
+				for (String i : Config.icons)
 					Vloxlands.skin.add(i, Vloxlands.assets.get("img/gui/icons/" + i + ".png", Texture.class));
 				
 				Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
@@ -113,14 +113,19 @@ public class LoadingLayer extends Layer
 		
 		stage.addActor(logo);
 		
+		Vloxlands.assets.load("img/transparent.png", Texture.class);
+		
 		Vloxlands.assets.load("img/icons.png", Texture.class);
 		Vloxlands.assets.load("img/gui/progressBar.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
 		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
-		for (String i : icons)
+		for (String i : Config.icons)
 			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
+		
+		for (String i : Config.dataMaps)
+			Vloxlands.assets.load("img/datamaps/" + i.toLowerCase() + ".png", Texture.class);
 		
 		// TODO Add all models wanting to be loaded
 		Vloxlands.assets.load("models/creature/humanblend/humanblend.g3db", Model.class);

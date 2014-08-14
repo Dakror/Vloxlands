@@ -18,6 +18,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import de.dakror.vloxlands.Config;
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.Entity;
@@ -40,7 +42,10 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static final int MAXHEIGHT = 512;
 	
-	public static Material opaque, transp, highlight;
+	public static Material[][] dataMaps;
+	int dataMap;
+	
+	public static Material highlight;
 	
 	Island[] islands;
 	
@@ -57,12 +62,15 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		
 		islands = new Island[width * depth];
 		
-		Texture tex = new Texture(Gdx.files.internal("img/voxelTextures.png"));
-		Texture tex2 = new Texture(Gdx.files.internal("img/transparent.png"));
+		highlight = new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/transparent.png", Texture.class)), ColorAttribute.createDiffuse(SELECTION));
 		
-		opaque = new Material(TextureAttribute.createDiffuse(tex));
-		transp = new Material(TextureAttribute.createDiffuse(tex), new BlendingAttribute());
-		highlight = new Material(TextureAttribute.createDiffuse(tex2), ColorAttribute.createDiffuse(SELECTION));
+		dataMaps = new Material[Config.dataMaps.length][2];
+		for (int i = 0; i < dataMaps.length; i++)
+		{
+			Material trp = new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/datamaps/" + Config.dataMaps[i].toLowerCase() + ".png", Texture.class)), new BlendingAttribute());
+			Material opq = Config.dataMapFullBlending[i] ? trp : new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/datamaps/" + Config.dataMaps[i].toLowerCase() + ".png", Texture.class)));
+			dataMaps[i] = new Material[] { opq, trp };
+		}
 	}
 	
 	/**
@@ -236,6 +244,37 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		
 		for (Island i : islands)
 			i.save(baos);
+	}
+	
+	public void setDataMap(int dataMap)
+	{
+		this.dataMap = Math.abs(dataMap) % dataMaps.length;
+	}
+	
+	public int getDataMap()
+	{
+		return dataMap;
+	}
+	
+	public Material getOpaque()
+	{
+		return dataMaps[dataMap][0];
+	}
+	
+	public Material getTransp()
+	{
+		return dataMaps[dataMap][1];
+	}
+	
+	
+	public Material getDefOpaque()
+	{
+		return dataMaps[0][0];
+	}
+	
+	public Material getDefTransp()
+	{
+		return dataMaps[0][1];
 	}
 	
 	public static float calculateRelativeUplift(float y)

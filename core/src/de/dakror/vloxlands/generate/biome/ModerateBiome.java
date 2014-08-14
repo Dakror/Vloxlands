@@ -34,6 +34,8 @@ public class ModerateBiome extends Biome
 		generateBoulders(island, Island.SIZE / 4 * 3, radius, boulderMin, boulderMax, 3, 6, 4, 7, new byte[] { Voxel.get("STONE").getId() });
 		worldGen.step();
 		
+		generateOreVeins(island);
+		
 		generateCrystals(island);
 		worldGen.step();
 	}

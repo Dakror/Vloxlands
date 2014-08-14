@@ -91,6 +91,19 @@ public abstract class Generator
 		return new Vector2(x, y);
 	}
 	
+	/**
+	 * [0 - 1]
+	 */
+	public static float getBezierValue(float[] c, float x)
+	{
+		Vector2 p0 = new Vector2(c[0], c[1]);
+		Vector2 p1 = new Vector2(c[2], c[3]);
+		Vector2 p2 = new Vector2(c[4], c[5]);
+		Vector2 p3 = new Vector2(c[6], c[7]);
+		
+		return Bezier.cubic(new Vector2(), x, p0, p1, p2, p3, new Vector2()).y;
+	}
+	
 	public static Vector2 getRandomCircleInCircle(Vector2 center, int radius, int rad2)
 	{
 		Vector2 v = new Vector2();
@@ -111,23 +124,23 @@ public abstract class Generator
 		return false;
 	}
 	
-	public static Vector3 pickRandomNaturalChunk(Island island)
+	public static Vector3 pickRandomNaturalChunk(Island island, int maxY)
 	{
 		int i = 0;
 		int chunks = island.getChunks().length;
 		
 		do
 			i = MathUtils.random(chunks - 1);
-		while (island.getChunk(i) == null || !hasNaturalVoxel(island.getChunk(i)));
+		while (island.getChunk(i) == null || !hasNaturalVoxel(island.getChunk(i)) || (maxY != 0 && island.getChunk(i).pos.y + Chunk.SIZE > maxY));
 		
 		return island.getChunk(i).index;
 	}
 	
-	public static Vector3 pickRandomNaturalVoxel(Island island)
+	public static Vector3 pickRandomNaturalVoxel(Island island, int maxY)
 	{
 		Array<Byte> naturalTypes = getNaturalTypes();
 		
-		Vector3 c = pickRandomNaturalChunk(island);
+		Vector3 c = pickRandomNaturalChunk(island, maxY);
 		Chunk chunk = island.getChunk(c.x, c.y, c.z);
 		
 		Array<Vector3> chunkVoxels = new Array<Vector3>();
@@ -149,11 +162,11 @@ public abstract class Generator
 		return chunkVoxels.get((int) (MathUtils.random() * chunkVoxels.size));
 	}
 	
-	public static VoxelStats generateVein(Island island, VoxelStats maximum, float min, float max, byte[] b)
+	public static VoxelStats generateVein(Island island, VoxelStats maximum, float min, float max, int maxY, byte[] b)
 	{
 		int size = (int) MathUtils.random(min, max);
 		
-		Vector3 c = pickRandomNaturalVoxel(island);
+		Vector3 c = pickRandomNaturalVoxel(island, maxY);
 		VoxelStats vs = new VoxelStats();
 		
 		float maxDistance = (float) (size * Math.sqrt(3)) / 2;
@@ -272,7 +285,7 @@ public abstract class Generator
 		while (weightNeededToUplift > 100)
 		{
 			int index = (int) (MathUtils.random() * CRYSTALS.length);
-			weightNeededToUplift -= generateVein(island, new VoxelStats(0, weightNeededToUplift), index + 1, index + 4, new byte[] { CRYSTALS[index].getId() }).uplift;
+			weightNeededToUplift -= generateVein(island, new VoxelStats(0, weightNeededToUplift), index + 1, index + 4, Island.SIZE / 4 * 3, new byte[] { CRYSTALS[index].getId() }).uplift;
 		}
 		
 		int[] amounts = new int[CRYSTALS.length];
@@ -286,8 +299,30 @@ public abstract class Generator
 		{
 			for (int i = 0; i < amounts[j]; i++)
 			{
-				Vector3 v = pickRandomNaturalVoxel(island);
+				Vector3 v = pickRandomNaturalVoxel(island, Island.SIZE / 4 * 3);
 				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId(), true, false);
+			}
+		}
+	}
+	
+	public static void generateOreVeins(Island island)
+	{
+		final Voxel[] ORES = { Voxel.get("COAL_ORE"), Voxel.get("IRON_ORE"), Voxel.get("GOLD_ORE") };
+		final float[][] BEZIERS = { Beziers.COALORE_HEIGHT, Beziers.IRONORE_HEIGHT, Beziers.GOLDORE_HEIGHT };
+		
+		int height = Island.SIZE / 5 * 3;
+		
+		for (int i = 0; i < ORES.length; i++)
+		{
+			int y = MathUtils.random(8, height);
+			
+			int veins = Math.max(5, Math.round(getBezierValue(BEZIERS[i], y / (float) height) * height));
+			
+			for (int j = 0; j < veins; j++)
+			{
+				
+				int size = MathUtils.random(3);
+				generateVein(island, new VoxelStats(), size, size + 3, height, new byte[] { ORES[i].getId() });
 			}
 		}
 	}
