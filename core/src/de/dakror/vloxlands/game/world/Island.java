@@ -486,7 +486,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					
 					Renderable opaque = pool.obtain();
 					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-					opaque.material = World.opaque;
+					opaque.material = minimapMode ? Game.world.getDefOpaque() : Game.world.getOpaque();
 					opaque.mesh = chunk.getOpaqueMesh();
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
@@ -495,7 +495,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-					transp.material = World.transp;
+					transp.material = minimapMode ? Game.world.getDefTransp() : Game.world.getTransp();
 					transp.mesh = chunk.getTransparentMesh();
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;

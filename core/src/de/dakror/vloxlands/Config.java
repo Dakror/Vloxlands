@@ -10,6 +10,10 @@ import com.badlogic.gdx.files.FileHandle;
  */
 public class Config
 {
+	public static final String[] icons = { "bomb", "gears", "queue", "sleep", "work" };
+	public static final String[] dataMaps = { "All", "Ores" };
+	public static final boolean[] dataMapFullBlending = { false, true };
+	
 	public static final String version = "infdev 0.1";
 	
 	public static int fov;

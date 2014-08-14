@@ -98,6 +98,8 @@ public class Vloxlands extends GameBase
 		
 		if (Game.world != null)
 		{
+			if (keycode == Keys.F4) Game.world.setDataMap(Game.world.getDataMap() + 1);
+			if (keycode == Keys.F5) Game.world.setDataMap(Game.world.getDataMap() - 1);
 			if (keycode == Keys.F6) saveGame();
 			if (keycode == Keys.F7) Config.fov++;
 			if (keycode == Keys.F8) Config.fov--;

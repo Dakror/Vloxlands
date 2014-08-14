@@ -31,6 +31,7 @@ import de.dakror.vloxlands.ai.job.Job;
 import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.ai.state.HelperState;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
@@ -38,7 +39,6 @@ import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.tool.Tool;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.TooltipImageButton;
@@ -205,7 +205,7 @@ public class Human extends Creature
 				
 				ModelBuilder mb = new ModelBuilder();
 				mb.begin();
-				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, World.opaque);
+				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, Game.world.getOpaque());
 				model = mb.end();
 				scale.set(0.4f, 0.4f, 0.4f);
 				tr.set(-0.2f, 0, -0.3f);
