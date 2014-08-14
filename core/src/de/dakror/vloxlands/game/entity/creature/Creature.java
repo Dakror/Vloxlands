@@ -18,6 +18,7 @@ import de.dakror.vloxlands.game.world.World;
 /**
  * @author Dakror
  */
+// TODO: saving
 public abstract class Creature extends Entity
 {
 	protected boolean airborne;

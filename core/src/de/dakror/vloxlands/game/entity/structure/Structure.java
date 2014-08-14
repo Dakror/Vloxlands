@@ -62,6 +62,7 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 /**
  * @author Dakror
  */
+// TODO: saving
 public abstract class Structure extends Entity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
 {
 	Array<StructureNode> nodes;

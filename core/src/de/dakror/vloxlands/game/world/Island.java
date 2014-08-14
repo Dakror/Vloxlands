@@ -699,5 +699,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		baos.write(baos1.toByteArray());
 		
 		Bits.putInt(baos, entities.size());
+		for (Entity e : entities)
+			e.save(baos);
 	}
 }

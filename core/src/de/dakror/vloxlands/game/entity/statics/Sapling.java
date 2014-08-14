@@ -1,11 +1,15 @@
 package de.dakror.vloxlands.game.entity.statics;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.generate.Generator;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
@@ -38,5 +42,14 @@ public class Sapling extends Entity
 			Generator.generateTree(island, (int) voxelPos.x, (int) voxelPos.y - 1, (int) voxelPos.z);
 			markedForRemoval = true;
 		}
+	}
+	
+	@Override
+	public void save(ByteArrayOutputStream baos) throws IOException
+	{
+		super.save(baos);
+		
+		Bits.putInt(baos, growTicksLeft);
+		Bits.putVector3(baos, voxelPos);
 	}
 }
