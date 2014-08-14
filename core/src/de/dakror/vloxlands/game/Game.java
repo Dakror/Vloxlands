@@ -69,6 +69,8 @@ public class Game extends Layer
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
+	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks = 1200s = 20min
+	
 	public static Game instance;
 	
 	public static World world;
@@ -312,7 +314,7 @@ public class Game extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
-		world.update(delta);
+		if (!Config.paused) world.update(delta);
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
@@ -530,7 +532,7 @@ public class Game extends Layer
 					for (SelectionListener sl : listeners)
 						sl.onStructureSelection((Structure) selectedEntity, lmb);
 				}
-				else if (selectedEntity != null)
+				else if (selectedEntity instanceof Creature)
 				{
 					for (SelectionListener sl : listeners)
 						sl.onCreatureSelection((Creature) selectedEntity, lmb);

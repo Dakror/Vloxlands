@@ -491,7 +491,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
 					opaque.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.opaqueVerts > 0) renderables.add(opaque);
+					if (chunk.opaqueVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(opaque);
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -500,7 +500,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;
 					transp.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.transpVerts > 0) renderables.add(transp);
+					if (chunk.transpVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(transp);
 					
 					if (Vloxlands.wireframe && !minimapMode)
 					{

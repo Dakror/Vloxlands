@@ -204,16 +204,25 @@ public abstract class Generator
 				VoxelPos vp = island.getHighestVoxel(x, z);
 				if (vp.y <= 0 || vp.b != Voxel.get("DIRT").getId()) continue;
 				
-				int height = (int) (MathUtils.random() * 5 + 5);
-				
-				byte wood = Voxel.get("WOOD").getId();
-				
-				for (int k = 0; k < height; k++)
-					island.set(x, vp.y + 1 + k, z, wood, true, false);
-				
-				generateBezier(island, Beziers.TREE, x, z, 5, (int) (vp.y + 1 + height * 1.5f), (int) (height * 1.4f), new byte[] { Voxel.get("LEAVES").getId() }, false);
+				generateTree(island, x, vp.y, z);
 			}
 		}
+	}
+	
+	/**
+	 * @param y the block below the tree
+	 */
+	public static void generateTree(Island island, int x, int y, int z)
+	
+	{
+		int height = (int) (MathUtils.random() * 5 + 5);
+		
+		byte wood = Voxel.get("WOOD").getId();
+		
+		for (int k = 0; k < height; k++)
+			island.set(x, y + 1 + k, z, wood, true, false);
+		
+		generateBezier(island, Beziers.TREE, x, z, 5, (int) (y + 1 + height * 1.5f), (int) (height * 1.4f), new byte[] { Voxel.get("LEAVES").getId() }, false);
 	}
 	
 	public static void generateSpikes(Island island, int amount, int y, int radius, int topLayers, byte[] ratio)

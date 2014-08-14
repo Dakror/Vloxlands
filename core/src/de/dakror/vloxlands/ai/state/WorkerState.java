@@ -5,20 +5,23 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.ai.job.ChopJob;
 import de.dakror.vloxlands.ai.job.DepositJob;
+import de.dakror.vloxlands.ai.job.EnterStructureJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.PlaceEntityJob;
 import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.BFSConfig;
 import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.game.entity.Sapling;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.Callback;
 
 /**
@@ -136,24 +139,46 @@ public enum WorkerState implements State<Human>
 	{
 		final int checkHeight = 7;
 		final int checkRadius = 1;
-		final int range = 40;
+		final int range = 20;
+		final int timeout = 60 * 1000;
 		
 		@Override
-		public void enter(Human human)
+		public void enter(final Human human)
 		{
 			super.enter(human);
 			
+			human.stateParams.clear();
+			
 			Vector3 v = null;
-			if ((v = pickRandomSpot(human)) != null)
+			for (int i = 0; i < 3; i++) // try 3 times
 			{
-				D.p("whoop whoop");
+				if ((v = pickRandomSpot(human)) != null) break;
+			}
+			
+			if (v != null)
+			{
+				
+				Path p = AStar.findPath(human.getVoxelBelow(), v, human, true);
+				if (p == null)
+				{
+					human.stateParams.add(System.currentTimeMillis());
+					return;
+				}
+				human.setJob(p, new PlaceEntityJob(human, new Sapling(v.x, v.y + 1, v.z), false));
+				Job j = new EnterStructureJob(human, human.getWorkPlace(), false);
+				j.setEndEvent(new Callback()
+				{
+					@Override
+					public void trigger()
+					{
+						human.stateParams.add(System.currentTimeMillis());
+					}
+				});
+				human.queueJob(StateTools.getHomePath(human, p.getLast(), NodeType.entry), j);
+				
 				human.setLocation(null);
 			}
-			else
-			{
-				// D.p("no");
-				human.changeState(REST);
-			}
+			else human.stateParams.add(System.currentTimeMillis());
 		}
 		
 		public Vector3 pickRandomSpot(Human human)
@@ -175,21 +200,29 @@ public enum WorkerState implements State<Human>
 				return null;
 			}
 			
+			v.add(vp);
+			
+			byte b = human.getIsland().get(v.x, v.y, v.z);
+			
+			if (b != Voxel.get("DIRT").getId() && b != Voxel.get("GRASS").getId()) return null;
+			
 			for (int i = -checkRadius; i <= checkRadius; i++)
-			{
 				for (int j = -checkRadius; j <= checkRadius; j++)
-				{
-					for (int k = 0; k < checkHeight; k++)
-					{
-						if (Voxel.getForId(human.getIsland().get(vp.x + i, vp.y + k, vp.z + j)).isOpaque())
-						{
-							return null;
-						}
-					}
-				}
-			}
+					for (int k = 1; k < checkHeight; k++)
+						if (Voxel.getForId(human.getIsland().get(i + v.x, k + v.y, j + v.z)).isOpaque()) return null;
 			
 			return v;
+		}
+		
+		@Override
+		public void update(Human human)
+		{
+			super.update(human);
+			
+			if (human.stateParams.size > 0 && System.currentTimeMillis() - (Long) human.stateParams.get(0) >= timeout / Config.getGameSpeed())
+			{
+				human.changeState(REST);
+			}
 		}
 	},
 	REST
@@ -204,7 +237,7 @@ public enum WorkerState implements State<Human>
 		@Override
 		public void update(Human human)
 		{
-			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000)
+			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000f / Config.getGameSpeed())
 			{
 				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.revertToPreviousState();
 				else human.stateParams.set(0, System.currentTimeMillis());
