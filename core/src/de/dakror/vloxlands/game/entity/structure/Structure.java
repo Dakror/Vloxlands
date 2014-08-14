@@ -37,7 +37,7 @@ import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.entity.EntityItem;
+import de.dakror.vloxlands.game.entity.ItemDrop;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
@@ -418,7 +418,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		{
 			kill();
 			Vector3 p = Game.instance.activeIsland.pos;
-			EntityItem i = new EntityItem(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
+			ItemDrop i = new ItemDrop(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
 			island.addEntity(i, false, false);
 			return true;
 		}

@@ -1,6 +1,8 @@
 classpath;id
-EntityItem;1
+ItemDrop;1
+Sapling;32
 creature.Human;64
 structure.Warehouse;128
 structure.Towncenter;129
 structure.Lumberjack;130
+structure.Forester;131

@@ -45,6 +45,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	int random;
 	
 	byte[] voxels;
+	byte[] meta;
 	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
@@ -82,6 +83,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		pos = index.cpy().scl(SIZE);
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
+		meta = new byte[SIZE * SIZE * SIZE];
 		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
@@ -172,6 +174,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		
 		if (resources[get(x, y, z) + 128] > 0) resources[get(x, y, z) + 128]--;
 		
+		if (voxels[index] != id) meta[index] = 0;
+		
 		voxels[index] = id;
 		
 		resources[id + 128]++;
@@ -188,6 +192,39 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		if (z >= SIZE || z < 0) return 0;
 		
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
+	}
+	
+	public void addMeta(int x, int y, int z, byte id)
+	{
+		setMeta(x, y, z, id, false);
+	}
+	
+	public boolean setMeta(int x, int y, int z, byte id)
+	{
+		return setMeta(x, y, z, id, true);
+	}
+	
+	public boolean setMeta(int x, int y, int z, byte id, boolean force)
+	{
+		if (x >= SIZE || x < 0) return false;
+		if (y >= SIZE || y < 0) return false;
+		if (z >= SIZE || z < 0) return false;
+		
+		int index = z + y * SIZE + x * SIZE * SIZE;
+		
+		if (!force && meta[index] != 0) return false;
+		
+		meta[index] = id;
+		return true;
+	}
+	
+	public byte getMeta(int x, int y, int z)
+	{
+		if (x >= SIZE || x < 0) return 0;
+		if (y >= SIZE || y < 0) return 0;
+		if (z >= SIZE || z < 0) return 0;
+		
+		return meta[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
 	public byte[] getVoxels()
@@ -434,6 +471,10 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		baos.write((int) index.z);
 		
 		byte[] b = Compressor.compressRow(voxels);
+		Bits.putInt(baos, b.length);
+		baos.write(b);
+		
+		b = Compressor.compressRow(meta);
 		Bits.putInt(baos, b.length);
 		baos.write(b);
 	}

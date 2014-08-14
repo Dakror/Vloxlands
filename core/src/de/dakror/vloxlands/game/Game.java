@@ -35,6 +35,8 @@ import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ai.path.BFS;
+import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
@@ -66,6 +68,8 @@ public class Game extends Layer
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
+	
+	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks = 1200s = 20min
 	
 	public static Game instance;
 	
@@ -212,7 +216,7 @@ public class Game extends Layer
 		// int w = MathUtils.random(1, 5);
 		// int d = MathUtils.random(1, 5);
 		
-		world = new World(1, 1); // TODO multi island support
+		world = new World(1, 1);
 		// world = new World(w, d);
 		// Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
@@ -310,7 +314,7 @@ public class Game extends Layer
 		
 		modelBatch.begin(camera);
 		world.render(modelBatch, env);
-		world.update(delta);
+		if (!Config.paused) world.update(delta);
 		// modelBatch.render(sky, env);
 		if (cursorStructure != null)
 		{
@@ -339,6 +343,22 @@ public class Game extends Layer
 			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
 			shapeRenderer.setColor(0, 1, 0, 0.3f);
 			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
+			shapeRenderer.end();
+		}
+		
+		if (Vloxlands.showPathDebug)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			shapeRenderer.begin(ShapeType.Filled);
+			shapeRenderer.setProjectionMatrix(camera.combined);
+			for (BFSNode node : BFS.visited)
+			{
+				shapeRenderer.identity();
+				shapeRenderer.translate(activeIsland.pos.x + node.x, activeIsland.pos.y + node.y, activeIsland.pos.z + node.z + 1.01f);
+				shapeRenderer.setColor(1, 1, 1, 0.3f);
+				shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
+			}
 			shapeRenderer.end();
 		}
 	}
@@ -512,7 +532,7 @@ public class Game extends Layer
 					for (SelectionListener sl : listeners)
 						sl.onStructureSelection((Structure) selectedEntity, lmb);
 				}
-				else if (selectedEntity != null)
+				else if (selectedEntity instanceof Creature)
 				{
 					for (SelectionListener sl : listeners)
 						sl.onCreatureSelection((Creature) selectedEntity, lmb);
@@ -658,7 +678,7 @@ public class Game extends Layer
 				
 				Color defaultColor = ((ColorAttribute) defaultCursorStructureMaterials.get(i).get(ColorAttribute.Diffuse)).color;
 				
-				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED.cpy().add(defaultColor) : defaultColor));
+				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED : defaultColor));
 				if (!cursorStructurePlacable) m.set(new BlendingAttribute(0.8f));
 				else
 				{

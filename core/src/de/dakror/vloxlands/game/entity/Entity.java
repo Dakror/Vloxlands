@@ -20,7 +20,6 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
-import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.world.Island;
@@ -230,7 +229,7 @@ public class Entity extends EntityBase implements Agent, Savable
 	@Override
 	public void update(float delta)
 	{
-		if (!Config.paused) animationController.update(delta);
+		animationController.update(delta);
 	}
 	
 	@Override

@@ -277,6 +277,48 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		}
 	}
 	
+	public byte getMeta(float x, float y, float z)
+	{
+		int chunkX = (int) (x / Chunk.SIZE);
+		if (chunkX < 0 || chunkX >= CHUNKS) return 0;
+		int chunkY = (int) (y / Chunk.SIZE);
+		if (chunkY < 0 || chunkY >= CHUNKS) return 0;
+		int chunkZ = (int) (z / Chunk.SIZE);
+		if (chunkZ < 0 || chunkZ >= CHUNKS) return 0;
+		
+		ensureChunkExists(chunkX, chunkY, chunkZ);
+		
+		return chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].getMeta((int) x % Chunk.SIZE, (int) y % Chunk.SIZE, (int) z % Chunk.SIZE);
+	}
+	
+	public void addMeta(float x, float y, float z, byte id)
+	{
+		setMeta(x, y, z, id, false);
+	}
+	
+	public void setMeta(float x, float y, float z, byte id)
+	{
+		setMeta(x, y, z, id, true);
+	}
+	
+	public void setMeta(float x, float y, float z, byte id, boolean force)
+	{
+		int chunkX = (int) (x / Chunk.SIZE);
+		if (chunkX < 0 || chunkX >= CHUNKS) return;
+		int chunkY = (int) (y / Chunk.SIZE);
+		if (chunkY < 0 || chunkY >= CHUNKS) return;
+		int chunkZ = (int) (z / Chunk.SIZE);
+		if (chunkZ < 0 || chunkZ >= CHUNKS) return;
+		
+		int x1 = (int) x % Chunk.SIZE;
+		int y1 = (int) y % Chunk.SIZE;
+		int z1 = (int) z % Chunk.SIZE;
+		
+		ensureChunkExists(chunkX, chunkY, chunkZ);
+		
+		chunks[chunkZ + chunkY * CHUNKS + chunkX * CHUNKS * CHUNKS].setMeta(x1, y1, z1, id, force);
+	}
+	
 	public void ensureChunkExists(int x, int y, int z)
 	{
 		int index = z + y * CHUNKS + x * CHUNKS * CHUNKS;
@@ -449,7 +491,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
 					opaque.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.opaqueVerts > 0) renderables.add(opaque);
+					if (chunk.opaqueVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(opaque);
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -458,7 +500,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;
 					transp.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.transpVerts > 0) renderables.add(transp);
+					if (chunk.transpVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(transp);
 					
 					if (Vloxlands.wireframe && !minimapMode)
 					{
@@ -606,6 +648,18 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		}
 		
 		return true;
+	}
+	
+	public boolean hasNeighbors(float x, float y, float z)
+	{
+		byte air = Voxel.get("AIR").getId();
+		Direction[] directions = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+		for (Direction d : directions)
+		{
+			if (get(x + d.dir.x, y + d.dir.y, z + d.dir.z) != air) return true;
+		}
+		
+		return false;
 	}
 	
 	public VoxelPos getHighestVoxel(int x, int z)

@@ -71,6 +71,7 @@ public class Human extends Creature
 	final Matrix4 tmp = new Matrix4();
 	
 	StateMachine<Human> stateMachine;
+	Array<Object> previousStateParams = new Array<Object>();
 	public Array<Object> stateParams = new Array<Object>();
 	
 	public Human(float x, float y, float z)
@@ -342,9 +343,18 @@ public class Human extends Creature
 	
 	public void changeState(State<Human> newState, Object... params)
 	{
+		previousStateParams.clear();
+		previousStateParams.addAll(stateParams);
 		stateParams.clear();
 		stateParams.addAll(params);
 		stateMachine.changeState(newState);
+	}
+	
+	public void revertToPreviousState()
+	{
+		stateParams.clear();
+		stateParams.addAll(previousStateParams);
+		stateMachine.revertToPreviousState();
 	}
 	
 	public State<Human> getState()
