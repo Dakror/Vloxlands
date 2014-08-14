@@ -1,9 +1,10 @@
-package de.dakror.vloxlands.game.entity;
+package de.dakror.vloxlands.game.entity.statics;
 
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.generate.Generator;
 
 /**

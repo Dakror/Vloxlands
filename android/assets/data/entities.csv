@@ -1,6 +1,7 @@
 classpath;id
 ItemDrop;1
-Sapling;32
+statics.Sapling;32
+statics.Wheat;33
 creature.Human;64
 structure.Warehouse;128
 structure.Towncenter;129

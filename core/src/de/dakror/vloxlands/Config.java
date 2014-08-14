@@ -18,7 +18,7 @@ public class Config
 	
 	public static int fov;
 	public static boolean paused;
-	public static int shadowQuality = 1;
+	public static int shadowQuality = 0;
 	private static int gameSpeed = 0;
 	public static int[] gameSpeeds = { 1, 2, 5 };
 	public static FileHandle dir;
