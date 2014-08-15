@@ -89,6 +89,7 @@ public class Game extends Layer
 	
 	public StaticEntity cursorEntity;
 	boolean cursorEntityPlacable;
+	boolean cursorEntityContinousPlacing;
 	Array<Material> defaultCursorEntityMaterials;
 	
 	public String activeAction = "";
@@ -732,9 +733,21 @@ public class Game extends Layer
 							activeIsland.addEntity(cursorEntity, true, false);
 							cursorEntity.updateVoxelPos();
 							
-							cursorEntity = null;
-							defaultCursorEntityMaterials = null;
-							cursorEntityPlacable = false;
+							if (!cursorEntityContinousPlacing)
+							{
+								cursorEntity = null;
+								defaultCursorEntityMaterials = null;
+								cursorEntityPlacable = false;
+							}
+							else
+							{
+								cursorEntity = (StaticEntity) Entity.getForId(cursorEntity.getId(), cursorEntity.posCache.x, cursorEntity.posCache.y, cursorEntity.posCache.z);
+								cursorEntity.setIsland(activeIsland);
+								cursorEntity.getTransform().translate(activeIsland.pos.x, activeIsland.pos.y, activeIsland.pos.z);
+								cursorEntity.updateVoxelPos();
+								if (cursorEntity instanceof Structure) ((Structure) cursorEntity).setBuilt(true);
+								cursorEntity.setVisible(true);
+							}
 						}
 					}
 					else
@@ -805,7 +818,8 @@ public class Game extends Layer
 		}
 		if (action.contains("entity"))
 		{
-			String s = action.replace("entity:", "");
+			String[] a = action.split("\\|");
+			String s = a[0].replace("entity:", "");
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
 			if (e instanceof Structure)
 			{
@@ -814,6 +828,7 @@ public class Game extends Layer
 			}
 			e.setVisible(true);
 			cursorEntity = (StaticEntity) e;
+			cursorEntityContinousPlacing = a.length > 1 && a[1].equals("cont");
 		}
 		
 		activeAction = action;

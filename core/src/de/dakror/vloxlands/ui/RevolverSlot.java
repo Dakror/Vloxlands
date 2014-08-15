@@ -30,7 +30,7 @@ public class RevolverSlot extends TooltipImageButton
 		
 		if (name.startsWith("entity:"))
 		{
-			Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").trim()), 0, 0, 0);
+			Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").replace("|cont", "").trim()), 0, 0, 0);
 			if (e instanceof ResourceListProvider) tooltip = new ResourceListTooltip("", "", (ResourceListProvider) e, this);
 		}
 		if (name.startsWith("task:"))
