@@ -38,6 +38,7 @@ import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.ItemDrop;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
@@ -63,11 +64,10 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
  * @author Dakror
  */
 // TODO: saving
-public abstract class Structure extends Entity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
+public abstract class Structure extends StaticEntity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
 {
 	Array<StructureNode> nodes;
 	Array<Human> workers;
-	Vector3 voxelPos;
 	Inventory inventory;
 	/**
 	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
@@ -100,7 +100,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public Structure(float x, float y, float z, String model)
 	{
 		super(Math.round(x), Math.round(y), Math.round(z), model);
-		voxelPos = new Vector3(x, y, z);
 		
 		nodes = new Array<StructureNode>();
 		workers = new Array<Human>();
@@ -132,11 +131,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		setBuilt(false);
 	}
 	
-	public Vector3 getVoxelPos()
-	{
-		return voxelPos;
-	}
-	
 	public boolean isBuilt()
 	{
 		return built;
@@ -161,14 +155,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
-	public void updateVoxelPos()
-	{
-		transform.getTranslation(posCache);
-		transform.getRotation(rotCache);
-		Vector3 p = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().cpy().scl(0.5f));
-		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
-	}
-	
 	public boolean canBePlaced()
 	{
 		int width = (int) Math.ceil(boundingBox.getDimensions().x);
@@ -184,7 +170,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				}
 		
 		for (Entity s : island.getEntities())
-			if (s instanceof Structure && intersects((Structure) s)) return false;
+			if (s instanceof StaticEntity && intersects((Structure) s)) return false;
 		
 		return true;
 	}

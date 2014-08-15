@@ -10,18 +10,23 @@ import de.dakror.vloxlands.ai.job.ChopJob;
 import de.dakror.vloxlands.ai.job.DepositJob;
 import de.dakror.vloxlands.ai.job.EnterStructureJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.MakeAcreJob;
 import de.dakror.vloxlands.ai.job.PlaceEntityJob;
 import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.BFSConfig;
 import de.dakror.vloxlands.ai.path.Path;
+import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.statics.Sapling;
+import de.dakror.vloxlands.game.entity.statics.Wheat;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
 import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.Callback;
 
 /**
@@ -226,12 +231,127 @@ public enum WorkerState implements State<Human>
 		}
 	},
 	FARMER
-	{},
+	{
+		final int range = 3;
+		final int minRange = 2;
+		final int maxQueue = 1000;
+		
+		final int timeout = 15 * 1000;
+		
+		@Override
+		public void enter(final Human human)
+		{
+			human.stateParams.clear();
+			D.p("GO");
+			Vector3 pathStart = human.getVoxelBelow();
+			
+			int q = maintainAcres(pathStart, 0, human);
+			
+			// q = checkForHarvest(q, human);
+			// if (q < maxQueue)
+			// {
+			// q = checkForPlace(q, human);
+			// }
+			if (q > 0)
+			{
+				Job j = new EnterStructureJob(human, human.getWorkPlace(), false);
+				j.setEndEvent(new Callback()
+				{
+					@Override
+					public void trigger()
+					{
+						human.stateParams.add(System.currentTimeMillis());
+					}
+				});
+				human.queueJob(StateTools.getHomePath(human, pathStart, NodeType.entry), j);
+			}
+			else human.stateParams.add(System.currentTimeMillis());
+			
+		}
+		
+		public int maintainAcres(Vector3 pathStart, int queued, Human human)
+		{
+			int width = (int) Math.ceil(human.getWorkPlace().getBoundingBox().getDimensions().x);
+			int depth = (int) Math.ceil(human.getWorkPlace().getBoundingBox().getDimensions().z);
+			
+			byte acre = Voxel.get("ACRE").getId();
+			
+			for (int i = -range - minRange; i < range + width + minRange; i++)
+			{
+				for (int j = -range - minRange; j < range + depth + minRange; j++)
+				{
+					if (queued > maxQueue) return queued;
+					
+					if ((i >= -minRange && i < minRange + width) && (j >= -minRange && j < minRange + depth)) continue;
+					
+					if (human.getIsland().get(human.getWorkPlace().getVoxelPos().x + i, human.getWorkPlace().getVoxelPos().y, human.getWorkPlace().getVoxelPos().z + j) != acre)
+					{
+						if (!human.getIsland().isSpaceAbove(human.getWorkPlace().getVoxelPos().x + i, human.getWorkPlace().getVoxelPos().y, human.getWorkPlace().getVoxelPos().z + j, human.getHeight())) continue;
+						
+						MakeAcreJob job = new MakeAcreJob(human, new Vector3(human.getWorkPlace().getVoxelPos().x + i, human.getWorkPlace().getVoxelPos().y, human.getWorkPlace().getVoxelPos().z + j), Voxel.get("ACRE"), false);
+						Path p = AStar.findPath(pathStart, job.getTarget(), human, true);
+						if (p == null) continue;
+						
+						if (queued == 0)
+						{
+							human.setLocation(null);
+							human.setJob(p, job);
+						}
+						else human.queueJob(p, job);
+						
+						if (p.size() > 0) pathStart.set(p.getLast());
+						
+						queued++;
+					}
+				}
+			}
+			
+			return queued;
+		}
+		
+		public int checkForHarvest(int queued, Human human)
+		{
+			Vector3 vb = human.getVoxelBelow();
+			for (Entity e : human.getIsland().getEntities())
+			{
+				if (queued >= maxQueue) break;
+				if (e instanceof Wheat && e.isVisible())
+				{
+					float dst = ((StaticEntity) e).getVoxelPos().dst(vb);
+					if (dst >= minRange && dst <= minRange + range && !((Wheat) e).isManaged())
+					{
+						D.p("queue harvest");
+					}
+				}
+			}
+			
+			return queued;
+		}
+		
+		public int checkForPlace(int queued, Human human)
+		{
+			
+			return queued;
+		}
+		
+		@Override
+		public void update(Human human)
+		{
+			super.update(human);
+			
+			if (human.stateParams.size > 0 && System.currentTimeMillis() - (Long) human.stateParams.get(0) >= timeout / Config.getGameSpeed())
+			{
+				human.changeState(REST);
+			}
+		}
+	},
 	REST
 	{
 		@Override
 		public void enter(Human human)
 		{
+			human.stateParams.clear();
+			
 			human.stateParams.add(0l);
 			human.setLocation(human.getWorkPlace());
 		}
@@ -241,7 +361,11 @@ public enum WorkerState implements State<Human>
 		{
 			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000f / Config.getGameSpeed())
 			{
-				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.revertToPreviousState();
+				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull())
+				{
+					if (human.getStateMachine().getPreviousState() == human.getWorkPlace().getWorkerState()) human.revertToPreviousState();
+					else human.changeState(human.getWorkPlace().getWorkerState());
+				}
 				else human.stateParams.set(0, System.currentTimeMillis());
 			}
 		}
@@ -260,7 +384,7 @@ public enum WorkerState implements State<Human>
 	{
 		if (!StateTools.isWorkingTime())
 		{
-			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST) human.changeState(BRING_STUFF_HOME);
+			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST && human.getLocation() == null) human.changeState(BRING_STUFF_HOME);
 		}
 	}
 	

@@ -3,27 +3,23 @@ package de.dakror.vloxlands.game.entity.statics;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.badlogic.gdx.math.Vector3;
-
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
-import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.generate.Generator;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
  */
-public class Sapling extends Entity
+public class Sapling extends StaticEntity
 {
 	int growTicksLeft;
-	Vector3 voxelPos;
 	
 	public Sapling(float x, float y, float z)
 	{
 		super(x + 0.25f, y - 0.5f, z + 0.25f, "models/entities/sapling/sapling.g3db");
 		
-		voxelPos = new Vector3(x, y, z);
 		name = "Sapling";
 		weight = 1f;
 		
@@ -50,6 +46,5 @@ public class Sapling extends Entity
 		super.save(baos);
 		
 		Bits.putInt(baos, growTicksLeft);
-		Bits.putVector3(baos, voxelPos);
 	}
 }

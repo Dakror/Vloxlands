@@ -85,7 +85,6 @@ public class BFS
 					
 					v.set(selected.x + x, selected.y + y, selected.z + z);
 					
-					
 					byte vxl = cfg.creature.getIsland().get(v.x, v.y, v.z);
 					
 					// don't need parents here

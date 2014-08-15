@@ -74,6 +74,8 @@ public class Human extends Creature
 	Array<Object> previousStateParams = new Array<Object>();
 	public Array<Object> stateParams = new Array<Object>();
 	
+	int tick;
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -134,14 +136,24 @@ public class Human extends Creature
 	{
 		super.tick(tick);
 		
+		this.tick = tick;
+		
+		Job j = firstJob();
+		if (j != null && j.isActive() && !j.isDone()) j.tick(tick);
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		stateMachine.update();
+		
 		Job j = firstJob();
 		if (j != null)
 		{
 			if (j.isActive())
 			{
-				
-				if (!j.isDone()) j.tick(tick);
-				else
+				if (j.isDone())
 				{
 					jobQueue.removeIndex(0);
 					j.onEnd();
@@ -160,13 +172,6 @@ public class Human extends Creature
 				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
 			}
 		}
-	}
-	
-	@Override
-	public void update(float delta)
-	{
-		super.update(delta);
-		stateMachine.update();
 	}
 	
 	@Override

@@ -38,6 +38,7 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -64,7 +65,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
 @SuppressWarnings("deprecation")
 public class Game extends Layer
 {
-	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
+	public static long seed = 8642351828647088128l;// (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
@@ -592,7 +593,7 @@ public class Game extends Layer
 		
 		for (Entity entity : activeIsland.getEntities())
 		{
-			if (entity instanceof Structure) continue;
+			if (entity instanceof StaticEntity) continue;
 			if (!entity.isVisible()) continue;
 			entity.wasSelected = entity.selected;
 			entity.selected = false;
@@ -619,7 +620,7 @@ public class Game extends Layer
 				if (i == null) continue;
 				for (Entity e : i.getEntities())
 				{
-					if (!(e instanceof Structure)) continue;
+					if (!(e instanceof StaticEntity)) continue;
 					
 					e.wasSelected = e.selected;
 					e.selected = false;

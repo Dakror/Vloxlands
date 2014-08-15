@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Pool;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -386,7 +387,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	{
 		for (Entity s : entities)
 		{
-			if (minimapMode && !(s instanceof Structure)) continue;
+			if (minimapMode && !(s instanceof StaticEntity)) continue;
 			
 			if (s.inFrustum || minimapMode)
 			{

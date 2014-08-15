@@ -47,7 +47,7 @@ public abstract class Creature extends Entity
 		
 		try
 		{
-			if (path != null && Vloxlands.showPathDebug && !minimapMode)
+			if (path != null && path.size() > 0 && Vloxlands.showPathDebug && !minimapMode)
 			{
 				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 				Gdx.gl.glLineWidth(2);
@@ -73,7 +73,7 @@ public abstract class Creature extends Entity
 		}
 		catch (NullPointerException e)
 		{
-			e.printStackTrace();
+			Game.shapeRenderer.end();
 		}
 	}
 	

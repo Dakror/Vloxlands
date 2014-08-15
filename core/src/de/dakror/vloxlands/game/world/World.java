@@ -266,7 +266,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		return dataMaps[dataMap][1];
 	}
 	
-	
 	public Material getDefOpaque()
 	{
 		return dataMaps[0][0];
