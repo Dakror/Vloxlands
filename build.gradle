@@ -53,7 +53,6 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         
         compile "com.badlogicgames.gdx:gdx-ai:$gdxVersion"
-        compile "com.esotericsoftware.kryo:kryo:2.24.0"
     }
 }
 
@@ -65,7 +64,6 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         
         compile "com.badlogicgames.gdx:gdx-ai:$gdxVersion"
-        compile "com.esotericsoftware.kryo:kryo:2.24.0"
     }
 }
 
