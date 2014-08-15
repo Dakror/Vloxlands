@@ -95,7 +95,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public boolean tickRequestsEnabled = true;
 	
 	final Vector3 tmp = new Vector3();
-	final Vector3 dim = new Vector3();
 	
 	public Structure(float x, float y, float z, String model)
 	{
@@ -126,8 +125,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		taskQueue = new Array<Task>();
 		working = true;
 		
-		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
-		
 		setBuilt(false);
 	}
 	
@@ -153,26 +150,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public Vector3 getCenter()
 	{
 		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
-	}
-	
-	public boolean canBePlaced()
-	{
-		int width = (int) Math.ceil(boundingBox.getDimensions().x);
-		int height = (int) Math.ceil(boundingBox.getDimensions().y);
-		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
-		
-		for (int i = 0; i < width; i++)
-			for (int j = -1; j < height; j++)
-				for (int k = 0; k < depth; k++)
-				{
-					if (j == -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) == 0) return false;
-					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
-				}
-		
-		for (Entity s : island.getEntities())
-			if (s instanceof StaticEntity && intersects((Structure) s)) return false;
-		
-		return true;
 	}
 	
 	/**
@@ -416,20 +393,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		}
 		
 		return false;
-	}
-	
-	public boolean intersects(Structure o)
-	{
-		float lx = Math.abs(posCache.x - o.posCache.x);
-		float sumx = (dim.x / 2.0f) + (o.dim.x / 2.0f);
-		
-		float ly = Math.abs(posCache.y - o.posCache.y);
-		float sumy = (dim.y / 2.0f) + (o.dim.y / 2.0f);
-		
-		float lz = Math.abs(posCache.z - o.posCache.z);
-		float sumz = (dim.z / 2.0f) + (o.dim.z / 2.0f);
-		
-		return (lx <= sumx && ly <= sumy && lz <= sumz);
 	}
 	
 	protected void onWorkerAdded(Human human)

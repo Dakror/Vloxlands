@@ -87,9 +87,9 @@ public class Game extends Layer
 	public Camera minimapCamera;
 	public ModelBatch minimapBatch;
 	
-	public Structure cursorStructure;
-	boolean cursorStructurePlacable;
-	Array<Material> defaultCursorStructureMaterials;
+	public StaticEntity cursorEntity;
+	boolean cursorEntityPlacable;
+	Array<Material> defaultCursorEntityMaterials;
 	
 	public String activeAction = "";
 	public Island activeIsland;
@@ -319,10 +319,10 @@ public class Game extends Layer
 		world.render(modelBatch, env);
 		if (!Config.paused) world.update(delta);
 		// modelBatch.render(sky, env);
-		if (cursorStructure != null)
+		if (cursorEntity != null)
 		{
-			cursorStructure.update(delta);
-			cursorStructure.render(modelBatch, env, false);
+			cursorEntity.update(delta);
+			cursorEntity.render(modelBatch, env, false);
 		}
 		modelBatch.end();
 		
@@ -387,7 +387,7 @@ public class Game extends Layer
 			directionalLight.set(light, light, light, x, -0.5f, z);
 			world.tick(tick);
 		}
-		if (cursorStructure != null) cursorStructure.tick(tick);
+		if (cursorEntity != null) cursorEntity.tick(tick);
 		
 		if (activeIsland != null && startTick > 0)
 		{
@@ -656,36 +656,35 @@ public class Game extends Layer
 	public boolean mouseMoved(int screenX, int screenY)
 	{
 		if (regionSelectionMode) pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
-		else if (cursorStructure != null)
+		else if (cursorEntity != null)
 		{
 			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
-			cursorStructure.getTransform().setToTranslation(activeIsland.pos);
-			cursorStructure.getTransform().translate(hoveredVoxel);
-			cursorStructure.getTransform().translate(0, cursorStructure.getBoundingBox().getDimensions().y / 2, 0);
-			cursorStructure.setIsland(activeIsland);
-			cursorStructure.updateVoxelPos();
+			cursorEntity.getTransform().setToTranslation(activeIsland.pos);
+			cursorEntity.getTransform().translate(hoveredVoxel);
+			cursorEntity.getTransform().translate(0, cursorEntity.getBoundingBox().getDimensions().y / 2, 0);
+			cursorEntity.setIsland(activeIsland);
+			cursorEntity.updateVoxelPos();
+			cursorEntityPlacable = cursorEntity.canBePlaced();
 			
-			cursorStructurePlacable = cursorStructure.canBePlaced();
-			
-			if (defaultCursorStructureMaterials == null)
+			if (defaultCursorEntityMaterials == null)
 			{
-				defaultCursorStructureMaterials = new Array<Material>();
+				defaultCursorEntityMaterials = new Array<Material>();
 				
-				for (Material m : cursorStructure.getModelInstance().materials)
-					defaultCursorStructureMaterials.add(m.copy());
+				for (Material m : cursorEntity.getModelInstance().materials)
+					defaultCursorEntityMaterials.add(m.copy());
 			}
 			
-			for (int i = 0; i < cursorStructure.getModelInstance().materials.size; i++)
+			for (int i = 0; i < cursorEntity.getModelInstance().materials.size; i++)
 			{
-				Material m = cursorStructure.getModelInstance().materials.get(i);
+				Material m = cursorEntity.getModelInstance().materials.get(i);
 				
-				Color defaultColor = ((ColorAttribute) defaultCursorStructureMaterials.get(i).get(ColorAttribute.Diffuse)).color;
+				Color defaultColor = ((ColorAttribute) defaultCursorEntityMaterials.get(i).get(ColorAttribute.Diffuse)).color;
 				
-				m.set(ColorAttribute.createDiffuse(!cursorStructurePlacable ? Color.RED : defaultColor));
-				if (!cursorStructurePlacable) m.set(new BlendingAttribute(0.8f));
+				m.set(ColorAttribute.createDiffuse(!cursorEntityPlacable ? Color.RED : defaultColor));
+				if (!cursorEntityPlacable) m.set(new BlendingAttribute(0.8f));
 				else
 				{
-					BlendingAttribute ba = (BlendingAttribute) defaultCursorStructureMaterials.get(i).get(BlendingAttribute.Type);
+					BlendingAttribute ba = (BlendingAttribute) defaultCursorEntityMaterials.get(i).get(BlendingAttribute.Type);
 					if (ba == null) m.remove(BlendingAttribute.Type);
 					else m.set(ba);
 				}
@@ -717,32 +716,32 @@ public class Game extends Layer
 		{
 			if (!regionSelectionMode)
 			{
-				if (cursorStructure != null)
+				if (cursorEntity != null)
 				{
 					if (button == Buttons.LEFT)
 					{
-						if (cursorStructurePlacable)
+						if (cursorEntityPlacable)
 						{
-							for (int i = 0; i < defaultCursorStructureMaterials.size; i++)
+							for (int i = 0; i < defaultCursorEntityMaterials.size; i++)
 							{
-								cursorStructure.getModelInstance().materials.set(i, defaultCursorStructureMaterials.get(i));
+								cursorEntity.getModelInstance().materials.set(i, defaultCursorEntityMaterials.get(i));
 							}
 							
-							cursorStructure.setBuilt(false);
-							cursorStructure.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
-							activeIsland.addEntity(cursorStructure, true, false);
-							cursorStructure.updateVoxelPos();
+							if (cursorEntity instanceof Structure) ((Structure) cursorEntity).setBuilt(false);
+							cursorEntity.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
+							activeIsland.addEntity(cursorEntity, true, false);
+							cursorEntity.updateVoxelPos();
 							
-							cursorStructure = null;
-							defaultCursorStructureMaterials = null;
-							cursorStructurePlacable = false;
+							cursorEntity = null;
+							defaultCursorEntityMaterials = null;
+							cursorEntityPlacable = false;
 						}
 					}
 					else
 					{
-						cursorStructure = null;
-						defaultCursorStructureMaterials = null;
-						cursorStructurePlacable = false;
+						cursorEntity = null;
+						defaultCursorEntityMaterials = null;
+						cursorEntityPlacable = false;
 					}
 				}
 				else
@@ -808,10 +807,13 @@ public class Game extends Layer
 		{
 			String s = action.replace("entity:", "");
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
-			if (!(e instanceof Structure)) Gdx.app.error("GameLayer.action", "Cant cast " + s + " to Structure!");
-			((Structure) e).setBuilt(true);
-			((Structure) e).tickRequestsEnabled = false;
-			cursorStructure = (Structure) e;
+			if (e instanceof Structure)
+			{
+				((Structure) e).setBuilt(true);
+				((Structure) e).tickRequestsEnabled = false;
+			}
+			e.setVisible(true);
+			cursorEntity = (StaticEntity) e;
 		}
 		
 		activeAction = action;

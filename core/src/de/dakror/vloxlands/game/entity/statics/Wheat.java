@@ -6,6 +6,8 @@ import java.io.IOException;
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.StaticEntity;
+import de.dakror.vloxlands.game.voxel.MetaTags;
+import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
@@ -18,9 +20,19 @@ public class Wheat extends StaticEntity
 	
 	public Wheat(float x, float y, float z)
 	{
-		super(x, y, z, x, y + 0.62f, z + 0.02f, "models/entities/wheat/wheat.g3db");
+		super(x - 0.5f, y, z + 0.5f, "models/entities/wheat/wheat.g3db");
 		visible = false;
 		growTicksLeft = Game.dayInTicks;
+	}
+	
+	@Override
+	public void onSpawn()
+	{
+		super.onSpawn();
+		
+		visible = false;
+		island.set(voxelPos.x, voxelPos.y, voxelPos.z, Voxel.get("ACRE").getId());
+		island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.FARMER_PLANTED);
 	}
 	
 	@Override

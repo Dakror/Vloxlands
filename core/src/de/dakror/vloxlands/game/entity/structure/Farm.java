@@ -4,9 +4,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 
 import de.dakror.vloxlands.ai.state.WorkerState;
+import de.dakror.vloxlands.game.entity.statics.Wheat;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.tool.FarmTool;
+import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
  * @author Dakror
@@ -32,5 +34,30 @@ public class Farm extends Structure
 		resourceList.setCostPopulation(1);
 		
 		inventory = new Inventory(50);
+	}
+	
+	@Override
+	public void onSpawn()
+	{
+		super.onSpawn();
+		
+		if (!isBuilt())
+		{
+			byte b = Voxel.get("ACRE").getId();
+			
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					float x = i - 5 + voxelPos.x;
+					float y = voxelPos.y;
+					float z = j - 5 + voxelPos.z;
+					if (island.isSpaceAbove(x, y, z, 2) && island.get(x, y, z) != 0)
+					{
+						island.addEntity(new Wheat(x, y, z), false, false);
+					}
+				}
+			}
+		}
 	}
 }

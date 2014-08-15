@@ -106,8 +106,11 @@ public class HudLayer extends Layer implements SelectionListener
 		s = new RevolverSlot(stage, new Vector2(0, 7), "entity:131");
 		s.getTooltip().set("Forester", "Places tree saplings to regrow the forest.\nSaplings take 5 days to fully grow.");
 		actions.addSlot(1, "build", s);
-		s = new RevolverSlot(stage, new Vector2(0, 4), "entity:132");
+		s = new RevolverSlot(stage, new Vector2(1, 7), "entity:132");
 		s.getTooltip().set("Farm", "Plants wheat and harvests it when grown.\nWheat takes 2 days to fully grow.");
+		actions.addSlot(1, "build", s);
+		s = new RevolverSlot(stage, new Vector2(0, 4), "entity:33");
+		s.getTooltip().set("Wheatfield", "A field of wheat which takes 2 days to fully grow.");
 		actions.addSlot(1, "build", s);
 		
 		if (D.android())
