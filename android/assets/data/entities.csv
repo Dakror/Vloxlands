@@ -7,3 +7,4 @@ structure.Warehouse;128
 structure.Towncenter;129
 structure.Lumberjack;130
 structure.Forester;131
+structure.Farm;132

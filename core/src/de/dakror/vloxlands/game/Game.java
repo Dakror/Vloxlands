@@ -240,6 +240,8 @@ public class Game extends Layer
 		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("HAMMER"), 5));
+		tc.getInnerInventory().add(new ItemStack(Item.get("HOE"), 5));
+		
 		tc.getInnerInventory().add(new ItemStack(Item.get("WOODEN_LOG"), 40));
 		
 		doneLoading = true;
