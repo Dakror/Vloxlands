@@ -225,6 +225,8 @@ public enum WorkerState implements State<Human>
 			}
 		}
 	},
+	FARMER
+	{},
 	REST
 	{
 		@Override
