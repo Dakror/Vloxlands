@@ -8,7 +8,6 @@ import de.dakror.vloxlands.game.entity.statics.Wheat;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.tool.FarmTool;
-import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**
  * @author Dakror
@@ -43,8 +42,6 @@ public class Farm extends Structure
 		
 		if (!isBuilt())
 		{
-			byte b = Voxel.get("ACRE").getId();
-			
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)

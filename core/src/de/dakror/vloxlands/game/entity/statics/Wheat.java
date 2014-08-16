@@ -15,14 +15,17 @@ import de.dakror.vloxlands.util.math.Bits;
  */
 public class Wheat extends StaticEntity
 {
+	int growTicks;
 	int growTicksLeft;
 	boolean managed;
+	
+	public static int itemsForHarvest = 5;
 	
 	public Wheat(float x, float y, float z)
 	{
 		super(x - 0.5f, y, z + 0.5f, "models/entities/wheat/wheat.g3db");
 		visible = false;
-		growTicksLeft = Game.dayInTicks;
+		growTicks = growTicksLeft = Game.dayInTicks / 5;
 	}
 	
 	@Override
@@ -32,7 +35,7 @@ public class Wheat extends StaticEntity
 		
 		visible = false;
 		island.set(voxelPos.x, voxelPos.y, voxelPos.z, Voxel.get("ACRE").getId());
-		island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.FARMER_PLANTED);
+		island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWING);
 	}
 	
 	@Override
@@ -47,8 +50,16 @@ public class Wheat extends StaticEntity
 			if (growTicksLeft <= 0)
 			{
 				visible = true;
+				island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWN);
 			}
 		}
+	}
+	
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (!visible) growTicksLeft = growTicks;
 	}
 	
 	@Override

@@ -17,7 +17,7 @@ Item;0;default;N/A;;5;1;0;0;0;1;
 ;14;Raw Sandstone;A piece of rough sand stone.;voxel:14;;;;;;35;
 ;15;Morass;Ughhh! That smell! Also feels like dirt.;voxel:15;;;;;;50;
 ;16;Gravel;A pile of small stones.;voxel:16;;;;;;50;
-;17;;;;;;;;;;
+;17;Wheat;A bunch of wheaten stems.;wheat_item/wheat_item.g3db;0;4;1;;;35;
 ;18;;;;;;;;;;
 ;19;;;;;;;;;;
 ;20;;;;;;;;;;

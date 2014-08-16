@@ -44,11 +44,18 @@ public class TaskListItem extends Label
 	@Override
 	public void draw(Batch batch, float parentAlpha)
 	{
-		if ((Integer) getUserObject() == 0)
+		try
 		{
-			float fac = (1 - (structure.getTaskTicksLeft() / (float) structure.firstTask().getDuration()));
-			Texture t = Vloxlands.assets.get("img/gui/progressBar.png", Texture.class);
-			batch.draw(t, getX(), getY(), Math.round(getParent().getWidth() * fac), (int) getHeight(), 0, 0, Math.round(t.getWidth() * fac), t.getHeight(), false, false);
+			if ((Integer) getUserObject() == 0)
+			{
+				float fac = (1 - (structure.getTaskTicksLeft() / (float) structure.firstTask().getDuration()));
+				Texture t = Vloxlands.assets.get("img/gui/progressBar.png", Texture.class);
+				batch.draw(t, getX(), getY(), Math.round(getParent().getWidth() * fac), (int) getHeight(), 0, 0, Math.round(t.getWidth() * fac), t.getHeight(), false, false);
+			}
+		}
+		catch (NullPointerException e)
+		{
+			return;
 		}
 		
 		super.draw(batch, parentAlpha);
