@@ -29,8 +29,9 @@ public class Farm extends Structure
 		workerTool = FarmTool.class;
 		workerState = WorkerState.FARMER;
 		
-		resourceList.add(Item.get("WOODEN_LOG"), 20);
-		resourceList.setCostPopulation(1);
+		costs.add(Item.get("WOODEN_LOG"), 20);
+		costs.add(Item.get("WHEAT"), 20);
+		costs.setCostPopulation(1);
 		
 		inventory = new Inventory(50);
 	}

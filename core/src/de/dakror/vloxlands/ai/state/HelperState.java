@@ -117,7 +117,6 @@ public enum HelperState implements State<Human>
 				PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()));
 				if (pb != null)
 				{
-					target.getBuildInventory().manageNext();
 					pj.setTarget(pb.structure);
 					
 					if (!human.getCarryingItemStack().isNull())

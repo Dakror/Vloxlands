@@ -29,8 +29,8 @@ public class Lumberjack extends Structure
 		workerState = WorkerState.LUMBERJACK;
 		workerTool = ChopTool.class;
 		
-		resourceList.add(Item.get("WOODEN_LOG"), 10);
-		resourceList.setCostPopulation(1);
+		costs.add(Item.get("WOODEN_LOG"), 10);
+		costs.setCostPopulation(1);
 		
 		weight = 25f;
 		

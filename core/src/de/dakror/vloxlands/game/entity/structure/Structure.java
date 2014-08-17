@@ -44,7 +44,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.inv.Inventory;
-import de.dakror.vloxlands.game.item.inv.ManagedInventory;
+import de.dakror.vloxlands.game.item.inv.NonStackingInventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
@@ -72,8 +72,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	/**
 	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
 	 */
-	ManagedInventory buildInventory;
-	ResourceList resourceList;
+	NonStackingInventory buildInventory;
+	ResourceList costs;
 	String workerName;
 	State<Human> workerState;
 	Class<?> workerTool;
@@ -117,8 +117,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
-		buildInventory = new ManagedInventory(256 /* That should be enough... */);
-		resourceList = new ResourceList();
+		buildInventory = new NonStackingInventory(256 /* That should be enough... */);
+		costs = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
 		handledHumanStates = new Array<State<Human>>();
 		tasks = new Array<Task>();
@@ -142,8 +142,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		if (!built)
 		{
 			buildInventory.clear();
-			for (Byte b : resourceList.getAll())
-				buildInventory.add(new ItemStack(Item.getForId(b), resourceList.get(b)));
+			for (Byte b : costs.getAll())
+				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 		}
 	}
 	
@@ -157,7 +157,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	 */
 	public boolean progressBuild()
 	{
-		if (buildProgress == resourceList.getCount())
+		if (buildProgress == costs.getCount())
 		{
 			if (!built) setBuilt(true);
 			return true;
@@ -165,7 +165,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		buildProgress++;
 		
-		if (buildProgress == resourceList.getCount())
+		if (buildProgress == costs.getCount())
 		{
 			if (!built) setBuilt(true);
 			return true;
@@ -180,7 +180,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	public boolean addWorker(Human human)
 	{
-		if (workers.size >= resourceList.getCostPopulation()) return false;
+		if (workers.size >= costs.getCostPopulation()) return false;
 		if (human.getWorkPlace() != null) return false;
 		
 		human.setWorkPlace(this);
@@ -197,7 +197,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		super.onSpawn();
 		
 		inventory.addListener(this);
-		buildInventory.addListener(this);
 		
 		for (Entity e : island.getEntities())
 		{
@@ -254,8 +253,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
 			
-			if (workers.size < resourceList.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2 && resourceList.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
+			if (workers.size < costs.getCostPopulation() && built) broadcast(HelperState.START_WORK);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
 			{
 				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 				handledHumanStates.add(HelperState.EMPTY_INVENTORY);
@@ -337,7 +336,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		return built ? inventory : buildInventory;
 	}
 	
-	public ManagedInventory getBuildInventory()
+	public NonStackingInventory getBuildInventory()
 	{
 		return buildInventory;
 	}
@@ -350,7 +349,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	@Override
 	public ResourceList getCosts()
 	{
-		return resourceList;
+		return costs;
 	}
 	
 	@Override
@@ -430,14 +429,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	@Override
 	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
 	{
-		if (inventory instanceof ManagedInventory)
-		{
-			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(1, HelperState.BUILD);
-		}
-		else
-		{
-			handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
-		}
+		handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
 	}
 	
 	public CurserCommand getDefaultCommand()

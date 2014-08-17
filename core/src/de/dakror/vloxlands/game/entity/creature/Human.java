@@ -236,13 +236,24 @@ public class Human extends Creature
 	{
 		if (job == null)
 		{
-			if (path.size() > 0) jobQueue.add(new WalkJob(path, this));
+			if (path.size() > 0)
+			{
+				WalkJob wj = new WalkJob(path, this);
+				jobQueue.add(wj);
+				wj.queue();
+			}
 		}
 		else
 		{
-			if (path != null && path.size() > 0) jobQueue.add(new WalkJob(path, this));
+			if (path != null && path.size() > 0)
+			{
+				WalkJob wj = new WalkJob(path, this);
+				jobQueue.add(wj);
+				wj.queue();
+			}
 			else rotateTowardsGhostTarget(path);
 			jobQueue.add(job);
+			job.queue();
 		}
 	}
 	
