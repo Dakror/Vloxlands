@@ -54,7 +54,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	public FrameBuffer fbo;
 	public Vector3 index, pos;
 	public Chunk[] chunks;
-	public ResourceList totalResources;
+	public ResourceList availableResources;
 	
 	public int visibleChunks;
 	public int loadedChunks;
@@ -84,7 +84,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		index = new Vector3();
 		pos = new Vector3();
 		
-		totalResources = new ResourceList();
+		availableResources = new ResourceList();
 	}
 	
 	public void setPos(Vector3 pos)
@@ -165,14 +165,14 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onStructureSelection(null, true);
 					
-					totalResources.decreaseCostBuildings();
+					availableResources.decreaseCostBuildings();
 				}
 				else if (e instanceof Creature)
 				{
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onCreatureSelection(null, true);
 					
-					if (e instanceof Human) totalResources.decreaseCostPopulation();
+					if (e instanceof Human) availableResources.decreaseCostPopulation();
 				}
 				e.dispose();
 				entities.remove(e);
@@ -211,6 +211,9 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		s.getTransform().translate(pos);
 		entities.add(s);
 		s.onSpawn();
+		
+		if (s instanceof Structure) availableResources.increaseCostBuildings();
+		if (s instanceof Human) availableResources.increaseCostPopulation();
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{
@@ -536,7 +539,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		if (item != null)
 		{
 			int delta = inventory.getCount() - countBefore;
-			totalResources.add(item, delta);
+			availableResources.add(item, delta);
 		}
 		else Gdx.app.error("Island.onItemAdded", "item = null, not handled!");
 	}
@@ -547,7 +550,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		if (item != null)
 		{
 			int delta = countBefore - inventory.getCount();
-			totalResources.remove(item, delta);
+			availableResources.remove(item, delta);
 		}
 		else Gdx.app.error("Island.onItemRemoved", "item = null, not handled!");
 	}
@@ -559,7 +562,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	
 	public boolean takeItemsIslandWide(Item item, int amount)
 	{
-		if (totalResources.get(item) < amount) return false;
+		if (availableResources.get(item) < amount) return false;
 		
 		for (Entity e : entities)
 		{

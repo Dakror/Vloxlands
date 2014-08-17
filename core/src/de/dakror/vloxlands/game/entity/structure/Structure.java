@@ -718,7 +718,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					if (!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety first ;)
 					
 					for (Byte b : copy.getCosts().getAll())
 					{
@@ -734,7 +734,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				@Override
 				public boolean act(float delta)
 				{
-					s.setDisabled(!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
+					s.setDisabled(!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts()));
 					return false;
 				}
 			});
