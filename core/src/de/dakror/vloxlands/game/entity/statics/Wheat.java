@@ -25,7 +25,7 @@ public class Wheat extends StaticEntity
 	{
 		super(x - 0.5f, y, z + 0.5f, "models/entities/wheat/wheat.g3db");
 		visible = false;
-		growTicks = growTicksLeft = Game.dayInTicks / 5;
+		growTicks = growTicksLeft = Game.dayInTicks;
 	}
 	
 	@Override

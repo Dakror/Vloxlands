@@ -20,7 +20,7 @@ public class Config
 	public static boolean paused;
 	public static int shadowQuality = 0;
 	private static int gameSpeed = 0;
-	public static int[] gameSpeeds = { 1, 2, 5, 20 };
+	public static int[] gameSpeeds = { 1, 2, 5 };
 	public static FileHandle dir;
 	static Preferences pref;
 	public static String savegameName;
