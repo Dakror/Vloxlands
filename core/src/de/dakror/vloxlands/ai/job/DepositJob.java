@@ -33,7 +33,7 @@ public class DepositJob extends Job
 		{
 			target.getInventory().take(human.getCarryingItemStack().getItem(), human.getCarryingItemStack().getAmount());
 			human.setCarryingItemStack(new ItemStack());
-			if (target.getInventory().getCount() == 0 && target.getCosts().getCount() > 0) target.broadcast(1, HelperState.BUILD);
+			if (target.getInventory().getCount() == 0 && target.getCosts().getCount() > 0) target.broadcast(HelperState.BUILD);
 			
 		}
 		else human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
