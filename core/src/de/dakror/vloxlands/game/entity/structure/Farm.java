@@ -33,6 +33,8 @@ public class Farm extends Structure
 		costs.add(Item.get("WHEAT"), 20);
 		costs.setCostPopulation(1);
 		
+		weight = 1000f;
+		
 		inventory = new Inventory(50);
 	}
 	

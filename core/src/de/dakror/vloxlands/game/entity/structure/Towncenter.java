@@ -22,6 +22,8 @@ public class Towncenter extends Warehouse
 		costs.setMaxBuildings(1);
 		nodes.add(new StructureNode(NodeType.spawn, -2, 0, 1));
 		
+		weight = 0;
+		
 		tasks.add(Tasks.human);
 	}
 	

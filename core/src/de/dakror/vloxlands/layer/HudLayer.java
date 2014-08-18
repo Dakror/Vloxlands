@@ -100,17 +100,29 @@ public class HudLayer extends Layer implements SelectionListener
 		s.setDisabled(true);
 		s.getTooltip().set("Towncenter", "Functions as the central point and warehouse of an island.\nA prerequisite for settling on an island.");
 		actions.addSlot(1, "build", s);
+		
+		s = new RevolverSlot(stage, new Vector2(0, 3), "wood");
+		s.getTooltip().set("Wood", "Buildings specialized on working with the Wood resource.");
+		actions.addSlot(1, "build", s);
 		s = new RevolverSlot(stage, new Vector2(0, 3), "entity:130");
 		s.getTooltip().set("Lumberjack", "Chops nearby trees for wooden logs using an axe.");
-		actions.addSlot(1, "build", s);
+		actions.addSlot(2, "wood", s);
 		s = new RevolverSlot(stage, new Vector2(0, 7), "entity:131");
 		s.getTooltip().set("Forester", "Places tree saplings to regrow the forest.\nSaplings take 5 days to fully grow.");
+		actions.addSlot(2, "wood", s);
+		
+		s = new RevolverSlot(stage, new Vector2(2, 4), "food");
+		s.getTooltip().set("Food", "Buildings that produce all kinds of food.");
 		actions.addSlot(1, "build", s);
 		s = new RevolverSlot(stage, new Vector2(1, 7), "entity:132");
 		s.getTooltip().set("Farm", "Plants wheat and harvests it when grown.\nWheat takes 2 days to fully grow.");
-		actions.addSlot(1, "build", s);
+		actions.addSlot(2, "food", s);
 		s = new RevolverSlot(stage, new Vector2(0, 4), "entity:33|cont");
 		s.getTooltip().set("Wheatfield", "A field of wheat which takes 2 days to fully grow.");
+		actions.addSlot(2, "food", s);
+		
+		s = new RevolverSlot(stage, new Vector2(2, 0), "entity:133");
+		s.getTooltip().set("Mine", "Mines the specified ore or stone out of the ground.");
 		actions.addSlot(1, "build", s);
 		
 		if (D.android())

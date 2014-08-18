@@ -8,3 +8,4 @@ structure.Towncenter;129
 structure.Lumberjack;130
 structure.Forester;131
 structure.Farm;132
+structure.Mine;133
