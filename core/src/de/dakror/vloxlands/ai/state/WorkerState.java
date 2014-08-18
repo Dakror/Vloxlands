@@ -11,6 +11,7 @@ import de.dakror.vloxlands.ai.job.DepositJob;
 import de.dakror.vloxlands.ai.job.EnterStructureJob;
 import de.dakror.vloxlands.ai.job.HarvestWheatJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.MineJob;
 import de.dakror.vloxlands.ai.job.PlaceEntityJob;
 import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
@@ -19,11 +20,14 @@ import de.dakror.vloxlands.ai.path.BFSConfig;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.statics.Sapling;
+import de.dakror.vloxlands.game.entity.structure.Mine;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
+import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.util.event.Callback;
+import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
@@ -235,6 +239,45 @@ public enum WorkerState implements State<Human>
 			{
 				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.FARMER_TARGET);
 				Job j = new HarvestWheatJob(human, p.getGhostTarget(), false);
+				j.setEndEvent(new Callback()
+				{
+					@Override
+					public void trigger()
+					{
+						human.changeState(BRING_STUFF_HOME);
+					}
+				});
+				human.setJob(p, j);
+				return true;
+			}
+			return false;
+		}
+	},
+	MINER
+	{
+		final float range = 30;
+		
+		@Override
+		public void enter(Human human)
+		{
+			super.enter(human);
+			human.stateParams.clear();
+			
+			if (mine(human)) human.setLocation(null);
+			else human.changeState(REST);
+		}
+		
+		public boolean mine(final Human human)
+		{
+			if (human.getWorkPlace().getInventory().isFull()) return false;
+			if (!(human.getWorkPlace() instanceof Mine)) throw new IllegalStateException("Miner can't work in a structure other then Mine!");
+			
+			byte v = ((Mine) human.getWorkPlace()).getActiveOre();
+			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(v).range(range).notmeta(MetaTags.MINER_TARGET));
+			if (p != null)
+			{
+				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.MINER_TARGET);
+				Job j = new MineJob(human, new VoxelSelection(human.getIsland(), new VoxelPos(p.getGhostTarget(), v), null), false);
 				j.setEndEvent(new Callback()
 				{
 					@Override

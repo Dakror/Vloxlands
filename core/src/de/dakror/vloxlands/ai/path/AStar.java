@@ -243,6 +243,8 @@ public class AStar
 							boolean close = true;
 							
 							if (x == 0 && z == 0) close = false;
+							// if (!c.getIsland().isTargetableFrom(v.x, v.y, v.z, node.x, node.y, node.z)) close = false;
+							
 							if (targetable && close)
 							{
 								if (!v.equals(to)) neighbor = v;

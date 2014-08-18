@@ -666,6 +666,26 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		return false;
 	}
 	
+	public boolean isTargetableFrom(float x, float y, float z, float fx, float fy, float fz)
+	{
+		float dx = x - fx;
+		float dy = y - fy;
+		float dz = z - fz;
+		
+		byte air = Voxel.get("AIR").getId();
+		
+		for (Direction d : Direction.values())
+		{
+			byte g = get(x + d.dir.x, y + d.dir.y, z + d.dir.z);
+			
+			if (dx == d.dir.x && g != air) return false;
+			if (dy == d.dir.y && g != air) return false;
+			if (dz == d.dir.z && g != air) return false;
+		}
+		
+		return true;
+	}
+	
 	public VoxelPos getHighestVoxel(int x, int z)
 	{
 		byte air = Voxel.get("AIR").getId();

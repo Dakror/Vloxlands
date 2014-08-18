@@ -3,9 +3,11 @@ package de.dakror.vloxlands.game.entity.structure;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 
+import de.dakror.vloxlands.ai.state.WorkerState;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
 import de.dakror.vloxlands.game.item.tool.MineTool;
+import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.CurserCommand;
 
 /**
@@ -13,6 +15,8 @@ import de.dakror.vloxlands.util.CurserCommand;
  */
 public class Mine extends Structure
 {
+	byte activeOre;
+	
 	public Mine(float x, float y, float z)
 	{
 		super(x, y, z, "models/structure/PH_tent/PH_tent.g3db");
@@ -25,11 +29,13 @@ public class Mine extends Structure
 		nodes.add(new StructureNode(NodeType.entry, 0, 0, 2));
 		name = "Mine";
 		workerName = "Mine";
-		// workerState = WorkerState.LUMBERJACK;
+		workerState = WorkerState.MINER;
 		workerTool = MineTool.class;
 		
 		costs.add(Item.get("WOODEN_LOG"), 10);
 		costs.setCostPopulation(1);
+		
+		activeOre = Voxel.get("STONE").getId();
 		
 		weight = 1000f;
 		
@@ -40,5 +46,15 @@ public class Mine extends Structure
 	public CurserCommand getDefaultCommand()
 	{
 		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
+	}
+	
+	public byte getActiveOre()
+	{
+		return activeOre;
+	}
+	
+	public void setActiveOre(byte activeOre)
+	{
+		this.activeOre = activeOre;
 	}
 }
