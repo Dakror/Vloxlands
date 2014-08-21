@@ -272,7 +272,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
 		{
 			selected = true;
 			
@@ -283,23 +283,12 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
 		{
 			selected = true;
 			
 			CurserCommand c = structure.getCommandForEntity(this);
-			// if (c == CurserCommand.BUILD && !structure.isBuilt())
-			// {
-			// if (structure.getBuildInventory().getCount() == 0)
-			// {
-			// changeState(HelperState.BUILD, structure);
-			// }
-			// else
-			// {
-			// changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
-			// }
-			// }
-			// else
+			
 			if (c == CurserCommand.WALK)
 			{
 				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
