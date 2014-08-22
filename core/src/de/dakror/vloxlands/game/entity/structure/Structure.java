@@ -38,12 +38,13 @@ import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.ItemDrop;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.inv.Inventory;
-import de.dakror.vloxlands.game.item.inv.ManagedInventory;
+import de.dakror.vloxlands.game.item.inv.NonStackingInventory;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
@@ -62,17 +63,17 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 /**
  * @author Dakror
  */
-public abstract class Structure extends Entity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
+// TODO: saving
+public abstract class Structure extends StaticEntity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
 {
 	Array<StructureNode> nodes;
 	Array<Human> workers;
-	Vector3 voxelPos;
 	Inventory inventory;
 	/**
 	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
 	 */
-	ManagedInventory buildInventory;
-	ResourceList resourceList;
+	NonStackingInventory buildInventory;
+	ResourceList costs;
 	String workerName;
 	State<Human> workerState;
 	Class<?> workerTool;
@@ -94,12 +95,10 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	public boolean tickRequestsEnabled = true;
 	
 	final Vector3 tmp = new Vector3();
-	final Vector3 dim = new Vector3();
 	
 	public Structure(float x, float y, float z, String model)
 	{
 		super(Math.round(x), Math.round(y), Math.round(z), model);
-		voxelPos = new Vector3(x, y, z);
 		
 		nodes = new Array<StructureNode>();
 		workers = new Array<Human>();
@@ -118,22 +117,15 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		nodes.add(new StructureNode(NodeType.build, Math.round(width / 2), 0, depth - 1));
 		
 		inventory = new Inventory();
-		buildInventory = new ManagedInventory(256 /* That should be enough... */);
-		resourceList = new ResourceList();
+		buildInventory = new NonStackingInventory(256 /* That should be enough... */);
+		costs = new ResourceList();
 		requestedHumanStates = new Array<State<Human>>();
 		handledHumanStates = new Array<State<Human>>();
 		tasks = new Array<Task>();
 		taskQueue = new Array<Task>();
 		working = true;
 		
-		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
-		
 		setBuilt(false);
-	}
-	
-	public Vector3 getVoxelPos()
-	{
-		return voxelPos;
 	}
 	
 	public boolean isBuilt()
@@ -150,8 +142,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		if (!built)
 		{
 			buildInventory.clear();
-			for (Byte b : resourceList.getAll())
-				buildInventory.add(new ItemStack(Item.getForId(b), resourceList.get(b)));
+			for (Byte b : costs.getAll())
+				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 		}
 	}
 	
@@ -160,40 +152,12 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
-	public void updateVoxelPos()
-	{
-		transform.getTranslation(posCache);
-		transform.getRotation(rotCache);
-		Vector3 p = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().cpy().scl(0.5f));
-		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
-	}
-	
-	public boolean canBePlaced()
-	{
-		int width = (int) Math.ceil(boundingBox.getDimensions().x);
-		int height = (int) Math.ceil(boundingBox.getDimensions().y);
-		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
-		
-		for (int i = 0; i < width; i++)
-			for (int j = -1; j < height; j++)
-				for (int k = 0; k < depth; k++)
-				{
-					if (j == -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) == 0) return false;
-					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
-				}
-		
-		for (Entity s : island.getEntities())
-			if (s instanceof Structure && intersects((Structure) s)) return false;
-		
-		return true;
-	}
-	
 	/**
 	 * @return true if building is done
 	 */
 	public boolean progressBuild()
 	{
-		if (buildProgress == resourceList.getCount())
+		if (buildProgress == costs.getCount())
 		{
 			if (!built) setBuilt(true);
 			return true;
@@ -201,7 +165,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		
 		buildProgress++;
 		
-		if (buildProgress == resourceList.getCount())
+		if (buildProgress == costs.getCount())
 		{
 			if (!built) setBuilt(true);
 			return true;
@@ -216,7 +180,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	
 	public boolean addWorker(Human human)
 	{
-		if (workers.size >= resourceList.getCostPopulation()) return false;
+		if (workers.size >= costs.getCostPopulation()) return false;
 		if (human.getWorkPlace() != null) return false;
 		
 		human.setWorkPlace(this);
@@ -233,7 +197,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		super.onSpawn();
 		
 		inventory.addListener(this);
-		buildInventory.addListener(this);
 		
 		for (Entity e : island.getEntities())
 		{
@@ -290,8 +253,8 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
 			
-			if (workers.size < resourceList.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2 && resourceList.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
+			if (workers.size < costs.getCostPopulation() && built) broadcast(HelperState.START_WORK);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
 			{
 				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 				handledHumanStates.add(HelperState.EMPTY_INVENTORY);
@@ -373,7 +336,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		return built ? inventory : buildInventory;
 	}
 	
-	public ManagedInventory getBuildInventory()
+	public NonStackingInventory getBuildInventory()
 	{
 		return buildInventory;
 	}
@@ -386,7 +349,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	@Override
 	public ResourceList getCosts()
 	{
-		return resourceList;
+		return costs;
 	}
 	
 	@Override
@@ -431,20 +394,6 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 		return false;
 	}
 	
-	public boolean intersects(Structure o)
-	{
-		float lx = Math.abs(posCache.x - o.posCache.x);
-		float sumx = (dim.x / 2.0f) + (o.dim.x / 2.0f);
-		
-		float ly = Math.abs(posCache.y - o.posCache.y);
-		float sumy = (dim.y / 2.0f) + (o.dim.y / 2.0f);
-		
-		float lz = Math.abs(posCache.z - o.posCache.z);
-		float sumz = (dim.z / 2.0f) + (o.dim.z / 2.0f);
-		
-		return (lx <= sumx && ly <= sumy && lz <= sumz);
-	}
-	
 	protected void onWorkerAdded(Human human)
 	{}
 	
@@ -480,14 +429,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 	@Override
 	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
 	{
-		if (inventory instanceof ManagedInventory)
-		{
-			if (inventory.getCount() == 0 && countBefore > 0 && resourceList.getCount() > 0) broadcast(1, HelperState.BUILD);
-		}
-		else
-		{
-			handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
-		}
+		handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
 	}
 	
 	public CurserCommand getDefaultCommand()
@@ -768,7 +710,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					if (!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety first ;)
 					
 					for (Byte b : copy.getCosts().getAll())
 					{
@@ -784,7 +726,7 @@ public abstract class Structure extends Entity implements InventoryProvider, Inv
 				@Override
 				public boolean act(float delta)
 				{
-					s.setDisabled(!Game.instance.activeIsland.totalResources.canSubtract(copy.getCosts()));
+					s.setDisabled(!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts()));
 					return false;
 				}
 			});

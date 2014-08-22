@@ -3,7 +3,6 @@ package de.dakror.vloxlands.ai.task;
 import com.badlogic.gdx.math.Vector2;
 
 import de.dakror.vloxlands.game.entity.structure.Structure;
-import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
@@ -91,11 +90,6 @@ public abstract class Task implements ResourceListProvider
 	
 	public void enter()
 	{
-		for (Byte b : costs.getAll())
-		{
-			origin.getInventory().take(Item.getForId(b), costs.get(b));
-		}
-		
 		started = true;
 	}
 	

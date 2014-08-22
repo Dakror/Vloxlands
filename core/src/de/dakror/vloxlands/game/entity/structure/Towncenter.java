@@ -19,8 +19,10 @@ public class Towncenter extends Warehouse
 		inventory = new NonStackingInventory(300);
 		confirmDismante = true;
 		
-		resourceList.setMaxBuildings(1);
+		costs.setMaxBuildings(1);
 		nodes.add(new StructureNode(NodeType.spawn, -2, 0, 1));
+		
+		weight = 0;
 		
 		tasks.add(Tasks.human);
 	}

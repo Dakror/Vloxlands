@@ -3,13 +3,16 @@ package de.dakror.vloxlands.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.ai.task.Tasks;
+import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 
@@ -30,8 +33,21 @@ public class RevolverSlot extends TooltipImageButton
 		
 		if (name.startsWith("entity:"))
 		{
-			Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").trim()), 0, 0, 0);
+			final Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").replace("|cont", "").trim()), 0, 0, 0);
 			if (e instanceof ResourceListProvider) tooltip = new ResourceListTooltip("", "", (ResourceListProvider) e, this);
+			
+			if (e instanceof Structure)
+			{
+				addAction(new Action()
+				{
+					@Override
+					public boolean act(float delta)
+					{
+						setDisabled(!Game.instance.activeIsland.availableResources.canSubtract(((Structure) e).getCosts()));
+						return false;
+					}
+				});
+			}
 		}
 		if (name.startsWith("task:"))
 		{

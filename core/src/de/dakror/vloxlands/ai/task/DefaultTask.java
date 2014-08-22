@@ -21,7 +21,7 @@ public class DefaultTask extends Task
 	{
 		for (Byte b : result.getAll())
 		{
-			origin.getInventory().add(new ItemStack(Item.getForId(b), costs.get(b)));
+			origin.getInventory().add(new ItemStack(Item.getForId(b), result.get(b)));
 		}
 	}
 }

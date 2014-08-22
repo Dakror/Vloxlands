@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Pool;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
+import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
@@ -46,14 +47,11 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 {
 	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
-	public static final int SNOWLEVEL = 50;
-	public static final float SNOW_PER_TICK = 0.2f;
-	public static final float SNOW_INCREASE = 16;
 	
 	public FrameBuffer fbo;
 	public Vector3 index, pos;
 	public Chunk[] chunks;
-	public ResourceList totalResources;
+	public ResourceList availableResources;
 	
 	public int visibleChunks;
 	public int loadedChunks;
@@ -83,7 +81,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		index = new Vector3();
 		pos = new Vector3();
 		
-		totalResources = new ResourceList();
+		availableResources = new ResourceList();
 	}
 	
 	public void setPos(Vector3 pos)
@@ -164,14 +162,14 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onStructureSelection(null, true);
 					
-					totalResources.decreaseCostBuildings();
+					availableResources.decreaseCostBuildings();
 				}
 				else if (e instanceof Creature)
 				{
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onCreatureSelection(null, true);
 					
-					if (e instanceof Human) totalResources.decreaseCostPopulation();
+					if (e instanceof Human) availableResources.decreaseCostPopulation();
 				}
 				e.dispose();
 				entities.remove(e);
@@ -210,6 +208,9 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		s.getTransform().translate(pos);
 		entities.add(s);
 		s.onSpawn();
+		
+		if (s instanceof Structure) availableResources.increaseCostBuildings();
+		if (s instanceof Human) availableResources.increaseCostPopulation();
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{
@@ -379,14 +380,14 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	public void grassify()
 	{
 		for (Chunk c : chunks)
-			if (c != null) c.grassify(this);
+			if (c != null) c.spread(0, false);
 	}
 	
 	protected void renderEntities(ModelBatch batch, Environment environment, boolean minimapMode)
 	{
 		for (Entity s : entities)
 		{
-			if (minimapMode && !(s instanceof Structure)) continue;
+			if (minimapMode && !(s instanceof StaticEntity)) continue;
 			
 			if (s.inFrustum || minimapMode)
 			{
@@ -535,7 +536,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		if (item != null)
 		{
 			int delta = inventory.getCount() - countBefore;
-			totalResources.add(item, delta);
+			availableResources.add(item, delta);
 		}
 		else Gdx.app.error("Island.onItemAdded", "item = null, not handled!");
 	}
@@ -546,7 +547,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		if (item != null)
 		{
 			int delta = countBefore - inventory.getCount();
-			totalResources.remove(item, delta);
+			availableResources.remove(item, delta);
 		}
 		else Gdx.app.error("Island.onItemRemoved", "item = null, not handled!");
 	}
@@ -558,7 +559,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	
 	public boolean takeItemsIslandWide(Item item, int amount)
 	{
-		if (totalResources.get(item) < amount) return false;
+		if (availableResources.get(item) < amount) return false;
 		
 		for (Entity e : entities)
 		{
@@ -699,5 +700,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		baos.write(baos1.toByteArray());
 		
 		Bits.putInt(baos, entities.size());
+		for (Entity e : entities)
+			e.save(baos);
 	}
 }

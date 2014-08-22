@@ -26,8 +26,10 @@ public class Forester extends Structure
 		workerName = "Forester";
 		workerState = WorkerState.FORESTER;
 		
-		resourceList.add(Item.get("WOODEN_LOG"), 25);
-		resourceList.setCostPopulation(1);
+		costs.add(Item.get("WOODEN_LOG"), 25);
+		costs.setCostPopulation(1);
+		
+		weight = 1000f;
 		
 		inventory = new Inventory(20);
 	}

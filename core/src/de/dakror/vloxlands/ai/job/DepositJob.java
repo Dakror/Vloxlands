@@ -1,5 +1,6 @@
 package de.dakror.vloxlands.ai.job;
 
+import de.dakror.vloxlands.ai.state.HelperState;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.item.ItemStack;
@@ -32,6 +33,8 @@ public class DepositJob extends Job
 		{
 			target.getInventory().take(human.getCarryingItemStack().getItem(), human.getCarryingItemStack().getAmount());
 			human.setCarryingItemStack(new ItemStack());
+			if (target.getInventory().getCount() == 0 && target.getCosts().getCount() > 0) target.broadcast(HelperState.BUILD);
+			
 		}
 		else human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
 	}

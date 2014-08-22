@@ -40,7 +40,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 {
 	public static final Color SELECTION = Color.WHITE;
 	
-	public static final int MAXHEIGHT = 512;
+	public static final int MAX_HEIGHT = 512;
 	
 	public static Material[][] dataMaps;
 	int dataMap;
@@ -266,7 +266,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		return dataMaps[dataMap][1];
 	}
 	
-	
 	public Material getDefOpaque()
 	{
 		return dataMaps[0][0];
@@ -279,6 +278,6 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static float calculateRelativeUplift(float y)
 	{
-		return (1 - y / MAXHEIGHT) * 4 + 0.1f;
+		return (1 - y / MAX_HEIGHT) * 8 + 0.1f;
 	}
 }

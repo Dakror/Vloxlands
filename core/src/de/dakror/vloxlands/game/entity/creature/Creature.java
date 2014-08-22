@@ -18,6 +18,7 @@ import de.dakror.vloxlands.game.world.World;
 /**
  * @author Dakror
  */
+// TODO: saving
 public abstract class Creature extends Entity
 {
 	protected boolean airborne;
@@ -46,7 +47,7 @@ public abstract class Creature extends Entity
 		
 		try
 		{
-			if (path != null && Vloxlands.showPathDebug && !minimapMode)
+			if (path != null && path.size() > 0 && Vloxlands.showPathDebug && !minimapMode)
 			{
 				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 				Gdx.gl.glLineWidth(2);
@@ -72,7 +73,7 @@ public abstract class Creature extends Entity
 		}
 		catch (NullPointerException e)
 		{
-			e.printStackTrace();
+			Game.shapeRenderer.end();
 		}
 	}
 	
@@ -80,7 +81,6 @@ public abstract class Creature extends Entity
 	public void tick(int tick)
 	{
 		super.tick(tick);
-		
 		if (path != null)
 		{
 			try
@@ -90,17 +90,45 @@ public abstract class Creature extends Entity
 					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
-					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
+					if (dif.len() > speed)
+					{
+						dif.limit(speed);
+						
+						posCache.add(dif);
+						transform.setTranslation(posCache);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		if (path != null)
+		{
+			try
+			{
+				if (path.size() > 0)
+				{
+					transform.getRotation(rotCache);
+					transform.getTranslation(posCache);
 					
-					// transform.rotate(Vector3.Y, rot - rotCache.getYaw());
-					if (dif.len() > speed) dif.limit(speed);
-					else
+					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
+					Vector3 dif = target.cpy().sub(posCache);
+					
+					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
+					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+					if (dif.len() <= speed)
 					{
 						if (path.isDone()) onReachTarget();
 						else path.next();
 					}
-					posCache.add(dif);
-					transform.setTranslation(posCache);
 				}
 				else onReachTarget();
 			}

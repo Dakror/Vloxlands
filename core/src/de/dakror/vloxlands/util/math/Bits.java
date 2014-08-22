@@ -2,6 +2,9 @@ package de.dakror.vloxlands.util.math;
 
 import java.io.ByteArrayOutputStream;
 
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
+
 /**
  * Copied from {@link java.io.Bits} and slightly modified to work with {@link java.io.ByteArrayOutputStream}
  * 
@@ -54,5 +57,18 @@ public class Bits
 	public static void putDouble(ByteArrayOutputStream baos, double val)
 	{
 		putLong(baos, Double.doubleToLongBits(val));
+	}
+	
+	public static void putMatrix4(ByteArrayOutputStream baos, Matrix4 mtx)
+	{
+		for (float f : mtx.getValues())
+			putFloat(baos, f);
+	}
+	
+	public static void putVector3(ByteArrayOutputStream baos, Vector3 vec)
+	{
+		putFloat(baos, vec.x);
+		putFloat(baos, vec.y);
+		putFloat(baos, vec.z);
 	}
 }

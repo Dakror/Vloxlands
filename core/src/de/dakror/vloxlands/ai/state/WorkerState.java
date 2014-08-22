@@ -9,7 +9,9 @@ import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.ai.job.ChopJob;
 import de.dakror.vloxlands.ai.job.DepositJob;
 import de.dakror.vloxlands.ai.job.EnterStructureJob;
+import de.dakror.vloxlands.ai.job.HarvestWheatJob;
 import de.dakror.vloxlands.ai.job.Job;
+import de.dakror.vloxlands.ai.job.MineJob;
 import de.dakror.vloxlands.ai.job.PlaceEntityJob;
 import de.dakror.vloxlands.ai.job.RemoveLeavesJob;
 import de.dakror.vloxlands.ai.path.AStar;
@@ -18,11 +20,14 @@ import de.dakror.vloxlands.ai.path.BFSConfig;
 import de.dakror.vloxlands.ai.path.Path;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.statics.Sapling;
+import de.dakror.vloxlands.game.entity.structure.Mine;
 import de.dakror.vloxlands.game.entity.structure.NodeType;
+import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.MetaTags;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.util.event.Callback;
+import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
  * @author Dakror
@@ -57,17 +62,17 @@ public enum WorkerState implements State<Human>
 	LUMBERJACK
 	{
 		final float range = 30;
-		byte wood;
 		
 		@Override
 		public void enter(Human human)
 		{
 			super.enter(human);
 			
-			wood = Voxel.get("WOOD").getId();
-			
-			human.stateParams.add(0); // lastTargetMetadata
-			human.stateParams.add(new Vector3(-1, 0, 0)); // lastTarget
+			if (human.stateParams.size == 0)
+			{
+				human.stateParams.add(0); // lastTargetMetadata
+				human.stateParams.add(new Vector3(-1, 0, 0)); // lastTarget
+			}
 			
 			if (chop(human)) human.setLocation(null);
 			else human.changeState(REST);
@@ -80,7 +85,7 @@ public enum WorkerState implements State<Human>
 			
 			if (((Vector3) human.stateParams.get(1)).x == -1)
 			{
-				path = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).voxel(wood).range(range).closest(true).notmeta(MetaTags.LUMBERJACK_TARGET).notneighbor(MetaTags.LUMBERJACK_TARGET).neighborrange(2, 2, 2));
+				path = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).voxel(Voxel.get("WOOD").getId()).range(range).closest(true).notmeta(MetaTags.LUMBERJACK_TARGET).notneighbor(MetaTags.LUMBERJACK_TARGET).neighborrange(2, 2, 2));
 				if (path == null) return false;
 				
 				human.getIsland().setMeta(path.getGhostTarget().x, path.getGhostTarget().y, path.getGhostTarget().z, MetaTags.LUMBERJACK_TARGET);
@@ -128,7 +133,7 @@ public enum WorkerState implements State<Human>
 			int height = 0;
 			for (int y = (int) pos.y; y < Island.SIZE; y++)
 			{
-				if (human.getIsland().get(pos.x, y, pos.z) == wood) height++;
+				if (human.getIsland().get(pos.x, y, pos.z) == Voxel.get("WOOD").getId()) height++;
 				else break;
 			}
 			
@@ -146,18 +151,14 @@ public enum WorkerState implements State<Human>
 		public void enter(final Human human)
 		{
 			super.enter(human);
-			
 			human.stateParams.clear();
-			
 			Vector3 v = null;
 			for (int i = 0; i < 3; i++) // try 3 times
 			{
 				if ((v = pickRandomSpot(human)) != null) break;
 			}
-			
 			if (v != null)
 			{
-				
 				Path p = AStar.findPath(human.getVoxelBelow(), v, human, true);
 				if (p == null)
 				{
@@ -175,7 +176,6 @@ public enum WorkerState implements State<Human>
 					}
 				});
 				human.queueJob(StateTools.getHomePath(human, p.getLast(), NodeType.entry), j);
-				
 				human.setLocation(null);
 			}
 			else human.stateParams.add(System.currentTimeMillis());
@@ -184,8 +184,7 @@ public enum WorkerState implements State<Human>
 		public Vector3 pickRandomSpot(Human human)
 		{
 			Vector3 vp = human.getVoxelBelow();
-			Vector3 v = new Vector3(MathUtils.random(-range, range), 1337 /* hehe */, MathUtils.random(-range, range));
-			
+			Vector3 v = new Vector3(MathUtils.random(-range, range), 1337, MathUtils.random(-range, range));
 			for (int y = -2; y < 2; y++)
 			{
 				if (human.getIsland().isSpaceAbove(v.x + vp.x, y + vp.y, v.z + vp.z, human.getHeight()))
@@ -194,23 +193,17 @@ public enum WorkerState implements State<Human>
 					break;
 				}
 			}
-			
 			if (v.y == 1337)
 			{
 				return null;
 			}
-			
 			v.add(vp);
-			
 			byte b = human.getIsland().get(v.x, v.y, v.z);
-			
 			if (b != Voxel.get("DIRT").getId() && b != Voxel.get("GRASS").getId()) return null;
-			
 			for (int i = -checkRadius; i <= checkRadius; i++)
 				for (int j = -checkRadius; j <= checkRadius; j++)
 					for (int k = 1; k < checkHeight; k++)
 						if (Voxel.getForId(human.getIsland().get(i + v.x, k + v.y, j + v.z)).isOpaque()) return null;
-			
 			return v;
 		}
 		
@@ -218,11 +211,85 @@ public enum WorkerState implements State<Human>
 		public void update(Human human)
 		{
 			super.update(human);
-			
 			if (human.stateParams.size > 0 && System.currentTimeMillis() - (Long) human.stateParams.get(0) >= timeout / Config.getGameSpeed())
 			{
 				human.changeState(REST);
 			}
+		}
+	},
+	FARMER
+	{
+		final int range = 15;
+		
+		@Override
+		public void enter(final Human human)
+		{
+			super.enter(human);
+			human.stateParams.clear();
+			if (harvest(human)) human.setLocation(null);
+			else human.changeState(REST);
+		}
+		
+		public boolean harvest(final Human human)
+		{
+			if (human.getWorkPlace().getInventory().isFull()) return false;
+			
+			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(Voxel.get("ACRE").getId()).range(range).meta(MetaTags.ACRE_PLANT_GROWN));
+			if (p != null)
+			{
+				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.FARMER_TARGET);
+				Job j = new HarvestWheatJob(human, p.getGhostTarget(), false);
+				j.setEndEvent(new Callback()
+				{
+					@Override
+					public void trigger()
+					{
+						human.changeState(BRING_STUFF_HOME);
+					}
+				});
+				human.setJob(p, j);
+				return true;
+			}
+			return false;
+		}
+	},
+	MINER
+	{
+		final float range = 30;
+		
+		@Override
+		public void enter(Human human)
+		{
+			super.enter(human);
+			human.stateParams.clear();
+			
+			if (mine(human)) human.setLocation(null);
+			else human.changeState(REST);
+		}
+		
+		public boolean mine(final Human human)
+		{
+			if (human.getWorkPlace().getInventory().isFull()) return false;
+			if (!(human.getWorkPlace() instanceof Mine)) throw new IllegalStateException("Miner can't work in a structure other then Mine!");
+			
+			byte v = ((Mine) human.getWorkPlace()).getActiveOre();
+			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(v).range(range).notmeta(MetaTags.MINER_TARGET));
+			if (p != null)
+			{
+				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.MINER_TARGET);
+				Job j = new MineJob(human, new VoxelSelection(human.getIsland(), new VoxelPos(p.getGhostTarget(), v), null), false);
+				j.setEndEvent(new Callback()
+				{
+					@Override
+					public void trigger()
+					{
+						human.changeState(BRING_STUFF_HOME);
+					}
+				});
+				human.setJob(p, j);
+				return true;
+			}
+			return false;
 		}
 	},
 	REST
@@ -230,6 +297,8 @@ public enum WorkerState implements State<Human>
 		@Override
 		public void enter(Human human)
 		{
+			human.stateParams.clear();
+			
 			human.stateParams.add(0l);
 			human.setLocation(human.getWorkPlace());
 		}
@@ -239,7 +308,11 @@ public enum WorkerState implements State<Human>
 		{
 			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000f / Config.getGameSpeed())
 			{
-				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull()) human.revertToPreviousState();
+				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull())
+				{
+					if (human.getStateMachine().getPreviousState() == human.getWorkPlace().getWorkerState()) human.revertToPreviousState();
+					else human.changeState(human.getWorkPlace().getWorkerState());
+				}
 				else human.stateParams.set(0, System.currentTimeMillis());
 			}
 		}
@@ -258,7 +331,7 @@ public enum WorkerState implements State<Human>
 	{
 		if (!StateTools.isWorkingTime())
 		{
-			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST) human.changeState(BRING_STUFF_HOME);
+			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST && human.getLocation() == null) human.changeState(BRING_STUFF_HOME);
 		}
 	}
 	

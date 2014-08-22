@@ -74,6 +74,11 @@ public class Human extends Creature
 	Array<Object> previousStateParams = new Array<Object>();
 	public Array<Object> stateParams = new Array<Object>();
 	
+	int tick;
+	
+	boolean queueRotateTowardsTarget;
+	Path queueRotateTowardsTargetPath;
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -134,14 +139,31 @@ public class Human extends Creature
 	{
 		super.tick(tick);
 		
+		this.tick = tick;
+		
+		Job j = firstJob();
+		if (j != null && j.isActive() && !j.isDone()) j.tick(tick);
+	}
+	
+	@Override
+	public void update(float delta)
+	{
+		super.update(delta);
+		stateMachine.update();
+		
+		if (queueRotateTowardsTarget)
+		{
+			rotateTowardsGhostTarget(queueRotateTowardsTargetPath);
+			queueRotateTowardsTarget = false;
+			queueRotateTowardsTargetPath = null;
+		}
+		
 		Job j = firstJob();
 		if (j != null)
 		{
 			if (j.isActive())
 			{
-				
-				if (!j.isDone()) j.tick(tick);
-				else
+				if (j.isDone())
 				{
 					jobQueue.removeIndex(0);
 					j.onEnd();
@@ -160,13 +182,6 @@ public class Human extends Creature
 				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
 			}
 		}
-	}
-	
-	@Override
-	public void update(float delta)
-	{
-		super.update(delta);
-		stateMachine.update();
 	}
 	
 	@Override
@@ -231,13 +246,28 @@ public class Human extends Creature
 	{
 		if (job == null)
 		{
-			if (path.size() > 0) jobQueue.add(new WalkJob(path, this));
+			if (path.size() > 0)
+			{
+				WalkJob wj = new WalkJob(path, this);
+				jobQueue.add(wj);
+				wj.queue();
+			}
 		}
 		else
 		{
-			if (path != null && path.size() > 0) jobQueue.add(new WalkJob(path, this));
-			else rotateTowardsGhostTarget(path);
+			if (path != null && path.size() > 0)
+			{
+				WalkJob wj = new WalkJob(path, this);
+				jobQueue.add(wj);
+				wj.queue();
+			}
+			else
+			{
+				queueRotateTowardsTarget = true;
+				queueRotateTowardsTargetPath = path;
+			}
 			jobQueue.add(job);
+			job.queue();
 		}
 	}
 	
@@ -256,7 +286,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
 		{
 			selected = true;
 			
@@ -267,23 +297,12 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null)
+		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
 		{
 			selected = true;
 			
 			CurserCommand c = structure.getCommandForEntity(this);
-			// if (c == CurserCommand.BUILD && !structure.isBuilt())
-			// {
-			// if (structure.getBuildInventory().getCount() == 0)
-			// {
-			// changeState(HelperState.BUILD, structure);
-			// }
-			// else
-			// {
-			// changeState(HelperState.GET_RESOURCES_FOR_BUILD, structure);
-			// }
-			// }
-			// else
+			
 			if (c == CurserCommand.WALK)
 			{
 				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));

@@ -213,6 +213,10 @@ public class ResourceList
 			if (!o.items.containsKey(b)) continue;
 			if (o.get(b) > get(b)) return false;
 		}
+		for (Byte b : o.items.keySet())
+		{
+			if (!items.containsKey(b)) return false;
+		}
 		
 		return true;
 	}

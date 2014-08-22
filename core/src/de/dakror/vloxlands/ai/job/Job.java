@@ -50,6 +50,9 @@ public abstract class Job implements Tickable
 		return tool;
 	}
 	
+	public void queue()
+	{}
+	
 	public void trigger(int tick)
 	{
 		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), null, 0.2f);

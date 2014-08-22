@@ -29,6 +29,7 @@ import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
 import de.dakror.vloxlands.util.base.EntityBase;
 import de.dakror.vloxlands.util.interf.Savable;
+import de.dakror.vloxlands.util.math.Bits;
 
 /**
  * @author Dakror
@@ -266,7 +267,17 @@ public class Entity extends EntityBase implements Agent, Savable
 	
 	@Override
 	public void save(ByteArrayOutputStream baos) throws IOException
-	{}
+	{
+		baos.write(id);
+		
+		Bits.putMatrix4(baos, transform);
+		
+		Bits.putInt(baos, level);
+		
+		Bits.putBoolean(baos, visible);
+		Bits.putBoolean(baos, spawned);
+		Bits.putBoolean(baos, markedForRemoval);
+	}
 	
 	public void setUI(PinnableWindow window, Object... params)
 	{}

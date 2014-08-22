@@ -17,3 +17,4 @@ VoxelDouble;11;0;3;Wood;;0.9;;;6;;ChopTool;
 ;14;4;3;Sandstone;;1.1;;;4;;MineTool;
 ;15;2;1;Morass;;0.9;;;2;;DigTool;
 ;16;2;2;Gravel;;0.7;;;2;;DigTool;
+VoxelGrass;17;5;3;Acre;;0.8;;;2;;DigTool;

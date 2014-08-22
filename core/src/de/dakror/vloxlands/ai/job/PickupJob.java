@@ -24,6 +24,15 @@ public class PickupJob extends Job
 		this.equip = equip;
 	}
 	
+	@Override
+	public void queue()
+	{
+		if (!stack.isNull())
+		{
+			target.getInventory().take(stack.getItem(), stack.getAmount());
+		}
+	}
+	
 	public ItemStack getItemStack()
 	{
 		return stack;
@@ -57,8 +66,6 @@ public class PickupJob extends Job
 		
 		if (!stack.isNull())
 		{
-			target.getInventory().take(stack.getItem(), stack.getAmount());
-			
 			if (stack.getItem() instanceof Tool && equip && human.getTool().isNull())
 			{
 				human.setTool(stack.getItem());
@@ -70,7 +77,7 @@ public class PickupJob extends Job
 			}
 			else
 			{
-				Gdx.app.error("PickupJob.tick", "Welp, this Human can't pickup those items! Putting 'em back.");
+				Gdx.app.error("PickupJob.trigger", "Welp, this Human can't pickup those items! Putting 'em back.");
 				target.getInventory().add(stack);
 			}
 		}

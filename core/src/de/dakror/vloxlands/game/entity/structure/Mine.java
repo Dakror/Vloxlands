@@ -6,31 +6,36 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import de.dakror.vloxlands.ai.state.WorkerState;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.inv.Inventory;
-import de.dakror.vloxlands.game.item.tool.ChopTool;
+import de.dakror.vloxlands.game.item.tool.MineTool;
+import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.CurserCommand;
 
 /**
  * @author Dakror
  */
-public class Lumberjack extends Structure
+public class Mine extends Structure
 {
-	public Lumberjack(float x, float y, float z)
+	byte activeOre;
+	
+	public Mine(float x, float y, float z)
 	{
 		super(x, y, z, "models/structure/PH_tent/PH_tent.g3db");
 		
-		modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(Color.valueOf("036108")));
-		modelInstance.materials.get(1).set(ColorAttribute.createDiffuse(Color.valueOf("274427")));
+		modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(Color.valueOf("3D3D3D")));
+		modelInstance.materials.get(1).set(ColorAttribute.createDiffuse(Color.valueOf("666666")));
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.entry, 0, 0, 2));
-		name = "Lumberjack";
-		workerName = "Lumberjack";
-		workerState = WorkerState.LUMBERJACK;
-		workerTool = ChopTool.class;
+		name = "Mine";
+		workerName = "Mine";
+		workerState = WorkerState.MINER;
+		workerTool = MineTool.class;
 		
 		costs.add(Item.get("WOODEN_LOG"), 10);
 		costs.setCostPopulation(1);
+		
+		activeOre = Voxel.get("STONE").getId();
 		
 		weight = 1000f;
 		
@@ -41,5 +46,15 @@ public class Lumberjack extends Structure
 	public CurserCommand getDefaultCommand()
 	{
 		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
+	}
+	
+	public byte getActiveOre()
+	{
+		return activeOre;
+	}
+	
+	public void setActiveOre(byte activeOre)
+	{
+		this.activeOre = activeOre;
 	}
 }

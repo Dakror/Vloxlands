@@ -38,6 +38,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public static final int VERTEX_SIZE = 11;
 	public static final int UNLOAD_TICKS = 120;
 	
+	public static final int SPREAD_TICKS = 6;
+	public static final int GRASS_SPREAD = 1;
+	public static final int SNOW_SPREAD = 8;
+	public static final int SNOW_MIN_HEIGHT = 384;
+	
 	public int opaqueVerts, transpVerts;
 	public Vector3 index;
 	public Vector3 pos;
@@ -350,14 +355,40 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 	}
 	
-	public void grassify(Island island)
+	public void spread(int maximum, boolean snow)
 	{
 		if (isEmpty() || getResource(Voxel.get("DIRT").getId()) == 0) return;
 		
+		int done = 0;
 		for (int i = 0; i < SIZE; i++)
+		{
 			for (int j = 0; j < SIZE; j++)
+			{
 				for (int k = 0; k < SIZE; k++)
-					if (get(i, j, k) == Voxel.get("DIRT").getId() && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) set(i, j, k, Voxel.get("GRASS").getId());
+				{
+					byte g = get(i, j, k);
+					if (done < maximum || maximum == 0)
+					{
+						if (snow)
+						{
+							if ((g == Voxel.get("DIRT").getId() || g == Voxel.get("GRASS").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
+							{
+								set(i, j, k, Voxel.get("SNOW").getId());
+								done++;
+							}
+						}
+						else
+						{
+							if ((g == Voxel.get("DIRT").getId() || g == Voxel.get("SNOW").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
+							{
+								set(i, j, k, Voxel.get("GRASS").getId());
+								done++;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private void getVertices()
@@ -415,6 +446,15 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			if (ticksInvisible > UNLOAD_TICKS + random) requestsUnload = true;
 		}
 		else ticksInvisible = 0;
+		
+		if (loaded)
+		{
+			if ((tick + random) % SPREAD_TICKS == 0)
+			{
+				boolean snow = pos.y + island.pos.y >= SNOW_MIN_HEIGHT;
+				spread(snow ? SNOW_SPREAD : GRASS_SPREAD, snow);
+			}
+		}
 	}
 	
 	public void render()
