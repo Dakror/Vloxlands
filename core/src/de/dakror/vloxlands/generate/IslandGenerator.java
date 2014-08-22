@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 import de.dakror.vloxlands.game.world.Island;
+import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.generate.biome.Biome;
 import de.dakror.vloxlands.generate.biome.BiomeType;
 
@@ -16,7 +17,7 @@ public class IslandGenerator
 	{
 		try
 		{
-			float yPos = 256 * MathUtils.random();
+			float yPos = World.MAX_HEIGHT / 2 * MathUtils.random() + World.MAX_HEIGHT / 4;
 			int radius = MathUtils.random(MIN, MAX);
 			
 			BiomeType biome = BiomeType.values()[(int) (MathUtils.random() * BiomeType.values().length)];

@@ -47,9 +47,6 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 {
 	public static final int CHUNKS = 8;
 	public static final int SIZE = CHUNKS * Chunk.SIZE;
-	public static final int SNOWLEVEL = 50;
-	public static final float SNOW_PER_TICK = 0.2f;
-	public static final float SNOW_INCREASE = 16;
 	
 	public FrameBuffer fbo;
 	public Vector3 index, pos;
@@ -383,7 +380,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	public void grassify()
 	{
 		for (Chunk c : chunks)
-			if (c != null) c.grassify(this);
+			if (c != null) c.spread(0, false);
 	}
 	
 	protected void renderEntities(ModelBatch batch, Environment environment, boolean minimapMode)
