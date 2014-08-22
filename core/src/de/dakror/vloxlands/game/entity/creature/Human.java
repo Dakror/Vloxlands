@@ -76,6 +76,9 @@ public class Human extends Creature
 	
 	int tick;
 	
+	boolean queueRotateTowardsTarget;
+	Path queueRotateTowardsTargetPath;
+	
 	public Human(float x, float y, float z)
 	{
 		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
@@ -147,6 +150,13 @@ public class Human extends Creature
 	{
 		super.update(delta);
 		stateMachine.update();
+		
+		if (queueRotateTowardsTarget)
+		{
+			rotateTowardsGhostTarget(queueRotateTowardsTargetPath);
+			queueRotateTowardsTarget = false;
+			queueRotateTowardsTargetPath = null;
+		}
 		
 		Job j = firstJob();
 		if (j != null)
@@ -251,7 +261,11 @@ public class Human extends Creature
 				jobQueue.add(wj);
 				wj.queue();
 			}
-			else rotateTowardsGhostTarget(path);
+			else
+			{
+				queueRotateTowardsTarget = true;
+				queueRotateTowardsTargetPath = path;
+			}
 			jobQueue.add(job);
 			job.queue();
 		}
