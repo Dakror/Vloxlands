@@ -11,8 +11,14 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Json.ReadOnlySerializer;
+import com.badlogic.gdx.utils.JsonValue;
 
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
@@ -23,6 +29,8 @@ import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.ui.RevolverSlot;
+import de.dakror.vloxlands.ui.skin.DoubleDrawable;
+import de.dakror.vloxlands.ui.skin.TilesetDrawable;
 import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.base.GameBase;
@@ -57,8 +65,72 @@ public class Vloxlands extends GameBase
 		setFullscreen(Config.pref.getBoolean("fullscreen"));
 		
 		assets = new AssetManager();
-		skin = new Skin(Gdx.files.internal("skin/default/uiskin.json"));
-		
+		skin = new Skin(new TextureAtlas(Gdx.files.internal("skin/RPGConstrUI/uiskin.atlas")))
+		{
+			@Override
+			protected Json getJsonLoader(FileHandle skinFile)
+			{
+				Json json = super.getJsonLoader(skinFile);
+				
+				json.setSerializer(TilesetDrawable.class, new ReadOnlySerializer<TilesetDrawable>()
+				{
+					@SuppressWarnings("rawtypes")
+					@Override
+					public TilesetDrawable read(Json json, JsonValue jsonData, Class type)
+					{
+						TextureRegion[] regions = new TextureRegion[9];
+						for (int i = 0; i < 9; i++)
+						{
+							try
+							{
+								regions[i] = getRegion(json.readValue(TilesetDrawable.values[i], String.class, jsonData));
+							}
+							catch (Exception e)
+							{}
+						}
+						return new TilesetDrawable(regions);
+					}
+				});
+				
+				json.setSerializer(DoubleDrawable.class, new ReadOnlySerializer<DoubleDrawable>()
+				{
+					@SuppressWarnings("rawtypes")
+					@Override
+					public DoubleDrawable read(Json json, JsonValue jsonData, Class type)
+					{
+						Drawable fg = null;
+						try
+						{
+							fg = getDrawable(json.readValue("fg", String.class, jsonData));
+						}
+						catch (Exception e)
+						{}
+						Drawable bg = null;
+						try
+						{
+							bg = getDrawable(json.readValue("bg", String.class, jsonData));
+						}
+						catch (Exception e)
+						{}
+						return new DoubleDrawable(fg, bg);
+					}
+				});
+				
+				return json;
+			}
+			
+			@Override
+			public Drawable getDrawable(String name)
+			{
+				TilesetDrawable tilesetDrawable = optional(name, TilesetDrawable.class);
+				if (tilesetDrawable != null) return tilesetDrawable;
+				DoubleDrawable doubleDrawable = optional(name, DoubleDrawable.class);
+				if (doubleDrawable != null) return doubleDrawable;
+				
+				return super.getDrawable(name);
+			}
+		};
+		skin.load(Gdx.files.internal("skin/RPGConstrUI/uiskin.json"));
 		getMultiplexer().addProcessor(0, new GestureDetector(this));
 		getMultiplexer().addProcessor(0, this);
 		Gdx.input.setInputProcessor(getMultiplexer());

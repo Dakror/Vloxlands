@@ -11,6 +11,15 @@ public class DoubleDrawable extends BaseDrawable
 {
 	public Drawable fg, bg;
 	
+	public DoubleDrawable()
+	{}
+	
+	public DoubleDrawable(Drawable fg, Drawable bg)
+	{
+		this.fg = fg;
+		this.bg = bg;
+	}
+	
 	public DoubleDrawable(Drawable drawable)
 	{
 		super(drawable);

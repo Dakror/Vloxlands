@@ -52,7 +52,7 @@ public class IslandInfo extends Group
 	{
 		setPosition((Gdx.graphics.getWidth() - getWidth()) / 2, Gdx.graphics.getHeight() - getHeight());
 		
-		Drawable bg = Vloxlands.skin.getDrawable("default-rect");
+		Drawable bg = Vloxlands.skin.getDrawable("shadow_container");
 		bg.draw(batch, getX(), getY(), getWidth(), getHeight());
 		super.draw(batch, parentAlpha);
 	}

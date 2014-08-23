@@ -1,0 +1,184 @@
+{
+    com.badlogic.gdx.graphics.g2d.BitmapFont: {
+        alagard_18pt: {
+            file: alagard_18pt.fnt
+        },
+        alagard_18pt_bold: {
+            file: alagard_18pt_bold.fnt
+        },
+        alagard_30pt: {
+            file: alagard_30pt.fnt
+        },
+        alagard_30pt_bold: {
+            file: alagard_30pt_bold.fnt
+        },
+    },
+    com.badlogic.gdx.graphics.Color: {
+        white: {
+            a: 1,
+            b: 1,
+            g: 1,
+            r: 1
+        },
+        black: {
+            a: 1
+        },
+        toggle_green: {
+            r: 0.4862745,
+            g: 0.87058824,
+            b: 0.41568628,
+            a: 1
+        },
+        disabled_grey: {
+            r: 0.6,
+            g: 0.6,
+            b: 0.6,
+            a: 1
+        },
+        red: {
+            a: 1,
+            r: 1
+        },
+        grey: {
+            a: 1,
+            b: 0.8,
+            g: 0.8,
+            r: 0.8
+        },
+        darker_grey: {
+            a: 1,
+            b: 0.7,
+            g: 0.7,
+            r: 0.7
+        }
+    },
+    de.dakror.vloxlands.ui.skin.TilesetDrawable: {
+        outline: {
+            lt: line_lt,
+            mt: line_mt,
+            rt: line_rt,
+            lm: line_lm,
+            rm: line_rm,
+            lb: line_lb,
+            mb: line_mb,
+            rb: line_rb
+        },
+        outline_doubled: {
+            lt: line_lt_doubled,
+            mt: line_mt_doubled,
+            rt: line_rt_doubled,
+            lm: line_lm_doubled,
+            rm: line_rm_doubled,
+            lb: line_lb_doubled,
+            mb: line_mb_doubled,
+            rb: line_rb_doubled
+        },
+        shadow: {
+            lt: shadow_lt,
+            mt: shadow_mt,
+            rt: shadow_rt,
+            lm: shadow_lm,
+            rm: shadow_rm,
+            lb: shadow_lb,
+            mb: shadow_mb,
+            rb: shadow_rb
+        },
+    },
+    de.dakror.vloxlands.ui.skin.DoubleDrawable: {
+        paper_container: {
+            fg: outline,
+            bg: paper
+        },
+        wood_container: {
+            fg: outline,
+            bg: wood
+        },
+        paper_container_doubled: {
+            fg: outline_doubled,
+            bg: paper
+        },
+        wood_container_doubled: {
+            fg: outline_doubled,
+            bg: wood
+        },
+        shadow_container: {
+            fg: outline,
+            bg: shadow
+        },
+        shadow_container_doubled: {
+            fg: outline_doubled,
+            bg: shadow
+        },
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+        default: {
+            font: alagard_30pt_bold,
+            fontColor: white,
+            disabledFontColor: disabled_grey,
+            up: text_button,
+            down: text_button_down,
+            over: text_button_hover,
+            disabled: text_button_disabled
+        },
+        toggle: {
+            font: alagard_30pt_bold,
+            fontColor: white,
+            checkedFontColor: toggle_green,
+            up: text_button,
+            down: text_button_down,
+            over: text_button_hover,
+            checked: text_button,
+            disabled: text_button_disabled
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+        default: {
+            background: outline,
+            titleFont: alagard_30pt_bold,
+            titleFontColor: white
+        },
+        dialog: {
+            background: outline,
+            titleFont: alagard_30pt_bold,
+            titleFontColor: white,
+            stageBackground: shadow_mm
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
+        default: {
+            checkboxOn: checkbox_selected,
+            checkboxOff: checkbox,
+            checkboxOver: checkbox_hover,
+            checkboxOnDisabled: checkbox_disabled_selected,
+            checkboxOffDisabled: checkbox_disabled,
+            font: alagard_30pt_bold,
+            fontColor: white
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+        optional: {
+            font: alagard_30pt_bold,
+            fontColor: darker_grey
+        },
+        default: {
+            font: alagard_30pt_bold,
+            fontColor: white
+        },
+        error: {
+            font: alagard_30pt_bold,
+            fontColor: red
+        },
+        title: {
+            font: alagard_30pt_bold,
+            fontColor: grey
+        },
+        small: {
+            font: alagard_18pt_bold,
+            fontColor: white
+        },
+        small_thin: {
+            font: alagard_18pt,
+            fontColor: white
+        }
+    },
+}

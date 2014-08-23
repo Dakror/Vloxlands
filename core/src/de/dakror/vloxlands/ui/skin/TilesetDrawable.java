@@ -19,7 +19,32 @@ public class TilesetDrawable extends BaseDrawable
 	 * 6-7-8
 	 */
 	Drawable[] drawables;
-	public TextureRegion tl, tm, tr, ml, mm, mr, bl, bm, br;
+	public static final String[] values = { "lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb" };
+	public TextureRegion lt, mt, rt, lm, mm, rm, lb, mb, rb;
+	
+	public TilesetDrawable()
+	{}
+	
+	public TilesetDrawable(Drawable... drawables)
+	{
+		assert (drawables.length == 9);
+		this.drawables = drawables;
+	}
+	
+	public TilesetDrawable(TextureRegion... regions)
+	{
+		assert (drawables.length == 9);
+		drawables = new Drawable[9];
+		drawables[0] = new TextureRegionDrawable(regions[0]);
+		drawables[1] = new TiledDrawable(regions[1]);
+		drawables[2] = new TextureRegionDrawable(regions[2]);
+		drawables[3] = new TiledDrawable(regions[3]);
+		if (regions[4] != null) drawables[4] = new TiledDrawable(regions[4]);
+		drawables[5] = new TiledDrawable(regions[5]);
+		drawables[6] = new TextureRegionDrawable(regions[6]);
+		drawables[7] = new TiledDrawable(regions[7]);
+		drawables[8] = new TextureRegionDrawable(regions[8]);
+	}
 	
 	public TilesetDrawable(Drawable drawable)
 	{
@@ -32,15 +57,15 @@ public class TilesetDrawable extends BaseDrawable
 		if (drawables == null)
 		{
 			drawables = new Drawable[9];
-			drawables[0] = new TextureRegionDrawable(tl);
-			drawables[1] = new TiledDrawable(tm);
-			drawables[2] = new TextureRegionDrawable(tr);
-			drawables[3] = new TiledDrawable(ml);
-			drawables[4] = new TiledDrawable(mm);
-			drawables[5] = new TiledDrawable(mr);
-			drawables[6] = new TextureRegionDrawable(bl);
-			drawables[7] = new TiledDrawable(bm);
-			drawables[8] = new TextureRegionDrawable(br);
+			drawables[0] = new TextureRegionDrawable(lt);
+			drawables[1] = new TiledDrawable(mt);
+			drawables[2] = new TextureRegionDrawable(rt);
+			drawables[3] = new TiledDrawable(lm);
+			if (mm != null) drawables[4] = new TiledDrawable(mm);
+			drawables[5] = new TiledDrawable(rm);
+			drawables[6] = new TextureRegionDrawable(lb);
+			drawables[7] = new TiledDrawable(mb);
+			drawables[8] = new TextureRegionDrawable(rb);
 		}
 		
 		float cw = drawables[0].getMinWidth();
@@ -52,7 +77,7 @@ public class TilesetDrawable extends BaseDrawable
 		drawables[1].draw(batch, x + cw, y, mw, ch);
 		drawables[2].draw(batch, x + width - cw, y, cw, ch);
 		drawables[3].draw(batch, x, y + ch, cw, mh);
-		drawables[4].draw(batch, x + cw, y + ch, mw, mh);
+		if (drawables[4] != null) drawables[4].draw(batch, x + cw, y + ch, mw, mh);
 		drawables[5].draw(batch, x + width - cw, y + ch, cw, mh);
 		drawables[6].draw(batch, x, y + height - ch, cw, ch);
 		drawables[7].draw(batch, x + cw, y + height - ch, mw, ch);
