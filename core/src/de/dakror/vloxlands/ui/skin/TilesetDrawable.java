@@ -1,4 +1,4 @@
-package de.dakror.vloxlands.ui;
+package de.dakror.vloxlands.ui.skin;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -20,9 +20,6 @@ public class TilesetDrawable extends BaseDrawable
 	 */
 	Drawable[] drawables;
 	public TextureRegion tl, tm, tr, ml, mm, mr, bl, bm, br;
-	
-	public TilesetDrawable()
-	{}
 	
 	public TilesetDrawable(Drawable drawable)
 	{
