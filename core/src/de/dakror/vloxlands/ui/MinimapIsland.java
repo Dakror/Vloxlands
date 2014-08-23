@@ -35,8 +35,8 @@ public class MinimapIsland extends Actor
 		{
 			if (active)
 			{
-				Drawable d = Vloxlands.skin.getDrawable("default-rect");
-				d.draw(batch, getX() + getWidth() / 4, getY(), getWidth() / 2, getHeight());
+				Drawable d = Vloxlands.skin.getDrawable("outline");
+				d.draw(batch, (int) (getX() + getWidth() / 4), (int) getY(), (int) getWidth() / 2, (int) getHeight());
 			}
 			batch.draw(island.fbo.getColorBufferTexture(), getX(), getY(), getWidth(), getHeight(), 0, 0, island.fbo.getColorBufferTexture().getWidth(), island.fbo.getColorBufferTexture().getHeight(), false, true);
 		}

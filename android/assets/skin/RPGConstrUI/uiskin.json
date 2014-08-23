@@ -78,6 +78,7 @@
             mt: shadow_mt,
             rt: shadow_rt,
             lm: shadow_lm,
+            mm: shadow_mm,
             rm: shadow_rm,
             lb: shadow_lb,
             mb: shadow_mb,
@@ -156,29 +157,39 @@
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
-        optional: {
-            font: alagard_30pt_bold,
-            fontColor: darker_grey
-        },
-        default: {
+        title: {
             font: alagard_30pt_bold,
             fontColor: white
         },
-        error: {
-            font: alagard_30pt_bold,
-            fontColor: red
+        title_plain: {
+            font: alagard_30pt,
+            fontColor: white
         },
-        title: {
-            font: alagard_30pt_bold,
-            fontColor: grey
-        },
-        small: {
+        bold: {
             font: alagard_18pt_bold,
             fontColor: white
         },
-        small_thin: {
+        default: {
             font: alagard_18pt,
             fontColor: white
         }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+        default: {
+            up: text_button,
+            down: text_button_down,
+            over: text_button_hover,
+            disabled: text_button_disabled
+        },
+        toggle: {
+            up: text_button,
+            down: text_button_down,
+            over: text_button_hover,
+            checked: text_button,
+            disabled: text_button_disabled
+        }
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+        default: {}
     },
 }

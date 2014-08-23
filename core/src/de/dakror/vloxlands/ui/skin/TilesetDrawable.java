@@ -71,16 +71,19 @@ public class TilesetDrawable extends BaseDrawable
 		float cw = drawables[0].getMinWidth();
 		float ch = drawables[0].getMinHeight();
 		float mw = width - cw * 2;
-		float mh = width - ch * 2;
+		float mh = height - ch * 2;
 		
-		drawables[0].draw(batch, x, y, cw, ch);
-		drawables[1].draw(batch, x + cw, y, mw, ch);
-		drawables[2].draw(batch, x + width - cw, y, cw, ch);
-		drawables[3].draw(batch, x, y + ch, cw, mh);
+		float sh = drawables[1].getMinHeight();
+		float sw = drawables[3].getMinWidth();
+		
+		drawables[0].draw(batch, x, y + height - ch, cw, ch);
+		drawables[1].draw(batch, x + cw, y + height - sh, mw, sh);
+		drawables[2].draw(batch, x + width - cw, y + height - ch, cw, ch);
+		drawables[3].draw(batch, x, y + ch, sw, mh);
 		if (drawables[4] != null) drawables[4].draw(batch, x + cw, y + ch, mw, mh);
-		drawables[5].draw(batch, x + width - cw, y + ch, cw, mh);
-		drawables[6].draw(batch, x, y + height - ch, cw, ch);
-		drawables[7].draw(batch, x + cw, y + height - ch, mw, ch);
-		drawables[8].draw(batch, x + width - cw, y + height - ch, cw, ch);
+		drawables[5].draw(batch, x + width - sw, y + ch, sw, mh);
+		drawables[6].draw(batch, x, y, cw, ch);
+		drawables[7].draw(batch, x + cw, y, mw, sh);
+		drawables[8].draw(batch, x + width - cw, y, cw, ch);
 	}
 }
