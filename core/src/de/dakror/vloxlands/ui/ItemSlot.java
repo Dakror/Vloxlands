@@ -28,6 +28,7 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	public ItemSlot(Stage stage, ItemStack stack)
 	{
 		super(createStyle(stack));
+		pad(12);
 		amount = new Label("", Vloxlands.skin);
 		amount.setFontScale(1.15f);
 		amount.setZIndex(1);
@@ -44,7 +45,7 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getIconX() * Item.SIZE, stack.getItem().getIconY() * Item.SIZE, Item.SIZE, Item.SIZE);
 		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default transparent space
 		
-		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = new TextureRegionDrawable(region);
 		style.imageUp.setMinWidth(size);
 		style.imageUp.setMinHeight(size);

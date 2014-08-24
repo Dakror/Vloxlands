@@ -436,7 +436,7 @@ public class Human extends Creature
 		ItemSlot armor = new ItemSlot(window.getStage(), new ItemStack());
 		window.add(armor);
 		
-		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("queue");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);

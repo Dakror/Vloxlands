@@ -101,17 +101,23 @@ public class Vloxlands extends GameBase
 						Drawable fg = null;
 						try
 						{
-							fg = getDrawable(json.readValue("fg", String.class, jsonData));
+							if (jsonData.has("fg_tile") && json.readValue("fg_tile", Boolean.class, jsonData) == Boolean.TRUE) fg = getTiledDrawable(json.readValue("fg", String.class, jsonData));
+							else fg = getDrawable(json.readValue("fg", String.class, jsonData));
 						}
 						catch (Exception e)
-						{}
+						{
+							e.printStackTrace();
+						}
 						Drawable bg = null;
 						try
 						{
-							bg = getDrawable(json.readValue("bg", String.class, jsonData));
+							if (jsonData.has("bg_tile") && json.readValue("bg_tile", Boolean.class, jsonData) == Boolean.TRUE) bg = getTiledDrawable(json.readValue("bg", String.class, jsonData));
+							else bg = getDrawable(json.readValue("bg", String.class, jsonData));
 						}
 						catch (Exception e)
-						{}
+						{
+							e.printStackTrace();
+						}
 						return new DoubleDrawable(fg, bg);
 					}
 				});

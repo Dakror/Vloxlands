@@ -28,7 +28,7 @@ public class DoubleDrawable extends BaseDrawable
 	@Override
 	public void draw(Batch batch, float x, float y, float width, float height)
 	{
-		if (fg != null) fg.draw(batch, x, y, width, height);
 		if (bg != null) bg.draw(batch, x, y, width, height);
+		if (fg != null) fg.draw(batch, x, y, width, height);
 	}
 }

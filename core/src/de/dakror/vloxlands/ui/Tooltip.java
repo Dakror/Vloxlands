@@ -5,15 +5,15 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 
 import de.dakror.vloxlands.Vloxlands;
+import de.dakror.vloxlands.ui.skin.DWindow;
 
 /**
  * @author Dakror
  */
-public class Tooltip extends Window
+public class Tooltip extends DWindow
 {
 	final Vector2 tmp = new Vector2();
 	
@@ -21,7 +21,7 @@ public class Tooltip extends Window
 	
 	public Tooltip(String title, String description, final Actor parent)
 	{
-		super(title, Vloxlands.skin);
+		super(title, Vloxlands.skin, "tooltip");
 		setTitleAlignment(Align.left);
 		setDescription(description);
 		setVisible(false);
@@ -77,7 +77,7 @@ public class Tooltip extends Window
 		clear();
 		Label l = new Label(s, Vloxlands.skin);
 		l.setWrap(true);
-		add(l).width(200);
+		add(l).padBottom(6).width(200);
 		
 		pack();
 	}

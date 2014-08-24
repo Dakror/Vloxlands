@@ -65,6 +65,7 @@ public class ResourceListTooltip extends Tooltip
 		}
 		
 		pack();
+		setHeight(getHeight() + 16);
 	}
 	
 	protected void addItem(Texture texture, String text, int iconX, int iconY)
@@ -77,7 +78,7 @@ public class ResourceListTooltip extends Tooltip
 		Label l = new Label(text, Vloxlands.skin);
 		l.setWrap(true);
 		l.setAlignment(Align.right, Align.right);
-		t.add(l).width(174).right();
+		t.add(l).padLeft(-8).width(174).right();
 		row();
 		add(t).width(200);
 	}

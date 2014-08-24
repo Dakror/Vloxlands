@@ -452,7 +452,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	protected Table getDefaultTable(final PinnableWindow window)
 	{
-		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("bomb");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -485,10 +485,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				else broadcast(HelperState.DISMANTLE);
 			}
 		});
-		dismantle.pad(4);
 		dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
 		
-		style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("sleep");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -507,7 +506,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
 			}
 		});
-		sleep.pad(4);
+		
 		sleep.getTooltip().set("Production is " + (isWorking() ? "running" : "paused"), "Toggle the building's production activity.");
 		
 		final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
@@ -530,7 +529,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("queue");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -553,7 +552,6 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		};
 		queue.addListener(cl);
-		queue.pad(4);
 		queue.getTooltip().set("Task Queue", "Toggle Task Queue display");
 		queue.setDisabled(tasks.size == 0);
 		

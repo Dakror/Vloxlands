@@ -83,24 +83,28 @@
             lb: shadow_lb,
             mb: shadow_mb,
             rb: shadow_rb
-        },
+        }
     },
     de.dakror.vloxlands.ui.skin.DoubleDrawable: {
         paper_container: {
             fg: outline,
-            bg: paper
+            bg: paper,
+            bg_tile: true
         },
         wood_container: {
             fg: outline,
-            bg: wood
+            bg: wood,
+            bg_tile: true
         },
         paper_container_doubled: {
             fg: outline_doubled,
-            bg: paper
+            bg: paper,
+            bg_tile: true
         },
         wood_container_doubled: {
             fg: outline_doubled,
-            bg: wood
+            bg: wood,
+            bg_tile: true
         },
         shadow_container: {
             fg: outline,
@@ -110,6 +114,14 @@
             fg: outline_doubled,
             bg: shadow
         },
+        disabled_outline: {
+            fg: shadow,
+            bg: outline
+        },
+        disabled_outline_doubled: {
+            fg: shadow,
+            bg: outline_doubled
+        }
     },
     com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
         default: {
@@ -130,11 +142,17 @@
             over: text_button_hover,
             checked: text_button,
             disabled: text_button_disabled
+        },
+        image: {
+            up: outline,
+            down: wood_container,
+            over: shadow_container,
+            font: alagard_18pt
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
         default: {
-            background: outline,
+            background: paper_container_doubled,
             titleFont: alagard_30pt_bold,
             titleFontColor: white
         },
@@ -143,6 +161,11 @@
             titleFont: alagard_30pt_bold,
             titleFontColor: white,
             stageBackground: shadow_mm
+        },
+        tooltip: {
+            background: shadow_container,
+            titleFont: alagard_18pt_bold,
+            titleFontColor: white
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
@@ -187,9 +210,17 @@
             over: text_button_hover,
             checked: text_button,
             disabled: text_button_disabled
+        },
+        image: {
+            up: outline,
+            down: wood_container,
+            over: shadow_container
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+        default: {}
+    },
+    com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
         default: {}
     },
 }
