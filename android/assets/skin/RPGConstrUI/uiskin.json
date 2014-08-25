@@ -222,18 +222,35 @@
             down: wood_container,
             over: shadow_container
         },
+        image_toggle: {
+            up: outline,
+            down: wood_container,
+            over: shadow_container,
+            checked: wood_container
+        },
         image_alt: {
             up: outline,
             down: wood_container,
             over: outline_doubled
+        },
+        image_alt2: {
+            up: paper_container,
+            down: wood_container,
+            over: paper_container_doubled
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
         default: {
-            vScrollKnob: shadow_container
+            vScrollKnob: wood_container,
+            background: outline,
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
-        default: {}
+        default: {
+            font: alagard_18pt,
+            fontColorSelected: white,
+            fontColorUnselected: white,
+            selection: wood
+        },
     },
 }

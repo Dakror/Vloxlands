@@ -395,7 +395,7 @@ public class Human extends Creature
 	@Override
 	public void setUI(final PinnableWindow window, Object... params)
 	{
-		window.row().pad(0).colspan(4).width(220);
+		window.row().pad(0).colspan(50).padRight(-10).fillX();
 		final List<Job> jobs = new List<Job>(Vloxlands.skin);
 		jobs.setItems(new IdleJob(this));
 		jobs.addAction(new Action()
@@ -420,6 +420,8 @@ public class Human extends Creature
 		});
 		jobs.getSelection().setDisabled(true);
 		jobs.setSelectedIndex(-1);
+		jobs.getStyle().selection.setLeftWidth(10);
+		jobs.getStyle().selection.setTopHeight(3);
 		final ScrollPane jobsWrap = new ScrollPane(jobs, Vloxlands.skin);
 		jobsWrap.setVisible(false);
 		jobsWrap.setScrollbarsOnTop(false);
@@ -428,15 +430,15 @@ public class Human extends Creature
 		
 		window.row();
 		ItemSlot tool = new ItemSlot(window.getStage(), this.tool);
-		window.left().add(tool);
+		window.left().add(tool).spaceRight(2);
 		
 		ItemSlot slot = new ItemSlot(window.getStage(), carryingItemStack);
-		window.add(slot);
+		window.add(slot).spaceRight(2);
 		
 		ItemSlot armor = new ItemSlot(window.getStage(), new ItemStack());
-		window.add(armor);
+		window.add(armor).spaceRight(2);
 		
-		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image_toggle", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("queue");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -446,7 +448,6 @@ public class Human extends Creature
 		final TooltipImageButton job = new TooltipImageButton(style);
 		window.getStage().addActor(job.getTooltip());
 		job.setName("job");
-		job.getStyle().checked = Vloxlands.skin.getDrawable("default-round-down");
 		ClickListener cl = new ClickListener()
 		{
 			@Override
@@ -459,9 +460,8 @@ public class Human extends Creature
 			}
 		};
 		job.addListener(cl);
-		job.pad(4);
 		job.getTooltip().set("Job Queue", "Toggle Job Queue display");
-		window.add(job);
+		window.add(job).padRight(-10);
 		
 		if (params[0] == Boolean.TRUE)
 		{

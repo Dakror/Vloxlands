@@ -76,7 +76,7 @@ public class Minimap extends Group
 	{
 		setPosition(Gdx.graphics.getWidth() - getWidth(), Gdx.graphics.getHeight() - getHeight());
 		
-		Drawable bg = Vloxlands.skin.getDrawable("shadow_container");
+		Drawable bg = Vloxlands.skin.getDrawable("paper_container");
 		bg.draw(batch, getX(), getY(), getWidth(), getHeight());
 		super.draw(batch, parentAlpha);
 	}

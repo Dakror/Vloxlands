@@ -713,6 +713,8 @@ public class Game extends Layer
 	@Override
 	public boolean tap(float x, float y, int count, int button)
 	{
+		if (!doneLoading) return false;
+		
 		if (button != Buttons.MIDDLE)
 		{
 			if (!regionSelectionMode)

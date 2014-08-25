@@ -62,7 +62,6 @@ public class RevolverSlot extends TooltipImageButton
 			}
 		}
 		
-		
 		stage.addActor(tooltip);
 	}
 	
@@ -83,7 +82,6 @@ public class RevolverSlot extends TooltipImageButton
 		TextureRegion region = new TextureRegion(tex, (int) icon.x * Item.SIZE, (int) icon.y * Item.SIZE, Item.SIZE, Item.SIZE);
 		
 		ImageButtonStyle style = new ImageButtonStyle();
-		
 		style.up = Vloxlands.skin.getDrawable("revolverSlot");
 		style.up.setMinWidth(SIZE);
 		style.up.setMinHeight(SIZE);

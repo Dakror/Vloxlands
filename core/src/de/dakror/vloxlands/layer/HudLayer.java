@@ -150,7 +150,7 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedStructureWindow.clearActions();
 		}
 		
-		if (lmb && selectedEntityWindow.setShown(false) && creature == null)
+		if (creature == null && lmb && selectedEntityWindow.setShown(false))
 		{
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
@@ -220,7 +220,7 @@ public class HudLayer extends Layer implements SelectionListener
 			selectedEntityWindow.clearActions();
 		}
 		
-		if (lmb && selectedStructureWindow.setShown(false) && structure == null)
+		if (structure == null && lmb && selectedStructureWindow.setShown(false))
 		{
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
@@ -228,12 +228,14 @@ public class HudLayer extends Layer implements SelectionListener
 		
 		if (lmb && structure != null)
 		{
+			boolean tasksWereExpanded = selectedStructureWindow.isVisible() && selectedStructureWindow.getTitle().equals(structure.getName()) && ((Button) selectedStructureWindow.findActor("queue")) != null && ((Button) selectedStructureWindow.findActor("queue")).isChecked();
+			
 			selectedStructureWindow.setTitle(structure.getName());
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 			selectedStructureWindow.addActor(selectedStructureWindow.getButtonTable());
 			
-			structure.setUI(selectedStructureWindow);
+			structure.setUI(selectedStructureWindow, tasksWereExpanded);
 			
 			selected.getTooltip().setTitle("");
 			selected.setIcon(new Vector2(5, 1));

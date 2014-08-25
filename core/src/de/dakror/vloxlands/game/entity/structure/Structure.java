@@ -21,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
@@ -53,6 +52,7 @@ import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.TaskListItem;
 import de.dakror.vloxlands.ui.TooltipImageButton;
+import de.dakror.vloxlands.ui.skin.DProgressBar;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 import de.dakror.vloxlands.util.event.InventoryListener;
@@ -450,7 +450,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		return getDefaultCommand();
 	}
 	
-	protected Table getDefaultTable(final PinnableWindow window)
+	protected Table getDefaultTable(final PinnableWindow window, Object... params)
 	{
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("bomb");
@@ -487,7 +487,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		});
 		dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
 		
-		style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
+		style = new ImageButtonStyle(Vloxlands.skin.get("image_toggle", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("sleep");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -529,7 +529,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
+		style = new ImageButtonStyle(Vloxlands.skin.get("image_toggle", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("queue");
 		style.imageUp.setMinWidth(ItemSlot.size);
 		style.imageUp.setMinHeight(ItemSlot.size);
@@ -548,21 +548,26 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
 				actor.setVisible(!actor.isVisible());
 				window.invalidateHierarchy();
-				window.pack();
+				if (x != -3) window.pack();
 			}
 		};
 		queue.addListener(cl);
+		queue.setName("queue");
 		queue.getTooltip().set("Task Queue", "Toggle Task Queue display");
-		queue.setDisabled(tasks.size == 0);
 		
+		if (params[0] == Boolean.TRUE)
+		{
+			queue.setChecked(true);
+			cl.clicked(null, -3, 0);
+		}
 		
 		Table rightSide = new Table(Vloxlands.skin);
 		rightSide.row();
 		rightSide.add(capacity).colspan(3);
-		rightSide.row().spaceTop(5);
-		rightSide.add(dismantle);
-		rightSide.add(sleep);
-		rightSide.add(queue);
+		rightSide.row().spaceTop(5).spaceBottom(2);
+		rightSide.add(dismantle).spaceRight(2);
+		rightSide.add(sleep).spaceRight(2);
+		rightSide.add(queue).spaceRight(2);
 		
 		return rightSide;
 	}
@@ -604,7 +609,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		window.row().right().pad(5, 0, 5, 0).colspan(50).fillX();
+		window.row().right().pad(5, 0, 5, -10).colspan(50).fillX();
 		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
 		tasksWrap.setScrollbarsOnTop(false);
 		tasksWrap.setFadeScrollBars(false);
@@ -623,7 +628,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
-			window.add(getDefaultTable(window)).width(200);
+			window.add(getDefaultTable(window, params)).width(200);
 		}
 		else
 		{
@@ -647,7 +652,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				i++;
 			}
 			window.add(res).minWidth(200);
-			final ProgressBar progress = new ProgressBar(0, getCosts().getCount(), 1, false, Vloxlands.skin);
+			final DProgressBar progress = new DProgressBar(0, getCosts().getCount(), 0, Vloxlands.skin);
 			progress.setAnimateDuration(0.2f);
 			progress.setAnimateInterpolation(Interpolation.pow3);
 			window.addAction(new Action()
