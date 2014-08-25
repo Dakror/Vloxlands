@@ -20,6 +20,7 @@ public abstract class StaticEntity extends Entity
 	{
 		super(x, y, z, model);
 		voxelPos = new Vector3(Math.round(x), Math.round(y), Math.round(z));
+		dim.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
 	}
 	
 	public void updateVoxelPos()

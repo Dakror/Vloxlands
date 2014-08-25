@@ -628,7 +628,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
-			window.add(getDefaultTable(window, params)).width(200);
+			window.add(getDefaultTable(window, params)).right().width(200).pad(0, -2, 0, 0);
 		}
 		else
 		{
@@ -648,7 +648,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				Label l = new Label((max - inv.get(b)) + " / " + max, Vloxlands.skin);
 				l.setName(b + "");
 				l.setWrap(true);
-				res.add(l).width(50);
+				res.add(l).width(100);
 				i++;
 			}
 			window.add(res).minWidth(200);
