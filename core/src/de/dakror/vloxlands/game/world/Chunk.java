@@ -38,8 +38,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public static final int VERTEX_SIZE = 11;
 	public static final int UNLOAD_TICKS = 120;
 	
-	public static final int SPREAD_TICKS = 6;
-	public static final int GRASS_SPREAD = 1;
+	public static final int SPREAD_TICKS = 60;
+	public static final int GRASS_SPREAD = 6;
 	public static final int SNOW_SPREAD = 8;
 	public static final int SNOW_MIN_HEIGHT = 384;
 	
@@ -357,35 +357,45 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void spread(int maximum, boolean snow)
 	{
-		if (isEmpty() || getResource(Voxel.get("DIRT").getId()) == 0) return;
+		if (isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
 		
-		int done = 0;
-		for (int i = 0; i < SIZE; i++)
+		if (maximum == 0)
 		{
-			for (int j = 0; j < SIZE; j++)
+			for (int i = 0; i < SIZE; i++)
 			{
-				for (int k = 0; k < SIZE; k++)
+				for (int j = 0; j < SIZE; j++)
 				{
-					byte g = get(i, j, k);
-					if (done < maximum || maximum == 0)
+					for (int k = 0; k < SIZE; k++)
 					{
-						if (snow)
+						byte g = get(i, j, k);
+						if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
 						{
-							if ((g == Voxel.get("DIRT").getId() || g == Voxel.get("GRASS").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
-							{
-								set(i, j, k, Voxel.get("SNOW").getId());
-								done++;
-							}
-						}
-						else
-						{
-							if ((g == Voxel.get("DIRT").getId() || g == Voxel.get("SNOW").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
-							{
-								set(i, j, k, Voxel.get("GRASS").getId());
-								done++;
-							}
+							set(i, j, k, Voxel.get(snow ? "SNOW" : "GRASS").getId());
 						}
 					}
+				}
+			}
+		}
+		else
+		{
+			IntArray f = new IntArray();
+			for (int i = 0; i < SIZE * SIZE * SIZE; i++)
+				f.add(i);
+			f.shuffle();
+			
+			int done = 0;
+			while (done < maximum && f.size > 0)
+			{
+				int ind = f.pop();
+				int x = ind / (SIZE * SIZE);
+				int y = (ind / SIZE) % SIZE;
+				int z = ind % SIZE;
+				
+				byte g = get(x, y, z);
+				if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(x + pos.x, y + pos.y + 1, z + pos.z) == 0)
+				{
+					set(x, y, z, Voxel.get(snow ? "SNOW" : "GRASS").getId());
+					done++;
 				}
 			}
 		}
@@ -451,7 +461,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		{
 			if ((tick + random) % SPREAD_TICKS == 0)
 			{
-				boolean snow = pos.y + island.pos.y >= SNOW_MIN_HEIGHT;
+				boolean snow = island.pos.y + Island.SIZE / 2 >= SNOW_MIN_HEIGHT;
 				spread(snow ? SNOW_SPREAD : GRASS_SPREAD, snow);
 			}
 		}

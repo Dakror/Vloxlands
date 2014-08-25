@@ -1,8 +1,8 @@
 package de.dakror.vloxlands.ui;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
@@ -49,8 +49,8 @@ public class TaskListItem extends Label
 			if ((Integer) getUserObject() == 0)
 			{
 				float fac = (1 - (structure.getTaskTicksLeft() / (float) structure.firstTask().getDuration()));
-				Texture t = Vloxlands.assets.get("img/gui/progressBar.png", Texture.class);
-				batch.draw(t, getX(), getY(), Math.round(getParent().getWidth() * fac), (int) getHeight(), 0, 0, Math.round(t.getWidth() * fac), t.getHeight(), false, false);
+				TextureRegion t = Vloxlands.skin.getRegion("progressBar");
+				batch.draw(t.getTexture(), getX(), getY(), Math.round(getParent().getWidth() * fac), (int) getHeight(), t.getRegionX(), t.getRegionY(), Math.round(t.getRegionWidth() * fac), t.getRegionHeight(), false, false);
 			}
 		}
 		catch (NullPointerException e)

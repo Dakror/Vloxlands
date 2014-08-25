@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Updater;
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 
 /**
@@ -20,7 +21,7 @@ public class DebugLayer extends Layer
 	public void show()
 	{
 		spriteBatch = new SpriteBatch();
-		font = new BitmapFont();
+		font = Vloxlands.skin.getFont("alagard_18pt");
 	}
 	
 	@Override

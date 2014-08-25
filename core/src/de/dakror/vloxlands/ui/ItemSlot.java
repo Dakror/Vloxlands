@@ -28,13 +28,15 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	public ItemSlot(Stage stage, ItemStack stack)
 	{
 		super(createStyle(stack));
-		amount = new Label("", Vloxlands.skin);
-		amount.setFontScale(1.15f);
+		amount = new Label("", Vloxlands.skin, "title_plain");
 		amount.setZIndex(1);
-		addActor(amount);
+		row().right().bottom().pad(-40, 0, -8, -4);
+		add(amount);
 		
 		setItemStack(stack);
 		stage.addActor(tooltip);
+		
+		pad(12);
 	}
 	
 	private static ImageButtonStyle createStyle(ItemStack stack)
@@ -44,7 +46,7 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getIconX() * Item.SIZE, stack.getItem().getIconY() * Item.SIZE, Item.SIZE, Item.SIZE);
 		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default transparent space
 		
-		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get(ButtonStyle.class));
+		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = new TextureRegionDrawable(region);
 		style.imageUp.setMinWidth(size);
 		style.imageUp.setMinHeight(size);
@@ -78,7 +80,6 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	public void onStackChanged()
 	{
 		setStyle(createStyle(stack));
-		pad(4);
 		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
 		else amount.setText("");
 		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);
