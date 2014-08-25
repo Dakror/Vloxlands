@@ -83,7 +83,13 @@
             lb: shadow_lb,
             mb: shadow_mb,
             rb: shadow_rb
-        }
+        },
+        line_ver: {
+            lt: line_b,
+            lm: line_lm,
+            lb: line_t,
+            center: true
+        },
     },
     de.dakror.vloxlands.ui.skin.DoubleDrawable: {
         paper_container: {
@@ -215,10 +221,17 @@
             up: outline,
             down: wood_container,
             over: shadow_container
+        },
+        image_alt: {
+            up: outline,
+            down: wood_container,
+            over: outline_doubled
         }
     },
     com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
-        default: {}
+        default: {
+            vScrollKnob: shadow_container
+        }
     },
     com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
         default: {}

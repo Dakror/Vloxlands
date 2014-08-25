@@ -48,7 +48,7 @@ public class Warehouse extends Structure
 	protected void setupUI(final PinnableWindow window, Object... params)
 	{
 		super.setupUI(window);
-		
+		window.debugAll();
 		final VerticalGroup items = new VerticalGroup();
 		items.left();
 		items.addAction(new Action()
@@ -76,11 +76,12 @@ public class Warehouse extends Structure
 				return false;
 			}
 		});
-		
 		window.row().pad(0).width(400);
 		final ScrollPane itemsWrap = new ScrollPane(items, Vloxlands.skin);
-		itemsWrap.setScrollbarsOnTop(false);
+		itemsWrap.setScrollbarsOnTop(true);
 		itemsWrap.setFadeScrollBars(false);
-		window.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200);
+		itemsWrap.setScrollingDisabled(true, false);
+		itemsWrap.setOverscroll(false, false);
+		window.left().add(itemsWrap).maxHeight(100).minHeight(100).width(200).padRight(10);
 	}
 }

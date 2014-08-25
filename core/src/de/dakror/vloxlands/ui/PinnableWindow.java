@@ -17,12 +17,20 @@ public class PinnableWindow extends DWindow
 	public PinnableWindow(String title, Skin skin)
 	{
 		super(title, skin);
-		
 		pin = new CheckBox("", Vloxlands.skin);
 		TextButton x = new TextButton("X", Vloxlands.skin, "image");
 		x.addListener(new HidingClickListener(this));
 		getButtonTable().add(pin).height(getPadTop()).width(getPadTop());
-		getButtonTable().add(x).height(getPadTop()).width(getPadTop()).padRight(4).padTop(4);
+		getButtonTable().add(x).size(40).padRight(4);
+	}
+	
+	@Override
+	public void initStyle()
+	{
+		padLeft(16f);
+		padTop(50f);
+		padBottom(10);
+		padRight(10);
 	}
 	
 	public boolean setShown(boolean visible)

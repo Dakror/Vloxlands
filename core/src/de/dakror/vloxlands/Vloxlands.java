@@ -88,7 +88,9 @@ public class Vloxlands extends GameBase
 							catch (Exception e)
 							{}
 						}
-						return new TilesetDrawable(regions);
+						TilesetDrawable td = new TilesetDrawable(regions);
+						if (jsonData.has("center") && json.readValue("center", Boolean.class, jsonData) == true) td.center = true;
+						return td;
 					}
 				});
 				

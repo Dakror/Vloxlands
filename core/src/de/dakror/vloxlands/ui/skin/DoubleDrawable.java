@@ -31,4 +31,20 @@ public class DoubleDrawable extends BaseDrawable
 		if (bg != null) bg.draw(batch, x, y, width, height);
 		if (fg != null) fg.draw(batch, x, y, width, height);
 	}
+	
+	@Override
+	public float getMinWidth()
+	{
+		if (fg instanceof TilesetDrawable) return fg.getMinWidth();
+		if (bg instanceof TilesetDrawable) return bg.getMinWidth();
+		return fg != null && bg != null ? Math.max(fg.getMinWidth(), bg.getMinWidth()) : fg != null ? fg.getMinWidth() : bg.getMinWidth();
+	}
+	
+	@Override
+	public float getMinHeight()
+	{
+		if (fg instanceof TilesetDrawable) return fg.getMinHeight();
+		if (bg instanceof TilesetDrawable) return bg.getMinHeight();
+		return fg != null && bg != null ? Math.max(fg.getMinHeight(), bg.getMinHeight()) : fg != null ? fg.getMinHeight() : bg.getMinHeight();
+	}
 }

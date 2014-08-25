@@ -1,6 +1,6 @@
 
 uiskin.png
-size: 1552,518
+size: 1553,518
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -165,23 +165,65 @@ checkbox_selected
   orig: 44, 44
   offset: 0, 0
   index: -1
+line_all
+  rotate: false
+  xy: 1064, 2
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
+line_all_doubled
+  rotate: false
+  xy: 1228, 4
+  size: 31, 31
+  orig: 31, 31
+  offset: 0, 0
+  index: -1
+line_b
+  rotate: false
+  xy: 1276, 77
+  size: 14, 16
+  orig: 14, 16
+  offset: 0, 0
+  index: -1
+line_b_doubled
+  rotate: false
+  xy: 1520, 278
+  size: 19, 16
+  orig: 19, 16
+  offset: 0, 0
+  index: -1
+line_l
+  rotate: false
+  xy: 1336, 156
+  size: 16, 14
+  orig: 16, 14
+  offset: 0, 0
+  index: -1
+line_l_doubled
+  rotate: false
+  xy: 1476, 157
+  size: 16, 19
+  orig: 16, 19
+  offset: 0, 0
+  index: -1
 line_lb
   rotate: false
-  xy: 1168, 16
+  xy: 1434, 157
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: -1
 line_lb_doubled
   rotate: false
-  xy: 1064, 4
+  xy: 1320, 96
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 line_lm
   rotate: false
-  xy: 1533, 325
+  xy: 1536, 163
   size: 12, 59
   orig: 12, 59
   offset: 0, 0
@@ -195,14 +237,14 @@ line_lm_doubled
   index: -1
 line_lt
   rotate: false
-  xy: 1189, 16
+  xy: 1455, 157
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: -1
 line_lt_doubled
   rotate: false
-  xy: 1090, 11
+  xy: 1261, 14
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -235,23 +277,93 @@ line_mt_doubled
   orig: 73, 17
   offset: 0, 0
   index: -1
+line_nb
+  rotate: false
+  xy: 1249, 40
+  size: 26, 20
+  orig: 26, 20
+  offset: 0, 0
+  index: -1
+line_nb_doubled
+  rotate: false
+  xy: 1227, 95
+  size: 31, 25
+  orig: 31, 25
+  offset: 0, 0
+  index: -1
+line_nl
+  rotate: false
+  xy: 1533, 358
+  size: 20, 26
+  orig: 20, 26
+  offset: 0, 0
+  index: -1
+line_nl_doubled
+  rotate: false
+  xy: 1249, 62
+  size: 25, 31
+  orig: 25, 31
+  offset: 0, 0
+  index: -1
+line_nr
+  rotate: false
+  xy: 1533, 330
+  size: 20, 26
+  orig: 20, 26
+  offset: 0, 0
+  index: -1
+line_nr_doubled
+  rotate: false
+  xy: 1293, 89
+  size: 25, 31
+  orig: 25, 31
+  offset: 0, 0
+  index: -1
+line_nt
+  rotate: false
+  xy: 1354, 150
+  size: 26, 20
+  orig: 26, 20
+  offset: 0, 0
+  index: -1
+line_nt_doubled
+  rotate: false
+  xy: 1260, 95
+  size: 31, 25
+  orig: 31, 25
+  offset: 0, 0
+  index: -1
+line_r
+  rotate: false
+  xy: 1494, 154
+  size: 16, 14
+  orig: 16, 14
+  offset: 0, 0
+  index: -1
+line_r_doubled
+  rotate: false
+  xy: 1369, 129
+  size: 16, 19
+  orig: 16, 19
+  offset: 0, 0
+  index: -1
 line_rb
   rotate: false
-  xy: 1210, 16
+  xy: 1348, 129
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: -1
 line_rb_doubled
   rotate: false
-  xy: 1116, 11
+  xy: 1382, 152
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 line_rm
   rotate: false
-  xy: 1536, 163
+  xy: 1541, 235
   size: 12, 59
   orig: 12, 59
   offset: 0, 0
@@ -265,16 +377,30 @@ line_rm_doubled
   index: -1
 line_rt
   rotate: false
-  xy: 1231, 16
+  xy: 1387, 131
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: -1
 line_rt_doubled
   rotate: false
-  xy: 1142, 11
+  xy: 1408, 152
   size: 24, 24
   orig: 24, 24
+  offset: 0, 0
+  index: -1
+line_t
+  rotate: false
+  xy: 1512, 152
+  size: 14, 16
+  orig: 14, 16
+  offset: 0, 0
+  index: -1
+line_t_doubled
+  rotate: false
+  xy: 1408, 134
+  size: 19, 16
+  orig: 19, 16
   offset: 0, 0
   index: -1
 minus_hor
@@ -426,56 +552,56 @@ shadow_lb
   index: -1
 shadow_lm
   rotate: false
-  xy: 1246, 122
+  xy: 1520, 296
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_lt
   rotate: false
-  xy: 1280, 122
+  xy: 1246, 122
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_mb
   rotate: false
-  xy: 1314, 122
+  xy: 1280, 122
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_mm
   rotate: false
-  xy: 1520, 291
+  xy: 1314, 122
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_mt
   rotate: false
-  xy: 1348, 138
+  xy: 1092, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_rb
   rotate: false
-  xy: 1382, 144
+  xy: 1126, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_rm
   rotate: false
-  xy: 1416, 144
+  xy: 1160, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 shadow_rt
   rotate: false
-  xy: 1450, 144
+  xy: 1194, 3
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
