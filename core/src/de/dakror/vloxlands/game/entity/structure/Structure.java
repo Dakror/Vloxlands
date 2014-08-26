@@ -56,6 +56,7 @@ import de.dakror.vloxlands.ui.skin.DProgressBar;
 import de.dakror.vloxlands.util.CurserCommand;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 import de.dakror.vloxlands.util.event.InventoryListener;
+import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
 import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
@@ -159,7 +160,12 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	{
 		if (buildProgress == costs.getCount())
 		{
-			if (!built) setBuilt(true);
+			if (!built)
+			{
+				setBuilt(true);
+				for (SelectionListener sl : Game.instance.listeners)
+					sl.onStructureSelection(this, true);
+			}
 			return true;
 		}
 		
@@ -167,7 +173,12 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		if (buildProgress == costs.getCount())
 		{
-			if (!built) setBuilt(true);
+			if (!built)
+			{
+				setBuilt(true);
+				for (SelectionListener sl : Game.instance.listeners)
+					sl.onStructureSelection(this, true);
+			}
 			return true;
 		}
 		return false;
