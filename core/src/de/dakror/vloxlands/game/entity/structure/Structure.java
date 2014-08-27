@@ -160,12 +160,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	{
 		if (buildProgress == costs.getCount())
 		{
-			if (!built)
-			{
-				setBuilt(true);
-				for (SelectionListener sl : Game.instance.listeners)
-					sl.onStructureSelection(this, true);
-			}
+			if (!built) setBuilt(true);
 			return true;
 		}
 		
@@ -173,12 +168,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		if (buildProgress == costs.getCount())
 		{
-			if (!built)
-			{
-				setBuilt(true);
-				for (SelectionListener sl : Game.instance.listeners)
-					sl.onStructureSelection(this, true);
-			}
+			if (!built) setBuilt(true);
 			return true;
 		}
 		return false;
@@ -527,9 +517,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			@Override
 			public boolean act(float delta)
 			{
-				capacity.setText("Capacity: " + getInventory().getCount() + " / " + getInventory().getCapacity() + " Items");
+				capacity.setText("Capacity: " + getInnerInventory().getCount() + " / " + getInnerInventory().getCapacity() + " Items");
 				
-				float percent = getInventory().getCount() / (float) getInventory().getCapacity();
+				float percent = getInnerInventory().getCount() / (float) getInnerInventory().getCapacity();
 				
 				if (percent >= 0.8f) capacity.setColor(1, 0.5f, 0, 1);
 				else if (percent >= 0.5f) capacity.setColor(1, 1, 0, 1);
@@ -620,7 +610,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		window.row().right().pad(5, 0, 5, -10).colspan(50).fillX();
+		window.row().right().pad(5, -8, 5, -8).colspan(50).fillX();
 		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
 		tasksWrap.setScrollbarsOnTop(false);
 		tasksWrap.setFadeScrollBars(false);
@@ -630,16 +620,20 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	}
 	
 	protected void setupUI(PinnableWindow window, Object... params)
-	{}
+	{
+		window.row();
+	}
 	
 	@Override
 	public final void setUI(PinnableWindow window, Object... params)
 	{
+		window.padRight(16);
+		
 		if (isBuilt())
 		{
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
-			window.add(getDefaultTable(window, params)).right().width(200).pad(0, -2, 0, 0);
+			window.add(getDefaultTable(window, params)).right().width(204);
 		}
 		else
 		{
@@ -649,7 +643,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			int i = 0;
 			for (Byte b : getCosts().getAll())
 			{
-				if (i % 4 == 0 && i > 0) res.row();
+				if (i % 2 == 0) res.row();
 				Item item = Item.getForId(b);
 				Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
 				res.add(img);
@@ -659,10 +653,12 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				Label l = new Label((max - inv.get(b)) + " / " + max, Vloxlands.skin);
 				l.setName(b + "");
 				l.setWrap(true);
-				res.add(l).width(100);
+				res.add(l).spaceLeft(4).width(100);
 				i++;
 			}
-			window.add(res).minWidth(200);
+			window.row();
+			window.add(res);
+			window.row().left();
 			final DProgressBar progress = new DProgressBar(0, getCosts().getCount(), 0, Vloxlands.skin);
 			progress.setAnimateDuration(0.2f);
 			progress.setAnimateInterpolation(Interpolation.pow3);
@@ -685,14 +681,14 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 					
 					if (isBuilt())
 					{
-						onStructureSelection(Structure.this, true);
+						for (SelectionListener sl : Game.instance.listeners)
+							sl.onStructureSelection(Structure.this, true);
 						return true;
 					}
 					return false;
 				}
 			});
-			window.row();
-			window.add(progress).width(190);
+			window.add(progress).fillX();
 		}
 	}
 	
