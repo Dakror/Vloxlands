@@ -83,6 +83,6 @@ public class Warehouse extends Structure
 		itemsWrap.getStyle().background.setRightWidth(10);
 		itemsWrap.getStyle().background.setBottomHeight(10);
 		itemsWrap.getStyle().background.setTopHeight(10);
-		window.add(itemsWrap).left().maxHeight(100).minHeight(100).width(220).padRight(10).padLeft(-8);
+		window.add(itemsWrap).left().maxHeight(100).minHeight(100).width(220).padRight(10).padRight(0);
 	}
 }

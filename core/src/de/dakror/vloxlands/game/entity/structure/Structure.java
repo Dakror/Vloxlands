@@ -610,7 +610,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		window.row().right().pad(5, -8, 5, -8).colspan(50).fillX();
+		window.row().right().colspan(50).fillX();
 		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
 		tasksWrap.setScrollbarsOnTop(false);
 		tasksWrap.setFadeScrollBars(false);
@@ -621,7 +621,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	protected void setupUI(PinnableWindow window, Object... params)
 	{
-		window.row();
+		window.row().center();
 	}
 	
 	@Override
@@ -633,7 +633,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
-			window.add(getDefaultTable(window, params)).right().width(204);
+			window.add(getDefaultTable(window, params)).width(204).expandX();
 		}
 		else
 		{
@@ -691,7 +691,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			window.add(progress).fillX();
 		}
 		
-		window.getCells().get(0).minWidth(window.getTitleWidth() + 60);
+		window.getCells().get(0).minWidth(window.getTitleWidth() + 80);
 	}
 	
 	@Override

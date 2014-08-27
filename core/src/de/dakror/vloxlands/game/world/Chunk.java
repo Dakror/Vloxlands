@@ -38,7 +38,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public static final int VERTEX_SIZE = 11;
 	public static final int UNLOAD_TICKS = 120;
 	
-	public static final int SPREAD_TICKS = 60;
+	public static final int SPREAD_TICKS = 150;
 	public static final int GRASS_SPREAD = 6;
 	public static final int SNOW_SPREAD = 8;
 	public static final int SNOW_MIN_HEIGHT = 384;
@@ -378,10 +378,19 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 		else
 		{
-			IntArray f = new IntArray();
-			for (int i = 0; i < SIZE * SIZE * SIZE; i++)
-				f.add(i);
-			f.shuffle();
+			int size = SIZE * SIZE * SIZE;
+			int[] arr = new int[size];
+			for (int i = 0; i < size; i++)
+				arr[i] = i;
+			
+			for (int i = 0; i < size; i++)
+			{
+				int ran = MathUtils.random(size - 1);
+				int temp = arr[i];
+				arr[i] = arr[ran];
+				arr[ran] = temp;
+			}
+			IntArray f = new IntArray(arr);
 			
 			int done = 0;
 			while (done < maximum && f.size > 0)
