@@ -9,16 +9,10 @@
 	
 	<target name="upload">
 	    <copy file="desktop/build/libs/desktop-1.0.jar" tofile="${project.name}.jar" />
-	    <copy tofile="${project.name}.apk">
-	        <first><fileset dir="${basedir}" includes="**/*.apk" /></first>
-	    </copy>
 	    
    		<signjar jar="${project.name}.jar" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
 			storepass="dakrorKeystore" />
    		
-   		<signjar jar="${project.name}.apk" keystore="http://dakror.de/bin/dakrorKeystore.jks" alias="dakror"
-			storepass="dakrorKeystore" />
-	    
 		<echo message="starting FTP file upload" />
 		<java classname="de.dakror.dakrorbin.Uploader">
 			<arg value="${project.name}" />
