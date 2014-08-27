@@ -690,6 +690,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			});
 			window.add(progress).fillX();
 		}
+		
+		window.getCells().get(0).minWidth(window.getTitleWidth() + 60);
 	}
 	
 	@Override
