@@ -54,8 +54,13 @@ public class TilesetDrawable extends BaseDrawable
 	}
 	
 	@Override
-	public void draw(Batch batch, float x, float y, float width, float height)
+	public void draw(Batch batch, float x1, float y1, float w1, float h1)
 	{
+		int x = (int) x1;
+		int y = (int) y1;
+		int width = (int) w1;
+		int height = (int) h1;
+		
 		if (drawables == null)
 		{
 			drawables = new Drawable[9];
@@ -70,20 +75,20 @@ public class TilesetDrawable extends BaseDrawable
 			if (rb != null) drawables[8] = new TextureRegionDrawable(rb);
 		}
 		
-		float cw = drawables[0].getMinWidth();
-		float ch = drawables[0].getMinHeight();
+		int cw = (int) drawables[0].getMinWidth();
+		int ch = (int) drawables[0].getMinHeight();
 		
-		if (width < cw * 2 && width > 0) cw = width / 2;
-		if (height < ch * 2 && height > 0) ch = height / 2;
+		if (width < cw * 2 && width > 0) cw = (int) (width / 2f);
+		if (height < ch * 2 && height > 0) ch = (int) (height / 2f);
 		
-		float mw = width - cw * 2;
-		float mh = height - ch * 2;
+		int mw = width - cw * 2;
+		int mh = height - ch * 2;
 		
-		float sh = drawables[1] != null ? drawables[1].getMinHeight() : 0;
-		float sw = drawables[3] != null ? drawables[3].getMinWidth() : 0;
+		int sh = (int) (drawables[1] != null ? drawables[1].getMinHeight() : 0);
+		int sw = (int) (drawables[3] != null ? drawables[3].getMinWidth() : 0);
 		
-		float deltaW = Math.max(cw, sw) - Math.min(cw, sw);
-		float deltaH = Math.max(ch, sh) - Math.min(ch, sh);
+		int deltaW = Math.max(cw, sw) - Math.min(cw, sw);
+		int deltaH = Math.max(ch, sh) - Math.min(ch, sh);
 		
 		drawables[0].draw(batch, x, y + height - ch, cw, ch);
 		if (drawables[1] != null) drawables[1].draw(batch, x + cw, y + height - sh + (center ? deltaH / 2 : 0), mw, sh);
