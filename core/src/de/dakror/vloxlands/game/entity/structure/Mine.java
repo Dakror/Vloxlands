@@ -38,6 +38,7 @@ public class Mine extends Structure
 		activeOre = Voxel.get("STONE").getId();
 		
 		weight = 1000f;
+		workRadius = 30f;
 		
 		inventory = new Inventory(20);
 	}

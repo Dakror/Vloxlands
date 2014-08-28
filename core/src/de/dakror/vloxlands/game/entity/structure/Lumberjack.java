@@ -33,6 +33,7 @@ public class Lumberjack extends Structure
 		costs.setCostPopulation(1);
 		
 		weight = 1000f;
+		workRadius = 30f;
 		
 		inventory = new Inventory(20);
 	}

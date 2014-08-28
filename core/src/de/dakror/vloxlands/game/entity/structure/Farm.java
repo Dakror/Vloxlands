@@ -33,6 +33,7 @@ public class Farm extends Structure
 		costs.setCostPopulation(1);
 		
 		weight = 1000f;
+		workRadius = 15f;
 		
 		inventory = new Inventory(50);
 	}

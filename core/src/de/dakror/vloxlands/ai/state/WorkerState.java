@@ -61,8 +61,6 @@ public enum WorkerState implements State<Human>
 	},
 	LUMBERJACK
 	{
-		final float range = 30;
-		
 		@Override
 		public void enter(Human human)
 		{
@@ -85,7 +83,7 @@ public enum WorkerState implements State<Human>
 			
 			if (((Vector3) human.stateParams.get(1)).x == -1)
 			{
-				path = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).voxel(Voxel.get("WOOD").getId()).range(range).closest(true).notmeta(MetaTags.LUMBERJACK_TARGET).notneighbor(MetaTags.LUMBERJACK_TARGET).neighborrange(2, 2, 2));
+				path = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).voxel(Voxel.get("WOOD").getId()).range(human.getWorkPlace().getWorkRadius()).closest(true).notmeta(MetaTags.LUMBERJACK_TARGET).notneighbor(MetaTags.LUMBERJACK_TARGET).neighborrange(2, 2, 2));
 				if (path == null) return false;
 				
 				human.getIsland().setMeta(path.getGhostTarget().x, path.getGhostTarget().y, path.getGhostTarget().z, MetaTags.LUMBERJACK_TARGET);
@@ -95,7 +93,7 @@ public enum WorkerState implements State<Human>
 			}
 			else
 			{
-				path = AStar.findPath(human.getVoxelBelow(), ((Vector3) human.stateParams.get(1)), human, range, true);
+				path = AStar.findPath(human.getVoxelBelow(), ((Vector3) human.stateParams.get(1)), human, human.getWorkPlace().getWorkRadius(), true);
 				if (path == null)
 				{
 					((Vector3) human.stateParams.get(1)).x = -1;
@@ -144,7 +142,6 @@ public enum WorkerState implements State<Human>
 	{
 		final int checkHeight = 7;
 		final int checkRadius = 1;
-		final int range = 20;
 		final int timeout = 60 * 1000;
 		
 		@Override
@@ -184,7 +181,8 @@ public enum WorkerState implements State<Human>
 		public Vector3 pickRandomSpot(Human human)
 		{
 			Vector3 vp = human.getVoxelBelow();
-			Vector3 v = new Vector3(MathUtils.random(-range, range), 1337, MathUtils.random(-range, range));
+			float f = human.getWorkPlace().getWorkRadius();
+			Vector3 v = new Vector3(MathUtils.random(-f, f), 1337, MathUtils.random(-f, f));
 			for (int y = -2; y < 2; y++)
 			{
 				if (human.getIsland().isSpaceAbove(v.x + vp.x, y + vp.y, v.z + vp.z, human.getHeight()))
@@ -219,8 +217,6 @@ public enum WorkerState implements State<Human>
 	},
 	FARMER
 	{
-		final int range = 15;
-		
 		@Override
 		public void enter(final Human human)
 		{
@@ -234,7 +230,7 @@ public enum WorkerState implements State<Human>
 		{
 			if (human.getWorkPlace().getInventory().isFull()) return false;
 			
-			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(Voxel.get("ACRE").getId()).range(range).meta(MetaTags.ACRE_PLANT_GROWN));
+			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(Voxel.get("ACRE").getId()).range(human.getWorkPlace().getWorkRadius()).meta(MetaTags.ACRE_PLANT_GROWN));
 			if (p != null)
 			{
 				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.FARMER_TARGET);
@@ -255,8 +251,6 @@ public enum WorkerState implements State<Human>
 	},
 	MINER
 	{
-		final float range = 30;
-		
 		@Override
 		public void enter(Human human)
 		{
@@ -273,7 +267,7 @@ public enum WorkerState implements State<Human>
 			if (!(human.getWorkPlace() instanceof Mine)) throw new IllegalStateException("Miner can't work in a structure other then Mine!");
 			
 			byte v = ((Mine) human.getWorkPlace()).getActiveOre();
-			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(v).range(range).notmeta(MetaTags.MINER_TARGET));
+			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(v).range(human.getWorkPlace().getWorkRadius()).notmeta(MetaTags.MINER_TARGET));
 			if (p != null)
 			{
 				human.getIsland().setMeta(p.getGhostTarget().x, p.getGhostTarget().y, p.getGhostTarget().z, MetaTags.MINER_TARGET);

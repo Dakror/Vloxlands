@@ -3,12 +3,18 @@ package de.dakror.vloxlands.game.entity.structure;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -78,6 +84,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	String workerName;
 	State<Human> workerState;
 	Class<?> workerTool;
+	float workRadius;
 	Array<State<Human>> requestedHumanStates;
 	Array<State<Human>> handledHumanStates;
 	
@@ -357,6 +364,11 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public ResourceList getResult()
 	{
 		return null;
+	}
+	
+	public float getWorkRadius()
+	{
+		return workRadius;
 	}
 	
 	public boolean isWorking()
@@ -768,5 +780,26 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public int getTaskTicksLeft()
 	{
 		return taskTicksLeft;
+	}
+	
+	@Override
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
+	{
+		super.render(batch, environment, minimapMode);
+		
+		if ((hovered || selected) && !minimapMode && Vloxlands.wireframe)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Game.shapeRenderer.identity();
+			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
+			Game.shapeRenderer.rotate(1, 0, 0, 90);
+			Game.shapeRenderer.begin(ShapeType.Line);
+			Game.shapeRenderer.setColor(Color.GREEN);
+			Game.shapeRenderer.circle(0, 0, workRadius, 100);
+			Game.shapeRenderer.line(-workRadius, 0, workRadius, 0);
+			Game.shapeRenderer.line(0, -workRadius, 0, workRadius);
+			Game.shapeRenderer.end();
+		}
 	}
 }

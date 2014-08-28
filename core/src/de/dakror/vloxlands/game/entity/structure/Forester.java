@@ -30,6 +30,7 @@ public class Forester extends Structure
 		costs.setCostPopulation(1);
 		
 		weight = 1000f;
+		workRadius = 25f;
 		
 		inventory = new Inventory(20);
 	}
