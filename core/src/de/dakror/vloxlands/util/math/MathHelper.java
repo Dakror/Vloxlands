@@ -2,6 +2,8 @@ package de.dakror.vloxlands.util.math;
 
 import java.text.DecimalFormat;
 
+import com.badlogic.gdx.math.MathUtils;
+
 /**
  * @author Dakror
  */
@@ -21,4 +23,20 @@ public class MathHelper
 		return null;
 	}
 	
+	public static int[] indexShuffle(int size)
+	{
+		int[] arr = new int[size];
+		for (int i = 0; i < size; i++)
+			arr[i] = i;
+		
+		for (int i = 0; i < size; i++)
+		{
+			int ran = MathUtils.random(size - 1);
+			int temp = arr[i];
+			arr[i] = arr[ran];
+			arr[ran] = temp;
+		}
+		
+		return arr;
+	}
 }

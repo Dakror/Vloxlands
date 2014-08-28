@@ -27,6 +27,7 @@ import de.dakror.vloxlands.util.interf.Meshable;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.interf.Tickable;
 import de.dakror.vloxlands.util.math.Bits;
+import de.dakror.vloxlands.util.math.MathHelper;
 
 /**
  * @author Dakror
@@ -378,19 +379,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 		else
 		{
-			int size = SIZE * SIZE * SIZE;
-			int[] arr = new int[size];
-			for (int i = 0; i < size; i++)
-				arr[i] = i;
-			
-			for (int i = 0; i < size; i++)
-			{
-				int ran = MathUtils.random(size - 1);
-				int temp = arr[i];
-				arr[i] = arr[ran];
-				arr[ran] = temp;
-			}
-			IntArray f = new IntArray(arr);
+			IntArray f = new IntArray(MathHelper.indexShuffle(SIZE * SIZE * SIZE));
 			
 			int done = 0;
 			while (done < maximum && f.size > 0)

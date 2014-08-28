@@ -54,7 +54,7 @@ public enum WorkerState implements State<Human>
 		{
 			if (human.isIdle())
 			{
-				if (!StateTools.isWorkingTime()) human.changeState(REST);
+				if (!StateTools.isWorkingTime() || !human.getWorkPlace().isWorking()) human.changeState(REST);
 				else human.revertToPreviousState();
 			}
 		}
@@ -308,7 +308,7 @@ public enum WorkerState implements State<Human>
 		{
 			if (System.currentTimeMillis() - (Long) human.stateParams.get(0) >= 5000f / Config.getGameSpeed())
 			{
-				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull())
+				if (StateTools.isWorkingTime() && !human.getWorkPlace().getInventory().isFull() && human.getWorkPlace().isWorking())
 				{
 					if (human.getStateMachine().getPreviousState() == human.getWorkPlace().getWorkerState()) human.revertToPreviousState();
 					else human.changeState(human.getWorkPlace().getWorkerState());
@@ -329,7 +329,7 @@ public enum WorkerState implements State<Human>
 	@Override
 	public void update(Human human)
 	{
-		if (!StateTools.isWorkingTime())
+		if (!StateTools.isWorkingTime() || !human.getWorkPlace().isWorking())
 		{
 			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST && human.getLocation() == null) human.changeState(BRING_STUFF_HOME);
 		}
