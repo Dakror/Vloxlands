@@ -63,6 +63,7 @@ public class Entity extends EntityBase implements Agent, Savable
 	
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
+	protected final Vector3 dimensions = new Vector3();
 	protected Island island;
 	
 	protected AnimationController animationController;
@@ -89,6 +90,8 @@ public class Entity extends EntityBase implements Agent, Savable
 		modelVisible = true;
 		additionalVisible = true;
 		visible = true;
+		
+		dimensions.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
 		
 		Game.instance.addListener(this);
 	}
@@ -284,6 +287,20 @@ public class Entity extends EntityBase implements Agent, Savable
 	
 	public void setActions(RevolverSlot parent)
 	{}
+	
+	public boolean intersects(Entity o)
+	{
+		float lx = Math.abs(posCache.x - o.posCache.x);
+		float sumx = (dimensions.x / 2.0f) + (o.dimensions.x / 2.0f);
+		
+		float ly = Math.abs(posCache.y - o.posCache.y);
+		float sumy = (dimensions.y / 2.0f) + (o.dimensions.y / 2.0f);
+		
+		float lz = Math.abs(posCache.z - o.posCache.z);
+		float sumz = (dimensions.z / 2.0f) + (o.dimensions.z / 2.0f);
+		
+		return (lx <= sumx && ly <= sumy && lz <= sumz);
+	}
 	
 	// -- events -- //
 	
