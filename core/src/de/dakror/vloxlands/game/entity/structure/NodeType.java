@@ -1,6 +1,5 @@
 package de.dakror.vloxlands.game.entity.structure;
 
-
 public enum NodeType
 {
 	target(false),

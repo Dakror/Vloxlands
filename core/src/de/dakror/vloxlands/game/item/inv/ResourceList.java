@@ -8,7 +8,6 @@ import com.badlogic.gdx.Gdx;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 
-
 /**
  * Functions as pre-requisites array as well as costs list or simple resource stats
  * 

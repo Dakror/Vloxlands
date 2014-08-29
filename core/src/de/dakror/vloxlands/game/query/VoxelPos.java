@@ -2,7 +2,6 @@ package de.dakror.vloxlands.game.query;
 
 import com.badlogic.gdx.math.Vector3;
 
-
 /**
  * @author Dakror
  */

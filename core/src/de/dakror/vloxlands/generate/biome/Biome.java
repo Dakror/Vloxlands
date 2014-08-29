@@ -4,7 +4,6 @@ import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.generate.Generator;
 import de.dakror.vloxlands.generate.WorldGenerator;
 
-
 /**
  * @author Dakror
  */
