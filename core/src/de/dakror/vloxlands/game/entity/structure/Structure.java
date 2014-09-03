@@ -151,7 +151,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
+			{
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
+			}
 		}
 	}
 	
@@ -655,6 +658,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			int i = 0;
 			for (Byte b : getCosts().getAll())
 			{
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				
 				if (i % 2 == 0) res.row();
 				Item item = Item.getForId(b);
 				Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
