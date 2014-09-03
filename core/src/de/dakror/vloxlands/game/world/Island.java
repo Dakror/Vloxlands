@@ -209,8 +209,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		entities.add(s);
 		s.onSpawn();
 		
-		if (s instanceof Structure) availableResources.add(Item.get("PEOPLE"), 1);
-		if (s instanceof Human) availableResources.add(Item.get("BUILDINGS"), 1);
+		if (s instanceof Structure) availableResources.add(Item.get("BUILDINGS"), 1);
+		if (s instanceof Human) availableResources.add(Item.get("PEOPLE"), 1);
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{
