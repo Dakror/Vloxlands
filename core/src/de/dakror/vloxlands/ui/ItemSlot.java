@@ -80,6 +80,7 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 	public void onStackChanged()
 	{
 		setStyle(createStyle(stack));
+		pad(12);
 		if (stack.getAmount() > 1) amount.setText(stack.getAmount() + "");
 		else amount.setText("");
 		amount.setPosition(getWidth() - amount.getTextBounds().width * 1.15f, 5);

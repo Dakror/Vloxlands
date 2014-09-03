@@ -27,6 +27,7 @@ import de.dakror.vloxlands.util.interf.Meshable;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.interf.Tickable;
 import de.dakror.vloxlands.util.math.Bits;
+import de.dakror.vloxlands.util.math.MathHelper;
 
 /**
  * @author Dakror
@@ -38,7 +39,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public static final int VERTEX_SIZE = 11;
 	public static final int UNLOAD_TICKS = 120;
 	
-	public static final int SPREAD_TICKS = 60;
+	public static final int SPREAD_TICKS = 150;
 	public static final int GRASS_SPREAD = 6;
 	public static final int SNOW_SPREAD = 8;
 	public static final int SNOW_MIN_HEIGHT = 384;
@@ -378,10 +379,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 		else
 		{
-			IntArray f = new IntArray();
-			for (int i = 0; i < SIZE * SIZE * SIZE; i++)
-				f.add(i);
-			f.shuffle();
+			IntArray f = new IntArray(MathHelper.indexShuffle(SIZE * SIZE * SIZE));
 			
 			int done = 0;
 			while (done < maximum && f.size > 0)

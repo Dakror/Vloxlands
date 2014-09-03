@@ -93,7 +93,7 @@ public class Human extends Creature
 		stateMachine = new SyncedStateMachine<Human>(this);
 		stateMachine.setInitialState(HelperState.IDLE);
 		
-		MessageDispatcher.getInstance().addListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
+		MessageDispatcher.getInstance().addListener(this, MessageType.STRUCTURE_BROADCAST.ordinal());
 	}
 	
 	public void setTool(Item tool)
@@ -389,7 +389,7 @@ public class Human extends Creature
 	public void dispose()
 	{
 		super.dispose();
-		MessageDispatcher.getInstance().removeListener(MessageType.STRUCTURE_BROADCAST.ordinal(), this);
+		MessageDispatcher.getInstance().removeListener(this, MessageType.STRUCTURE_BROADCAST.ordinal());
 	}
 	
 	@Override

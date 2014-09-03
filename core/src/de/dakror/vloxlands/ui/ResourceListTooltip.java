@@ -37,7 +37,7 @@ public class ResourceListTooltip extends Tooltip
 		
 		ResourceList rl = provider.getCosts();
 		
-		l = new Label("Costs", Vloxlands.skin);
+		l = new Label("Costs", Vloxlands.skin, "bold");
 		row();
 		add(l).width(200);
 		
@@ -48,9 +48,6 @@ public class ResourceListTooltip extends Tooltip
 			Item item = Item.getForId(b);
 			addItem(tex, provider.getCosts().get(b) + "", item.getIconX(), item.getIconY());
 		}
-		
-		if (rl.getCostPopulation() > 0) addItem(tex, rl.getCostPopulation() + "", 3, 6);
-		if (rl.getCostBuildings() > 0) addItem(tex, rl.getCostBuildings() + "", 1, 5);
 		
 		if (rl.hasRequirements())
 		{
@@ -74,7 +71,7 @@ public class ResourceListTooltip extends Tooltip
 		
 		Table t = new Table(Vloxlands.skin);
 		Image img = new Image(region);
-		t.add(img);
+		t.add(img).padLeft(-12);
 		Label l = new Label(text, Vloxlands.skin);
 		l.setWrap(true);
 		l.setAlignment(Align.right, Align.right);

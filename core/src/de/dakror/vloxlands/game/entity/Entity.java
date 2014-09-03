@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.Agent;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -34,7 +34,7 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Entity extends EntityBase implements Agent, Savable
+public class Entity extends EntityBase implements Telegraph, Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -63,6 +63,7 @@ public class Entity extends EntityBase implements Agent, Savable
 	
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
+	protected final Vector3 dimensions = new Vector3();
 	protected Island island;
 	
 	protected AnimationController animationController;
@@ -89,6 +90,8 @@ public class Entity extends EntityBase implements Agent, Savable
 		modelVisible = true;
 		additionalVisible = true;
 		visible = true;
+		
+		dimensions.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
 		
 		Game.instance.addListener(this);
 	}
@@ -227,7 +230,6 @@ public class Entity extends EntityBase implements Agent, Savable
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
 	
-	@Override
 	public void update(float delta)
 	{
 		animationController.update(delta);
@@ -285,6 +287,20 @@ public class Entity extends EntityBase implements Agent, Savable
 	public void setActions(RevolverSlot parent)
 	{}
 	
+	public boolean intersects(Entity o)
+	{
+		float lx = Math.abs(posCache.x - o.posCache.x);
+		float sumx = (dimensions.x / 2.0f) + (o.dimensions.x / 2.0f);
+		
+		float ly = Math.abs(posCache.y - o.posCache.y);
+		float sumy = (dimensions.y / 2.0f) + (o.dimensions.y / 2.0f);
+		
+		float lz = Math.abs(posCache.z - o.posCache.z);
+		float sumz = (dimensions.z / 2.0f) + (o.dimensions.z / 2.0f);
+		
+		return (lx <= sumx && ly <= sumy && lz <= sumz);
+	}
+	
 	// -- events -- //
 	
 	public void onSpawn()
@@ -301,20 +317,26 @@ public class Entity extends EntityBase implements Agent, Savable
 		
 		String cell;
 		Class<?> c = null;
+		boolean hasCell0 = false;
 		while ((cell = csv.readNext()) != null)
 		{
+			if (cell.trim().length() == 0) continue;
 			try
 			{
 				if (csv.getIndex() == 0)
 				{
+					hasCell0 = true;
 					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
 				}
 				else
 				{
+					if (!hasCell0) continue;
 					byte b = (byte) Integer.parseInt(cell.trim());
 					
 					idToClassMap.put(b, c);
 					classToIdMap.put(c, b);
+					
+					hasCell0 = false;
 				}
 			}
 			catch (Exception e)

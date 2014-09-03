@@ -21,6 +21,7 @@ import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.ui.IslandInfo;
+import de.dakror.vloxlands.ui.IslandResources;
 import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.Revolver;
@@ -72,6 +73,7 @@ public class HudLayer extends Layer implements SelectionListener
 		
 		stage.addActor(new Minimap());
 		stage.addActor(new IslandInfo());
+		stage.addActor(new IslandResources(stage));
 	}
 	
 	@Override

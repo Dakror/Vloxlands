@@ -3,12 +3,18 @@ package de.dakror.vloxlands.game.entity.structure;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -78,6 +84,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	String workerName;
 	State<Human> workerState;
 	Class<?> workerTool;
+	float workRadius;
 	Array<State<Human>> requestedHumanStates;
 	Array<State<Human>> handledHumanStates;
 	
@@ -144,7 +151,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
+			{
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
+			}
 		}
 	}
 	
@@ -181,7 +191,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	public boolean addWorker(Human human)
 	{
-		if (workers.size >= costs.getCostPopulation()) return false;
+		if (workers.size >= costs.get(Item.get("PEOPLE"))) return false;
 		if (human.getWorkPlace() != null) return false;
 		
 		human.setWorkPlace(this);
@@ -254,8 +264,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
 			
-			if (workers.size < costs.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
+			if (workers.size < costs.get(Item.get("PEOPLE")) && built) broadcast(HelperState.START_WORK);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.get(Item.get("PEOPLE")) > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
 			{
 				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 				handledHumanStates.add(HelperState.EMPTY_INVENTORY);
@@ -357,6 +367,11 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public ResourceList getResult()
 	{
 		return null;
+	}
+	
+	public float getWorkRadius()
+	{
+		return workRadius;
 	}
 	
 	public boolean isWorking()
@@ -610,7 +625,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			}
 		});
 		
-		window.row().right().pad(5, -8, 5, -8).colspan(50).fillX();
+		window.row().right().colspan(50).fillX();
 		final ScrollPane tasksWrap = new ScrollPane(tasks, Vloxlands.skin);
 		tasksWrap.setScrollbarsOnTop(false);
 		tasksWrap.setFadeScrollBars(false);
@@ -621,7 +636,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	protected void setupUI(PinnableWindow window, Object... params)
 	{
-		window.row();
+		window.row().center();
 	}
 	
 	@Override
@@ -633,7 +648,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		{
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
-			window.add(getDefaultTable(window, params)).right().width(204);
+			window.add(getDefaultTable(window, params)).width(204).expandX();
 		}
 		else
 		{
@@ -643,6 +658,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			int i = 0;
 			for (Byte b : getCosts().getAll())
 			{
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				
 				if (i % 2 == 0) res.row();
 				Item item = Item.getForId(b);
 				Image img = new Image(new TextureRegion(tex, item.getIconX() * Item.SIZE, item.getIconY() * Item.SIZE, Item.SIZE, Item.SIZE));
@@ -691,7 +708,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			window.add(progress).fillX();
 		}
 		
-		window.getCells().get(0).minWidth(window.getTitleWidth() + 60);
+		window.getCells().get(0).minWidth(window.getTitleWidth() + 80);
 	}
 	
 	@Override
@@ -768,5 +785,26 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public int getTaskTicksLeft()
 	{
 		return taskTicksLeft;
+	}
+	
+	@Override
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
+	{
+		super.render(batch, environment, minimapMode);
+		
+		if ((hovered || selected) && !minimapMode && Vloxlands.wireframe)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Game.shapeRenderer.identity();
+			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
+			Game.shapeRenderer.rotate(1, 0, 0, 90);
+			Game.shapeRenderer.begin(ShapeType.Line);
+			Game.shapeRenderer.setColor(Color.GREEN);
+			Game.shapeRenderer.circle(0, 0, workRadius, 100);
+			Game.shapeRenderer.line(-workRadius, 0, workRadius, 0);
+			Game.shapeRenderer.line(0, -workRadius, 0, workRadius);
+			Game.shapeRenderer.end();
+		}
 	}
 }

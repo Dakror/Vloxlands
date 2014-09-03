@@ -33,11 +33,12 @@ public class Mine extends Structure
 		workerTool = MineTool.class;
 		
 		costs.add(Item.get("WOODEN_LOG"), 10);
-		costs.setCostPopulation(1);
+		costs.add(Item.get("PEOPLE"), 1);
 		
 		activeOre = Voxel.get("STONE").getId();
 		
 		weight = 1000f;
+		workRadius = 30f;
 		
 		inventory = new Inventory(20);
 	}

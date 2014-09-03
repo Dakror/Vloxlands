@@ -162,14 +162,14 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onStructureSelection(null, true);
 					
-					availableResources.decreaseCostBuildings();
+					availableResources.remove(Item.get("BUILDINGS"), 1);
 				}
 				else if (e instanceof Creature)
 				{
 					for (SelectionListener sl : Game.instance.listeners)
 						sl.onCreatureSelection(null, true);
 					
-					if (e instanceof Human) availableResources.decreaseCostPopulation();
+					if (e instanceof Human) availableResources.remove(Item.get("PEOPLE"), 1);
 				}
 				e.dispose();
 				entities.remove(e);
@@ -209,8 +209,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		entities.add(s);
 		s.onSpawn();
 		
-		if (s instanceof Structure) availableResources.increaseCostBuildings();
-		if (s instanceof Human) availableResources.increaseCostPopulation();
+		if (s instanceof Structure) availableResources.add(Item.get("BUILDINGS"), 1);
+		if (s instanceof Human) availableResources.add(Item.get("PEOPLE"), 1);
 		
 		if (!user && clearArea && (s instanceof Structure))
 		{
