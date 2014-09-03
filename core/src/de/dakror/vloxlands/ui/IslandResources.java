@@ -23,12 +23,12 @@ public class IslandResources extends VerticalGroup
 	{
 		pad(12);
 		align(Align.left);
-		setBounds(0, 0, 200, 0);
+		setBounds(0, 0, 80, 0);
 		setOrigin(getX(), getY());
 		
 		for (int id : displayedResources)
 		{
-			NonStackingInventoryListItem nsili = new NonStackingInventoryListItem(stage, Item.getForId(id), 0, false);
+			NonStackingInventoryListItem nsili = new NonStackingInventoryListItem(stage, Item.getForId(id), 0, false, true, false);
 			addActor(nsili);
 		}
 		
@@ -37,11 +37,16 @@ public class IslandResources extends VerticalGroup
 			@Override
 			public boolean act(float d)
 			{
+				boolean change = false;
 				for (int i = 0; i < displayedResources.length; i++)
 				{
 					NonStackingInventoryListItem nsili = (NonStackingInventoryListItem) getChildren().get(i);
-					nsili.setAmount(Game.instance.activeIsland.availableResources.get((byte) displayedResources[i]));
+					nsili.setWidth(80);
+					float am = nsili.amount;
+					nsili.setAmount(Game.instance.activeIsland.availableResources.get((byte) (displayedResources[i] + 128)));
+					if (nsili.amount != am) change = true;
 				}
+				if (change) pack();
 				return false;
 			}
 		});

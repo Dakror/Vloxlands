@@ -317,21 +317,26 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		
 		String cell;
 		Class<?> c = null;
+		boolean hasCell0 = false;
 		while ((cell = csv.readNext()) != null)
 		{
+			if (cell.trim().length() == 0) continue;
 			try
 			{
 				if (csv.getIndex() == 0)
 				{
-					if (cell.trim().length() == 0) continue;
+					hasCell0 = true;
 					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
 				}
 				else
 				{
+					if (!hasCell0) continue;
 					byte b = (byte) Integer.parseInt(cell.trim());
 					
 					idToClassMap.put(b, c);
 					classToIdMap.put(c, b);
+					
+					hasCell0 = false;
 				}
 			}
 			catch (Exception e)
