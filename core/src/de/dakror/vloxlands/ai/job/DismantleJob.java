@@ -25,6 +25,6 @@ public class DismantleJob extends Job
 	public void onEnd()
 	{
 		super.onEnd();
-		MessageDispatcher.getInstance().dispatchMessage(0, human, target, MessageType.YOU_ARE_DISMANTLED.ordinal());
+		MessageDispatcher.getInstance().dispatchMessage(human, target, MessageType.YOU_ARE_DISMANTLED.ordinal());
 	}
 }

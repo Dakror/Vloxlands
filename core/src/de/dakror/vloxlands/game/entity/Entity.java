@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.Agent;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -34,7 +34,7 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Entity extends EntityBase implements Agent, Savable
+public class Entity extends EntityBase implements Telegraph, Savable
 {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
@@ -230,7 +230,6 @@ public class Entity extends EntityBase implements Agent, Savable
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{}
 	
-	@Override
 	public void update(float delta)
 	{
 		animationController.update(delta);
