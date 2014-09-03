@@ -11,14 +11,19 @@ public class MathHelper
 {
 	public static String formatBinarySize(long size, int digits)
 	{
-		final String[] levels = { "", "K", "M", "G", "T" };
+		return formatNumber(size, digits, 1024).toUpperCase() + "B";
+	}
+	
+	public static String formatNumber(long size, int digits, int base)
+	{
+		final String[] levels = { "", "k", "m", "g", "t" };
 		for (int i = levels.length - 1; i > -1; i--)
-			if (size > (long) Math.pow(1024, i))
+			if (size > (long) Math.pow(base, i))
 			{
 				DecimalFormat df = new DecimalFormat();
 				df.setMaximumFractionDigits(digits);
 				df.setMinimumFractionDigits(digits);
-				return df.format(size / Math.pow(1024, i)) + levels[i] + "B";
+				return df.format(size / Math.pow(base, i)) + levels[i];
 			}
 		return null;
 	}

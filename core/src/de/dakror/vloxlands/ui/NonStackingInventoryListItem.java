@@ -21,10 +21,17 @@ public class NonStackingInventoryListItem extends HorizontalGroup
 	Image image;
 	Item item;
 	int amount;
+	boolean hideOnZero = true;
 	
 	public NonStackingInventoryListItem(Stage stage, Item item, int amount)
 	{
+		this(stage, item, amount, true);
+	}
+	
+	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean hideOnZero)
+	{
 		setName((item.getId() + 128) + "");
+		this.hideOnZero = hideOnZero;
 		this.item = item;
 		this.amount = amount;
 		
@@ -74,6 +81,6 @@ public class NonStackingInventoryListItem extends HorizontalGroup
 		image.setDrawable(new TextureRegionDrawable(region));
 		image.setSize(24, 24);
 		
-		setVisible(amount > 0);
+		if (hideOnZero) setVisible(amount > 0);
 	}
 }

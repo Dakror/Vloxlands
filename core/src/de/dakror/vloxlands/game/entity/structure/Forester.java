@@ -27,7 +27,7 @@ public class Forester extends Structure
 		workerState = WorkerState.FORESTER;
 		
 		costs.add(Item.get("WOODEN_LOG"), 25);
-		costs.setCostPopulation(1);
+		costs.add(Item.get("PEOPLE"), 1);
 		
 		weight = 1000f;
 		workRadius = 25f;

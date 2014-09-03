@@ -18,7 +18,7 @@ public class IslandInfo extends Group
 {
 	public IslandInfo()
 	{
-		setBounds((Gdx.graphics.getWidth() - 500) / 2f, Gdx.graphics.getHeight() - 80, 500, 80);
+		setBounds(0, 0, 500, 80);
 		setOrigin(getX(), getY());
 		
 		final Label biome = new Label("", Vloxlands.skin);
@@ -56,5 +56,4 @@ public class IslandInfo extends Group
 		bg.draw(batch, getX(), getY(), getWidth(), getHeight());
 		super.draw(batch, parentAlpha);
 	}
-	
 }

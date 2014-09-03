@@ -49,9 +49,6 @@ public class ResourceListTooltip extends Tooltip
 			addItem(tex, provider.getCosts().get(b) + "", item.getIconX(), item.getIconY());
 		}
 		
-		if (rl.getCostPopulation() > 0) addItem(tex, rl.getCostPopulation() + "", 3, 6);
-		if (rl.getCostBuildings() > 0) addItem(tex, rl.getCostBuildings() + "", 1, 5);
-		
 		if (rl.hasRequirements())
 		{
 			l = new Label("Requirements", Vloxlands.skin);

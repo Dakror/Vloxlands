@@ -19,10 +19,8 @@ public class ResourceList
 	
 	int minBuildings;
 	int maxBuildings;
-	int costBuildings;
 	int minPopulation;
 	int maxPopulation;
-	int costPopulation;
 	
 	int count;
 	
@@ -72,11 +70,13 @@ public class ResourceList
 	
 	public int get(Item item)
 	{
+		if (!items.containsKey(item.getId())) return 0;
 		return get(item.getId());
 	}
 	
 	public int get(byte itemId)
 	{
+		if (!items.containsKey(itemId)) return 0;
 		return items.get(itemId);
 	}
 	
@@ -107,17 +107,6 @@ public class ResourceList
 		return this;
 	}
 	
-	public int getCostBuildings()
-	{
-		return costBuildings;
-	}
-	
-	public ResourceList setCostBuildings(int costBuildings)
-	{
-		this.costBuildings = costBuildings;
-		return this;
-	}
-	
 	public int getMinPopulation()
 	{
 		return minPopulation;
@@ -140,50 +129,13 @@ public class ResourceList
 		return this;
 	}
 	
-	public int getCostPopulation()
-	{
-		return costPopulation;
-	}
-	
-	public ResourceList setCostPopulation(int costPopulation)
-	{
-		this.costPopulation = costPopulation;
-		return this;
-	}
-	
 	public boolean hasRequirements()
 	{
 		return maxBuildings > 0 || minBuildings > 0 || maxPopulation > 0 || minPopulation > 0;
 	}
 	
-	public ResourceList increaseCostPopulation()
-	{
-		costPopulation++;
-		return this;
-	}
-	
-	public ResourceList increaseCostBuildings()
-	{
-		costBuildings++;
-		return this;
-	}
-	
-	public ResourceList decreaseCostPopulation()
-	{
-		costPopulation--;
-		return this;
-	}
-	
-	public ResourceList decreaseCostBuildings()
-	{
-		costBuildings--;
-		return this;
-	}
-	
 	public ResourceList set(ResourceList o)
 	{
-		costBuildings = o.costBuildings;
-		costPopulation = o.costPopulation;
 		maxBuildings = o.maxBuildings;
 		maxPopulation = o.maxPopulation;
 		minBuildings = o.minBuildings;
@@ -198,8 +150,6 @@ public class ResourceList
 	
 	public boolean canSubtract(ResourceList o)
 	{
-		if (o.costBuildings > costBuildings) return false;
-		if (o.costPopulation > costPopulation) return false;
 		if (o.maxBuildings > maxBuildings) return false;
 		if (o.maxPopulation > maxPopulation) return false;
 		if (o.minBuildings > minBuildings) return false;
@@ -223,8 +173,6 @@ public class ResourceList
 	public void print()
 	{
 		Gdx.app.log("ResourceList.print", "count         : " + count);
-		Gdx.app.log("ResourceList.print", "costBuildings : " + costBuildings);
-		Gdx.app.log("ResourceList.print", "costPopulation: " + costPopulation);
 		Gdx.app.log("ResourceList.print", "maxBuildings  : " + maxBuildings);
 		Gdx.app.log("ResourceList.print", "maxPopulation : " + maxPopulation);
 		Gdx.app.log("ResourceList.print", "minBuildings  : " + minBuildings);

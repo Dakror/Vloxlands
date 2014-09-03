@@ -188,7 +188,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	public boolean addWorker(Human human)
 	{
-		if (workers.size >= costs.getCostPopulation()) return false;
+		if (workers.size >= costs.get(Item.get("PEOPLE"))) return false;
 		if (human.getWorkPlace() != null) return false;
 		
 		human.setWorkPlace(this);
@@ -261,8 +261,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
 			
-			if (workers.size < costs.getCostPopulation() && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.getCostPopulation() > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
+			if (workers.size < costs.get(Item.get("PEOPLE")) && built) broadcast(HelperState.START_WORK);
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.get(Item.get("PEOPLE")) > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
 			{
 				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 				handledHumanStates.add(HelperState.EMPTY_INVENTORY);

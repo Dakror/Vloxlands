@@ -30,7 +30,7 @@ public class Lumberjack extends Structure
 		workerTool = ChopTool.class;
 		
 		costs.add(Item.get("WOODEN_LOG"), 10);
-		costs.setCostPopulation(1);
+		costs.add(Item.get("PEOPLE"), 1);
 		
 		weight = 1000f;
 		workRadius = 30f;

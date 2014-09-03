@@ -324,6 +324,7 @@ public class Entity extends EntityBase implements Agent, Savable
 			{
 				if (csv.getIndex() == 0)
 				{
+					if (cell.trim().length() == 0) continue;
 					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
 				}
 				else
