@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.task.Task;
@@ -54,8 +53,7 @@ public class RevolverSlot extends TooltipImageButton
 		{
 			try
 			{
-				
-				Task t = (Task) ClassReflection.getField(Tasks.class, name.replace("task:", "")).get(null);
+				Task t = (Task) Tasks.class.getField(name.replace("task:", "")).get(null);
 				tooltip = new ResourceListTooltip("", "", t, this);
 			}
 			catch (Exception e)

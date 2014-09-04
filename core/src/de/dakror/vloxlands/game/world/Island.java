@@ -2,7 +2,7 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -60,7 +60,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	
 	public boolean initFBO;
 	
-	List<Entity> entities = Vloxlands.specifics.createConcurrentList();
+	CopyOnWriteArrayList<Entity> entities = new CopyOnWriteArrayList<Entity>();
 	
 	BiomeType biome;
 	
@@ -372,7 +372,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		return entities.size();
 	}
 	
-	public List<Entity> getEntities()
+	public CopyOnWriteArrayList<Entity> getEntities()
 	{
 		return entities;
 	}

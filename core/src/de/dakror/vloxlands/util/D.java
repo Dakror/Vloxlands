@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.TimeUtils;
 
 /**
  * @author Dakror
@@ -15,10 +14,10 @@ public class D
 	
 	public static void u()
 	{
-		if (last == 0) last = TimeUtils.nanoTime();
+		if (last == 0) last = System.nanoTime();
 		else
 		{
-			double dif = TimeUtils.nanoTime() - last;
+			double dif = System.nanoTime() - last;
 			p(dif + "ns = " + r(dif /= 1000.0) + "µs = " + r(dif /= 1000.0) + "ms = " + r(dif /= 1000.0) + "s = " + r(dif /= 60.0) + "m = " + r(dif /= 60.0) + "h");
 			last = 0;
 		}

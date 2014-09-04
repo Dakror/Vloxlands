@@ -1,6 +1,6 @@
 package de.dakror.vloxlands.util.base;
 
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.InputMultiplexer;
@@ -15,14 +15,8 @@ import de.dakror.vloxlands.layer.Layer;
  */
 public abstract class GameBase extends ApplicationAdapter implements InputProcessor, GestureListener
 {
-	public List<Layer> layers;
+	public CopyOnWriteArrayList<Layer> layers = new CopyOnWriteArrayList<Layer>();
 	private InputMultiplexer multiplexer = new InputMultiplexer();
-	
-	@SuppressWarnings("unchecked")
-	protected GameBase(List<?> list)
-	{
-		layers = (List<Layer>) list;
-	}
 	
 	public void addLayer(Layer layer)
 	{

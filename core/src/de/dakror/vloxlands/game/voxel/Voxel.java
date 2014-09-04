@@ -8,8 +8,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.util.CSVReader;
@@ -190,7 +188,6 @@ public class Voxel
 		return voxels.values().toArray();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static void loadVoxels()
 	{
 		CSVReader csv = new CSVReader(Gdx.files.internal("data/voxels.csv"));
@@ -204,7 +201,7 @@ public class Voxel
 			{
 				try
 				{
-					if (cell.length() > 0) voxel = (Voxel) ClassReflection.newInstance(ClassReflection.forName("de.dakror.vloxlands.game.voxel." + cell));
+					if (cell.length() > 0) voxel = (Voxel) Class.forName("de.dakror.vloxlands.game.voxel." + cell).newInstance();
 					else voxel = new Voxel();
 				}
 				catch (Exception e)
@@ -284,13 +281,12 @@ public class Voxel
 					{
 						try
 						{
-							voxel.tool = ClassReflection.forName("de.dakror.vloxlands.game.item.tool." + cell);
+							voxel.tool = Class.forName("de.dakror.vloxlands.game.item.tool." + cell);
 						}
-						catch (ReflectionException e)
+						catch (ClassNotFoundException e)
 						{
 							e.printStackTrace();
 						}
-						
 					}
 					else voxel.tool = null;
 					break;

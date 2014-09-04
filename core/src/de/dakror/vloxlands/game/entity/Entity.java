@@ -19,7 +19,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
@@ -327,7 +326,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 				if (csv.getIndex() == 0)
 				{
 					hasCell0 = true;
-					c = ClassReflection.forName("de.dakror.vloxlands.game.entity." + cell);
+					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
 				}
 				else
 				{
@@ -359,7 +358,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		}
 		try
 		{
-			return (Entity) ClassReflection.getConstructor(c, float.class, float.class, float.class).newInstance(x, y, z);
+			return (Entity) c.getConstructor(float.class, float.class, float.class).newInstance(x, y, z);
 		}
 		catch (Exception e)
 		{

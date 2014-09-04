@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
@@ -176,8 +175,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			{
 				if (!(s instanceof Structure)) continue;
 				if (s == query.sourceStructure) continue;
-				
-				if (!ClassReflection.isAssignableFrom(query.searchedClass, s.getClass())) continue;
+				if (!query.searchedClass.isAssignableFrom(s.getClass())) continue;
 				if (query.mustWork && !((Structure) s).isWorking()) continue;
 				if (query.mustBeEmpty && ((Structure) s).getInventory().getCount() > 0) continue;
 				if (query.mustBeFull && !((Structure) s).getInventory().isFull()) continue;

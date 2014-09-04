@@ -21,7 +21,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
-import de.dakror.vloxlands.util.CompressorGDX;
+import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.interf.Meshable;
 import de.dakror.vloxlands.util.interf.Savable;
@@ -518,11 +518,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		baos.write((int) index.y);
 		baos.write((int) index.z);
 		
-		byte[] b = CompressorGDX.compressRow(voxels);
+		byte[] b = Compressor.compressRow(voxels);
 		Bits.putInt(baos, b.length);
 		baos.write(b);
 		
-		b = CompressorGDX.compressRow(meta);
+		b = Compressor.compressRow(meta);
 		Bits.putInt(baos, b.length);
 		baos.write(b);
 	}
