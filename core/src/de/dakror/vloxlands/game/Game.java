@@ -76,7 +76,6 @@ public class Game extends Layer
 	
 	public static World world;
 	public static Camera camera;
-	public static ShapeRenderer shapeRenderer;
 	public static float time = 0.99999999999f;
 	
 	public Environment env;
@@ -204,7 +203,7 @@ public class Game extends Layer
 		
 		shadowBatch = new ModelBatch(new DepthShaderProvider());
 		
-		shapeRenderer = new ShapeRenderer();
+		Vloxlands.shapeRenderer = new ShapeRenderer();
 		
 		new MeshingThread();
 		
@@ -341,29 +340,29 @@ public class Game extends Layer
 			float minZ = Math.min(selectionStartVoxel.z, selectedVoxel.z);
 			float maxZ = Math.max(selectionStartVoxel.z, selectedVoxel.z);
 			
-			shapeRenderer.begin(ShapeType.Filled);
-			shapeRenderer.setProjectionMatrix(camera.combined);
-			shapeRenderer.identity();
-			shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
-			shapeRenderer.setColor(0, 1, 0, 0.3f);
-			shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
-			shapeRenderer.end();
+			Vloxlands.shapeRenderer.begin(ShapeType.Filled);
+			Vloxlands.shapeRenderer.setProjectionMatrix(camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(activeIsland.pos.x + minX, activeIsland.pos.y + minY, activeIsland.pos.z + maxZ + 1.01f);
+			Vloxlands.shapeRenderer.setColor(0, 1, 0, 0.3f);
+			Vloxlands.shapeRenderer.box(-0.005f, -0.005f, -0.005f, (maxX - minX) + 1.01f, (maxY - minY) + 1.01f, (maxZ - minZ) + 1.01f);
+			Vloxlands.shapeRenderer.end();
 		}
 		
 		if (Vloxlands.showPathDebug)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glEnable(GL20.GL_BLEND);
-			shapeRenderer.begin(ShapeType.Filled);
-			shapeRenderer.setProjectionMatrix(camera.combined);
+			Vloxlands.shapeRenderer.begin(ShapeType.Filled);
+			Vloxlands.shapeRenderer.setProjectionMatrix(camera.combined);
 			for (BFSNode node : BFS.visited)
 			{
-				shapeRenderer.identity();
-				shapeRenderer.translate(activeIsland.pos.x + node.x, activeIsland.pos.y + node.y, activeIsland.pos.z + node.z + 1.01f);
-				shapeRenderer.setColor(1, 1, 1, 0.3f);
-				shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
+				Vloxlands.shapeRenderer.identity();
+				Vloxlands.shapeRenderer.translate(activeIsland.pos.x + node.x, activeIsland.pos.y + node.y, activeIsland.pos.z + node.z + 1.01f);
+				Vloxlands.shapeRenderer.setColor(1, 1, 1, 0.3f);
+				Vloxlands.shapeRenderer.box(-0.005f, -0.005f, -0.005f, 1.01f, 1.01f, 1.01f);
 			}
-			shapeRenderer.end();
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	

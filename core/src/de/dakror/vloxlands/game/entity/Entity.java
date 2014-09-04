@@ -203,27 +203,27 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
-			Game.shapeRenderer.rotate(1, 0, 0, 90);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(World.SELECTION);
-			Game.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
+			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(World.SELECTION);
+			Vloxlands.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
+			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
 		
 		if (Vloxlands.wireframe && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(Color.RED);
-			Game.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.RED);
+			Vloxlands.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	

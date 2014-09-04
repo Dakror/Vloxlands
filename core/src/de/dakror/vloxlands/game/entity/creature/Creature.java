@@ -51,29 +51,29 @@ public abstract class Creature extends Entity
 			{
 				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 				Gdx.gl.glLineWidth(2);
-				Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-				Game.shapeRenderer.identity();
-				Game.shapeRenderer.translate(island.pos.x, island.pos.y, island.pos.z);
-				Game.shapeRenderer.rotate(1, 0, 0, 90);
-				Game.shapeRenderer.begin(ShapeType.Line);
-				Game.shapeRenderer.setColor(Color.WHITE);
+				Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+				Vloxlands.shapeRenderer.identity();
+				Vloxlands.shapeRenderer.translate(island.pos.x, island.pos.y, island.pos.z);
+				Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
+				Vloxlands.shapeRenderer.begin(ShapeType.Line);
+				Vloxlands.shapeRenderer.setColor(Color.WHITE);
 				
-				Game.shapeRenderer.translate(0, 0, -path.getLast().y - 1.0f - World.gap);
-				Game.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
-				Game.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
+				Vloxlands.shapeRenderer.translate(0, 0, -path.getLast().y - 1.0f - World.gap);
+				Vloxlands.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
+				Vloxlands.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
 				
 				for (int i = path.getIndex(); i < path.size() - 1; i++)
 				{
 					Vector3 start = path.get(i);
 					Vector3 end = path.get(i + 1);
-					Game.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
+					Vloxlands.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
 				}
-				Game.shapeRenderer.end();
+				Vloxlands.shapeRenderer.end();
 			}
 		}
 		catch (NullPointerException e)
 		{
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	

@@ -404,13 +404,13 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		if (Game.instance.activeIsland == this && Game.instance.selectedVoxel.x > -1)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(pos.x + Game.instance.selectedVoxel.x, pos.y + Game.instance.selectedVoxel.y, pos.z + Game.instance.selectedVoxel.z + 1);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(Color.WHITE);
-			Game.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(pos.x + Game.instance.selectedVoxel.x, pos.y + Game.instance.selectedVoxel.y, pos.z + Game.instance.selectedVoxel.z + 1);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.WHITE);
+			Vloxlands.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
+			Vloxlands.shapeRenderer.end();
 		}
 		
 		if (((tick % 60 == 0 && Game.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
