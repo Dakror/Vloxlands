@@ -2,7 +2,6 @@ package de.dakror.vloxlands;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.badlogic.gdx.Application;
@@ -31,14 +30,16 @@ import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.skin.DoubleDrawable;
 import de.dakror.vloxlands.ui.skin.TilesetDrawable;
-import de.dakror.vloxlands.util.Compressor;
+import de.dakror.vloxlands.util.CompressorGDX;
 import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.base.GameBase;
+import de.dakror.vloxlands.util.interf.PlatformSpecifics;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
 
 public class Vloxlands extends GameBase
 {
+	public static PlatformSpecifics specifics;
 	public static Vloxlands instance;
 	public static AssetManager assets;
 	public static Skin skin;
@@ -46,11 +47,16 @@ public class Vloxlands extends GameBase
 	public static boolean showPathDebug;
 	public static boolean wireframe;
 	
+	public Vloxlands(PlatformSpecifics specifics)
+	{
+		super(specifics.createConcurrentList());
+		Vloxlands.specifics = specifics;
+		instance = this;
+	}
+	
 	@Override
 	public void create()
 	{
-		instance = this;
-		
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		
 		Config.init();
@@ -217,14 +223,14 @@ public class Vloxlands extends GameBase
 			if (Config.savegameName == null)
 			{
 				wasNull = true;
-				Config.savegameName = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
+				Config.savegameName = specifics.formatDate("dd.MM.yy HH-mm-ss", new Date());
 			}
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			Bits.putLong(baos, Game.seed);
 			Game.world.save(baos);
 			FileHandle file = Gdx.files.external(".dakror/Vloxlands/maps/" + Config.savegameName + ".map");
-			file.writeBytes(Compressor.compress(baos.toByteArray()), false);
+			file.writeBytes(CompressorGDX.compress(baos.toByteArray()), false);
 			Gdx.app.log("Vloxlands.saveGame", "Game saved" + (wasNull ? " as " + file.name() + " (" + MathHelper.formatBinarySize(file.length(), 0) + ")." : "."));
 		}
 		catch (IOException e)

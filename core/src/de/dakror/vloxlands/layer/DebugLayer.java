@@ -41,7 +41,11 @@ public class DebugLayer extends Layer
 			
 			int minutes = (int) (-Game.time * 12 * 60 + 12 * 60 + 6 * 60);
 			
-			font.draw(spriteBatch, "Time: " + String.format("%1$02d:%2$02d", (minutes / 60) % 24, minutes % 60), 0, Gdx.graphics.getHeight() - 140);
+			String hours = ((minutes / 60) % 24) + "";
+			hours = hours.length() == 1 ? "0" + hours : hours;
+			String min = (minutes % 60) + "";
+			min = min.length() == 1 ? "0" + min : min;
+			font.draw(spriteBatch, "Time: " + hours + ":" + min, 0, Gdx.graphics.getHeight() - 140);
 			font.draw(spriteBatch, "Speed: " + Config.getGameSpeed(), 0, Gdx.graphics.getHeight() - 160);
 		}
 		font.draw(spriteBatch, "Seed: " + Game.seed, 0, Gdx.graphics.getHeight() - 180);

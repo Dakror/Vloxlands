@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.item.Item;
-import de.dakror.vloxlands.util.math.MathHelper;
 
 /**
  * @author Dakror
@@ -98,7 +97,7 @@ public class NonStackingInventoryListItem extends Table
 	
 	private void onChange()
 	{
-		String amount = format ? MathHelper.formatNumber(this.amount, 0, 1000) : this.amount + "";
+		String amount = format ? Vloxlands.specifics.formatNumber(this.amount, 0, 1000) : this.amount + "";
 		
 		tooltip.set(amount + " " + item.getName(), item.getDescription());
 		label.setText(amount + (showName ? " " + item.getName() : ""));

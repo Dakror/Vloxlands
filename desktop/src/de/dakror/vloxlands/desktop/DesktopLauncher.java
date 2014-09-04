@@ -24,6 +24,6 @@ public class DesktopLauncher
 		config.setFromDisplayMode(LwjglApplicationConfiguration.getDesktopDisplayMode());
 		config.fullscreen = false;
 		
-		new LwjglApplication(new Vloxlands(), config);
+		new LwjglApplication(new Vloxlands(new DesktopSpecifics()), config);
 	}
 }
