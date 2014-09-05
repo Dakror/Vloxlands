@@ -69,6 +69,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public boolean onceLoaded = false;
 	public boolean drawn = false;
 	public boolean loaded = false;
+	boolean spreadDone = false;
 	
 	Vector2 tex;
 	Island island;
@@ -187,6 +188,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		resources[id + 128]++;
 		
 		updateRequired = true;
+		spreadDone = false;
 		
 		return true;
 	}
@@ -358,7 +360,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void spread(int maximum, boolean snow)
 	{
-		if (isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
+		if (spreadDone || isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
 		
 		if (maximum == 0)
 		{
@@ -376,6 +378,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					}
 				}
 			}
+			
+			spreadDone = true;
 		}
 		else
 		{
@@ -396,6 +400,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					done++;
 				}
 			}
+			
+			spreadDone = done == 0;
 		}
 	}
 	
@@ -415,13 +421,13 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					if (voxel == 0) continue;
 					Voxel v = Voxel.getForId(voxel);
 					
-					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
+					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque()) && !v.getName().toLowerCase().contains("ore")) continue;
 					
 					for (Direction d : Direction.values())
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
 						Voxel ww = Voxel.getForId(w);
-						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
+						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel || v.getName().toLowerCase().contains("ore"))
 						{
 							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
 							if (v.isOpaque()) faces.put(face.hashCode(), face);

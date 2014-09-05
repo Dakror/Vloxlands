@@ -42,7 +42,7 @@ public class Updater extends Thread
 			
 			try
 			{
-				Thread.sleep(16 / Config.getGameSpeed(), 700 / Config.getGameSpeed());
+				Thread.sleep(Math.round(16.666f / Config.getGameSpeed()));
 			}
 			catch (InterruptedException e)
 			{
