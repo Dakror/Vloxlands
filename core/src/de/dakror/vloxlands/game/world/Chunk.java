@@ -2,6 +2,7 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -53,6 +54,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	byte[] voxels;
 	byte[] meta;
 	
+	boolean[] walls;
+	
 	FloatArray opaqueMeshData;
 	FloatArray transpMeshData;
 	
@@ -91,6 +94,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		
 		voxels = new byte[SIZE * SIZE * SIZE];
 		meta = new byte[SIZE * SIZE * SIZE];
+		
+		walls = new boolean[6];
 		
 		resources = new int[Voxel.VOXELS];
 		resources[Voxel.get("AIR").getId() + 128] = SIZE * SIZE * SIZE;
@@ -378,8 +383,6 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					}
 				}
 			}
-			
-			spreadDone = true;
 		}
 		else
 		{
@@ -473,7 +476,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void render()
 	{
-		if (requestsUnload)
+		if (requestsUnload && loaded)
 		{
 			unload();
 			ticksInvisible = 0;
@@ -492,6 +495,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			transpMeshData = new FloatArray();
 			try
 			{
+				updateWalls();
 				getVertices();
 				int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
 				int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
@@ -506,6 +510,38 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				meshing = true;
 			}
 		}
+	}
+	
+	public void updateWalls()
+	{
+		if (isEmpty())
+		{
+			Arrays.fill(walls, false);
+			return;
+		}
+		
+		for (Direction d : Direction.values())
+			walls[d.ordinal()] = isWall(d);
+	}
+	
+	public boolean isWall(Direction d)
+	{
+		for (int j = 0; j < (d.dir.x == 0 ? SIZE : 1); j++)
+		{
+			for (int k = 0; k < (d.dir.y == 0 ? SIZE : 1); k++)
+			{
+				for (int l = 0; l < (d.dir.z == 0 ? SIZE : 1); l++)
+				{
+					int x = d.dir.x > 0 ? SIZE - 1 : j;
+					int y = d.dir.y > 0 ? SIZE - 1 : k;
+					int z = d.dir.z > 0 ? SIZE - 1 : l;
+					
+					if (get(x, y, z) == (byte) 0) return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	@Override

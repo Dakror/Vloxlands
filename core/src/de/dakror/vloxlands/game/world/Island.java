@@ -399,6 +399,9 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
+		for (Chunk c : chunks)
+			if (c != null) c.render();
+		
 		renderEntities(batch, environment, false);
 		
 		if (Game.instance.activeIsland == this && Game.instance.selectedVoxel.x > -1)
@@ -491,8 +494,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					opaque.mesh = chunk.getOpaqueMesh();
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
-					opaque.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.opaqueVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(opaque);
+					opaque.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.opaqueVerts > 0) renderables.add(opaque);
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -500,29 +503,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					transp.mesh = chunk.getTransparentMesh();
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;
-					transp.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.transpVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(transp);
-					
-					if (Vloxlands.wireframe && !minimapMode)
-					{
-						Renderable opaque1 = pool.obtain();
-						opaque1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-						opaque1.material = World.highlight;
-						opaque1.mesh = chunk.getOpaqueMesh();
-						opaque1.meshPartOffset = 0;
-						opaque1.meshPartSize = chunk.opaqueVerts;
-						opaque1.primitiveType = GL20.GL_LINES;
-						if (chunk.opaqueVerts > 0) renderables.add(opaque1);
-						
-						Renderable transp1 = pool.obtain();
-						transp1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-						transp1.material = World.highlight;
-						transp1.mesh = chunk.getTransparentMesh();
-						transp1.meshPartOffset = 0;
-						transp1.meshPartSize = chunk.transpVerts;
-						transp1.primitiveType = GL20.GL_LINES;
-						if (chunk.transpVerts > 0) renderables.add(transp1);
-					}
+					transp.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.transpVerts > 0) renderables.add(transp);
 				}
 			}
 			
