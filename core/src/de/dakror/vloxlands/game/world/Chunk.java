@@ -4,8 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -17,6 +21,8 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 
+import de.dakror.vloxlands.Config;
+import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.render.Face;
@@ -481,6 +487,18 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			unload();
 			ticksInvisible = 0;
 			requestsUnload = false;
+		}
+		
+		if (Config.debug && !isEmpty() && inFrustum)
+		{
+			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(pos.x + island.pos.x, pos.y + island.pos.y, pos.z + island.pos.z + SIZE);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.WHITE);
+			Vloxlands.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, SIZE + World.gap, SIZE + World.gap, SIZE + World.gap);
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	
