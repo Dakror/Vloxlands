@@ -2,7 +2,6 @@ package de.dakror.vloxlands.game.world;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -34,7 +33,6 @@ import de.dakror.vloxlands.game.item.inv.ResourceList;
 import de.dakror.vloxlands.game.query.VoxelPos;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.generate.biome.BiomeType;
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.InventoryListener;
 import de.dakror.vloxlands.util.event.SelectionListener;
@@ -453,6 +451,13 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		return true;
 	}
 	
+	public boolean isFullyLoaded()
+	{
+		for (Chunk c : chunks)
+			if (c != null && !c.isEmpty() && !c.loaded) return false;
+		return true;
+	}
+	
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
 	{
@@ -465,113 +470,46 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 		
 		if (!minimapMode && !inFrustum) return;
 		
-		Chunk closestToCam = null;
-		float dist = 0;
 		for (int i = 0; i < chunks.length; i++)
 		{
 			Chunk chunk = chunks[i];
 			if (chunk == null) continue;
+			if (chunk.isEmpty()) continue;
 			
 			if (!chunk.onceLoaded) chunk.load();
 			
 			if (minimapMode || (chunk.inFrustum = Game.camera.frustum.boundsInFrustum(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs, hs, hs, hs)))
 			{
-				if (chunk.isEmpty()) continue;
-				
 				if (!chunk.loaded && !minimapMode) chunk.load();
 				
 				if (chunk.updateMeshes() && !minimapMode) visibleChunks++;
 				
 				if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0))
 				{
-					if (minimapMode)
-					{
-						chunk.drawn = true;
-						
-						addChunkToRenderables(chunk, renderables, pool);
-					}
-					else
-					{
-						float distance = Game.camera.position.dst(pos.x + chunk.pos.x + hs, pos.y + chunk.pos.y + hs, pos.z + chunk.pos.z + hs);
-						if (chunk.inFrustum && (closestToCam == null || distance < dist))
-						{
-							closestToCam = chunk;
-							dist = distance;
-						}
-					}
+					if (minimapMode) chunk.drawn = true;
+					
+					Renderable opaque = pool.obtain();
+					opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+					opaque.material = minimapMode ? Game.world.getDefOpaque() : Game.world.getOpaque();
+					opaque.mesh = chunk.getOpaqueMesh();
+					opaque.meshPartOffset = 0;
+					opaque.meshPartSize = chunk.opaqueVerts;
+					opaque.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.opaqueVerts > 0) renderables.add(opaque);
+					
+					Renderable transp = pool.obtain();
+					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
+					transp.material = minimapMode ? Game.world.getDefTransp() : Game.world.getTransp();
+					transp.mesh = chunk.getTransparentMesh();
+					transp.meshPartOffset = 0;
+					transp.meshPartSize = chunk.transpVerts;
+					transp.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.transpVerts > 0) renderables.add(transp);
 				}
 			}
 			
 			if (chunk.loaded && !minimapMode) loadedChunks++;
 		}
-		
-		if (!minimapMode)
-		{
-			if (closestToCam == null) return;
-			
-			Array<Chunk> visited = new Array<Chunk>();
-			ArrayDeque<Chunk> queue = new ArrayDeque<Chunk>();
-			queue.add(closestToCam);
-			
-			Array<Direction> dirs = new Array<Direction>();
-			for (Direction d : Direction.values())
-				if (Game.camera.direction.dot(d.dir.x, -d.dir.y, d.dir.z) < 0) dirs.add(d);
-			
-			int added = 0;
-			while (queue.size() > 0)
-			{
-				Chunk c = queue.pop();
-				addChunkToRenderables(c, renderables, pool);
-				added++;
-				
-				for (Direction d : dirs)
-				{
-					float x = c.index.x - d.dir.x;
-					float y = c.index.y - d.dir.y;
-					float z = c.index.z - d.dir.z;
-					if (x >= 0 && y >= 0 && z >= 0 && x < CHUNKS && y < CHUNKS && z < CHUNKS)
-					{
-						ensureChunkExists((int) x, (int) y, (int) z);
-						Chunk neighbor = getChunk(x, y, z);
-						if (!visited.contains(neighbor, true) /* && !c.walls[d.ordinal()] */&& neighbor.inFrustum)
-						{
-							queue.add(neighbor);
-							visited.add(neighbor);
-						}
-					}
-				}
-			}
-			
-			D.p(added);
-		}
-	}
-	
-	private void addChunkToRenderables(Chunk chunk, Array<Renderable> renderables, Pool<Renderable> pool)
-	{
-		if (chunk.loaded && (chunk.opaqueVerts > 0 || chunk.transpVerts > 0) && !chunk.isEmpty())
-		{
-			if (minimapMode) chunk.drawn = true;
-			
-			Renderable opaque = pool.obtain();
-			opaque.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-			opaque.material = minimapMode ? Game.world.getDefOpaque() : Game.world.getOpaque();
-			opaque.mesh = chunk.getOpaqueMesh();
-			opaque.meshPartOffset = 0;
-			opaque.meshPartSize = chunk.opaqueVerts;
-			opaque.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
-			if (chunk.opaqueVerts > 0) renderables.add(opaque);
-			
-			Renderable transp = pool.obtain();
-			transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-			transp.material = minimapMode ? Game.world.getDefTransp() : Game.world.getTransp();
-			transp.mesh = chunk.getTransparentMesh();
-			transp.meshPartOffset = 0;
-			transp.meshPartSize = chunk.transpVerts;
-			transp.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
-			if (chunk.transpVerts > 0) renderables.add(transp);
-		}
-		
-		if (chunk.loaded && !minimapMode) loadedChunks++;
 	}
 	
 	@Override
