@@ -133,6 +133,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		taskQueue = new Array<Task>();
 		working = true;
 		
+		dimensions.x++;
+		dimensions.z++;
+		
 		setBuilt(false);
 	}
 	

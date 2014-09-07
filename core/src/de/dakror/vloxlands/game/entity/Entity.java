@@ -91,7 +91,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		additionalVisible = true;
 		visible = true;
 		
-		dimensions.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
+		dimensions.set(Math.round(boundingBox.getDimensions().x), Math.round(boundingBox.getDimensions().y), Math.round(boundingBox.getDimensions().z));
 		
 		Game.instance.addListener(this);
 	}
@@ -298,7 +298,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		float lz = Math.abs(posCache.z - o.posCache.z);
 		float sumz = (dimensions.z / 2.0f) + (o.dimensions.z / 2.0f);
 		
-		return (lx <= sumx && ly <= sumy && lz <= sumz);
+		return (lx < sumx && ly < sumy && lz < sumz);
 	}
 	
 	// -- events -- //

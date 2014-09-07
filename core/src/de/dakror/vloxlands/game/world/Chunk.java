@@ -419,13 +419,13 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					if (voxel == 0) continue;
 					Voxel v = Voxel.getForId(voxel);
 					
-					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque()) && !v.getName().toLowerCase().contains("ore")) continue;
+					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
 					
 					for (Direction d : Direction.values())
 					{
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
 						Voxel ww = Voxel.getForId(w);
-						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel || v.getName().toLowerCase().contains("ore"))
+						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
 							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
 							if (v.isOpaque()) faces.put(face.hashCode(), face);
