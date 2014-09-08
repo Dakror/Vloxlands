@@ -15,7 +15,7 @@ import de.dakror.vloxlands.util.Direction;
  */
 public class Mesher
 {
-	public static final Vector3[] directions = { Vector3.X, /* Vector3.Y, */Vector3.Z };
+	public static final Vector3[] directions = { Vector3.X, Vector3.Y, Vector3.Z };
 	
 	static long millis;
 	static int count;
@@ -77,10 +77,6 @@ public class Mesher
 				}
 			}
 		}
-		// long l = System.currentTimeMillis();
-		// count++;
-		// millis += (System.currentTimeMillis() - l);
-		// D.p(millis / (float) count);
 	}
 	
 	public static boolean canFace(Direction dir, Vector3 direction)
