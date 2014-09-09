@@ -1,7 +1,6 @@
 package de.dakror.vloxlands.util;
 
 import java.awt.Color;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,9 +9,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import com.badlogic.gdx.math.Vector3;
 
@@ -37,7 +35,7 @@ public class VoxieConverter
 	
 	static class Face
 	{
-		Vector3 tl, br, bl, tr;
+		Vector3 tl, bl, br, tr;
 		int direction;
 	}
 	
@@ -46,6 +44,16 @@ public class VoxieConverter
 		Face[] faces = new Face[Direction.values().length];
 		int color;
 	}
+	
+	static final String nl = "\r\n";
+	static final float blockSize = 0.25f;
+	
+	static Block[] blocks;
+	
+	static String out;
+	
+	static int[] data;
+	static int width, height, depth, offsetX, offsetY, offsetZ;
 	
 	public static void main(String[] args) throws IOException
 	{
@@ -64,15 +72,15 @@ public class VoxieConverter
 		ByteBuffer bb = ByteBuffer.wrap(fileData);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
-		int width = bb.getInt();
-		int height = bb.getInt();
-		int depth = bb.getInt();
+		width = bb.getInt();
+		height = bb.getInt();
+		depth = bb.getInt();
 		
-		int offsetX = bb.getInt();
-		int offsetY = bb.getInt();
-		int offsetZ = bb.getInt();
+		offsetX = bb.getInt();
+		offsetY = bb.getInt();
+		offsetZ = bb.getInt();
 		
-		int[] data = new int[width * height * depth];
+		data = new int[width * height * depth];
 		for (int i = 0; i < data.length; i++)
 			data[i] = bb.get() & 0xff;
 		
@@ -97,40 +105,180 @@ public class VoxieConverter
 			referencePoints[i] = new ReferencePoint(sb.toString(), x, y, z);
 		}
 		
-		
-		
-		
-		String nl = "\r\n";
-		float blockSize = 0.25f;
-		
-		
-		
-		
-		D.p("Writing materials...");
-		BufferedWriter mtl = new BufferedWriter(new FileWriter(new File(src.getParentFile(), src.getName().replace(".vxi", ".mtl"))));
-		for (int i = 0; i < colors.length - 1 /* don't need 255 */; i++)
-		{
-			Color c = colors[i];
-			if ((c.getRed() != 0 && c.getGreen() != 0 && c.getBlue() != 0 && c.getAlpha() != 0))
-			{
-				mtl.write("newmtl mtl" + i + nl);
-				mtl.write("Ka 1.000 1.000 1.000" + nl);
-				mtl.write("Kd " + (c.getRed() / 255f) + " " + (c.getGreen() / 255f) + " " + (c.getGreen() / 255f) + nl);
-				mtl.write("d " + (c.getAlpha() / 255f) + nl);
-				mtl.write("Tr " + (c.getAlpha() / 255f) + nl);
-				mtl.write("illum 2" + nl + nl);
-			}
-		}
-		mtl.close();
-		
-		BufferedWriter obj = new BufferedWriter(new FileWriter(new File(src.getParentFile(), src.getName().replace(".vxi", ".obj"))));
-		obj.write("mtllib " + src.getName().replace(".vxi", ".mtl") + nl + nl);
-		
 		D.p("Generating mesh...");
 		
-		ArrayList<Vector3> vertices = new ArrayList<Vector3>();
-		Block[] blocks = new Block[data.length];
+		blocks = new Block[data.length];
+		generateBlocks();
 		
+		D.p("Writing output file...");
+		
+		out = "";
+		
+		/*
+		 * Wondering why I hardcoded all this JSON?
+		 * 1. I don't like libgdx's default JSON API
+		 * 2. I wanted to exactly match the default format
+		 */
+		
+		out += "{" + nl;
+		out += "	\"version\": [  0,   1]," + nl;
+		out += "	\"id\": \"\"," + nl;
+		out += "	\"meshes\": [" + nl;
+		out += "		{" + nl;
+		out += "			\"attributes\": [\"POSITION\", \"NORMAL\", \"COLOR\"]," + nl;
+		out += "			\"vertices\": [" + nl;
+		
+		ArrayList<Vector3> vertices = new ArrayList<Vector3>();
+		
+		String indexArray = "";
+		
+		int indices = 0;
+		
+		DecimalFormat dm = new DecimalFormat();
+		dm.setParseIntegerOnly(true);
+		dm.setGroupingUsed(false);
+		
+		for (Block b : blocks)
+		{
+			if (b == null) continue;
+			
+			for (Face f : b.faces)
+			{
+				if (f == null) continue;
+				
+				if (!vertices.contains(f.tl))
+				{
+					printVertex(f.tl, f.direction, colors[b.color]);
+					vertices.add(f.tl);
+				}
+				if (!vertices.contains(f.bl))
+				{
+					printVertex(f.bl, f.direction, colors[b.color]);
+					vertices.add(f.bl);
+				}
+				if (!vertices.contains(f.br))
+				{
+					printVertex(f.br, f.direction, colors[b.color]);
+					vertices.add(f.br);
+				}
+				if (!vertices.contains(f.tr))
+				{
+					printVertex(f.tr, f.direction, colors[b.color]);
+					vertices.add(f.tr);
+				}
+				
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.tl), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.bl), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.br), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.tl), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.br), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+				if (indices % 12 == 0) indexArray += "						";
+				indexArray += format(dm, vertices.indexOf(f.tr), 4) + ",";
+				if (indices % 12 == 11) indexArray += nl;
+				indices++;
+			}
+		}
+		
+		out += "			]," + nl;
+		out += "			\"parts\": [" + nl;
+		out += "				{" + nl;
+		out += "					\"id\": \"shape1_part1\", " + nl;
+		out += "					\"type\": \"TRIANGLES\", " + nl;
+		out += "					\"indices\": [" + nl;
+		
+		out += indexArray;
+		
+		out += "					]" + nl;
+		out += "				}" + nl;
+		out += "			]" + nl;
+		out += "		}" + nl;
+		out += "	]," + nl;
+		out += "	\"materials\": [" + nl;
+		out += "		{" + nl;
+		out += "			\"id\": \"mtl1\", " + nl;
+		out += "			\"diffuse\": [ 0.800000,  0.800000,  0.800000], " + nl;
+		out += "			\"emissive\": [ 0.800000,  0.800000,  0.800000]" + nl;
+		out += "		}" + nl;
+		out += "	]," + nl;
+		out += "	\"nodes\": [" + nl;
+		out += "		{" + nl;
+		out += "			\"id\": \"" + src.getName().substring(0, src.getName().lastIndexOf(".")) + "\", " + nl;
+		out += "			\"rotation\": [ 0.000000,  0.000000,  0.000000,  1.000000], " + nl;
+		out += "			\"scale\": [ 1.000000,  1.000000,  1.000000], " + nl;
+		out += "			\"parts\": [" + nl;
+		out += "				{" + nl;
+		out += "					\"meshpartid\": \"shape1_part1\", " + nl;
+		out += "					\"materialid\": \"mtl1\"" + nl;
+		out += "				}" + nl;
+		out += "			]" + nl;
+		out += "		}" + nl;
+		out += "	], " + nl;
+		out += "	\"animations\": [" + nl;
+		out += "		{" + nl;
+		out += "			\"id\": \"Default Take\", " + nl;
+		out += "			\"bones\": []" + nl;
+		out += "		}" + nl;
+		out += "	]" + nl;
+		out += "}" + nl;
+		
+		FileWriter fw = new FileWriter(new File(src.getParentFile(), src.getName().replace(".vxi", ".g3dj")));
+		fw.write(out);
+		fw.close();
+		
+		D.p("Done!");
+	}
+	
+	public static void printVertex(Vector3 v, int dir, Color c) throws IOException
+	{
+		Direction d = Direction.values()[dir];
+		
+		DecimalFormat dm = new DecimalFormat();
+		dm.setMinimumFractionDigits(6);
+		dm.setMaximumFractionDigits(6);
+		
+		// @formatter:off
+		out+="				" + 
+				format(dm, v.x, 10) + "," + 
+				format(dm, v.z, 10) + "," + 
+				format(dm, v.y, 10) + "," + 
+				format(dm, d.dir.x, 10) + "," + 
+				format(dm, d.dir.z, 10) + "," + 
+				format(dm, d.dir.y, 10) + "," + 
+				format(dm, c.getRed() / 255f, 10) + "," + 
+				format(dm, c.getGreen() / 255f, 10) + "," + 
+				format(dm, c.getBlue() / 255f, 10) + "," + 
+				nl;
+		// @formatter:on
+	}
+	
+	public static String format(DecimalFormat dm, float f, int w)
+	{
+		String s = dm.format(f);
+		
+		int origWidth = s.length();
+		
+		while (s.length() < w + (w - origWidth < 1 ? origWidth - w + 1 : 0))
+			s = " " + s;
+		return s;
+	}
+	
+	public static void generateBlocks()
+	{
 		for (int i = 0; i < blocks.length; i++)
 		{
 			int c = data[i];
@@ -142,10 +290,13 @@ public class VoxieConverter
 			int y = (i / depth) % height;
 			int z = i % depth;
 			
-			Vector3 pos = new Vector3(offsetX + x * blockSize, offsetY + y * blockSize, offsetZ + z * blockSize);
+			Vector3 pos = new Vector3((offsetX + x) * blockSize, (offsetY + y) * blockSize, (offsetZ + z) * blockSize);
 			
 			for (Direction d : Direction.values())
 			{
+				int index2 = (int) ((x + d.dir.x) * height * depth + (y + d.dir.y) * depth + (z + d.dir.z));
+				if (x + d.dir.x > -1 && y + d.dir.y > -1 && z + d.dir.z > -1 && x + d.dir.x < width && y + d.dir.y < height && z + d.dir.z < depth && data[index2] != 255) continue;
+				
 				Face f = new Face();
 				f.direction = d.ordinal();
 				
@@ -208,56 +359,15 @@ public class VoxieConverter
 				f.bl.add(pos);
 				f.br.add(pos);
 				
-				if (!vertices.contains(f.tl)) vertices.add(f.tl);
-				if (!vertices.contains(f.tr)) vertices.add(f.tr);
-				if (!vertices.contains(f.bl)) vertices.add(f.bl);
-				if (!vertices.contains(f.br)) vertices.add(f.br);
-				
 				b.faces[d.ordinal()] = f;
 			}
 			
 			blocks[i] = b;
 		}
+	}
+	
+	public static void setupFaceVertices(Face face)
+	{	
 		
-		
-		D.p("Writing vertices...");
-		for (Vector3 v : vertices)
-			obj.write("v " + v.x + " " + v.z + " " + v.y + nl);
-		
-		obj.write(nl);
-		D.p("Writing normals...");
-		for (Direction d : Direction.values())
-			obj.write("vn " + d.dir.x + " " + d.dir.y + " " + d.dir.z + nl);
-		
-		obj.write(nl);
-		D.p("Writing faces...");
-		Arrays.sort(blocks, new Comparator<Block>()
-		{
-			@Override
-			public int compare(Block o1, Block o2)
-			{
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				return Integer.compare(o1.color, o2.color);
-			}
-		});
-		
-		int lastColor = 255;
-		
-		for (Block b : blocks)
-		{
-			if (b == null) continue;
-			
-			if (lastColor == 255 || lastColor != b.color) obj.write("usemtl mtl" + b.color + nl);
-			lastColor = b.color;
-			
-			for (Face f : b.faces)
-			{
-				obj.write("f " + (vertices.indexOf(f.tl) + 1) + "//" + (f.direction + 1) + " " + (vertices.indexOf(f.bl) + 1) + "//" + (f.direction + 1) + " " + (vertices.indexOf(f.br) + 1) + "//" + (f.direction + 1) + " " + (vertices.indexOf(f.tr) + 1) + "//" + (f.direction + 1) + nl);
-			}
-		}
-		
-		obj.close();
-		D.p("Done!");
 	}
 }

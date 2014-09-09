@@ -92,7 +92,6 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		visible = true;
 		
 		dimensions.set(Math.round(boundingBox.getDimensions().x), Math.round(boundingBox.getDimensions().y), Math.round(boundingBox.getDimensions().z));
-		
 		Game.instance.addListener(this);
 	}
 	
