@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector3;
 /**
  * @author Dakror
  */
+@Deprecated
 public class VoxieConverter
 {
 	static class ReferencePoint
@@ -55,6 +56,7 @@ public class VoxieConverter
 	static int[] data;
 	static int width, height, depth, offsetX, offsetY, offsetZ;
 	
+	@Deprecated
 	public static void main(String[] args) throws IOException
 	{
 		if (args.length == 0) throw new InvalidParameterException("no file specified");
@@ -125,7 +127,7 @@ public class VoxieConverter
 		out += "	\"id\": \"\"," + nl;
 		out += "	\"meshes\": [" + nl;
 		out += "		{" + nl;
-		out += "			\"attributes\": [\"POSITION\", \"NORMAL\", \"COLOR\"]," + nl;
+		out += "			\"attributes\": [\"POSITION\", \"NORMAL\"]," + nl; // , \"COLOR\", \"TEXCOORD0\"
 		out += "			\"vertices\": [" + nl;
 		
 		ArrayList<Vector3> vertices = new ArrayList<Vector3>();
@@ -243,7 +245,7 @@ public class VoxieConverter
 		D.p("Done!");
 	}
 	
-	public static void printVertex(Vector3 v, int dir, Color c) throws IOException
+	static void printVertex(Vector3 v, int dir, Color c) throws IOException
 	{
 		Direction d = Direction.values()[dir];
 		
@@ -259,14 +261,17 @@ public class VoxieConverter
 				format(dm, d.dir.x, 10) + "," + 
 				format(dm, d.dir.z, 10) + "," + 
 				format(dm, d.dir.y, 10) + "," + 
-				format(dm, c.getRed() / 255f, 10) + "," + 
-				format(dm, c.getGreen() / 255f, 10) + "," + 
-				format(dm, c.getBlue() / 255f, 10) + "," + 
+//				format(dm, c.getRed() / 255f, 10) + "," + 
+//				format(dm, c.getGreen() / 255f, 10) + "," + 
+//				format(dm, c.getBlue() / 255f, 10) + "," + 
+//				format(dm, 0, 10) + "," + 
+//				format(dm, 0, 10) + "," + 
+//				format(dm, 0, 10) + "," + 
 				nl;
 		// @formatter:on
 	}
 	
-	public static String format(DecimalFormat dm, float f, int w)
+	static String format(DecimalFormat dm, float f, int w)
 	{
 		String s = dm.format(f);
 		
@@ -277,7 +282,7 @@ public class VoxieConverter
 		return s;
 	}
 	
-	public static void generateBlocks()
+	static void generateBlocks()
 	{
 		for (int i = 0; i < blocks.length; i++)
 		{
@@ -366,7 +371,7 @@ public class VoxieConverter
 		}
 	}
 	
-	public static void setupFaceVertices(Face face)
+	static void setupFaceVertices(Face face)
 	{	
 		
 	}

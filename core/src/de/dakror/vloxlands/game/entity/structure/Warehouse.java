@@ -21,10 +21,7 @@ public class Warehouse extends Structure
 {
 	public Warehouse(float x, float y, float z)
 	{
-		super(x, y, z, "models/homecenter.g3dj");
-		
-		// modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(Color.valueOf("E72100")));
-		// modelInstance.materials.get(1).set(ColorAttribute.createDiffuse(Color.valueOf("522B26")));
+		super(x, y, z, "models/structure/towncenter.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
