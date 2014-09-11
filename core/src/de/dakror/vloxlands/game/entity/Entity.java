@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -28,6 +29,7 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
+import de.dakror.vloxlands.util.VxiLoader;
 import de.dakror.vloxlands.util.base.EntityBase;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.math.Bits;
@@ -70,6 +72,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
+	final Matrix4 tmp = new Matrix4();
 	
 	public Entity(float x, float y, float z, String model)
 	{
@@ -88,7 +91,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		{
 			if (n.id.startsWith("model:"))
 			{
-				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation));
+				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation.cpy().scl(VxiLoader.blockSize)));
 			}
 		}
 		
@@ -201,6 +204,17 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		if (modelVisible)
 		{
 			batch.render(modelInstance, environment);
+			for (ModelInstance mi : subs)
+			{
+				tmp.set(mi.transform);
+				modelInstance.transform.getTranslation(posCache);
+				modelInstance.transform.getRotation(rotCache);
+				mi.transform.translate(posCache).rotate(rotCache);
+				
+				batch.render(mi, environment);
+				
+				mi.transform.set(tmp);
+			}
 		}
 		if (additionalVisible) renderAdditional(batch, environment);
 		

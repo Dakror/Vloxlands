@@ -153,7 +153,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 				if (f == null) continue;
 				
 				Direction d = Direction.values()[f.direction];
-				Vector3 dir = new Vector3(d.dir.x, d.dir.z, d.dir.y);
+				Vector3 dir = new Vector3(d.dir.x, d.dir.y, d.dir.z);
 				
 				Color c = colors[b.color];
 				
@@ -162,6 +162,16 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 				Vertex br = new Vertex(f.br, dir, c);
 				Vertex tr = new Vertex(f.tr, dir, c);
 				
+				if (!vertices.contains(tr, true))
+				{
+					mpb.vertex(f.tr, dir, c, null);
+					vertices.add(tr);
+				}
+				if (!vertices.contains(br, true))
+				{
+					mpb.vertex(f.br, dir, c, null);
+					vertices.add(br);
+				}
 				if (!vertices.contains(tl, true))
 				{
 					mpb.vertex(f.tl, dir, c, null);
@@ -172,19 +182,9 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 					mpb.vertex(f.bl, dir, c, null);
 					vertices.add(bl);
 				}
-				if (!vertices.contains(br, true))
-				{
-					mpb.vertex(f.br, dir, c, null);
-					vertices.add(br);
-				}
-				if (!vertices.contains(tr, true))
-				{
-					mpb.vertex(f.tr, dir, c, null);
-					vertices.add(tr);
-				}
 				
-				mpb.index((short) vertices.indexOf(tl, true), (short) vertices.indexOf(bl, true), (short) vertices.indexOf(br, true));
-				mpb.index((short) vertices.indexOf(tl, true), (short) vertices.indexOf(br, true), (short) vertices.indexOf(tr, true));
+				mpb.index((short) vertices.indexOf(br, true), (short) vertices.indexOf(bl, true), (short) vertices.indexOf(tl, true));
+				mpb.index((short) vertices.indexOf(tr, true), (short) vertices.indexOf(br, true), (short) vertices.indexOf(tl, true));
 			}
 		}
 		Model model = mb.end();
@@ -194,7 +194,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			node.translation.set(p.x, p.z, p.y);
+			node.translation.set(p.x, p.z, -p.y);
 			model.nodes.get(0).children.add(node);
 		}
 		
@@ -289,25 +289,25 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 				f.tl.add(pos);
 				tmp = f.tl.y;
 				f.tl.y = f.tl.z;
-				f.tl.z = tmp;
+				f.tl.z = -tmp;
 				tmp = 0;
 				
 				f.tr.add(pos);
 				tmp = f.tr.y;
 				f.tr.y = f.tr.z;
-				f.tr.z = tmp;
+				f.tr.z = -tmp;
 				tmp = 0;
 				
 				f.bl.add(pos);
 				tmp = f.bl.y;
 				f.bl.y = f.bl.z;
-				f.bl.z = tmp;
+				f.bl.z = -tmp;
 				tmp = 0;
 				
 				f.br.add(pos);
 				tmp = f.br.y;
 				f.br.y = f.br.z;
-				f.br.z = tmp;
+				f.br.z = -tmp;
 				
 				b.faces[d.ordinal()] = f;
 			}
