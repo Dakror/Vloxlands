@@ -35,8 +35,7 @@ public class InternalAssetManager
 	 * not contain a "." have no file name extension. File name extension
 	 * comparisons are case insensitive.
 	 * <p>
-	 * The following example creates a {@code FileNameExtensionFilter} that will
-	 * show {@code jpg} files:
+	 * The following example creates a {@code FileNameExtensionFilter} that will show {@code jpg} files:
 	 * 
 	 * <pre>
 	 * FileFilter filter = new FileNameExtensionFilter(&quot;jpg&quot;, &quot;jpeg&quot;);
@@ -57,8 +56,7 @@ public class InternalAssetManager
 		
 		/**
 		 * Creates a {@code FileNameExtensionFilter} with the specified
-		 * description and file name extensions. The returned
-		 * {@code FileNameExtensionFilter} will accept all directories and any
+		 * description and file name extensions. The returned {@code FileNameExtensionFilter} will accept all directories and any
 		 * file with a file name extension contained in {@code extensions}.
 		 *
 		 * @param extensions the accepted file name extensions
@@ -358,8 +356,7 @@ public class InternalAssetManager
 	 * @param assets the AssetManager to load the found assets
 	 * @param path the directory to be loaded
 	 * @param type the AssetManager Type e.g {@link Texture}
-	 * @param fileFilter the {@link FileFilter} to apply. Use e.g a
-	 *          {@link FileNameExtensionFilter}
+	 * @param fileFilter the {@link FileFilter} to apply. Use e.g a {@link FileNameExtensionFilter}
 	 * @param recursive wether all files in all subfolders should be loaded too
 	 */
 	public static void scheduleDirectory(AssetManager assets, String path, Class<?> type, FileFilter fileFilter, boolean recursive)

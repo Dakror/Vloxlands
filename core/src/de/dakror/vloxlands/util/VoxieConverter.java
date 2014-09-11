@@ -128,8 +128,8 @@ public class VoxieConverter
 		out += "	\"meshes\": [" + nl;
 		out += "		{" + nl;
 		out += "			\"attributes\": [\"POSITION\", \"NORMAL\"]," + nl; // ,
-																																	// \"COLOR\",
-																																	// \"TEXCOORD0\"
+		// \"COLOR\",
+		// \"TEXCOORD0\"
 		out += "			\"vertices\": [" + nl;
 		
 		ArrayList<Vector3> vertices = new ArrayList<Vector3>();

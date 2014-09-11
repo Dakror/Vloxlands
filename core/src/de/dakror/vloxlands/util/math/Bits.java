@@ -6,8 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 /**
- * Copied from {@link java.io.Bits} and slightly modified to work with
- * {@link java.io.ByteArrayOutputStream}
+ * Copied from {@link java.io.Bits} and slightly modified to work with {@link java.io.ByteArrayOutputStream}
  * 
  * @author Dakror
  */
