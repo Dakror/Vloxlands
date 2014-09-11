@@ -29,6 +29,7 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
+import de.dakror.vloxlands.util.VxiLoader;
 import de.dakror.vloxlands.util.base.EntityBase;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.math.Bits;
@@ -90,7 +91,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		{
 			if (n.id.startsWith("model:"))
 			{
-				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation.cpy().scl(0.25f)));
+				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation.cpy().scl(VxiLoader.blockSize)));
 			}
 		}
 		
