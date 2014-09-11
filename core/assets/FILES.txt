@@ -94,7 +94,8 @@ f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
 f models/structure/.PH means PlaceHolder
-f models/structure/door.vxi
+f models/structure/door_x.vxi
+f models/structure/door_z.vxi
 f models/structure/towncenter.vxi
 d models/structure/PH_tent
 f models/structure/PH_tent/PH_tent.blend
