@@ -43,7 +43,6 @@ import de.dakror.vloxlands.ui.ItemSlot;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.TooltipImageButton;
 import de.dakror.vloxlands.util.CurserCommand;
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
 /**
@@ -55,11 +54,9 @@ public class Human extends Creature
 	
 	ItemStack carryingItemStack;
 	ModelInstance carryingItemModelInstance;
-	Matrix4 carryingItemTransform;
 	
 	ItemStack tool;
 	ModelInstance toolModelInstance;
-	Matrix4 toolTransform;
 	
 	Array<Job> jobQueue = new Array<Job>();
 	
@@ -81,7 +78,7 @@ public class Human extends Creature
 	
 	public Human(float x, float y, float z)
 	{
-		super(x, y, z, "models/creature/humanblend/humanblend.g3db");
+		super(x, y, z, "creature/humanblend/humanblend.g3db");
 		name = "Helper";
 		
 		speed = 0.025f;
@@ -101,7 +98,6 @@ public class Human extends Creature
 		if (tool == null)
 		{
 			toolModelInstance = null;
-			toolTransform = null;
 			this.tool.set(new ItemStack());
 		}
 		else
@@ -109,7 +105,6 @@ public class Human extends Creature
 			this.tool.setItem(tool);
 			this.tool.setAmount(1);
 			toolModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + tool.getModel(), Model.class), new Matrix4());
-			toolTransform = toolModelInstance.transform;
 		}
 	}
 	
@@ -126,11 +121,7 @@ public class Human extends Creature
 	public void setCarryingItemStack(ItemStack carryingItemStack)
 	{
 		this.carryingItemStack.set(carryingItemStack);
-		if (carryingItemStack.isNull())
-		{
-			carryingItemModelInstance = null;
-			carryingItemTransform = null;
-		}
+		if (carryingItemStack.isNull()) carryingItemModelInstance = null;
 		else createModelInstanceForCarryiedItemStack = true;
 	}
 	
@@ -187,21 +178,21 @@ public class Human extends Creature
 	@Override
 	public void renderAdditional(ModelBatch batch, Environment environment)
 	{
-		if (!carryingItemStack.isNull() && carryingItemTransform != null)
+		if (!carryingItemStack.isNull() && carryingItemModelInstance != null)
 		{
 			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
 			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			tmp.translate(resourceTrn);
-			carryingItemTransform.set(tmp);
+			carryingItemModelInstance.transform.set(tmp);
 		}
 		
-		if (!tool.isNull() && toolTransform != null)
+		if (!tool.isNull() && toolModelInstance.transform != null)
 		{
 			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
 			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			
 			((Tool) tool.getItem()).transformInHand(tmp, this);
-			toolTransform.set(tmp);
+			toolModelInstance.transform.set(tmp);
 		}
 		
 		if (createModelInstanceForCarryiedItemStack)
@@ -221,7 +212,7 @@ public class Human extends Creature
 				mb.begin();
 				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, Game.world.getOpaque());
 				model = mb.end();
-				scale.set(0.4f, 0.4f, 0.4f);
+				scale.set(0.2f, 0.2f, 0.2f);
 				tr.set(-0.2f, 0, -0.3f);
 			}
 			else
@@ -234,7 +225,6 @@ public class Human extends Creature
 			if (!scale.isZero()) carryingItemModelInstance.nodes.get(0).scale.set(scale);
 			carryingItemModelInstance.nodes.get(0).translation.set(tr);
 			carryingItemModelInstance.calculateTransforms();
-			carryingItemTransform = carryingItemModelInstance.transform;
 			createModelInstanceForCarryiedItemStack = false;
 		}
 		
@@ -286,7 +276,7 @@ public class Human extends Creature
 	@Override
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
+		if ((wasSelected || selected) && !lmb && location == null && workPlace == null)
 		{
 			selected = true;
 			
@@ -297,7 +287,7 @@ public class Human extends Creature
 	@Override
 	public void onStructureSelection(Structure structure, boolean lmb)
 	{
-		if ((wasSelected || selected) && (!lmb || D.android()) && location == null && workPlace == null)
+		if ((wasSelected || selected) && !lmb && location == null && workPlace == null)
 		{
 			selected = true;
 			

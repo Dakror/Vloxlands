@@ -9,9 +9,9 @@ public class ItemDrop extends Entity
 	
 	public ItemDrop(float x, float y, float z, Item i)
 	{
-		super(x, y, z, "models/item/" + i.getModel());
+		super(x, y, z, "item/" + i.getModel());
 		item = i;
-		this.name = "entity." + i.getName();
+		name = "entity." + i.getName();
 	}
 	
 	public ItemDrop(float x, float y, float z, Item i, int amount)

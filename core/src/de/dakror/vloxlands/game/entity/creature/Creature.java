@@ -36,7 +36,7 @@ public abstract class Creature extends Entity
 		super(x, y, z, model);
 		
 		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
-		transform.translate(blockTrn);
+		modelInstance.transform.translate(blockTrn);
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
@@ -51,29 +51,29 @@ public abstract class Creature extends Entity
 			{
 				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 				Gdx.gl.glLineWidth(2);
-				Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-				Game.shapeRenderer.identity();
-				Game.shapeRenderer.translate(island.pos.x, island.pos.y, island.pos.z);
-				Game.shapeRenderer.rotate(1, 0, 0, 90);
-				Game.shapeRenderer.begin(ShapeType.Line);
-				Game.shapeRenderer.setColor(Color.WHITE);
+				Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+				Vloxlands.shapeRenderer.identity();
+				Vloxlands.shapeRenderer.translate(island.pos.x, island.pos.y, island.pos.z);
+				Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
+				Vloxlands.shapeRenderer.begin(ShapeType.Line);
+				Vloxlands.shapeRenderer.setColor(Color.WHITE);
 				
-				Game.shapeRenderer.translate(0, 0, -path.getLast().y - 1.0f - World.gap);
-				Game.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
-				Game.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
+				Vloxlands.shapeRenderer.translate(0, 0, -path.getLast().y - 1.0f - World.gap);
+				Vloxlands.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
+				Vloxlands.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
 				
 				for (int i = path.getIndex(); i < path.size() - 1; i++)
 				{
 					Vector3 start = path.get(i);
 					Vector3 end = path.get(i + 1);
-					Game.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
+					Vloxlands.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
 				}
-				Game.shapeRenderer.end();
+				Vloxlands.shapeRenderer.end();
 			}
 		}
 		catch (NullPointerException e)
 		{
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	
@@ -95,7 +95,7 @@ public abstract class Creature extends Entity
 						dif.limit(speed);
 						
 						posCache.add(dif);
-						transform.setTranslation(posCache);
+						modelInstance.transform.setTranslation(posCache);
 					}
 				}
 			}
@@ -116,14 +116,14 @@ public abstract class Creature extends Entity
 			{
 				if (path.size() > 0)
 				{
-					transform.getRotation(rotCache);
-					transform.getTranslation(posCache);
+					modelInstance.transform.getRotation(rotCache);
+					modelInstance.transform.getTranslation(posCache);
 					
 					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
 					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
-					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+					modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 					if (dif.len() <= speed)
 					{
 						if (path.isDone()) onReachTarget();
@@ -151,7 +151,7 @@ public abstract class Creature extends Entity
 	
 	public Vector3 getVoxelBelow()
 	{
-		transform.getTranslation(posCache);
+		modelInstance.transform.getTranslation(posCache);
 		
 		Vector3 v = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
@@ -188,7 +188,7 @@ public abstract class Creature extends Entity
 		{
 			Vector3 target = path.getGhostTarget().cpy().add(island.pos).add(blockTrn);
 			float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
-			transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+			modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 		}
 	}
 }

@@ -178,7 +178,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			else if (e.isSpawned())
 			{
 				e.tick(tick);
-				if (delta != 0) e.getTransform().translate(0, delta, 0);
+				if (delta != 0) e.getModelInstance().transform.translate(0, delta, 0);
 			}
 		}
 		
@@ -205,7 +205,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	{
 		s.setIsland(this);
 		if (s instanceof Structure) ((Structure) s).getInnerInventory().addListener(this);
-		s.getTransform().translate(pos);
+		s.getModelInstance().transform.translate(pos);
 		entities.add(s);
 		s.onSpawn();
 		
@@ -399,18 +399,21 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	
 	public void render(ModelBatch batch, Environment environment)
 	{
+		for (Chunk c : chunks)
+			if (c != null) c.render();
+		
 		renderEntities(batch, environment, false);
 		
 		if (Game.instance.activeIsland == this && Game.instance.selectedVoxel.x > -1)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(pos.x + Game.instance.selectedVoxel.x, pos.y + Game.instance.selectedVoxel.y, pos.z + Game.instance.selectedVoxel.z + 1);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(Color.WHITE);
-			Game.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(pos.x + Game.instance.selectedVoxel.x, pos.y + Game.instance.selectedVoxel.y, pos.z + Game.instance.selectedVoxel.z + 1);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.WHITE);
+			Vloxlands.shapeRenderer.box(-World.gap / 2, -World.gap / 2, -World.gap / 2, 1 + World.gap, 1 + World.gap, 1 + World.gap);
+			Vloxlands.shapeRenderer.end();
 		}
 		
 		if (((tick % 60 == 0 && Game.instance.activeIsland == this) || !initFBO || fbo.getWidth() != Gdx.graphics.getWidth() || fbo.getHeight() != Gdx.graphics.getHeight()) && environment != null)
@@ -491,8 +494,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					opaque.mesh = chunk.getOpaqueMesh();
 					opaque.meshPartOffset = 0;
 					opaque.meshPartSize = chunk.opaqueVerts;
-					opaque.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.opaqueVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(opaque);
+					opaque.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.opaqueVerts > 0) renderables.add(opaque);
 					
 					Renderable transp = pool.obtain();
 					transp.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
@@ -500,29 +503,8 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 					transp.mesh = chunk.getTransparentMesh();
 					transp.meshPartOffset = 0;
 					transp.meshPartSize = chunk.transpVerts;
-					transp.primitiveType = GL20.GL_TRIANGLES;
-					if (chunk.transpVerts > 0 && (minimapMode || !Vloxlands.wireframe)) renderables.add(transp);
-					
-					if (Vloxlands.wireframe && !minimapMode)
-					{
-						Renderable opaque1 = pool.obtain();
-						opaque1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-						opaque1.material = World.highlight;
-						opaque1.mesh = chunk.getOpaqueMesh();
-						opaque1.meshPartOffset = 0;
-						opaque1.meshPartSize = chunk.opaqueVerts;
-						opaque1.primitiveType = GL20.GL_LINES;
-						if (chunk.opaqueVerts > 0) renderables.add(opaque1);
-						
-						Renderable transp1 = pool.obtain();
-						transp1.worldTransform.setToTranslation(pos.x, pos.y, pos.z);
-						transp1.material = World.highlight;
-						transp1.mesh = chunk.getTransparentMesh();
-						transp1.meshPartOffset = 0;
-						transp1.meshPartSize = chunk.transpVerts;
-						transp1.primitiveType = GL20.GL_LINES;
-						if (chunk.transpVerts > 0) renderables.add(transp1);
-					}
+					transp.primitiveType = Vloxlands.wireframe && !minimapMode ? GL20.GL_LINES : GL20.GL_TRIANGLES;
+					if (chunk.transpVerts > 0) renderables.add(transp);
 				}
 			}
 			

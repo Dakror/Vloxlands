@@ -19,7 +19,7 @@ public class Mine extends Structure
 	
 	public Mine(float x, float y, float z)
 	{
-		super(x, y, z, "models/structure/PH_tent/PH_tent.g3db");
+		super(x, y, z, "structure/PH_tent/PH_tent.g3db");
 		
 		modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(Color.valueOf("3D3D3D")));
 		modelInstance.materials.get(1).set(ColorAttribute.createDiffuse(Color.valueOf("666666")));

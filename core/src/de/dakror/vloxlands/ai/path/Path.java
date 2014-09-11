@@ -11,7 +11,8 @@ public class Path
 	public Vector3 removedFirstNode;
 	Array<Vector3> nodes;
 	/**
-	 * If the target is not walkable (e.g. a embeded resource in the ground) this is the actual target.
+	 * If the target is not walkable (e.g. a embeded resource in the ground) this
+	 * is the actual target.
 	 */
 	Vector3 ghostTarget;
 	/**

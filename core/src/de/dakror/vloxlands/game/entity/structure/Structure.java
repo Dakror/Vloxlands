@@ -77,7 +77,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	Array<Human> workers;
 	Inventory inventory;
 	/**
-	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
+	 * Works reversed. Gets filled when placed and <code>built == false</code>.
+	 * Gets emptied by delivering the building materials
 	 */
 	NonStackingInventory buildInventory;
 	ResourceList costs;
@@ -133,6 +134,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		taskQueue = new Array<Task>();
 		working = true;
 		
+		dimensions.x++;
+		dimensions.z++;
+		
 		setBuilt(false);
 	}
 	
@@ -152,7 +156,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
+																																					// people
+																																					// and
+																																					// buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 			}
 		}
@@ -658,7 +665,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			int i = 0;
 			for (Byte b : getCosts().getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
+																																					// people
+																																					// and
+																																					// buildings
 				
 				if (i % 2 == 0) res.row();
 				Item item = Item.getForId(b);
@@ -739,7 +749,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety
+																																																		// first
+																																																		// ;)
 					
 					for (Byte b : copy.getCosts().getAll())
 					{
@@ -795,16 +807,16 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		if ((hovered || selected) && !minimapMode && Vloxlands.wireframe)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
-			Game.shapeRenderer.rotate(1, 0, 0, 90);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(Color.GREEN);
-			Game.shapeRenderer.circle(0, 0, workRadius, 100);
-			Game.shapeRenderer.line(-workRadius, 0, workRadius, 0);
-			Game.shapeRenderer.line(0, -workRadius, 0, workRadius);
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
+			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.GREEN);
+			Vloxlands.shapeRenderer.circle(0, 0, workRadius, 100);
+			Vloxlands.shapeRenderer.line(-workRadius, 0, workRadius, 0);
+			Vloxlands.shapeRenderer.line(0, -workRadius, 0, workRadius);
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 }

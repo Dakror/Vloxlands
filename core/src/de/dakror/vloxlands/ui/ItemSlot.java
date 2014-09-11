@@ -44,7 +44,9 @@ public class ItemSlot extends TooltipImageButton implements ItemStackListener
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = null;
 		if (!stack.isNull()) region = new TextureRegion(tex, stack.getItem().getIconX() * Item.SIZE, stack.getItem().getIconY() * Item.SIZE, Item.SIZE, Item.SIZE);
-		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default transparent space
+		else region = new TextureRegion(tex, 5 * Item.SIZE, Item.SIZE, Item.SIZE, Item.SIZE); // default
+																																													// transparent
+																																													// space
 		
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = new TextureRegionDrawable(region);

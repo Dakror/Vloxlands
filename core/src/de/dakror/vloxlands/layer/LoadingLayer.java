@@ -10,12 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import de.dakror.vloxlands.Config;
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
-import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.generate.WorldGenerator;
-import de.dakror.vloxlands.util.D;
+import de.dakror.vloxlands.util.InternalAssetManager;
+import de.dakror.vloxlands.util.InternalAssetManager.FileNameExtensionFilter;
+import de.dakror.vloxlands.util.InternalAssetManager.FileNode;
 
 /**
  * @author Dakror
@@ -43,12 +43,8 @@ public class LoadingLayer extends Layer
 		{
 			if (!iconsSet)
 			{
-				for (String i : Config.icons)
-					Vloxlands.skin.add(i, Vloxlands.assets.get("img/gui/icons/" + i + ".png", Texture.class));
-				
-				Vloxlands.skin.add("revolverSlot", Vloxlands.assets.get("img/gui/revolverSlot.png", Texture.class));
-				Vloxlands.skin.add("revolverSlot_over", Vloxlands.assets.get("img/gui/revolverSlot_over.png", Texture.class));
-				Vloxlands.skin.add("revolverSlot_disabled", Vloxlands.assets.get("img/gui/revolverSlot_disabled.png", Texture.class));
+				for (FileNode fn : InternalAssetManager.listFiles("img/gui", true))
+					Vloxlands.skin.add(fn.file.nameWithoutExtension(), Vloxlands.assets.get(fn.file.path(), Texture.class));
 				iconsSet = true;
 			}
 			if (!worldGen)
@@ -60,8 +56,8 @@ public class LoadingLayer extends Layer
 			else if (worldGenerator.done && percent > 0.99)
 			{
 				Vloxlands.instance.addLayer(new HudLayer());
-				if (D.android()) Vloxlands.instance.addLayer(new DebugLayer());
 				Vloxlands.instance.removeLayer(this);
+				
 				Game.instance.doneLoading();
 				return;
 			}
@@ -112,26 +108,7 @@ public class LoadingLayer extends Layer
 		
 		stage.addActor(logo);
 		
-		Vloxlands.assets.load("img/transparent.png", Texture.class);
-		
-		Vloxlands.assets.load("img/icons.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_over.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
-		Vloxlands.assets.load("img/gui/revolverSlot_disabled.png", Texture.class);
-		for (String i : Config.icons)
-			Vloxlands.assets.load("img/gui/icons/" + i + ".png", Texture.class);
-		
-		for (String i : Config.dataMaps)
-			Vloxlands.assets.load("img/datamaps/" + i.toLowerCase() + ".png", Texture.class);
-		
-		// TODO Add all models wanting to be loaded
-		Vloxlands.assets.load("models/creature/humanblend/humanblend.g3db", Model.class);
-		Vloxlands.assets.load("models/structure/PH_tent/PH_tent.g3db", Model.class);
-		Vloxlands.assets.load("models/entities/sapling/sapling.g3db", Model.class);
-		Vloxlands.assets.load("models/entities/wheat/wheat.g3db", Model.class);
-		// Vloxlands.assets.load("models/sky/sky.g3db", Model.class);
-		for (Item item : Item.getAll())
-			if (item.isModel() && item.getModel().length() > 0) Vloxlands.assets.load("models/item/" + item.getModel(), Model.class);
+		InternalAssetManager.scheduleDirectory(Vloxlands.assets, "img", Texture.class, true);
+		InternalAssetManager.scheduleDirectory(Vloxlands.assets, "models", Model.class, new FileNameExtensionFilter("g3db", "vxi"), true);
 	}
 }

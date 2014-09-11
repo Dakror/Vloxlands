@@ -2,7 +2,6 @@ package de.dakror.vloxlands.util;
 
 import java.util.Arrays;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 
 /**
@@ -18,7 +17,7 @@ public class D
 		else
 		{
 			double dif = System.nanoTime() - last;
-			p(dif + "ns = " + r(dif /= 1000.0) + "µs = " + r(dif /= 1000.0) + "ms = " + r(dif /= 1000.0) + "s = " + r(dif /= 60.0) + "m = " + r(dif /= 60.0) + "h");
+			p(r(dif) + "ns = " + r(dif /= 1000.0) + "µs = " + r(dif /= 1000.0) + "ms = " + r(dif /= 1000.0) + "s = " + r(dif /= 60.0) + "m = " + r(dif /= 60.0) + "h");
 			last = 0;
 		}
 	}
@@ -43,11 +42,10 @@ public class D
 	
 	public static String r(double d)
 	{
-		return (Math.round(d * 1000) / 1000.0) + "";
-	}
-	
-	public static boolean android()
-	{
-		return Gdx.app.getType() == ApplicationType.Android;
+		String s = (Math.round(d * 1000) / 1000.0) + "";
+		while (s.length() < 10)
+			s = " " + s;
+		
+		return s;
 	}
 }

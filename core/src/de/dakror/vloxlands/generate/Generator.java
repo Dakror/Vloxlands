@@ -310,7 +310,7 @@ public abstract class Generator
 		final Voxel[] ORES = { Voxel.get("COAL_ORE"), Voxel.get("IRON_ORE"), Voxel.get("GOLD_ORE") };
 		final float[][] BEZIERS = { Beziers.COALORE_HEIGHT, Beziers.IRONORE_HEIGHT, Beziers.GOLDORE_HEIGHT };
 		
-		int height = Island.SIZE / 4 * 3 - 5;
+		int height = Island.SIZE / 4 * 3;
 		
 		for (int i = 0; i < ORES.length; i++)
 		{

@@ -26,7 +26,6 @@ import de.dakror.vloxlands.ui.Minimap;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.Revolver;
 import de.dakror.vloxlands.ui.RevolverSlot;
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
 
@@ -126,16 +125,6 @@ public class HudLayer extends Layer implements SelectionListener
 		s = new RevolverSlot(stage, new Vector2(2, 0), "entity:133");
 		s.getTooltip().set("Mine", "Mines the specified ore or stone out of the ground.");
 		actions.addSlot(1, "build", s);
-		
-		if (D.android())
-		{
-			s = new RevolverSlot(stage, new Vector2(1, 6), "controls");
-			s.getTooltip().set("Controls", "Selection modes and controls.");
-			actions.addSlot(0, null, s);
-			s = new RevolverSlot(stage, new Vector2(2, 6), "rect|android");
-			s.getTooltip().set("Rectangle Selection", "Select a group of entities by dragging a rectangle.");
-			actions.addSlot(1, "controls", s);
-		}
 		
 		selected = new RevolverSlot(stage, new Vector2(5, 1), "selected");
 		actions.addSlot(0, null, selected);
@@ -302,7 +291,7 @@ public class HudLayer extends Layer implements SelectionListener
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if ((!D.android() && buttonDown == Buttons.LEFT) || Game.instance.activeAction.equals("rect|android"))
+		if (buttonDown == Buttons.LEFT)
 		{
 			if (dragStart.x == -1)
 			{

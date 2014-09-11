@@ -2,6 +2,7 @@ package de.dakror.vloxlands;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,16 +10,22 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Json.ReadOnlySerializer;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
@@ -28,17 +35,18 @@ import de.dakror.vloxlands.layer.DebugLayer;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
-import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.skin.DoubleDrawable;
 import de.dakror.vloxlands.ui.skin.TilesetDrawable;
 import de.dakror.vloxlands.util.Compressor;
-import de.dakror.vloxlands.util.D;
+import de.dakror.vloxlands.util.InternalAssetManager;
+import de.dakror.vloxlands.util.VxiLoader;
 import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
 
 public class Vloxlands extends GameBase
 {
+	public static ShapeRenderer shapeRenderer;
 	public static Vloxlands instance;
 	public static AssetManager assets;
 	public static Skin skin;
@@ -54,8 +62,7 @@ public class Vloxlands extends GameBase
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		
 		Config.init();
-		
-		if (D.android()) RevolverSlot.SIZE = 80;
+		InternalAssetManager.init();
 		
 		Entity.loadEntities();
 		Voxel.loadVoxels();
@@ -65,6 +72,8 @@ public class Vloxlands extends GameBase
 		setFullscreen(Config.pref.getBoolean("fullscreen"));
 		
 		assets = new AssetManager();
+		assets.setLoader(Model.class, ".vxi", new VxiLoader(assets, new InternalFileHandleResolver()));
+		
 		skin = new Skin(new TextureAtlas(Gdx.files.internal("skin/RPGConstrUI/uiskin.atlas")))
 		{
 			@Override
@@ -169,13 +178,6 @@ public class Vloxlands extends GameBase
 		}
 		if (keycode == Keys.F2) showPathDebug = !showPathDebug;
 		if (keycode == Keys.F3) wireframe = !wireframe;
-		if (keycode == Keys.F11)
-		{
-			setFullscreen(!Gdx.graphics.isFullscreen());
-			
-			return true;
-		}
-		
 		if (Game.world != null)
 		{
 			if (keycode == Keys.F4) Game.world.setDataMap(Game.world.getDataMap() + 1);
@@ -188,6 +190,18 @@ public class Vloxlands extends GameBase
 			{
 				Config.shadowQuality = Math.max(0, Config.shadowQuality);
 				((DDirectionalShadowLight) Game.instance.env.shadowMap).setShadowQuality(Config.shadowQuality);
+			}
+			if (keycode == Keys.F11)
+			{
+				setFullscreen(!Gdx.graphics.isFullscreen());
+				
+				return true;
+			}
+			if (keycode == Keys.F12)
+			{
+				takeScreenshot();
+				
+				return true;
 			}
 			if (keycode == Keys.UP) Config.changeGameSpeed(true);
 			if (keycode == Keys.DOWN) Config.changeGameSpeed(false);
@@ -207,6 +221,37 @@ public class Vloxlands extends GameBase
 	{
 		if (!fullscreen) Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
+	}
+	
+	public void takeScreenshot()
+	{
+		String name = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
+		FileHandle file = Gdx.files.external(".dakror/Vloxlands/screenshots/" + name + ".png");
+		PixmapIO.writePNG(file, getScreenshot(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true));
+		Gdx.app.log("Vloxlands.takeScreenshot", "Screenshot saved as " + name + ".");
+	}
+	
+	private static Pixmap getScreenshot(int x, int y, int w, int h, boolean yDown)
+	{
+		final Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h);
+		
+		if (yDown)
+		{
+			// Flip the pixmap upside down
+			ByteBuffer pixels = pixmap.getPixels();
+			int numBytes = w * h * 4;
+			byte[] lines = new byte[numBytes];
+			int numBytesPerLine = w * 4;
+			for (int i = 0; i < h; i++)
+			{
+				pixels.position((h - i - 1) * numBytesPerLine);
+				pixels.get(lines, i * numBytesPerLine, numBytesPerLine);
+			}
+			pixels.clear();
+			pixels.put(lines);
+		}
+		
+		return pixmap;
 	}
 	
 	public void saveGame()

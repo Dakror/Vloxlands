@@ -13,12 +13,13 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
@@ -41,9 +42,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	static HashMap<Byte, Class<?>> idToClassMap = new HashMap<Byte, Class<?>>();
 	static HashMap<Class<?>, Byte> classToIdMap = new HashMap<Class<?>, Byte>();
 	
-	protected Matrix4 transform;
-	
 	protected ModelInstance modelInstance;
+	protected Array<ModelInstance> subs;
 	
 	protected byte id;
 	protected int level;
@@ -75,24 +75,31 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		id = classToIdMap.get(getClass());
 		
-		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
+		modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		
 		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
 		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
-		transform = modelInstance.transform;
 		
-		transform.getTranslation(posCache);
+		subs = new Array<ModelInstance>();
+		for (Node n : modelInstance.nodes.get(0).children)
+		{
+			if (n.id.startsWith("model:"))
+			{
+				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation));
+			}
+		}
+		
+		modelInstance.transform.getTranslation(posCache);
 		
 		level = 0;
 		modelVisible = true;
 		additionalVisible = true;
 		visible = true;
 		
-		dimensions.set((float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().y), (float) Math.ceil(boundingBox.getDimensions().z));
-		
+		dimensions.set(Math.round(boundingBox.getDimensions().x), Math.round(boundingBox.getDimensions().y), Math.round(boundingBox.getDimensions().z));
 		Game.instance.addListener(this);
 	}
 	
@@ -151,11 +158,6 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		return modelInstance;
 	}
 	
-	public Matrix4 getTransform()
-	{
-		return transform;
-	}
-	
 	public byte getId()
 	{
 		return id;
@@ -179,8 +181,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	@Override
 	public void tick(int tick)
 	{
-		transform.getTranslation(posCache);
-		transform.getRotation(rotCache);
+		modelInstance.transform.getTranslation(posCache);
+		modelInstance.transform.getRotation(rotCache);
 		inFrustum = Game.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
@@ -196,34 +198,37 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		if (!visible) return;
 		
-		if (modelVisible) batch.render(modelInstance, environment);
+		if (modelVisible)
+		{
+			batch.render(modelInstance, environment);
+		}
 		if (additionalVisible) renderAdditional(batch, environment);
 		
 		if ((hovered || selected) && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
-			Game.shapeRenderer.rotate(1, 0, 0, 90);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(World.SELECTION);
-			Game.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y + World.gap, posCache.z);
+			Vloxlands.shapeRenderer.rotate(1, 0, 0, 90);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(World.SELECTION);
+			Vloxlands.shapeRenderer.rect(-(float) Math.ceil(boundingBox.getDimensions().x) / 2, -(float) Math.ceil(boundingBox.getDimensions().z) / 2, (float) Math.ceil(boundingBox.getDimensions().x), (float) Math.ceil(boundingBox.getDimensions().z));
+			Vloxlands.shapeRenderer.end();
 			Gdx.gl.glLineWidth(1);
 		}
 		
 		if (Vloxlands.wireframe && !minimapMode)
 		{
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			Game.shapeRenderer.setProjectionMatrix(Game.camera.combined);
-			Game.shapeRenderer.identity();
-			Game.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
-			Game.shapeRenderer.begin(ShapeType.Line);
-			Game.shapeRenderer.setColor(Color.RED);
-			Game.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
-			Game.shapeRenderer.end();
+			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
+			Vloxlands.shapeRenderer.identity();
+			Vloxlands.shapeRenderer.translate(posCache.x, posCache.y - boundingBox.getDimensions().y / 2 + boundingBox.getCenter().y, posCache.z);
+			Vloxlands.shapeRenderer.begin(ShapeType.Line);
+			Vloxlands.shapeRenderer.setColor(Color.RED);
+			Vloxlands.shapeRenderer.box(-boundingBox.getDimensions().x / 2, 0, boundingBox.getDimensions().z / 2, boundingBox.getDimensions().x, boundingBox.getDimensions().y, boundingBox.getDimensions().z);
+			Vloxlands.shapeRenderer.end();
 		}
 	}
 	
@@ -272,7 +277,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		baos.write(id);
 		
-		Bits.putMatrix4(baos, transform);
+		Bits.putMatrix4(baos, modelInstance.transform);
 		
 		Bits.putInt(baos, level);
 		
@@ -298,7 +303,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		float lz = Math.abs(posCache.z - o.posCache.z);
 		float sumz = (dimensions.z / 2.0f) + (o.dimensions.z / 2.0f);
 		
-		return (lx <= sumx && ly <= sumy && lz <= sumz);
+		return (lx < sumx && ly < sumy && lz < sumz);
 	}
 	
 	// -- events -- //

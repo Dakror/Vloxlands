@@ -69,6 +69,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	public boolean onceLoaded = false;
 	public boolean drawn = false;
 	public boolean loaded = false;
+	boolean spreadDone = false;
 	
 	Vector2 tex;
 	Island island;
@@ -120,9 +121,21 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 		
-		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																																																																			 * how
+																																																																																																																			 * many
+																																																																																																																			 * faces
+																																																																																																																			 * together
+																																																																																																																			 * ?
+																																																																																																																			 */);
 		opaque.setIndices(indices);
-		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																																																																			 * how
+																																																																																																																			 * many
+																																																																																																																			 * faces
+																																																																																																																			 * together
+																																																																																																																			 * ?
+																																																																																																																			 */);
 		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();
@@ -187,6 +200,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		resources[id + 128]++;
 		
 		updateRequired = true;
+		spreadDone = false;
 		
 		return true;
 	}
@@ -358,7 +372,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void spread(int maximum, boolean snow)
 	{
-		if (isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
+		if (spreadDone || isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
 		
 		if (maximum == 0)
 		{
@@ -396,6 +410,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					done++;
 				}
 			}
+			
+			spreadDone = done == 0;
 		}
 	}
 	
@@ -467,7 +483,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	public void render()
 	{
-		if (requestsUnload)
+		if (requestsUnload && loaded)
 		{
 			unload();
 			ticksInvisible = 0;

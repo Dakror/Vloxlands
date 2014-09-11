@@ -17,7 +17,23 @@ import de.dakror.vloxlands.game.item.Item;
  */
 public class IslandResources extends VerticalGroup
 {
-	public static final int[] displayedResources = { 254, 255, 1, 11, 17 }; // TODO: Let User choose displayedResources via a dialog and store that in either settings or save file
+	public static final int[] displayedResources = { 254, 255, 1, 11, 17 }; // TODO:
+																																					// Let
+																																					// User
+																																					// choose
+																																					// displayedResources
+																																					// via
+																																					// a
+																																					// dialog
+																																					// and
+																																					// store
+																																					// that
+																																					// in
+																																					// either
+																																					// settings
+																																					// or
+																																					// save
+																																					// file
 	
 	public IslandResources(Stage stage)
 	{

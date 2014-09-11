@@ -23,7 +23,7 @@ public class Wheat extends StaticEntity
 	
 	public Wheat(float x, float y, float z)
 	{
-		super(x - 0.5f, y, z + 0.5f, "models/entities/wheat/wheat.g3db");
+		super(x - 0.5f, y, z + 0.5f, "entities/wheat/wheat.g3db");
 		visible = false;
 		growTicks = growTicksLeft = Game.dayInTicks;
 	}
@@ -45,7 +45,11 @@ public class Wheat extends StaticEntity
 		
 		if (!visible)
 		{
-			if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in sunlight, so <code>initial time * 2</code> = real time is takes
+			if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in
+																												// sunlight, so
+																												// <code>initial time *
+																												// 2</code> = real time
+																												// is takes
 			
 			if (growTicksLeft <= 0)
 			{

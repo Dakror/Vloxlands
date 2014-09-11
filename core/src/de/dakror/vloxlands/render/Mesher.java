@@ -15,7 +15,7 @@ import de.dakror.vloxlands.util.Direction;
  */
 public class Mesher
 {
-	public static final Vector3[] directions = { Vector3.X, /* Vector3.Y, */Vector3.Z };
+	public static final Vector3[] directions = { Vector3.X, Vector3.Y, Vector3.Z };
 	
 	static long millis;
 	static int count;
@@ -77,10 +77,6 @@ public class Mesher
 				}
 			}
 		}
-		// long l = System.currentTimeMillis();
-		// count++;
-		// millis += (System.currentTimeMillis() - l);
-		// D.p(millis / (float) count);
 	}
 	
 	public static boolean canFace(Direction dir, Vector3 direction)
@@ -92,7 +88,13 @@ public class Mesher
 	
 	public static Mesh genCube(float size, float texX, float texY, float texSize)
 	{
-		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																																												 * how
+																																																																																												 * many
+																																																																																												 * faces
+																																																																																												 * together
+																																																																																												 * ?
+																																																																																												 */);
 		
 		float[] cubeVerts = { 0, 0, 0, 0, 0, size, size, 0, size, size, 0, 0, 0, size, 0, 0, size, size, size, size, size, size, size, 0, 0, 0, 0, 0, size, 0, size, size, 0, size, 0, 0, 0, 0, size, 0, size, size, size, size, size, size, 0, size, 0, 0, 0, 0, 0, size, 0, size, size, 0, size, 0, size, 0, 0, size, 0, size, size, size, size, size, size, 0, };
 		
@@ -131,7 +133,13 @@ public class Mesher
 	
 	public static Mesh genCubeWireframe(float size)
 	{
-		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																												 * how
+																																																																												 * many
+																																																																												 * faces
+																																																																												 * together
+																																																																												 * ?
+																																																																												 */);
 		
 		float[] cubeVerts = { 0, 0, 0, 0, 0, size, 0, 0, size, 0, size, size, 0, size, size, 0, size, 0, 0, size, 0, 0, 0, 0, size, 0, 0, size, 0, size, size, 0, size, size, size, size, size, size, size, size, size, 0, size, size, 0, size, 0, 0, size, 0, 0, 0, 0, 0, size, size, 0, 0, size, 0, size, 0, size, 0, 0, size, size, size, size, 0, size, size, };
 		
