@@ -189,7 +189,14 @@ public abstract class Generator
 						vs.weight += v.getWeight();
 						
 						byte b2 = island.get(i, j, k);
-						if (b2 != Voxel.get("AIR").getId()) vs.uplift += Voxel.getForId(b2).getWeight(); // balances uplift-weight in case of v.getUplift() > 0
+						if (b2 != Voxel.get("AIR").getId()) vs.uplift += Voxel.getForId(b2).getWeight(); // balances
+																																															// uplift-weight
+																																															// in
+																																															// case
+																																															// of
+																																															// v.getUplift()
+																																															// >
+																																															// 0
 						
 						island.set(i, j, k, bv, true, false);
 					}

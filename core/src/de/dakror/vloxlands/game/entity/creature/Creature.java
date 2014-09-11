@@ -36,7 +36,7 @@ public abstract class Creature extends Entity
 		super(x, y, z, model);
 		
 		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
-		transform.translate(blockTrn);
+		modelInstance.transform.translate(blockTrn);
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
@@ -95,7 +95,7 @@ public abstract class Creature extends Entity
 						dif.limit(speed);
 						
 						posCache.add(dif);
-						transform.setTranslation(posCache);
+						modelInstance.transform.setTranslation(posCache);
 					}
 				}
 			}
@@ -116,14 +116,14 @@ public abstract class Creature extends Entity
 			{
 				if (path.size() > 0)
 				{
-					transform.getRotation(rotCache);
-					transform.getTranslation(posCache);
+					modelInstance.transform.getRotation(rotCache);
+					modelInstance.transform.getTranslation(posCache);
 					
 					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
 					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
-					transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+					modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 					if (dif.len() <= speed)
 					{
 						if (path.isDone()) onReachTarget();
@@ -151,7 +151,7 @@ public abstract class Creature extends Entity
 	
 	public Vector3 getVoxelBelow()
 	{
-		transform.getTranslation(posCache);
+		modelInstance.transform.getTranslation(posCache);
 		
 		Vector3 v = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 		v.set(Math.round(v.x), Math.round(v.y) - 1, Math.round(v.z));
@@ -188,7 +188,7 @@ public abstract class Creature extends Entity
 		{
 			Vector3 target = path.getGhostTarget().cpy().add(island.pos).add(blockTrn);
 			float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
-			transform.rotate(Vector3.Y, rot - rotCache.getYaw());
+			modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());
 		}
 	}
 }

@@ -13,12 +13,13 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.utils.Array;
 
 import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.game.Game;
@@ -41,9 +42,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	static HashMap<Byte, Class<?>> idToClassMap = new HashMap<Byte, Class<?>>();
 	static HashMap<Class<?>, Byte> classToIdMap = new HashMap<Class<?>, Byte>();
 	
-	protected Matrix4 transform;
-	
 	protected ModelInstance modelInstance;
+	protected Array<ModelInstance> subs;
 	
 	protected byte id;
 	protected int level;
@@ -75,16 +75,24 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		id = classToIdMap.get(getClass());
 		
-		modelInstance = new ModelInstance(Vloxlands.assets.get(model, Model.class));
+		modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		
 		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
 		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
-		transform = modelInstance.transform;
 		
-		transform.getTranslation(posCache);
+		subs = new Array<ModelInstance>();
+		for (Node n : modelInstance.nodes.get(0).children)
+		{
+			if (n.id.startsWith("model:"))
+			{
+				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation));
+			}
+		}
+		
+		modelInstance.transform.getTranslation(posCache);
 		
 		level = 0;
 		modelVisible = true;
@@ -150,11 +158,6 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		return modelInstance;
 	}
 	
-	public Matrix4 getTransform()
-	{
-		return transform;
-	}
-	
 	public byte getId()
 	{
 		return id;
@@ -178,8 +181,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	@Override
 	public void tick(int tick)
 	{
-		transform.getTranslation(posCache);
-		transform.getRotation(rotCache);
+		modelInstance.transform.getTranslation(posCache);
+		modelInstance.transform.getRotation(rotCache);
 		inFrustum = Game.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
@@ -195,7 +198,10 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		if (!visible) return;
 		
-		if (modelVisible) batch.render(modelInstance, environment);
+		if (modelVisible)
+		{
+			batch.render(modelInstance, environment);
+		}
 		if (additionalVisible) renderAdditional(batch, environment);
 		
 		if ((hovered || selected) && !minimapMode)
@@ -271,7 +277,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	{
 		baos.write(id);
 		
-		Bits.putMatrix4(baos, transform);
+		Bits.putMatrix4(baos, modelInstance.transform);
 		
 		Bits.putInt(baos, level);
 		

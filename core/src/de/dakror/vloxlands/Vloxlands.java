@@ -35,11 +35,10 @@ import de.dakror.vloxlands.layer.DebugLayer;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.layer.LoadingLayer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
-import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.ui.skin.DoubleDrawable;
 import de.dakror.vloxlands.ui.skin.TilesetDrawable;
 import de.dakror.vloxlands.util.Compressor;
-import de.dakror.vloxlands.util.D;
+import de.dakror.vloxlands.util.InternalAssetManager;
 import de.dakror.vloxlands.util.VxiLoader;
 import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
@@ -63,8 +62,7 @@ public class Vloxlands extends GameBase
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		
 		Config.init();
-		
-		if (D.android()) RevolverSlot.SIZE = 80;
+		InternalAssetManager.init();
 		
 		Entity.loadEntities();
 		Voxel.loadVoxels();

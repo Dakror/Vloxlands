@@ -108,7 +108,9 @@ public class Inventory implements Savable
 	/**
 	 * @param item Item type to get
 	 * @param amount amount to get
-	 * @return only if at least <code>amount</code> items of type <code>item</code> are inside the inventory a stack, otherwise <code>null</code>
+	 * @return only if at least <code>amount</code> items of type
+	 *         <code>item</code> are inside the inventory a stack, otherwise
+	 *         <code>null</code>
 	 */
 	public ItemStack takeIfHas(Item item, int amount)
 	{

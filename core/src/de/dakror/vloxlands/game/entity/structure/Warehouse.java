@@ -21,10 +21,10 @@ public class Warehouse extends Structure
 {
 	public Warehouse(float x, float y, float z)
 	{
-		super(x, y, z, "models/structure/towncenter.vxi");
+		super(x, y, z, "structure/towncenter.vxi");
 		
-		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
-		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
+		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 2));
+		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 2));
 		name = "Warehouse";
 		
 		weight = 1000f;

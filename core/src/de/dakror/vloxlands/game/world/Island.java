@@ -178,7 +178,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 			else if (e.isSpawned())
 			{
 				e.tick(tick);
-				if (delta != 0) e.getTransform().translate(0, delta, 0);
+				if (delta != 0) e.getModelInstance().transform.translate(0, delta, 0);
 			}
 		}
 		
@@ -205,7 +205,7 @@ public class Island implements RenderableProvider, Tickable, Savable, InventoryL
 	{
 		s.setIsland(this);
 		if (s instanceof Structure) ((Structure) s).getInnerInventory().addListener(this);
-		s.getTransform().translate(pos);
+		s.getModelInstance().transform.translate(pos);
 		entities.add(s);
 		s.onSpawn();
 		

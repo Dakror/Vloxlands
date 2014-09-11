@@ -2,7 +2,6 @@ package de.dakror.vloxlands.util;
 
 import java.util.Arrays;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 
 /**
@@ -48,10 +47,5 @@ public class D
 			s = " " + s;
 		
 		return s;
-	}
-	
-	public static boolean android()
-	{
-		return Gdx.app.getType() == ApplicationType.Android;
 	}
 }

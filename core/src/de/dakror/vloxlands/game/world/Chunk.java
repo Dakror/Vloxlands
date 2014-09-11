@@ -121,9 +121,21 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 		
-		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		opaque = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																																																																			 * how
+																																																																																																																			 * many
+																																																																																																																			 * faces
+																																																																																																																			 * together
+																																																																																																																			 * ?
+																																																																																																																			 */);
 		opaque.setIndices(indices);
-		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /* how many faces together? */);
+		transp = new Mesh(true, SIZE * SIZE * SIZE * 6 * 4, SIZE * SIZE * SIZE * 36 / 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
+																																																																																																																			 * how
+																																																																																																																			 * many
+																																																																																																																			 * faces
+																																																																																																																			 * together
+																																																																																																																			 * ?
+																																																																																																																			 */);
 		transp.setIndices(indices);
 		
 		opaqueMeshData = new FloatArray();

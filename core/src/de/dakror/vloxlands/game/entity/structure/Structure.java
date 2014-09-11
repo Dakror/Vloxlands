@@ -77,7 +77,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	Array<Human> workers;
 	Inventory inventory;
 	/**
-	 * Works reversed. Gets filled when placed and <code>built == false</code>. Gets emptied by delivering the building materials
+	 * Works reversed. Gets filled when placed and <code>built == false</code>.
+	 * Gets emptied by delivering the building materials
 	 */
 	NonStackingInventory buildInventory;
 	ResourceList costs;
@@ -155,7 +156,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
+																																					// people
+																																					// and
+																																					// buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 			}
 		}
@@ -661,7 +665,10 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			int i = 0;
 			for (Byte b : getCosts().getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
+																																					// people
+																																					// and
+																																					// buildings
 				
 				if (i % 2 == 0) res.row();
 				Item item = Item.getForId(b);
@@ -742,7 +749,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 				@Override
 				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
 				{
-					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety first ;)
+					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety
+																																																		// first
+																																																		// ;)
 					
 					for (Byte b : copy.getCosts().getAll())
 					{

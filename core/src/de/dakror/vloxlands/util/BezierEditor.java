@@ -35,8 +35,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * <li>x - reset bezier
  * <li>c - copy bezier to clipboard
  * <li>v - load bezier from clipboard</li>
- * <li>b - run a example of possible voxel generation using this bezier curve with custom params</li>
- * <li>n - run a example of possible voxel generation using this bezier curve with last used params</li>
+ * <li>b - run a example of possible voxel generation using this bezier curve
+ * with custom params</li>
+ * <li>n - run a example of possible voxel generation using this bezier curve
+ * with last used params</li>
  * <li>SHIFT+DRAG - drag only on X-Axis</li>
  * <li>CTRL+DRAG - drag only on Y-Axis</li>
  * </ul>

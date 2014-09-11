@@ -53,7 +53,6 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.layer.Layer;
 import de.dakror.vloxlands.render.DDirectionalShadowLight;
 import de.dakror.vloxlands.render.MeshingThread;
-import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.event.SelectionListener;
 import de.dakror.vloxlands.util.event.VoxelSelection;
@@ -70,7 +69,8 @@ public class Game extends Layer
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
-	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks = 1200s = 20min
+	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks =
+																							// 1200s = 20min
 	
 	public static Game instance;
 	
@@ -190,8 +190,7 @@ public class Game extends Layer
 		controller.forwardKey = -1;
 		controller.backwardKey = -1;
 		controller.translateButton = -1;
-		if (D.android()) controller.pinchZoomFactor = 50;
-		controller.rotateButton = D.android() ? Buttons.LEFT : Buttons.MIDDLE;
+		controller.rotateButton = Buttons.MIDDLE;
 		Vloxlands.instance.getMultiplexer().addProcessor(controller);
 		minimapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		minimapCamera.near = 0.1f;
@@ -636,18 +635,14 @@ public class Game extends Layer
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer)
 	{
-		if (D.android()) mouseMoved(screenX, screenY);
-		else
+		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
 		{
-			if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-			{
-				float f = 0.1f;
-				
-				controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
-				camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
-				camera.update();
-				controller.update();
-			}
+			float f = 0.1f;
+			
+			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
+			camera.position.y = cameraPos.y + (screenY - mouseDown.y) * f;
+			camera.update();
+			controller.update();
 		}
 		return false;
 	}
@@ -659,9 +654,9 @@ public class Game extends Layer
 		else if (cursorEntity != null)
 		{
 			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
-			cursorEntity.getTransform().setToTranslation(activeIsland.pos);
-			cursorEntity.getTransform().translate(hoveredVoxel);
-			cursorEntity.getTransform().translate(0, cursorEntity.getBoundingBox().getDimensions().y / 2, 0);
+			cursorEntity.getModelInstance().transform.setToTranslation(activeIsland.pos);
+			cursorEntity.getModelInstance().transform.translate(hoveredVoxel);
+			cursorEntity.getModelInstance().transform.translate(0, cursorEntity.getBoundingBox().getDimensions().y / 2, 0);
 			cursorEntity.setIsland(activeIsland);
 			cursorEntity.updateVoxelPos();
 			cursorEntityPlacable = cursorEntity.canBePlaced();
@@ -730,7 +725,7 @@ public class Game extends Layer
 							}
 							
 							if (cursorEntity instanceof Structure) ((Structure) cursorEntity).setBuilt(false);
-							cursorEntity.getTransform().translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
+							cursorEntity.getModelInstance().transform.translate(-activeIsland.pos.x, -activeIsland.pos.y, -activeIsland.pos.z);
 							activeIsland.addEntity(cursorEntity, true, false);
 							cursorEntity.updateVoxelPos();
 							
@@ -744,7 +739,7 @@ public class Game extends Layer
 							{
 								cursorEntity = (StaticEntity) Entity.getForId(cursorEntity.getId(), cursorEntity.posCache.x, cursorEntity.posCache.y, cursorEntity.posCache.z);
 								cursorEntity.setIsland(activeIsland);
-								cursorEntity.getTransform().translate(activeIsland.pos.x, activeIsland.pos.y, activeIsland.pos.z);
+								cursorEntity.getModelInstance().transform.translate(activeIsland.pos.x, activeIsland.pos.y, activeIsland.pos.z);
 								cursorEntity.updateVoxelPos();
 								if (cursorEntity instanceof Structure) ((Structure) cursorEntity).setBuilt(true);
 								cursorEntity.setVisible(true);

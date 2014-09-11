@@ -18,7 +18,7 @@ public class Sapling extends StaticEntity
 	
 	public Sapling(float x, float y, float z)
 	{
-		super(x + 0.25f, y - 0.5f, z + 0.25f, "models/entities/sapling/sapling.g3db");
+		super(x + 0.25f, y - 0.5f, z + 0.25f, "entities/sapling/sapling.g3db");
 		
 		name = "Sapling";
 		weight = 1f;
@@ -31,7 +31,10 @@ public class Sapling extends StaticEntity
 	{
 		super.tick(tick);
 		
-		if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in sunlight, so <code>initial time * 2</code> = real time is takes
+		if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in sunlight,
+																											// so <code>initial time *
+																											// 2</code> = real time is
+																											// takes
 		
 		if (growTicksLeft <= 0)
 		{
