@@ -6,6 +6,8 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -186,6 +188,8 @@ public class InternalAssetManager
 	{
 		try
 		{
+			Reader reader = null;
+			
 			if (!isRunningFromJarFile())
 			{
 				File parent = new File(InternalAssetManager.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile();
@@ -194,21 +198,26 @@ public class InternalAssetManager
 				if (!dst.exists()) dst = new File(parent, "android/assets");
 				if (!dst.exists()) throw new FileNotFoundException("Could not locate assets folder");
 				
+				StringBuffer sb = new StringBuffer();
+				writeDirectory(sb, dst, dst.getPath().length() + 1);
 				FileWriter fw = new FileWriter(new File(dst, "FILES.txt"));
-				writeDirectory(fw, dst, dst.getPath().length() + 1);
+				String s = sb.toString();
+				fw.write(s);
 				fw.close();
+
+				reader = new StringReader(s);
 			}
 			
+			int files = 0;
+			
 			FileHandle fh = Gdx.files.internal("FILES.txt");
-			BufferedReader br = new BufferedReader(fh.reader());
+			BufferedReader br = new BufferedReader(reader == null ? fh.reader() : reader);
 			String line = "";
 			
 			root = new FileNode(null, null, true);
 			
 			FileNode activeNode = root;
 			int slashes = -1;
-			
-			int files = 0;
 			
 			while ((line = br.readLine()) != null)
 			{
@@ -408,7 +417,7 @@ public class InternalAssetManager
 		return null;
 	}
 	
-	static void writeDirectory(FileWriter fw, File dir, int pathOffset) throws IOException
+	static void writeDirectory(StringBuffer sb, File dir, int pathOffset) throws IOException
 	{
 		File[] files = dir.listFiles();
 		Arrays.sort(files, new Comparator<File>()
@@ -426,8 +435,8 @@ public class InternalAssetManager
 		});
 		for (File f : files)
 		{
-			fw.write((f.isDirectory() ? "d " : "f ") + f.getPath().substring(pathOffset).replace("\\", "/") + "\r\n");
-			if (f.isDirectory()) writeDirectory(fw, f, pathOffset);
+			sb.append((f.isDirectory() ? "d " : "f ") + f.getPath().substring(pathOffset).replace("\\", "/") + "\r\n");
+			if (f.isDirectory()) writeDirectory(sb, f, pathOffset);
 		}
 	}
 }

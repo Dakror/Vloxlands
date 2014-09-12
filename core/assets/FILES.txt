@@ -47,6 +47,7 @@ d models/entities/wheat
 f models/entities/wheat/wheat.blend
 f models/entities/wheat/wheat.fbx
 f models/entities/wheat/wheat.g3db
+f models/entities/wheat/wheat.g3dj
 d models/item
 d models/item/axe
 f models/item/axe/LICENSE.txt
@@ -94,7 +95,6 @@ f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
 f models/structure/.PH means PlaceHolder
-f models/structure/door_x.vxi
 f models/structure/door_z.vxi
 f models/structure/towncenter.vxi
 d models/structure/PH_tent
