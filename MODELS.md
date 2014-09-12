@@ -5,8 +5,9 @@ Models needing to be voxel-ed
 - Human (1 x 2 x 1)
 
 ## Static Entities
-- Wheat (1 x 1 x 1) [Nimmi-dev]
+- ~~Wheat (1 x 1 x 1) [Nimmi-dev]~~
 - Sapling (1 x 1 x 1)
+  
 ## Structures
 - Farm
 - Forester
