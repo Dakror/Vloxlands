@@ -48,6 +48,11 @@ f models/entities/wheat/wheat.blend
 f models/entities/wheat/wheat.fbx
 f models/entities/wheat/wheat.g3db
 f models/entities/wheat/wheat.g3dj
+f models/entities/wheat/wheat0[16].vxi
+f models/entities/wheat/wheat1[16].vxi
+f models/entities/wheat/wheat2[16].vxi
+f models/entities/wheat/wheat3[16].vxi
+f models/entities/wheat/wheat4[16].vxi
 d models/item
 d models/item/axe
 f models/item/axe/LICENSE.txt

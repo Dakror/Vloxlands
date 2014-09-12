@@ -139,6 +139,8 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		Array<Vertex> vertices = new Array<Vertex>();
 		
+		offsetZ -= depth * 0.3f;
+		
 		for (ColorFace f : faces.values())
 		{
 			Vertex tl = new Vertex(f.tl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution).rotate(Vector3.X, -90), f.dir.dir.cpy().rotate(Vector3.X, -90), f.c);
@@ -178,7 +180,8 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			node.translation.set(-width / 2, -height / 2, -depth / 2).scl(resolution);
+			
+			node.translation.add(p.x, -p.y, p.z + depth * 0.3f).scl(resolution);
 			model.nodes.get(0).children.add(node);
 		}
 		
