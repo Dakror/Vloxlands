@@ -156,10 +156,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
-																																					// people
-																																					// and
-																																					// buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 			}
 		}

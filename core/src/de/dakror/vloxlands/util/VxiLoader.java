@@ -180,7 +180,6 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			
 			node.translation.add(p.x, -p.y, p.z + depth * 0.3f).scl(resolution);
 			model.nodes.get(0).children.add(node);
 		}

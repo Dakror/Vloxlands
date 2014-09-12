@@ -69,8 +69,7 @@ public class Game extends Layer
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
-	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks =
-																							// 1200s = 20min
+	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks = 1200s = 20min
 	
 	public static Game instance;
 	

@@ -99,13 +99,8 @@ f models/sky/sky.blend
 f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
-f models/structure/.PH means PlaceHolder
 f models/structure/door_z.vxi
 f models/structure/towncenter.vxi
-d models/structure/PH_tent
-f models/structure/PH_tent/PH_tent.blend
-f models/structure/PH_tent/PH_tent.fbx
-f models/structure/PH_tent/PH_tent.g3db
 d shader
 f shader/shader.fs
 f shader/shader.vs
