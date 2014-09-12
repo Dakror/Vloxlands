@@ -18,9 +18,9 @@ import com.badlogic.gdx.utils.IntMap;
 
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.voxel.Voxel;
-import de.dakror.vloxlands.render.Face;
 import de.dakror.vloxlands.render.Mesher;
 import de.dakror.vloxlands.render.MeshingThread;
+import de.dakror.vloxlands.render.TextureFace;
 import de.dakror.vloxlands.util.Compressor;
 import de.dakror.vloxlands.util.Direction;
 import de.dakror.vloxlands.util.interf.Meshable;
@@ -417,8 +417,8 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	private void getVertices()
 	{
-		IntMap<Face> faces = new IntMap<Face>();
-		IntMap<Face> transpFaces = new IntMap<Face>();
+		IntMap<TextureFace> faces = new IntMap<TextureFace>();
+		IntMap<TextureFace> transpFaces = new IntMap<TextureFace>();
 		
 		int i = 0;
 		for (int x = 0; x < SIZE; x++)
@@ -439,7 +439,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 						Voxel ww = Voxel.getForId(w);
 						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
 						{
-							Face face = new Face(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
+							TextureFace face = new TextureFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
 							if (v.isOpaque()) faces.put(face.hashCode(), face);
 							else transpFaces.put(face.hashCode(), face);
 						}
@@ -448,10 +448,10 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 			}
 		}
 		
-		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, faces);
-		Mesher.generateGreedyMesh((int) index.x, (int) index.y, (int) index.z, transpFaces);
+		Mesher.generateGreedyMesh((int) pos.x, (int) pos.y, (int) pos.z, faces);
+		Mesher.generateGreedyMesh((int) pos.x, (int) pos.y, (int) pos.z, transpFaces);
 		
-		for (IntMap.Entry<Face> f : faces)
+		for (IntMap.Entry<TextureFace> f : faces)
 			f.value.getVertexData(opaqueMeshData);
 		
 		IntArray transpKeys = transpFaces.keys().toArray();

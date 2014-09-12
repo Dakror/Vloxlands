@@ -20,7 +20,12 @@ public class Mesher
 	static long millis;
 	static int count;
 	
-	public static void generateGreedyMesh(int cx, int cy, int cz, IntMap<Face> faces)
+	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, IntMap<T> faces)
+	{
+		generateGreedyMesh(offsetX, offsetY, offsetZ, Chunk.SIZE, Chunk.SIZE, Chunk.SIZE, faces);
+	}
+	
+	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, int width, int height, int depth, IntMap<T> faces)
 	{
 		if (faces.size == 0) return;
 		
@@ -32,22 +37,21 @@ public class Mesher
 			{
 				if (!canFace(dir, direction)) continue;
 				
-				Face activeFace = null;
+				T activeFace = null;
 				int activeI = 0;
 				int activeJ = 0;
-				for (int i = 0; i < Chunk.SIZE; i++)
+				for (int i = 0; i < width; i++)
 				{
-					for (int j = 0; j < Chunk.SIZE; j++)
+					for (int j = 0; j < height; j++)
 					{
-						for (int k = 0; k < Chunk.SIZE; k++)
+						for (int k = 0; k < depth; k++)
 						{
 							int x = direction.x == 1 ? k : direction.z == 1 ? i : j;
 							int y = direction.y == 1 ? k : direction.z == 1 ? j : i;
 							int z = direction.z == 1 ? k : direction.x == 1 ? j : i;
 							
-							int hash = Face.getHashCode(x + cx * Chunk.SIZE, y + cy * Chunk.SIZE, z + cz * Chunk.SIZE, dir.ordinal());
-							Face face = faces.get(hash);
-							
+							int hash = Face.getHashCode(x + offsetX, y + offsetY, z + offsetZ, dir.ordinal());
+							T face = faces.get(hash);
 							
 							if (face == null)
 							{
@@ -60,7 +64,7 @@ public class Mesher
 								continue;
 							}
 							
-							if (activeFace != null && i == activeI && j == activeJ && face.tex.equals(activeFace.tex) && face.isSameSize(activeFace, direction))
+							if (activeFace != null && i == activeI && j == activeJ && face.canCombine(activeFace) && face.isSameSize(activeFace, direction))
 							{
 								activeFace.increaseSize(direction.x * face.sizeX, direction.y * face.sizeY, direction.z * face.sizeZ);
 								removedByMe.add(hash);

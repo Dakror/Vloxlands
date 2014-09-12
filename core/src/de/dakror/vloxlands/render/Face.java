@@ -1,37 +1,30 @@
 package de.dakror.vloxlands.render;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.FloatArray;
 
-import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.Direction;
 
-public class Face
+/**
+ * @author Dakror
+ */
+public abstract class Face<T extends Face<T>>
 {
 	public Direction dir;
 	public Vector3 pos, tl, tr, bl, br, n;
-	
-	public Vector2 tex;
-	public float texWidth = Voxel.TEXSIZE;
-	public float texHeight = Voxel.TEXSIZE;
-	
 	public float sizeX, sizeY, sizeZ;
 	
 	int hash;
 	boolean hashDirty = true;
 	
-	public Face(Direction dir, Vector3 pos, Vector2 tex)
+	public Face(Direction dir, Vector3 pos)
 	{
-		this(dir, pos, tex, 1, 1, 1);
+		this(dir, pos, 1, 1, 1);
 	}
 	
-	public Face(Direction dir, Vector3 pos, Vector2 tex, float sizeX, float sizeY, float sizeZ)
+	public Face(Direction dir, Vector3 pos, float sizeX, float sizeY, float sizeZ)
 	{
 		this.dir = dir;
 		this.pos = pos;
-		this.tex = tex;
 		setSize(sizeX, sizeY, sizeZ);
 	}
 	
@@ -111,65 +104,6 @@ public class Face
 		n = bl.cpy().sub(br).crs(tr.cpy().sub(br)).nor();
 	}
 	
-	public void getVertexData(FloatArray vert)
-	{
-		boolean zDir = dir == Direction.WEST || dir == Direction.EAST;
-		boolean yDir = dir == Direction.UP || dir == Direction.DOWN;
-		
-		float tx = (float) Math.ceil(zDir ? sizeX : yDir ? sizeX : sizeZ);
-		float ty = (float) Math.ceil(yDir ? sizeZ : sizeY);
-		
-		float b = Color.toFloatBits(1f, 1f, 1f, 1f);
-		
-		vert.add(tl.x + pos.x);
-		vert.add(tl.y + pos.y);
-		vert.add(tl.z + pos.z);
-		vert.add(n.x);
-		vert.add(n.y);
-		vert.add(n.z);
-		vert.add(b);
-		vert.add(tex.x);
-		vert.add(tex.y);
-		vert.add(tx);
-		vert.add(ty);
-		
-		vert.add(tr.x + pos.x);
-		vert.add(tr.y + pos.y);
-		vert.add(tr.z + pos.z);
-		vert.add(n.x);
-		vert.add(n.y);
-		vert.add(n.z);
-		vert.add(b);
-		vert.add(tex.x + texWidth);
-		vert.add(tex.y);
-		vert.add(tx);
-		vert.add(ty);
-		
-		vert.add(br.x + pos.x);
-		vert.add(br.y + pos.y);
-		vert.add(br.z + pos.z);
-		vert.add(n.x);
-		vert.add(n.y);
-		vert.add(n.z);
-		vert.add(b);
-		vert.add(tex.x + texWidth);
-		vert.add(tex.y + texHeight);
-		vert.add(tx);
-		vert.add(ty);
-		
-		vert.add(bl.x + pos.x);
-		vert.add(bl.y + pos.y);
-		vert.add(bl.z + pos.z);
-		vert.add(n.x);
-		vert.add(n.y);
-		vert.add(n.z);
-		vert.add(b);
-		vert.add(tex.x);
-		vert.add(tex.y + texHeight);
-		vert.add(tx);
-		vert.add(ty);
-	}
-	
 	public void increaseSize(Vector3 direction)
 	{
 		setSize(sizeX + direction.x, sizeY + direction.y, sizeZ + direction.z);
@@ -180,13 +114,7 @@ public class Face
 		setSize(sizeX + x, sizeY + y, sizeZ + z);
 	}
 	
-	@Override
-	public String toString()
-	{
-		return "VoxelFace[pos=" + pos.toString() + ", DIR=" + dir + ", sizeX=" + sizeX + ", sizeY=" + sizeY + ", sizeZ=" + sizeZ + ", tl=" + tl + ", tr=" + tr + ", bl=" + bl + ", br=" + br + "]";
-	}
-	
-	public boolean isSameSize(Face o, Vector3 direction)
+	public boolean isSameSize(T o, Vector3 direction)
 	{
 		if (direction.x == 1) return sizeY == o.sizeY && sizeZ == o.sizeZ;
 		else if (direction.y == 1) return sizeX == o.sizeX && sizeZ == o.sizeZ;
@@ -194,10 +122,16 @@ public class Face
 	}
 	
 	@Override
+	public String toString()
+	{
+		return "VoxelFace[pos=" + pos.toString() + ", DIR=" + dir + ", sizeX=" + sizeX + ", sizeY=" + sizeY + ", sizeZ=" + sizeZ + ", tl=" + tl + ", tr=" + tr + ", bl=" + bl + ", br=" + br + "]";
+	}
+	
+	@Override
 	public boolean equals(Object obj)
 	{
 		if (!(obj instanceof Face)) return false;
-		return hashCode() == obj.hashCode() && sizeX == ((Face) obj).sizeX && sizeY == ((Face) obj).sizeY && sizeZ == ((Face) obj).sizeZ;
+		return hashCode() == obj.hashCode() && sizeX == ((TextureFace) obj).sizeX && sizeY == ((TextureFace) obj).sizeY && sizeZ == ((TextureFace) obj).sizeZ;
 	}
 	
 	@Override
@@ -205,11 +139,13 @@ public class Face
 	{
 		if (hashDirty)
 		{
-			hash = getHashCode((int) pos.x, (int) pos.y, (int) pos.z, dir.ordinal());
+			hash = Face.getHashCode((int) pos.x, (int) pos.y, (int) pos.z, dir.ordinal());
 			hashDirty = false;
 		}
 		return hash;
 	}
+	
+	public abstract boolean canCombine(T o);
 	
 	public static int getHashCode(int x, int y, int z, int d)
 	{

@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ObjectMap;
 
-import de.dakror.vloxlands.render.Face;
+import de.dakror.vloxlands.render.TextureFace;
 import de.dakror.vloxlands.util.CSVReader;
 import de.dakror.vloxlands.util.Direction;
 
@@ -333,7 +333,7 @@ public class Voxel
 			v.mesh.setIndices(indices);
 			verts = new FloatArray();
 			for (Direction d : Direction.values())
-				new Face(d, new Vector3(), v.getTextureUV(0, 0, 0, d)).getVertexData(verts);
+				new TextureFace(d, new Vector3(), v.getTextureUV(0, 0, 0, d)).getVertexData(verts);
 			v.mesh.setVertices(verts.items, 0, verts.size);
 		}
 	}
