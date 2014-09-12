@@ -673,12 +673,13 @@ public class Game extends Layer
 			{
 				Material m = cursorEntity.getModelInstance().materials.get(i);
 				
-				Color defaultColor = ((ColorAttribute) defaultCursorEntityMaterials.get(i).get(ColorAttribute.Diffuse)).color;
-				
-				m.set(ColorAttribute.createDiffuse(!cursorEntityPlacable ? Color.RED : defaultColor));
-				if (!cursorEntityPlacable) m.set(new BlendingAttribute(0.8f));
+				if (!cursorEntityPlacable)
+				{
+					m.set(new BlendingAttribute(0.8f), ColorAttribute.createDiffuse(Color.RED));
+				}
 				else
 				{
+					m.remove(ColorAttribute.Diffuse);
 					BlendingAttribute ba = (BlendingAttribute) defaultCursorEntityMaterials.get(i).get(BlendingAttribute.Type);
 					if (ba == null) m.remove(BlendingAttribute.Type);
 					else m.set(ba);
