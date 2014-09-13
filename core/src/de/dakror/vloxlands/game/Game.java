@@ -233,8 +233,9 @@ public class Game extends Layer
 		activeIsland.addEntity(human, false, false);
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
-		tc.setBuilt(true);
+		
 		activeIsland.addEntity(tc, false, true);
+		tc.setBuilt(true);
 		tc.getInnerInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));

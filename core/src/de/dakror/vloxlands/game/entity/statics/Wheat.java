@@ -3,7 +3,6 @@ package de.dakror.vloxlands.game.entity.statics;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.voxel.MetaTags;
@@ -18,14 +17,16 @@ public class Wheat extends StaticEntity
 	int growTicks;
 	int growTicksLeft;
 	boolean managed;
+	int level;
+	int perLevel;
 	
 	public static int itemsForHarvest = 5;
 	
 	public Wheat(float x, float y, float z)
 	{
-		super(x - 0.5f, y, z + 0.5f, "entities/wheat/wheat.g3db");
-		visible = false;
-		growTicks = growTicksLeft = Game.dayInTicks;
+		super(x, y, z, "entities/wheat/wheat0[16].vxi");
+		growTicks = growTicksLeft = Game.dayInTicks / 3 * 2;
+		perLevel = growTicks / 5;
 	}
 	
 	@Override
@@ -33,7 +34,7 @@ public class Wheat extends StaticEntity
 	{
 		super.onSpawn();
 		
-		visible = false;
+		level = 0;
 		island.set(voxelPos.x, voxelPos.y, voxelPos.z, Voxel.get("ACRE").getId());
 		island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWING);
 	}
@@ -43,27 +44,17 @@ public class Wheat extends StaticEntity
 	{
 		super.tick(tick);
 		
-		if (!visible)
-		{
-			if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in
-																												// sunlight, so
-																												// <code>initial time *
-																												// 2</code> = real time
-																												// is takes
-			
-			if (growTicksLeft <= 0)
-			{
-				visible = true;
-				island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWN);
-			}
-		}
-	}
-	
-	@Override
-	public void setVisible(boolean visible)
-	{
-		super.setVisible(visible);
-		if (!visible) growTicksLeft = growTicks;
+		// if (level < 4)
+		// {
+		// if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in sunlight, so <code>initial time * 2</code> = real time is takes
+		//
+		// if (growTicksLeft % perLevel == 0)
+		// {
+		// level++;
+		// modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + "entities/wheat/wheat" + level + "[16].vxi", Model.class));
+		// }
+		// if (level == 4) island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWN);
+		// }
 	}
 	
 	@Override
