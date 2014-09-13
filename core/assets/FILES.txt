@@ -31,6 +31,7 @@ f img/logo/logo256-blur.png
 f img/logo/logo256.png
 f img/logo/logo32.png
 d models
+f models/palette.dat
 d models/creature
 d models/creature/humanblend
 f models/creature/humanblend/humanblend.blend
@@ -100,6 +101,7 @@ f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
 f models/structure/door_z.vxi
+f models/structure/palette.dat
 f models/structure/towncenter.vxi
 d shader
 f shader/shader.fs

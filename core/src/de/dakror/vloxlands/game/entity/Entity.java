@@ -71,6 +71,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
+	public final Vector3 tmpV = new Vector3();
+	public final Quaternion tmpQ = new Quaternion();
 	final Matrix4 tmp = new Matrix4();
 	
 	public Entity(float x, float y, float z, String model)
@@ -208,7 +210,13 @@ public class Entity extends EntityBase implements Telegraph, Savable
 				tmp.set(mi.transform);
 				modelInstance.transform.getTranslation(posCache);
 				modelInstance.transform.getRotation(rotCache);
-				mi.transform.translate(posCache).rotate(rotCache);
+				mi.transform.getTranslation(tmpV);
+				mi.transform.getRotation(tmpQ);
+				mi.transform.idt();
+				
+				mi.transform.translate(posCache).rotate(rotCache).translate(tmpV);
+				
+				mi.transform.rotate(tmpQ);
 				
 				batch.render(mi, environment);
 				
