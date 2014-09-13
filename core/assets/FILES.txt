@@ -101,7 +101,6 @@ f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
 f models/structure/door_z.vxi
-f models/structure/palette.dat
 f models/structure/towncenter.vxi
 d shader
 f shader/shader.fs

@@ -21,15 +21,13 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
  */
 public class RevolverSlot extends TooltipImageButton
 {
-	public static final float DEFAULT_SIZE = 54f;
-	public static int SIZE = (int) DEFAULT_SIZE;
+	public static final float SIZE = 54f;
 	Revolver revolver;
 	
 	public RevolverSlot(Stage stage, Vector2 icon, String name)
 	{
 		super(createStyle(icon));
 		setName(name);
-		pad(12 * (SIZE / DEFAULT_SIZE));
 		
 		if (name.startsWith("entity:"))
 		{
@@ -68,7 +66,6 @@ public class RevolverSlot extends TooltipImageButton
 	public void setIcon(Vector2 icon)
 	{
 		setStyle(createStyle(icon));
-		pad(12 * (SIZE / DEFAULT_SIZE));
 	}
 	
 	public void addSlot(RevolverSlot slot)
@@ -83,26 +80,17 @@ public class RevolverSlot extends TooltipImageButton
 		
 		ImageButtonStyle style = new ImageButtonStyle();
 		style.up = Vloxlands.skin.getDrawable("revolverSlot");
-		style.up.setMinWidth(SIZE);
-		style.up.setMinHeight(SIZE);
 		style.down = Vloxlands.skin.getDrawable("revolverSlot");
-		style.down.setMinWidth(SIZE);
-		style.down.setMinHeight(SIZE);
 		style.over = Vloxlands.skin.getDrawable("revolverSlot_over");
-		style.over.setMinWidth(SIZE);
-		style.over.setMinHeight(SIZE);
 		style.checked = Vloxlands.skin.getDrawable("revolverSlot_over");
-		style.checked.setMinWidth(SIZE);
-		style.checked.setMinHeight(SIZE);
 		style.disabled = Vloxlands.skin.getDrawable("revolverSlot_disabled");
-		style.disabled.setMinWidth(SIZE);
-		style.disabled.setMinHeight(SIZE);
 		style.imageUp = new TextureRegionDrawable(region);
-		style.imageUp.setMinWidth(SIZE);
-		style.imageUp.setMinHeight(SIZE);
+		style.imageUp.setMinWidth(SIZE - 24);
+		style.imageUp.setMinHeight(SIZE - 24);
 		style.imageDown = new TextureRegionDrawable(region);
-		style.imageDown.setMinWidth(SIZE);
-		style.imageDown.setMinHeight(SIZE);
+		style.imageDown.setMinWidth(SIZE - 24);
+		style.imageDown.setMinHeight(SIZE - 24);
+		
 		return style;
 	}
 }
