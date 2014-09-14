@@ -65,7 +65,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
 	protected final Vector3 dimensions = new Vector3();
-	protected final Vector3 blockTrn = new Vector3();
+	public final Vector3 blockTrn = new Vector3();
 	protected Island island;
 	
 	protected AnimationController animationController;

@@ -25,7 +25,7 @@ public abstract class StaticEntity extends Entity
 	{
 		modelInstance.transform.getTranslation(posCache);
 		modelInstance.transform.getRotation(rotCache);
-		Vector3 p = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().cpy().scl(0.5f));
+		Vector3 p = posCache.cpy().sub(island.pos).sub(blockTrn);
 		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
 	}
 	

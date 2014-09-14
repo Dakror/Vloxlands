@@ -655,8 +655,7 @@ public class Game extends Layer
 		{
 			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
 			cursorEntity.getModelInstance().transform.setToTranslation(activeIsland.pos);
-			cursorEntity.getModelInstance().transform.translate(hoveredVoxel);
-			cursorEntity.getModelInstance().transform.translate(0, cursorEntity.getBoundingBox().getDimensions().y / 2, 0);
+			cursorEntity.getModelInstance().transform.translate(hoveredVoxel).translate(cursorEntity.getBoundingBox().getDimensions().x <= 1 ? cursorEntity.blockTrn.x : 0, cursorEntity.blockTrn.y, cursorEntity.getBoundingBox().getDimensions().z <= 1 ? cursorEntity.blockTrn.z : 0);
 			cursorEntity.setIsland(activeIsland);
 			cursorEntity.updateVoxelPos();
 			cursorEntityPlacable = cursorEntity.canBePlaced();
