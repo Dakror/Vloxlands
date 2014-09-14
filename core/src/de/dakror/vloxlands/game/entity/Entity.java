@@ -29,6 +29,7 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.ui.PinnableWindow;
 import de.dakror.vloxlands.ui.RevolverSlot;
 import de.dakror.vloxlands.util.CSVReader;
+import de.dakror.vloxlands.util.D;
 import de.dakror.vloxlands.util.base.EntityBase;
 import de.dakror.vloxlands.util.interf.Savable;
 import de.dakror.vloxlands.util.math.Bits;
@@ -88,6 +89,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 			blockTrn.set(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1 - boundingBox.getCenter().y, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
 		}
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
+		D.p(model, boundingBox.getDimensions());
 		
 		modelInstance.transform.translate(x, y, z).translate(blockTrn);
 		

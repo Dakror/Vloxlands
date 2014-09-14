@@ -21,7 +21,12 @@ public class Warehouse extends Structure
 {
 	public Warehouse(float x, float y, float z)
 	{
-		super(x, y, z, "structure/towncenter.vxi");
+		this(x, y, z, "structure/house.vxi");
+	}
+	
+	protected Warehouse(float x, float y, float z, String model)
+	{
+		super(x, y, z, model);
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 2));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 2));

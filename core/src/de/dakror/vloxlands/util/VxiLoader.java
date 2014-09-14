@@ -139,7 +139,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		Array<Vertex> vertices = new Array<Vertex>();
 		
-		offsetZ -= depth * 0.3f;
+		offsetZ -= depth * 0.35f;
 		
 		for (ColorFace f : faces.values())
 		{

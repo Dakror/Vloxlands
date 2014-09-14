@@ -13,7 +13,7 @@ public class Towncenter extends Warehouse
 {
 	public Towncenter(float x, float y, float z)
 	{
-		super(x, y, z);
+		super(x, y, z, "structure/towncenter.vxi");
 		
 		name = "Towncenter";
 		inventory = new NonStackingInventory(300);

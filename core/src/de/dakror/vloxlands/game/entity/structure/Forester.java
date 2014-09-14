@@ -11,7 +11,7 @@ public class Forester extends Structure
 {
 	public Forester(float x, float y, float z)
 	{
-		super(x, y, z, "structure/towncenter.vxi");
+		super(x, y, z, "structure/house.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
 		nodes.add(new StructureNode(NodeType.pickup, 0, 0, 1));
