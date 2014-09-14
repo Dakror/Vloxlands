@@ -1,10 +1,11 @@
-package de.dakror.vloxlands.game.entity;
+package de.dakror.vloxlands.game.entity.statics;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.badlogic.gdx.math.Vector3;
 
+import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**

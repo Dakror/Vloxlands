@@ -4,9 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import de.dakror.vloxlands.game.Game;
-import de.dakror.vloxlands.game.entity.StaticEntity;
-import de.dakror.vloxlands.game.voxel.MetaTags;
-import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.math.Bits;
 
 /**
@@ -24,20 +21,25 @@ public class Wheat extends StaticEntity
 	
 	public Wheat(float x, float y, float z)
 	{
-		super(x, y, z, "entities/wheat/wheat0[16].vxi");
+		this(x, y, z, 0);
+	}
+	
+	public Wheat(float x, float y, float z, int phase)
+	{
+		super(x, y, z, "entities/wheat/wheat" + phase + "[16].vxi");
 		growTicks = growTicksLeft = Game.dayInTicks / 3 * 2;
 		perLevel = growTicks / 5;
 	}
 	
-	@Override
-	public void onSpawn()
-	{
-		super.onSpawn();
-		
-		level = 0;
-		island.set(voxelPos.x, voxelPos.y, voxelPos.z, Voxel.get("ACRE").getId());
-		island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWING);
-	}
+	// @Override
+	// public void onSpawn()
+	// {
+	// super.onSpawn();
+	//
+	// level = 0;
+	// island.set(voxelPos.x, voxelPos.y, voxelPos.z, Voxel.get("ACRE").getId());
+	// island.setMeta(voxelPos.x, voxelPos.y, voxelPos.z, MetaTags.ACRE_PLANT_GROWING);
+	// }
 	
 	@Override
 	public void tick(int tick)
