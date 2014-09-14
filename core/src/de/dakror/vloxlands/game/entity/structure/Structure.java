@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
@@ -211,7 +212,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	{
 		super.onSpawn();
 		
-		subs.get(0).transform.translate(0, 0, -1).rotate(0, -1, 0, 180).translate(0, 0, 1);
+		for (ModelInstance mi : subs)
+			mi.transform.rotate(0, -1, 0, 180);
 		
 		inventory.addListener(this);
 		

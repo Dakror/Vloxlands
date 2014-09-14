@@ -100,6 +100,7 @@ f models/sky/sky.blend
 f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
+f models/structure/door_x.vxi
 f models/structure/door_z.vxi
 f models/structure/house.vxi
 f models/structure/towncenter.vxi
