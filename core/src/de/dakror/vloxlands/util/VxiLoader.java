@@ -141,7 +141,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		Array<Vertex> vertices = new Array<Vertex>();
 		
-		offsetZ -= depth / 3f;
+		offsetZ -= depth * (depth < height ? 0.3f : 1 / 3f);// TODO is this doing the trick?
 		
 		for (ColorFace f : faces.values())
 		{
@@ -187,7 +187,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			node.translation.add(p.x, p.y, p.z - depth / 4f).scl(resolution);
+			node.translation.add(p.x, p.y, p.z - depth * (depth < height ? 0.165f : 1 / 4f)).scl(resolution);
 			rotate(node.translation);
 			model.nodes.get(0).children.add(node);
 		}

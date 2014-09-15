@@ -41,6 +41,7 @@ import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
 import de.dakror.vloxlands.game.entity.statics.StaticEntity;
+import de.dakror.vloxlands.game.entity.structure.Sawmill;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
@@ -253,6 +254,10 @@ public class Game extends Layer
 		activeIsland.addEntity(human, false, false);
 		human = new Human(Island.SIZE / 2 - 4, Island.SIZE / 4 * 3, Island.SIZE / 2);
 		activeIsland.addEntity(human, false, false);
+		
+		Sawmill sm = new Sawmill(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 + 10);
+		activeIsland.addEntity(sm, false, true);
+		sm.setBuilt(true);
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
 		activeIsland.addEntity(tc, false, true);

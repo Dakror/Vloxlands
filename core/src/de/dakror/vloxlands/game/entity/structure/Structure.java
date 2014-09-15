@@ -212,8 +212,14 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	{
 		super.onSpawn();
 		
-		for (ModelInstance mi : subs)
-			mi.transform.rotate(0, -1, 0, 135);
+		for (int i = 0; i < modelInstance.nodes.get(0).children.size; i++)
+		{
+			if (modelInstance.nodes.get(0).children.get(i).id.contains("model:door_"))
+			{
+				ModelInstance mi = subs.get(i);
+				mi.transform.rotate(0, -1, 0, 135);
+			}
+		}
 		
 		inventory.addListener(this);
 		
