@@ -38,9 +38,9 @@ import de.dakror.vloxlands.Vloxlands;
 import de.dakror.vloxlands.ai.path.BFS;
 import de.dakror.vloxlands.ai.path.node.BFSNode;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.statics.StaticEntity;
 import de.dakror.vloxlands.game.entity.structure.Structure;
 import de.dakror.vloxlands.game.entity.structure.Towncenter;
 import de.dakror.vloxlands.game.item.Item;
@@ -69,8 +69,7 @@ public class Game extends Layer
 	public static final float rotateSpeed = 0.2f;
 	public static float pickRayMaxDistance = 150f;
 	
-	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks =
-																							// 1200s = 20min
+	public static final int dayInTicks = 72020; // 1 ingame day = 72020 ticks = 1200s = 20min
 	
 	public static Game instance;
 	
@@ -162,7 +161,29 @@ public class Game extends Layer
 			protected boolean process(float deltaX, float deltaY, int button)
 			{
 				if (button == rotateButton && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) return false;
-				return super.process(deltaX, deltaY, button);
+				
+				if (button == rotateButton)
+				{
+					tmpV1.set(camera.direction).crs(camera.up).y = 0f;
+					camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
+					
+					float dot = camera.direction.dot(Vector3.Y);
+					if (dot < -0.95f) camera.rotateAround(target, tmpV1.nor(), -deltaY * rotateAngle);
+					camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
+				}
+				else if (button == translateButton)
+				{
+					camera.translate(tmpV1.set(camera.direction).crs(camera.up).nor().scl(-deltaX * translateUnits));
+					camera.translate(tmpV2.set(camera.up).scl(-deltaY * translateUnits));
+					if (translateTarget) target.add(tmpV1).add(tmpV2);
+				}
+				else if (button == forwardButton)
+				{
+					camera.translate(tmpV1.set(camera.direction).scl(deltaY * translateUnits));
+					if (forwardTarget) target.add(tmpV1);
+				}
+				if (autoUpdate) camera.update();
+				return true;
 			}
 			
 			@Override
@@ -234,8 +255,8 @@ public class Game extends Layer
 		activeIsland.addEntity(human, false, false);
 		
 		Towncenter tc = new Towncenter(Island.SIZE / 2 - 2, Island.SIZE / 4 * 3, Island.SIZE / 2 - 2);
-		tc.setBuilt(true);
 		activeIsland.addEntity(tc, false, true);
+		tc.setBuilt(true);
 		tc.getInnerInventory().add(new ItemStack(Item.get("AXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("PICKAXE"), 5));
 		tc.getInnerInventory().add(new ItemStack(Item.get("SHOVEL"), 5));
@@ -655,8 +676,7 @@ public class Game extends Layer
 		{
 			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
 			cursorEntity.getModelInstance().transform.setToTranslation(activeIsland.pos);
-			cursorEntity.getModelInstance().transform.translate(hoveredVoxel);
-			cursorEntity.getModelInstance().transform.translate(0, cursorEntity.getBoundingBox().getDimensions().y / 2, 0);
+			cursorEntity.getModelInstance().transform.translate(hoveredVoxel).translate(cursorEntity.getBoundingBox().getDimensions().x <= 1 ? cursorEntity.blockTrn.x : 0, cursorEntity.blockTrn.y, cursorEntity.getBoundingBox().getDimensions().z <= 1 ? cursorEntity.blockTrn.z : 0);
 			cursorEntity.setIsland(activeIsland);
 			cursorEntity.updateVoxelPos();
 			cursorEntityPlacable = cursorEntity.canBePlaced();
@@ -673,12 +693,13 @@ public class Game extends Layer
 			{
 				Material m = cursorEntity.getModelInstance().materials.get(i);
 				
-				Color defaultColor = ((ColorAttribute) defaultCursorEntityMaterials.get(i).get(ColorAttribute.Diffuse)).color;
-				
-				m.set(ColorAttribute.createDiffuse(!cursorEntityPlacable ? Color.RED : defaultColor));
-				if (!cursorEntityPlacable) m.set(new BlendingAttribute(0.8f));
+				if (!cursorEntityPlacable)
+				{
+					m.set(new BlendingAttribute(0.8f), ColorAttribute.createDiffuse(Color.RED));
+				}
 				else
 				{
+					m.remove(ColorAttribute.Diffuse);
 					BlendingAttribute ba = (BlendingAttribute) defaultCursorEntityMaterials.get(i).get(BlendingAttribute.Type);
 					if (ba == null) m.remove(BlendingAttribute.Type);
 					else m.set(ba);

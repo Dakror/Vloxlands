@@ -50,7 +50,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
  */
 public class Human extends Creature
 {
-	public static final Vector3 resourceTrn = new Vector3(0, 0.2f, -0.3f);
+	public static final Vector3 resourceTrn = new Vector3(0.1f, 0.2f, -0.1f);
 	
 	ItemStack carryingItemStack;
 	ModelInstance carryingItemModelInstance;

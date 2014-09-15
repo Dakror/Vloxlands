@@ -25,7 +25,6 @@ public abstract class Creature extends Entity
 	protected float climbHeight;
 	protected float speed;
 	protected float rotateSpeed = 20;
-	protected Vector3 blockTrn;
 	
 	protected boolean canFly;
 	
@@ -34,10 +33,6 @@ public abstract class Creature extends Entity
 	public Creature(float x, float y, float z, String model)
 	{
 		super(x, y, z, model);
-		
-		blockTrn = new Vector3(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
-		modelInstance.transform.translate(blockTrn);
-		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
 	@Override

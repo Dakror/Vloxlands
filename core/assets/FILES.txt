@@ -31,6 +31,7 @@ f img/logo/logo256-blur.png
 f img/logo/logo256.png
 f img/logo/logo32.png
 d models
+f models/palette.dat
 d models/creature
 d models/creature/humanblend
 f models/creature/humanblend/humanblend.blend
@@ -48,6 +49,11 @@ f models/entities/wheat/wheat.blend
 f models/entities/wheat/wheat.fbx
 f models/entities/wheat/wheat.g3db
 f models/entities/wheat/wheat.g3dj
+f models/entities/wheat/wheat0[16].vxi
+f models/entities/wheat/wheat1[16].vxi
+f models/entities/wheat/wheat2[16].vxi
+f models/entities/wheat/wheat3[16].vxi
+f models/entities/wheat/wheat4[16].vxi
 d models/item
 d models/item/axe
 f models/item/axe/LICENSE.txt
@@ -94,13 +100,10 @@ f models/sky/sky.blend
 f models/sky/sky.fbx
 f models/sky/sky.g3db
 d models/structure
-f models/structure/.PH means PlaceHolder
+f models/structure/door_x.vxi
 f models/structure/door_z.vxi
+f models/structure/house.vxi
 f models/structure/towncenter.vxi
-d models/structure/PH_tent
-f models/structure/PH_tent/PH_tent.blend
-f models/structure/PH_tent/PH_tent.fbx
-f models/structure/PH_tent/PH_tent.g3db
 d shader
 f shader/shader.fs
 f shader/shader.vs

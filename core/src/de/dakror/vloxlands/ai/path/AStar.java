@@ -11,9 +11,9 @@ import com.badlogic.gdx.utils.Array;
 import de.dakror.vloxlands.ai.job.WalkJob;
 import de.dakror.vloxlands.ai.path.node.AStarNode;
 import de.dakror.vloxlands.game.entity.Entity;
-import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.statics.StaticEntity;
 import de.dakror.vloxlands.game.voxel.Voxel;
 
 /**

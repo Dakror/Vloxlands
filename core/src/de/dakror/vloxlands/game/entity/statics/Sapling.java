@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import de.dakror.vloxlands.ai.state.StateTools;
 import de.dakror.vloxlands.game.Game;
-import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.generate.Generator;
 import de.dakror.vloxlands.util.math.Bits;
 

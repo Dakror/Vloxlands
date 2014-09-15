@@ -65,12 +65,15 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	protected boolean markedForRemoval;
 	protected BoundingBox boundingBox;
 	protected final Vector3 dimensions = new Vector3();
+	public final Vector3 blockTrn = new Vector3();
 	protected Island island;
 	
 	protected AnimationController animationController;
 	
 	public final Vector3 posCache = new Vector3();
 	public final Quaternion rotCache = new Quaternion();
+	public final Vector3 tmpV = new Vector3();
+	public final Quaternion tmpQ = new Quaternion();
 	final Matrix4 tmp = new Matrix4();
 	
 	public Entity(float x, float y, float z, String model)
@@ -80,7 +83,13 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		
-		modelInstance.transform.translate(x, y, z).translate(boundingBox.getDimensions().cpy().scl(0.5f));
+		if (boundingBox.getDimensions().x <= 1 || boundingBox.getDimensions().y <= 1 || boundingBox.getDimensions().z <= 1)
+		{
+			blockTrn.set(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1 - boundingBox.getCenter().y, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
+		}
+		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
+		
+		modelInstance.transform.translate(x, y, z).translate(blockTrn);
 		
 		animationController = new AnimationController(modelInstance);
 		markedForRemoval = false;
@@ -101,7 +110,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		additionalVisible = true;
 		visible = true;
 		
-		dimensions.set(Math.round(boundingBox.getDimensions().x), Math.round(boundingBox.getDimensions().y), Math.round(boundingBox.getDimensions().z));
+		dimensions.set(Math.max(Math.round(boundingBox.getDimensions().x), 1), Math.max(Math.round(boundingBox.getDimensions().y), 1), Math.max(Math.round(boundingBox.getDimensions().z), 1));
 		Game.instance.addListener(this);
 	}
 	
@@ -208,7 +217,13 @@ public class Entity extends EntityBase implements Telegraph, Savable
 				tmp.set(mi.transform);
 				modelInstance.transform.getTranslation(posCache);
 				modelInstance.transform.getRotation(rotCache);
-				mi.transform.translate(posCache).rotate(rotCache);
+				mi.transform.getTranslation(tmpV);
+				mi.transform.getRotation(tmpQ);
+				mi.transform.idt();
+				
+				mi.transform.translate(posCache).rotate(rotCache).translate(tmpV);
+				
+				mi.transform.rotate(tmpQ);
 				
 				batch.render(mi, environment);
 				

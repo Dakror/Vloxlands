@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector3;
@@ -43,9 +44,9 @@ import de.dakror.vloxlands.ai.task.Task;
 import de.dakror.vloxlands.game.Game;
 import de.dakror.vloxlands.game.entity.Entity;
 import de.dakror.vloxlands.game.entity.ItemDrop;
-import de.dakror.vloxlands.game.entity.StaticEntity;
 import de.dakror.vloxlands.game.entity.creature.Creature;
 import de.dakror.vloxlands.game.entity.creature.Human;
+import de.dakror.vloxlands.game.entity.statics.StaticEntity;
 import de.dakror.vloxlands.game.item.Item;
 import de.dakror.vloxlands.game.item.ItemStack;
 import de.dakror.vloxlands.game.item.inv.Inventory;
@@ -156,10 +157,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			buildInventory.clear();
 			for (Byte b : costs.getAll())
 			{
-				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
-																																					// people
-																																					// and
-																																					// buildings
+				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 			}
 		}
@@ -213,6 +211,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	public void onSpawn()
 	{
 		super.onSpawn();
+		
+		for (ModelInstance mi : subs)
+			mi.transform.rotate(0, -1, 0, 135);
 		
 		inventory.addListener(this);
 		

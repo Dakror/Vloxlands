@@ -97,7 +97,7 @@ public class Revolver extends Group
 	public float getDegrees(int slots, int level)
 	{
 		float radius = getRadius(level);
-		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12 * (RevolverSlot.SIZE / RevolverSlot.DEFAULT_SIZE);
+		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12;
 		float degreesPerSlot = (float) Math.toDegrees(Math.asin(slotRadius / (radius - slotRadius)));
 		
 		return slots * degreesPerSlot;
