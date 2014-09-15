@@ -3,7 +3,6 @@ d concept
 f concept/20140619_175732.jpg
 f concept/Economy-GER.jpg
 d data
-f data/.~lock.items.csv#
 f data/entities.csv
 f data/items.csv
 f data/voxels.csv
@@ -56,8 +55,8 @@ f models/entities/wheat/wheat2[16].vxi
 f models/entities/wheat/wheat3[16].vxi
 f models/entities/wheat/wheat4[16].vxi
 d models/item
-f models/item/gold_ingot.vxi
-f models/item/iron_ingot.vxi
+f models/item/gold_ingot[16].vxi
+f models/item/iron_ingot[16].vxi
 d models/item/axe
 f models/item/axe/LICENSE.txt
 f models/item/axe/axe.blend
