@@ -27,7 +27,7 @@ public class Sawmill extends Structure
 		// FIXME add worker ai workerTool =;
 		
 		costs.add(Item.get("WOODEN_LOG"), 25);
-		// costs.add(Item.get("IRON_INGOT"), 5);
+		costs.add(Item.get("IRON_INGOT"), 5);
 		// costs.add(Item.get("PEOPLE"), 1);
 		
 		weight = 1500f;
