@@ -26,8 +26,7 @@ public class Wheat extends StaticEntity
 	int perLevel;
 	
 	public static int itemsForHarvest = 5;
-	
-	
+		
 	public Wheat(float x, float y, float z)
 	{
 		super(x, y, z, "entities/wheat/wheat0[16].vxi");

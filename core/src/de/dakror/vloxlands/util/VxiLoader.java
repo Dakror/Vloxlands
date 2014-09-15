@@ -73,6 +73,8 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	
 	int width, height, depth, offsetX, offsetY, offsetZ;
 	
+	final Vector3 tmp = new Vector3();
+	
 	AssetManager assets;
 	
 	public VxiLoader(AssetManager assets, FileHandleResolver resolver)
@@ -143,10 +145,15 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		for (ColorFace f : faces.values())
 		{
-			Vertex tl = new Vertex(f.tl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution).rotate(Vector3.X, -90), f.dir.dir.cpy().rotate(Vector3.X, -90), f.c);
-			Vertex bl = new Vertex(f.bl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution).rotate(Vector3.X, -90), f.dir.dir.cpy().rotate(Vector3.X, -90), f.c);
-			Vertex br = new Vertex(f.br.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution).rotate(Vector3.X, -90), f.dir.dir.cpy().rotate(Vector3.X, -90), f.c);
-			Vertex tr = new Vertex(f.tr.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution).rotate(Vector3.X, -90), f.dir.dir.cpy().rotate(Vector3.X, -90), f.c);
+			Vertex tl = new Vertex(f.tl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
+			Vertex bl = new Vertex(f.bl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
+			Vertex br = new Vertex(f.br.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
+			Vertex tr = new Vertex(f.tr.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
+			
+			rotate(tl.pos);
+			rotate(bl.pos);
+			rotate(br.pos);
+			rotate(tr.pos);
 			
 			if (!vertices.contains(tr, true))
 			{
@@ -180,11 +187,21 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			node.translation.add(p.x, -p.y, p.z - p.y).scl(resolution);
+			node.translation.add(p.x, p.y, p.z - depth / 4f).scl(resolution);
+			rotate(node.translation);
 			model.nodes.get(0).children.add(node);
 		}
 		
 		return model;
+	}
+	
+	public void rotate(Vector3 v)
+	{
+		tmp.set(offsetX * resolution, offsetY * resolution, offsetZ * resolution).sub(v);
+		v.add(tmp);
+		v.rotate(Vector3.X, -90);
+		tmp.rotate(Vector3.X, -90);
+		v.sub(tmp);
 	}
 	
 	public float getResolution(String fileName)

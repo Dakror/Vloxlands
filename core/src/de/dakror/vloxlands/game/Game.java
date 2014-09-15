@@ -168,7 +168,7 @@ public class Game extends Layer
 					camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
 					
 					float dot = camera.direction.dot(Vector3.Y);
-					if (dot < -0.95f || dot > 0.5f) camera.rotateAround(target, tmpV1.nor(), -deltaY * rotateAngle);
+					if (dot < -0.95f) camera.rotateAround(target, tmpV1.nor(), -deltaY * rotateAngle);
 					camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
 				}
 				else if (button == translateButton)
