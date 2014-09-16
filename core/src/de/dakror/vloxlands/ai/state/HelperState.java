@@ -146,7 +146,7 @@ public enum HelperState implements State<Human>
 				else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a Warehouse containing the needed resources on island: 0!");
 			}
 			
-			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.deposit).pos.cpy().add(target.getVoxelPos()), human, NodeType.deposit.useGhostTarget);
+			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), human, NodeType.build.useGhostTarget);
 			if (p != null)
 			{
 				DepositJob dj = new DepositJob(human, target, false);
