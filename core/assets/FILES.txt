@@ -57,6 +57,7 @@ f models/entities/wheat/wheat4[16].vxi
 d models/item
 f models/item/gold_ingot[16].vxi
 f models/item/iron_ingot[16].vxi
+f models/item/wooden_plank[16].vxi
 d models/item/axe
 f models/item/axe/LICENSE.txt
 f models/item/axe/axe.blend
