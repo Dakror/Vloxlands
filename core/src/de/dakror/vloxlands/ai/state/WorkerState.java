@@ -73,7 +73,7 @@ public enum WorkerState implements State<Human>
 			}
 			
 			if (chop(human)) human.setLocation(null);
-			else human.changeState(REST);
+			else startTimeout();
 		}
 		
 		public boolean chop(final Human human)
@@ -142,11 +142,12 @@ public enum WorkerState implements State<Human>
 	{
 		final int checkHeight = 7;
 		final int checkRadius = 1;
-		final int timeout = 60 * 1000;
 		
 		@Override
 		public void enter(final Human human)
 		{
+			restTimeoutMS = 60 * 1000;
+			
 			super.enter(human);
 			human.stateParams.clear();
 			Vector3 v = null;
@@ -159,7 +160,7 @@ public enum WorkerState implements State<Human>
 				Path p = AStar.findPath(human.getVoxelBelow(), v, human, true);
 				if (p == null)
 				{
-					human.stateParams.add(System.currentTimeMillis());
+					startTimeout();
 					return;
 				}
 				human.setJob(p, new PlaceEntityJob(human, new Sapling(v.x, v.y + 1, v.z), false));
@@ -169,13 +170,13 @@ public enum WorkerState implements State<Human>
 					@Override
 					public void trigger()
 					{
-						human.stateParams.add(System.currentTimeMillis());
+						startTimeout();
 					}
 				});
 				human.queueJob(StateTools.getHomePath(human, p.getLast(), NodeType.entry), j);
 				human.setLocation(null);
 			}
-			else human.stateParams.add(System.currentTimeMillis());
+			else startTimeout();
 		}
 		
 		public Vector3 pickRandomSpot(Human human)
@@ -204,16 +205,6 @@ public enum WorkerState implements State<Human>
 						if (Voxel.getForId(human.getIsland().get(i + v.x, k + v.y, j + v.z)).isOpaque()) return null;
 			return v;
 		}
-		
-		@Override
-		public void update(Human human)
-		{
-			super.update(human);
-			if (human.stateParams.size > 0 && System.currentTimeMillis() - (Long) human.stateParams.get(0) >= timeout / Config.getGameSpeed())
-			{
-				human.changeState(REST);
-			}
-		}
 	},
 	FARMER
 	{
@@ -223,7 +214,7 @@ public enum WorkerState implements State<Human>
 			super.enter(human);
 			human.stateParams.clear();
 			if (harvest(human)) human.setLocation(null);
-			else human.changeState(REST);
+			else startTimeout();
 		}
 		
 		public boolean harvest(final Human human)
@@ -258,7 +249,7 @@ public enum WorkerState implements State<Human>
 			human.stateParams.clear();
 			
 			if (mine(human)) human.setLocation(null);
-			else human.changeState(REST);
+			else startTimeout();
 		}
 		
 		public boolean mine(final Human human)
@@ -314,6 +305,14 @@ public enum WorkerState implements State<Human>
 	
 	;
 	
+	protected long restTimeoutMS = 15 * 1000;
+	protected long timeoutStart;
+	
+	protected void startTimeout()
+	{
+		timeoutStart = System.currentTimeMillis();
+	}
+	
 	@Override
 	public void enter(Human human)
 	{
@@ -326,6 +325,11 @@ public enum WorkerState implements State<Human>
 		if (!StateTools.isWorkingTime() || !human.getWorkPlace().isWorking())
 		{
 			if (human.getState() != BRING_STUFF_HOME && human.getState() != REST && human.getLocation() == null) human.changeState(BRING_STUFF_HOME);
+		}
+		
+		if (this != REST && timeoutStart > 0 && restTimeoutMS > 0 && System.currentTimeMillis() - timeoutStart >= restTimeoutMS / Config.getGameSpeed())
+		{
+			human.changeState(REST);
 		}
 	}
 	
