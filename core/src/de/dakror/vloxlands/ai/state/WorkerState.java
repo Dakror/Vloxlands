@@ -255,7 +255,6 @@ public enum WorkerState implements State<Human>
 		public boolean mine(final Human human)
 		{
 			if (human.getWorkPlace().getInventory().isFull()) return false;
-			if (!(human.getWorkPlace() instanceof Mine)) throw new IllegalStateException("Miner can't work in a structure other then Mine!");
 			
 			byte v = ((Mine) human.getWorkPlace()).getActiveOre();
 			Path p = BFS.findClosestVoxel(human.getVoxelBelow(), new BFSConfig(human).closest(true).voxel(v).range(human.getWorkPlace().getWorkRadius()).notmeta(MetaTags.MINER_TARGET));

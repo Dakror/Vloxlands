@@ -24,7 +24,8 @@ public class Sawmill extends Structure
 		nodes.add(new StructureNode(NodeType.entry, 0, 0, 2));
 		name = "Sawmill";
 		workerName = "Sawmill worker";
-		// FIXME add worker ai workerTool =;
+		// FIXME add worker ai
+		// workerTool =;
 		
 		costs.add(Item.get("WOODEN_LOG"), 25);
 		costs.add(Item.get("IRON_INGOT"), 5);
