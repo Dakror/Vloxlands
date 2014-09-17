@@ -83,7 +83,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		
-		if (boundingBox.getDimensions().x <= 1 || boundingBox.getDimensions().y <= 1 || boundingBox.getDimensions().z <= 1)
+		if (boundingBox.getDimensions().x % 1 != 0 || boundingBox.getDimensions().y % 1 != 0 || boundingBox.getDimensions().z % 1 != 0)
 		{
 			blockTrn.set(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1 - boundingBox.getCenter().y, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
 		}

@@ -132,7 +132,7 @@ structure.Lumberjack;130
 structure.Forester;131
 structure.Farm;132
 structure.Mine;133
-;134
+structure.Sawmill;134
 ;135
 ;136
 ;137

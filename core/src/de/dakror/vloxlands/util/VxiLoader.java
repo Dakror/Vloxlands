@@ -1,5 +1,8 @@
 package de.dakror.vloxlands.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -15,6 +18,9 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -76,6 +82,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	final Vector3 tmp = new Vector3();
 	
 	AssetManager assets;
+	Material material;
 	
 	public VxiLoader(AssetManager assets, FileHandleResolver resolver)
 	{
@@ -128,6 +135,10 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			referencePoints[i] = new ReferencePoint(sb.toString(), x, y, z);
 		}
 		
+		material = new Material();
+		FileHandle mtl = file.sibling(file.nameWithoutExtension() + ".mtl");
+		if (mtl.exists()) loadMaterial(mtl);
+		
 		generateFaces();
 	}
 	
@@ -136,12 +147,11 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	{
 		ModelBuilder mb = new ModelBuilder();
 		mb.begin();
-		Material m = new Material();
-		MeshPartBuilder mpb = mb.part(file.nameWithoutExtension(), GL20.GL_TRIANGLES, new VertexAttributes(VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked()), m);
+		MeshPartBuilder mpb = mb.part(file.nameWithoutExtension(), GL20.GL_TRIANGLES, new VertexAttributes(VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked()), material);
 		
 		Array<Vertex> vertices = new Array<Vertex>();
 		
-		offsetZ -= depth / 3f;
+		offsetZ -= depth * (depth < height ? 0.3f : 1 / 3f);// TODO is this doing the trick?
 		
 		for (ColorFace f : faces.values())
 		{
@@ -187,7 +197,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
-			node.translation.add(p.x, p.y, p.z - depth / 4f).scl(resolution);
+			node.translation.add(p.x, p.y, p.z - depth * (depth < height ? 0.165f : 1 / 4f)).scl(resolution);
 			rotate(node.translation);
 			model.nodes.get(0).children.add(node);
 		}
@@ -217,6 +227,75 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	public Array<AssetDescriptor> getDependencies(String fileName, FileHandle file, VxiParameter parameter)
 	{
 		return null;
+	}
+	
+	private void loadMaterial(FileHandle file)
+	{
+		String line;
+		String[] tokens;
+		Color difcolor = Color.WHITE;
+		Color speccolor = Color.WHITE;
+		float opacity = 1.f;
+		float shininess = 0.f;
+		
+		BufferedReader reader = new BufferedReader(new InputStreamReader(file.read()), 4096);
+		try
+		{
+			while ((line = reader.readLine()) != null)
+			{
+				
+				if (line.length() > 0 && line.charAt(0) == '\t') line = line.substring(1).trim();
+				
+				tokens = line.split("\\s+");
+				
+				if (tokens[0].length() == 0)
+				{
+					continue;
+				}
+				else if (tokens[0].charAt(0) == '#') continue;
+				else
+				{
+					final String key = tokens[0].toLowerCase();
+					if (key.equals("kd") || key.equals("ks")) // diffuse or specular
+					{
+						float r = Float.parseFloat(tokens[1]);
+						float g = Float.parseFloat(tokens[2]);
+						float b = Float.parseFloat(tokens[3]);
+						float a = 1;
+						if (tokens.length > 4) a = Float.parseFloat(tokens[4]);
+						
+						if (tokens[0].toLowerCase().equals("kd"))
+						{
+							difcolor = new Color();
+							difcolor.set(r, g, b, a);
+						}
+						else
+						{
+							speccolor = new Color();
+							speccolor.set(r, g, b, a);
+						}
+					}
+					else if (key.equals("tr") || key.equals("d"))
+					{
+						opacity = Float.parseFloat(tokens[1]);
+					}
+					else if (key.equals("ns"))
+					{
+						shininess = Float.parseFloat(tokens[1]);
+					}
+				}
+			}
+			reader.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		material.set(new ColorAttribute(ColorAttribute.Diffuse, difcolor));
+		material.set(new ColorAttribute(ColorAttribute.Specular, speccolor));
+		material.set(new FloatAttribute(FloatAttribute.Shininess, shininess));
+		if (opacity != 1) material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, opacity));
 	}
 	
 	private void generateFaces()

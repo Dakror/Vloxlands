@@ -1,0 +1,39 @@
+# This is a template .mtl file
+# You use such a file to define
+# material properties of models
+# name the .mtl file the same as your
+# model geometry file and the material
+# info within here will be set to your
+# in-game model
+
+# The syntax matches the standard Wavefront-mtl filetype
+# All supported features are documented below
+#
+# @author Dakror
+#
+
+# Kd stands for diffuse color
+# it's the standard color and 
+# can be used to tint the texture
+# or post multiply
+
+Kd 0.800000 0.800000 0.800000 
+
+# Ks stands for specular color
+# When light hits the object a small
+# batch will shine in this color
+
+Ks 0.000000 0.000000 0.000000 
+
+# tr / d stands for opacity
+# here you can control how transparent
+# the model should be
+
+tr 1.000000
+
+# ns stands for shininess
+# this value defines how intensly
+# the model reflects light and geht tinted
+# with the specular color
+
+ns 0.000000

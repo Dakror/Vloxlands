@@ -184,6 +184,7 @@ public class Human extends Creature
 			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			tmp.translate(resourceTrn);
 			carryingItemModelInstance.transform.set(tmp);
+			
 		}
 		
 		if (!tool.isNull() && toolModelInstance.transform != null)
@@ -197,12 +198,12 @@ public class Human extends Creature
 		
 		if (createModelInstanceForCarryiedItemStack)
 		{
+			Vector3 tr = new Vector3(-0.2f, 0, -0.3f);
 			Model model = null;
-			Vector3 scale = new Vector3();
-			Vector3 tr = new Vector3();
 			if (carryingItemStack.getItem().isModel())
 			{
 				model = Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class);
+				tr.add(0.1f, 0.05f, 0.1f);
 			}
 			else if (carryingItemStack.getItem().getModel().startsWith("voxel:"))
 			{
@@ -212,8 +213,6 @@ public class Human extends Creature
 				mb.begin();
 				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, Game.world.getOpaque());
 				model = mb.end();
-				scale.set(0.2f, 0.2f, 0.2f);
-				tr.set(-0.2f, 0, -0.3f);
 			}
 			else
 			{
@@ -222,8 +221,10 @@ public class Human extends Creature
 			}
 			
 			carryingItemModelInstance = new ModelInstance(model, new Matrix4());
-			if (!scale.isZero()) carryingItemModelInstance.nodes.get(0).scale.set(scale);
+			
+			carryingItemModelInstance.nodes.get(0).scale.set(0.2f, 0.2f, 0.2f);
 			carryingItemModelInstance.nodes.get(0).translation.set(tr);
+			
 			carryingItemModelInstance.calculateTransforms();
 			createModelInstanceForCarryiedItemStack = false;
 		}
