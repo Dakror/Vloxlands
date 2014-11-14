@@ -16,8 +16,7 @@ import de.dakror.vloxlands.util.math.MathHelper;
 /**
  * @author Dakror
  */
-public class NonStackingInventoryListItem extends Table
-{
+public class NonStackingInventoryListItem extends Table {
 	Tooltip tooltip;
 	Label label;
 	Image image;
@@ -27,23 +26,19 @@ public class NonStackingInventoryListItem extends Table
 	boolean showName;
 	boolean format = true;
 	
-	public NonStackingInventoryListItem(Stage stage, Item item, int amount)
-	{
+	public NonStackingInventoryListItem(Stage stage, Item item, int amount) {
 		this(stage, item, amount, true);
 	}
 	
-	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean hideOnZero)
-	{
+	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean hideOnZero) {
 		this(stage, item, amount, true, hideOnZero);
 	}
 	
-	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean format, boolean hideOnZero)
-	{
+	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean format, boolean hideOnZero) {
 		this(stage, item, amount, format, hideOnZero, true);
 	}
 	
-	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean hideOnZero, boolean format, boolean showName)
-	{
+	public NonStackingInventoryListItem(Stage stage, Item item, int amount, boolean hideOnZero, boolean format, boolean showName) {
 		setWidth(200);
 		setName((item.getId() + 128) + "");
 		this.hideOnZero = hideOnZero;
@@ -60,44 +55,37 @@ public class NonStackingInventoryListItem extends Table
 		add(image).size(24, 24);
 		
 		label = new Label(amount + " " + item.getName(), Vloxlands.skin);
-		if (!showName)
-		{
+		if (!showName) {
 			label.setAlignment(Align.right);
 			add(label).right().expandX();
-		}
-		else add(label);
+		} else add(label);
 		
 		onChange();
 	}
 	
-	public void setAmount(int amount)
-	{
+	public void setAmount(int amount) {
 		this.amount = amount;
 		onChange();
 	}
 	
 	@Override
-	public float getHeight()
-	{
+	public float getHeight() {
 		if (!isVisible()) return 0;
 		return super.getHeight();
 	}
 	
 	@Override
-	public float getPrefHeight()
-	{
+	public float getPrefHeight() {
 		if (!isVisible()) return 0;
 		return super.getPrefHeight();
 	}
 	
 	@Override
-	public float getPrefWidth()
-	{
+	public float getPrefWidth() {
 		return getWidth();
 	}
 	
-	private void onChange()
-	{
+	private void onChange() {
 		String amount = format ? MathHelper.formatNumber(this.amount, 0, 1000) : this.amount + "";
 		
 		tooltip.set(amount + " " + item.getName(), item.getDescription());

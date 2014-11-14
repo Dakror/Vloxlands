@@ -13,10 +13,8 @@ import de.dakror.vloxlands.util.CurserCommand;
 /**
  * @author Dakror
  */
-public class Sawmill extends Structure
-{
-	public Sawmill(float x, float y, float z)
-	{
+public class Sawmill extends Structure {
+	public Sawmill(float x, float y, float z) {
 		super(x, y, z, "structure/sawmill.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 2));
@@ -37,16 +35,14 @@ public class Sawmill extends Structure
 	}
 	
 	@Override
-	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
-	{
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode) {
 		subs.get(1).transform.translate(0.125f, 0.375f, 0).rotate(Vector3.Z, -50 * Gdx.graphics.getDeltaTime() * Config.getGameSpeed()).translate(-0.125f, -0.375f, 0);
 		
 		super.render(batch, environment, minimapMode);
 	}
 	
 	@Override
-	public CurserCommand getDefaultCommand()
-	{
+	public CurserCommand getDefaultCommand() {
 		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
 	}
 }

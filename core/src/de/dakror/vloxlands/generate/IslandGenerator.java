@@ -8,15 +8,12 @@ import de.dakror.vloxlands.game.world.World;
 import de.dakror.vloxlands.generate.biome.Biome;
 import de.dakror.vloxlands.generate.biome.BiomeType;
 
-public class IslandGenerator
-{
+public class IslandGenerator {
 	public static final int MIN = 48;
 	public static final int MAX = 64;
 	
-	public static Island generate(WorldGenerator worldGen)
-	{
-		try
-		{
+	public static Island generate(WorldGenerator worldGen) {
+		try {
 			float yPos = World.MAX_HEIGHT / 2 * MathUtils.random() + World.MAX_HEIGHT / 4;
 			int radius = MathUtils.random(MIN, MAX);
 			
@@ -34,9 +31,7 @@ public class IslandGenerator
 			worldGen.step();
 			
 			return island;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}

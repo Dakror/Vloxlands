@@ -9,8 +9,7 @@ import com.badlogic.gdx.utils.Array;
 /**
  * @author Dakror
  */
-public class CSVReader
-{
+public class CSVReader {
 	BufferedReader br;
 	public String sep = ";";
 	
@@ -18,80 +17,60 @@ public class CSVReader
 	int index, lIndex;
 	int lineLength = -1;
 	
-	public CSVReader(FileHandle fh)
-	{
-		try
-		{
+	public CSVReader(FileHandle fh) {
+		try {
 			br = new BufferedReader(fh.reader());
 			index = 0;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void skipRow()
-	{
-		try
-		{
+	public void skipRow() {
+		try {
 			br.readLine();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public int getIndex()
-	{
+	public int getIndex() {
 		return lIndex;
 	}
 	
-	public String[] readRow()
-	{
-		try
-		{
+	public String[] readRow() {
+		try {
 			String l = br.readLine();
 			
-			if (l == null)
-			{
+			if (l == null) {
 				br.close();
 				return null;
 			}
 			return l.split(sep);
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 	
-	public String readNext()
-	{
-		try
-		{
-			if (segments == null || index == lineLength)
-			{
+	public String readNext() {
+		try {
+			if (segments == null || index == lineLength) {
 				String l = br.readLine();
-				if (l == null)
-				{
+				if (l == null) {
 					br.close();
 					return null;
 				}
 				while (l != null && l.length() == 0)
 					l = br.readLine();
 				
-				if (l == null)
-				{
+				if (l == null) {
 					br.close();
 					return null;
 				}
 				
 				segments = splitCells(l);
-				if (lineLength == -1)
-				{
+				if (lineLength == -1) {
 					lineLength = segments.length;
 				}
 				if (lineLength != -1 && segments.length != lineLength) throw new Exception("Each row has to have exactly " + lineLength + " cells! \n    This row only has " + segments.length + ": " + l);
@@ -102,21 +81,17 @@ public class CSVReader
 			
 			lIndex = index;
 			return segments[index++].trim();
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 	
-	private String[] splitCells(String row)
-	{
+	private String[] splitCells(String row) {
 		Array<String> cells = new Array<String>();
 		String r = row;
 		
-		while (r.indexOf(sep) > -1)
-		{
+		while (r.indexOf(sep) > -1) {
 			cells.add(r.substring(0, r.indexOf(sep)));
 			r = r.substring(r.indexOf(sep) + 1);
 		}

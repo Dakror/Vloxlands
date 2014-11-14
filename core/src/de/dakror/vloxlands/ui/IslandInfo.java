@@ -14,10 +14,8 @@ import de.dakror.vloxlands.game.world.Island;
 /**
  * @author Dakror
  */
-public class IslandInfo extends Group
-{
-	public IslandInfo()
-	{
+public class IslandInfo extends Group {
+	public IslandInfo() {
 		setBounds(0, 0, 500, 80);
 		setOrigin(getX(), getY());
 		
@@ -29,11 +27,9 @@ public class IslandInfo extends Group
 		final Label height = new Label("", Vloxlands.skin);
 		addActor(height);
 		
-		addAction(new Action()
-		{
+		addAction(new Action() {
 			@Override
-			public boolean act(float d)
-			{
+			public boolean act(float d) {
 				biome.setText(Game.instance.activeIsland.getBiome().getName() + " Island");
 				biome.setPosition((500 - biome.getTextBounds().width) / 2f, 60);
 				
@@ -48,8 +44,7 @@ public class IslandInfo extends Group
 	}
 	
 	@Override
-	public void draw(Batch batch, float parentAlpha)
-	{
+	public void draw(Batch batch, float parentAlpha) {
 		setPosition((Gdx.graphics.getWidth() - getWidth()) / 2, Gdx.graphics.getHeight() - getHeight());
 		
 		Drawable bg = Vloxlands.skin.getDrawable("paper_container");

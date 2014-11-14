@@ -11,8 +11,7 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 /**
  * @author Dakror
  */
-public class RemoveLeavesJob extends Job
-{
+public class RemoveLeavesJob extends Job {
 	/**
 	 * according to {@link de.dakror.vloxlands.generate.Beziers#TREE Beziers#TREE}
 	 */
@@ -22,8 +21,7 @@ public class RemoveLeavesJob extends Job
 	int treeHeight;
 	Array<Vector3> leaves = new Array<Vector3>();
 	
-	public RemoveLeavesJob(Human human, Vector3 treeTrunkBottom, int treeHeight, boolean persistent)
-	{
+	public RemoveLeavesJob(Human human, Vector3 treeTrunkBottom, int treeHeight, boolean persistent) {
 		super(human, "mine" /* chop */, "Harvesting leaves", -1, persistent);
 		
 		this.treeHeight = treeHeight + 5 /* approximation */;
@@ -33,17 +31,13 @@ public class RemoveLeavesJob extends Job
 		fetchRegion();
 	}
 	
-	public void fetchRegion()
-	{
+	public void fetchRegion() {
 		byte b = Voxel.get("LEAVES").getId();
 		
 		leaves.clear();
-		for (int i = 0; i < treeHeight; i++)
-		{
-			for (int j = 0; j < MAX_TREE_DIAMETER; j++)
-			{
-				for (int k = 0; k < MAX_TREE_DIAMETER; k++)
-				{
+		for (int i = 0; i < treeHeight; i++) {
+			for (int j = 0; j < MAX_TREE_DIAMETER; j++) {
+				for (int k = 0; k < MAX_TREE_DIAMETER; k++) {
 					int x = (int) (j - 2 + treeTrunkBottom.x);
 					int y = (int) (i + treeTrunkBottom.y);
 					int z = (int) (k - 2 + treeTrunkBottom.z);
@@ -57,15 +51,13 @@ public class RemoveLeavesJob extends Job
 	}
 	
 	@Override
-	protected void onAnimationFinished()
-	{
+	protected void onAnimationFinished() {
 		for (int i = 0; i < 5; i++) // remove multiple at a time
 		{
 			Vector3 v = leaves.removeIndex(MathUtils.random(leaves.size - 1));
 			human.getIsland().set(v.x, v.y, v.z, (byte) 0);
 			
-			if (leaves.size == 0)
-			{
+			if (leaves.size == 0) {
 				done = true;
 				return;
 			}

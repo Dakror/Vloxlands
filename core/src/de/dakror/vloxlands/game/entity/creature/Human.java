@@ -48,8 +48,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class Human extends Creature
-{
+public class Human extends Creature {
 	public static final Vector3 resourceTrn = new Vector3(0.1f, 0.2f, -0.1f);
 	
 	ItemStack carryingItemStack;
@@ -76,8 +75,7 @@ public class Human extends Creature
 	boolean queueRotateTowardsTarget;
 	Path queueRotateTowardsTargetPath;
 	
-	public Human(float x, float y, float z)
-	{
+	public Human(float x, float y, float z) {
 		super(x, y, z, "creature/humanblend/humanblend.g3db");
 		name = "Helper";
 		
@@ -93,41 +91,33 @@ public class Human extends Creature
 		MessageDispatcher.getInstance().addListener(this, MessageType.STRUCTURE_BROADCAST.ordinal());
 	}
 	
-	public void setTool(Item tool)
-	{
-		if (tool == null)
-		{
+	public void setTool(Item tool) {
+		if (tool == null) {
 			toolModelInstance = null;
 			this.tool.set(new ItemStack());
-		}
-		else
-		{
+		} else {
 			this.tool.setItem(tool);
 			this.tool.setAmount(1);
 			toolModelInstance = new ModelInstance(Vloxlands.assets.get("models/item/" + tool.getModel(), Model.class), new Matrix4());
 		}
 	}
 	
-	public ItemStack getTool()
-	{
+	public ItemStack getTool() {
 		return tool;
 	}
 	
-	public ItemStack getCarryingItemStack()
-	{
+	public ItemStack getCarryingItemStack() {
 		return carryingItemStack;
 	}
 	
-	public void setCarryingItemStack(ItemStack carryingItemStack)
-	{
+	public void setCarryingItemStack(ItemStack carryingItemStack) {
 		this.carryingItemStack.set(carryingItemStack);
 		if (carryingItemStack.isNull()) carryingItemModelInstance = null;
 		else createModelInstanceForCarryiedItemStack = true;
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		super.tick(tick);
 		
 		this.tick = tick;
@@ -137,38 +127,30 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void update(float delta)
-	{
+	public void update(float delta) {
 		super.update(delta);
 		stateMachine.update();
 		
-		if (queueRotateTowardsTarget)
-		{
+		if (queueRotateTowardsTarget) {
 			rotateTowardsGhostTarget(queueRotateTowardsTargetPath);
 			queueRotateTowardsTarget = false;
 			queueRotateTowardsTargetPath = null;
 		}
 		
 		Job j = firstJob();
-		if (j != null)
-		{
-			if (j.isActive())
-			{
-				if (j.isDone())
-				{
+		if (j != null) {
+			if (j.isActive()) {
+				if (j.isDone()) {
 					jobQueue.removeIndex(0);
 					j.onEnd();
 					j.triggerEndEvent();
 					
-					if (j.isPersistent())
-					{
+					if (j.isPersistent()) {
 						j.resetState();
 						queueJob(null, j);
 					}
 				}
-			}
-			else
-			{
+			} else {
 				j.trigger(tick);
 				if (j instanceof WalkJob && path != ((WalkJob) j).getPath() && !j.isDone()) path = ((WalkJob) j).getPath();
 			}
@@ -176,10 +158,8 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void renderAdditional(ModelBatch batch, Environment environment)
-	{
-		if (!carryingItemStack.isNull() && carryingItemModelInstance != null)
-		{
+	public void renderAdditional(ModelBatch batch, Environment environment) {
+		if (!carryingItemStack.isNull() && carryingItemModelInstance != null) {
 			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
 			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			tmp.translate(resourceTrn);
@@ -187,8 +167,7 @@ public class Human extends Creature
 			
 		}
 		
-		if (!tool.isNull() && toolModelInstance.transform != null)
-		{
+		if (!tool.isNull() && toolModelInstance.transform != null) {
 			tmp.setToRotation(Vector3.Y, 0).translate(posCache);
 			tmp.rotate(Vector3.Y, rotCache.getYaw());
 			
@@ -196,26 +175,20 @@ public class Human extends Creature
 			toolModelInstance.transform.set(tmp);
 		}
 		
-		if (createModelInstanceForCarryiedItemStack)
-		{
+		if (createModelInstanceForCarryiedItemStack) {
 			Vector3 tr = new Vector3(-0.2f, 0, -0.3f);
 			Model model = null;
-			if (carryingItemStack.getItem().isModel())
-			{
+			if (carryingItemStack.getItem().isModel()) {
 				model = Vloxlands.assets.get("models/item/" + carryingItemStack.getItem().getModel(), Model.class);
 				tr.add(0.1f, 0.05f, 0.1f);
-			}
-			else if (carryingItemStack.getItem().getModel().startsWith("voxel:"))
-			{
+			} else if (carryingItemStack.getItem().getModel().startsWith("voxel:")) {
 				Voxel v = Voxel.getForId(Integer.parseInt(carryingItemStack.getItem().getModel().replace("voxel:", "").trim()));
 				
 				ModelBuilder mb = new ModelBuilder();
 				mb.begin();
 				mb.part("voxel", v.getMesh(), GL20.GL_TRIANGLES, Game.world.getOpaque());
 				model = mb.end();
-			}
-			else
-			{
+			} else {
 				Gdx.app.error("Human.setCarryingItemStack", "Can't handle item model!");
 				return;
 			}
@@ -233,27 +206,19 @@ public class Human extends Creature
 		else if (!carryingItemStack.isNull() && carryingItemModelInstance != null) batch.render(carryingItemModelInstance, environment);
 	}
 	
-	public void queueJob(Path path, Job job)
-	{
-		if (job == null)
-		{
-			if (path.size() > 0)
-			{
+	public void queueJob(Path path, Job job) {
+		if (job == null) {
+			if (path.size() > 0) {
 				WalkJob wj = new WalkJob(path, this);
 				jobQueue.add(wj);
 				wj.queue();
 			}
-		}
-		else
-		{
-			if (path != null && path.size() > 0)
-			{
+		} else {
+			if (path != null && path.size() > 0) {
 				WalkJob wj = new WalkJob(path, this);
 				jobQueue.add(wj);
 				wj.queue();
-			}
-			else
-			{
+			} else {
 				queueRotateTowardsTarget = true;
 				queueRotateTowardsTargetPath = path;
 			}
@@ -262,23 +227,19 @@ public class Human extends Creature
 		}
 	}
 	
-	public void setJob(Path path, Job job)
-	{
+	public void setJob(Path path, Job job) {
 		jobQueue.clear();
 		queueJob(path, job);
 	}
 	
-	public Job firstJob()
-	{
+	public Job firstJob() {
 		if (jobQueue.size == 0) return null;
 		return jobQueue.first();
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{
-		if ((wasSelected || selected) && !lmb && location == null && workPlace == null)
-		{
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb) {
+		if ((wasSelected || selected) && !lmb && location == null && workPlace == null) {
 			selected = true;
 			
 			changeState(HelperState.WALK_TO_TARGET, vs.voxelPos.getPos());
@@ -286,72 +247,59 @@ public class Human extends Creature
 	}
 	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb)
-	{
-		if ((wasSelected || selected) && !lmb && location == null && workPlace == null)
-		{
+	public void onStructureSelection(Structure structure, boolean lmb) {
+		if ((wasSelected || selected) && !lmb && location == null && workPlace == null) {
 			selected = true;
 			
 			CurserCommand c = structure.getCommandForEntity(this);
 			
-			if (c == CurserCommand.WALK)
-			{
+			if (c == CurserCommand.WALK) {
 				changeState(HelperState.WALK_TO_TARGET, structure.getStructureNode(posCache, NodeType.target).pos.cpy().add(structure.getVoxelPos()));
 			}
 		}
 	}
 	
 	@Override
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
-	{}
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb) {}
 	
 	@Override
-	public void onReachTarget()
-	{
+	public void onReachTarget() {
 		super.onReachTarget();
 		
 		if (firstJob() instanceof WalkJob) firstJob().setDone();
 	}
 	
-	public Array<Job> getJobQueue()
-	{
+	public Array<Job> getJobQueue() {
 		return jobQueue;
 	}
 	
-	public boolean isIdle()
-	{
+	public boolean isIdle() {
 		return jobQueue.size == 0;
 	}
 	
-	public Structure getWorkPlace()
-	{
+	public Structure getWorkPlace() {
 		return workPlace;
 	}
 	
-	public void setWorkPlace(Structure workPlace)
-	{
+	public void setWorkPlace(Structure workPlace) {
 		this.workPlace = workPlace;
 	}
 	
-	public Structure getLocation()
-	{
+	public Structure getLocation() {
 		return location;
 	}
 	
-	public void setLocation(Structure location)
-	{
+	public void setLocation(Structure location) {
 		this.location = location;
 		visible = location == null;
 	}
 	
 	@Override
-	public boolean handleMessage(Telegram msg)
-	{
+	public boolean handleMessage(Telegram msg) {
 		return stateMachine.handleMessage(msg);
 	}
 	
-	public void changeState(State<Human> newState, Object... params)
-	{
+	public void changeState(State<Human> newState, Object... params) {
 		previousStateParams.clear();
 		previousStateParams.addAll(stateParams);
 		stateParams.clear();
@@ -359,45 +307,37 @@ public class Human extends Creature
 		stateMachine.changeState(newState);
 	}
 	
-	public void revertToPreviousState()
-	{
+	public void revertToPreviousState() {
 		stateParams.clear();
 		stateParams.addAll(previousStateParams);
 		stateMachine.revertToPreviousState();
 	}
 	
-	public State<Human> getState()
-	{
+	public State<Human> getState() {
 		return stateMachine.getCurrentState();
 	}
 	
-	public StateMachine<Human> getStateMachine()
-	{
+	public StateMachine<Human> getStateMachine() {
 		return stateMachine;
 	}
 	
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		super.dispose();
 		MessageDispatcher.getInstance().removeListener(this, MessageType.STRUCTURE_BROADCAST.ordinal());
 	}
 	
 	@Override
-	public void setUI(final PinnableWindow window, Object... params)
-	{
+	public void setUI(final PinnableWindow window, Object... params) {
 		window.row().pad(0).colspan(50).padRight(-10).fillX();
 		final List<Job> jobs = new List<Job>(Vloxlands.skin);
 		jobs.setItems(new IdleJob(this));
-		jobs.addAction(new Action()
-		{
+		jobs.addAction(new Action() {
 			@Override
-			public boolean act(float delta)
-			{
+			public boolean act(float delta) {
 				if (jobQueue.size == 0 && jobs.getItems().get(0) instanceof IdleJob) return false;
 				
-				if (!jobQueue.equals(jobs.getItems()))
-				{
+				if (!jobQueue.equals(jobs.getItems())) {
 					if (jobQueue.size > 0) jobs.setItems(jobQueue);
 					else jobs.setItems(new IdleJob(Human.this));
 					
@@ -439,11 +379,9 @@ public class Human extends Creature
 		final TooltipImageButton job = new TooltipImageButton(style);
 		window.getStage().addActor(job.getTooltip());
 		job.setName("job");
-		ClickListener cl = new ClickListener()
-		{
+		ClickListener cl = new ClickListener() {
 			@Override
-			public void clicked(InputEvent event, float x, float y)
-			{
+			public void clicked(InputEvent event, float x, float y) {
 				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
 				jobsWrap.setVisible(!jobsWrap.isVisible());
 				window.invalidateHierarchy();
@@ -454,8 +392,7 @@ public class Human extends Creature
 		job.getTooltip().set("Job Queue", "Toggle Job Queue display");
 		window.add(job).padRight(-10);
 		
-		if (params[0] == Boolean.TRUE)
-		{
+		if (params[0] == Boolean.TRUE) {
 			job.setChecked(true);
 			cl.clicked(null, 0, 0);
 		}

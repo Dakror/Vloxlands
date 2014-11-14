@@ -6,8 +6,7 @@ import com.badlogic.gdx.utils.Array;
 /**
  * @author Dakror
  */
-public class Path
-{
+public class Path {
 	public Vector3 removedFirstNode;
 	Array<Vector3> nodes;
 	/**
@@ -22,88 +21,72 @@ public class Path
 	
 	int index;
 	
-	public Path(Array<Vector3> nodes)
-	{
+	public Path(Array<Vector3> nodes) {
 		this.nodes = nodes;
 		index = 0;
 	}
 	
-	public void pop()
-	{
+	public void pop() {
 		nodes.pop();
 	}
 	
-	public boolean isLast()
-	{
+	public boolean isLast() {
 		return index == nodes.size - 1;
 	}
 	
-	public void next()
-	{
+	public void next() {
 		index++;
 	}
 	
-	public Vector3 getLast()
-	{
+	public Vector3 getLast() {
 		if (nodes.size > 0) return nodes.peek();
 		return null;
 	}
 	
-	public Vector3 get()
-	{
+	public Vector3 get() {
 		return nodes.get(index);
 	}
 	
-	public Vector3 get(int index)
-	{
+	public Vector3 get(int index) {
 		return nodes.get(index);
 	}
 	
-	public int getIndex()
-	{
+	public int getIndex() {
 		return index;
 	}
 	
-	public boolean isDone()
-	{
+	public boolean isDone() {
 		return index == nodes.size - 1;
 	}
 	
-	public int size()
-	{
+	public int size() {
 		return nodes.size;
 	}
 	
-	public float length()
-	{
+	public float length() {
 		float length = 0;
 		if (removedFirstNode != null && nodes.size > 0) length = nodes.get(0).dst(removedFirstNode);
 		
-		for (int i = 1; i < nodes.size; i++)
-		{
+		for (int i = 1; i < nodes.size; i++) {
 			length += nodes.get(i).dst(nodes.get(i - 1));
 		}
 		
 		return length;
 	}
 	
-	public Vector3 getGhostTarget()
-	{
+	public Vector3 getGhostTarget() {
 		return ghostTarget;
 	}
 	
-	public void setGhostTarget(Vector3 ghostTarget)
-	{
+	public void setGhostTarget(Vector3 ghostTarget) {
 		this.ghostTarget = ghostTarget;
 	}
 	
-	public Vector3 getRealTarget()
-	{
+	public Vector3 getRealTarget() {
 		return realTarget;
 	}
 	
-	public void setRealTarget(Vector3 realTarget)
-	{
+	public void setRealTarget(Vector3 realTarget) {
 		this.realTarget = realTarget;
 	}
 }

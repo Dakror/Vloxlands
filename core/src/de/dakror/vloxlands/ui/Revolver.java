@@ -14,15 +14,12 @@ import de.dakror.vloxlands.game.Game;
 /**
  * @author Dakror
  */
-public class Revolver extends Group
-{
-	public Revolver()
-	{
+public class Revolver extends Group {
+	public Revolver() {
 		setTransform(true);
 	}
 	
-	public void addSlot(int level, String parent, final RevolverSlot slot)
-	{
+	public void addSlot(int level, String parent, final RevolverSlot slot) {
 		final Group group = ensureCapacity(level, parent);
 		
 		int amount = group.getChildren().size;
@@ -32,11 +29,9 @@ public class Revolver extends Group
 		
 		slot.revolver = this;
 		slot.setUserObject(level);
-		slot.addListener(new InputListener()
-		{
+		slot.addListener(new InputListener() {
 			@Override
-			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
-			{
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 				if (slot.isDisabled()) return false;
 				if (button != Buttons.LEFT) return false;
 				
@@ -47,16 +42,13 @@ public class Revolver extends Group
 			}
 			
 			@Override
-			public void touchUp(InputEvent event, float x, float y, int pointer, int button)
-			{
+			public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
 				if (slot.isDisabled()) return;
 				if (button != Buttons.LEFT) return;
 				
 				Actor g = null;
-				for (Actor a : getChildren())
-				{
-					if (a.getName().equals(slot.getName()))
-					{
+				for (Actor a : getChildren()) {
+					if (a.getName().equals(slot.getName())) {
 						g = a;
 						break;
 					}
@@ -64,23 +56,19 @@ public class Revolver extends Group
 				
 				int l = g != null ? (Integer) g.getUserObject() : (Integer) slot.getUserObject() + 1;
 				
-				for (Actor a : getChildren())
-				{
+				for (Actor a : getChildren()) {
 					if ((Integer) a.getUserObject() < l && !a.isVisible()) continue;
 					a.setVisible((Integer) a.getUserObject() < l);
-					if (!a.isVisible())
-					{
+					if (!a.isVisible()) {
 						for (Actor b : ((Group) a).getChildren())
 							((Button) b).setChecked(false);
 					}
 				}
 				
 				if (g != null) g.setVisible(true);
-				if (g == null)
-				{
+				if (g == null) {
 					Game.instance.action(slot.getName());
-				}
-				else Game.instance.activeAction = "";
+				} else Game.instance.activeAction = "";
 				
 				slot.setChecked(false);
 			}
@@ -89,13 +77,11 @@ public class Revolver extends Group
 		group.addActor(slot);
 	}
 	
-	public float getRadius(int level)
-	{
+	public float getRadius(int level) {
 		return (RevolverSlot.SIZE + 5) * (level + 2);
 	}
 	
-	public float getDegrees(int slots, int level)
-	{
+	public float getDegrees(int slots, int level) {
 		float radius = getRadius(level);
 		float slotRadius = RevolverSlot.SIZE / 2f + level * 4 + 12;
 		float degreesPerSlot = (float) Math.toDegrees(Math.asin(slotRadius / (radius - slotRadius)));
@@ -103,16 +89,13 @@ public class Revolver extends Group
 		return slots * degreesPerSlot;
 	}
 	
-	private Group ensureCapacity(int level, String parent)
-	{
-		if (parent != null)
-		{
+	private Group ensureCapacity(int level, String parent) {
+		if (parent != null) {
 			for (Actor a : getChildren())
 				if (a.getName().equals(parent)) return (Group) a;
 		}
 		
-		while (getChildren().size <= level || parent != null)
-		{
+		while (getChildren().size <= level || parent != null) {
 			Group g = new Group();
 			g.setName(parent == null ? "" : parent);
 			g.setUserObject(level);
@@ -125,8 +108,7 @@ public class Revolver extends Group
 		return (Group) getChildren().get(level);
 	}
 	
-	public void removeGroup(String parent)
-	{
+	public void removeGroup(String parent) {
 		Actor a = findActor(parent);
 		if (!(a instanceof RevolverSlot)) a.remove();
 	}

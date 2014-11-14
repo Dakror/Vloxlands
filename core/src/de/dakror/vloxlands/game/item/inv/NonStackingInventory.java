@@ -11,32 +11,27 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class NonStackingInventory extends Inventory
-{
+public class NonStackingInventory extends Inventory {
 	int[] storage;
 	
-	public NonStackingInventory(int capacity)
-	{
+	public NonStackingInventory(int capacity) {
 		super(capacity);
 		storage = new int[Item.ITEMS];
 	}
 	
-	public NonStackingInventory()
-	{
+	public NonStackingInventory() {
 		this(10);
 	}
 	
 	@Override
-	public void clear()
-	{
+	public void clear() {
 		dispatchItemRemoved(count, null);
 		Arrays.fill(storage, 0);
 		count = 0;
 	}
 	
 	@Override
-	protected void addStack(ItemStack stack, int amount)
-	{
+	protected void addStack(ItemStack stack, int amount) {
 		int oldCount = count;
 		storage[stack.getItem().getId() + 128] += amount;
 		count += amount;
@@ -44,26 +39,22 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return Arrays.hashCode(storage);
 	}
 	
 	@Override
-	public int get(Item item)
-	{
+	public int get(Item item) {
 		return storage[item.getId() + 128];
 	}
 	
 	@Override
-	public int get(byte id)
-	{
+	public int get(byte id) {
 		return storage[id + 128];
 	}
 	
 	@Override
-	public ItemStack getFirst()
-	{
+	public ItemStack getFirst() {
 		if (count == 0) return new ItemStack();
 		
 		for (int i = 0; i < storage.length; i++)
@@ -73,14 +64,12 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public boolean contains(ItemStack stack)
-	{
+	public boolean contains(ItemStack stack) {
 		return get(stack.getItem()) >= stack.getAmount();
 	}
 	
 	@Override
-	public boolean contains(Class<?> class1)
-	{
+	public boolean contains(Class<?> class1) {
 		for (Item i : Item.getAll())
 			if (i.getClass().equals(class1) && get(i) > 0) return true;
 		
@@ -88,8 +77,7 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public Item getAnyItemForToolType(Class<?> class1)
-	{
+	public Item getAnyItemForToolType(Class<?> class1) {
 		for (Item i : Item.getAll())
 			if (i.getClass().equals(class1) && get(i) > 0) return i;
 		
@@ -97,8 +85,7 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public ItemStack take(Item item, int amount)
-	{
+	public ItemStack take(Item item, int amount) {
 		if (amount == 0) return null;
 		int oldCount = count;
 		int am = Math.min(amount, storage[item.getId() + 128]);
@@ -110,8 +97,7 @@ public class NonStackingInventory extends Inventory
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		Bits.putInt(baos, capacity);
 		Bits.putInt(baos, count);
 		Bits.putInt(baos, storage.length * 4 /* byte size of storage */);

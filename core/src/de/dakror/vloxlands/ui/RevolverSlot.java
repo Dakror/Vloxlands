@@ -19,43 +19,33 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 /**
  * @author Dakror
  */
-public class RevolverSlot extends TooltipImageButton
-{
+public class RevolverSlot extends TooltipImageButton {
 	public static final float SIZE = 54f;
 	Revolver revolver;
 	
-	public RevolverSlot(Stage stage, Vector2 icon, String name)
-	{
+	public RevolverSlot(Stage stage, Vector2 icon, String name) {
 		super(createStyle(icon));
 		setName(name);
 		
-		if (name.startsWith("entity:"))
-		{
+		if (name.startsWith("entity:")) {
 			final Entity e = Entity.getForId((byte) Integer.parseInt(name.replace("entity:", "").replace("|cont", "").trim()), 0, 0, 0);
 			if (e instanceof ResourceListProvider) tooltip = new ResourceListTooltip("", "", (ResourceListProvider) e, this);
 			
-			if (e instanceof Structure)
-			{
-				addAction(new Action()
-				{
+			if (e instanceof Structure) {
+				addAction(new Action() {
 					@Override
-					public boolean act(float delta)
-					{
+					public boolean act(float delta) {
 						setDisabled(!Game.instance.activeIsland.availableResources.canSubtract(((Structure) e).getCosts()));
 						return false;
 					}
 				});
 			}
 		}
-		if (name.startsWith("task:"))
-		{
-			try
-			{
+		if (name.startsWith("task:")) {
+			try {
 				Task t = (Task) Tasks.class.getField(name.replace("task:", "")).get(null);
 				tooltip = new ResourceListTooltip("", "", t, this);
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -63,18 +53,15 @@ public class RevolverSlot extends TooltipImageButton
 		stage.addActor(tooltip);
 	}
 	
-	public void setIcon(Vector2 icon)
-	{
+	public void setIcon(Vector2 icon) {
 		setStyle(createStyle(icon));
 	}
 	
-	public void addSlot(RevolverSlot slot)
-	{
+	public void addSlot(RevolverSlot slot) {
 		revolver.addSlot(((Integer) getUserObject()) + 1, getName(), slot);
 	}
 	
-	private static ImageButtonStyle createStyle(Vector2 icon)
-	{
+	private static ImageButtonStyle createStyle(Vector2 icon) {
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		TextureRegion region = new TextureRegion(tex, (int) icon.x * Item.SIZE, (int) icon.y * Item.SIZE, Item.SIZE, Item.SIZE);
 		

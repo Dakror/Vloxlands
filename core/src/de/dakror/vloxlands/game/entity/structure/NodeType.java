@@ -1,7 +1,6 @@
 package de.dakror.vloxlands.game.entity.structure;
 
-public enum NodeType
-{
+public enum NodeType {
 	target(false),
 	entry(true),
 	exit(true),
@@ -14,8 +13,7 @@ public enum NodeType
 	
 	public boolean useGhostTarget;
 	
-	private NodeType(boolean useGhostTarget)
-	{
+	private NodeType(boolean useGhostTarget) {
 		this.useGhostTarget = useGhostTarget;
 	}
 }

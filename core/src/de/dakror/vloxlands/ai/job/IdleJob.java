@@ -7,10 +7,8 @@ import de.dakror.vloxlands.game.entity.creature.Human;
  *
  * @author Dakror
  */
-public class IdleJob extends Job
-{
-	public IdleJob(Human human)
-	{
+public class IdleJob extends Job {
+	public IdleJob(Human human) {
 		super(human, "idle", "Idling...", -1, false);
 	}
 }

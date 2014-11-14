@@ -16,19 +16,16 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
 /**
  * @author Dakror
  */
-public class ResourceListTooltip extends Tooltip
-{
+public class ResourceListTooltip extends Tooltip {
 	ResourceListProvider provider;
 	
-	public ResourceListTooltip(String title, String description, ResourceListProvider provider, Actor parent)
-	{
+	public ResourceListTooltip(String title, String description, ResourceListProvider provider, Actor parent) {
 		super(title, description, parent);
 		this.provider = provider;
 	}
 	
 	@Override
-	public void setDescription(String s)
-	{
+	public void setDescription(String s) {
 		if (provider == null) return;
 		clear();
 		Label l = new Label(s, Vloxlands.skin);
@@ -43,14 +40,12 @@ public class ResourceListTooltip extends Tooltip
 		
 		Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 		
-		for (Byte b : provider.getCosts().getAll())
-		{
+		for (Byte b : provider.getCosts().getAll()) {
 			Item item = Item.getForId(b);
 			addItem(tex, provider.getCosts().get(b) + "", item.getIconX(), item.getIconY());
 		}
 		
-		if (rl.hasRequirements())
-		{
+		if (rl.hasRequirements()) {
 			l = new Label("Requirements", Vloxlands.skin);
 			row();
 			add(l).width(200);
@@ -65,8 +60,7 @@ public class ResourceListTooltip extends Tooltip
 		setHeight(getHeight() + 16);
 	}
 	
-	protected void addItem(Texture texture, String text, int iconX, int iconY)
-	{
+	protected void addItem(Texture texture, String text, int iconX, int iconY) {
 		TextureRegion region = new TextureRegion(texture, iconX * Item.SIZE, iconY * Item.SIZE, Item.SIZE, Item.SIZE);
 		
 		Table t = new Table(Vloxlands.skin);

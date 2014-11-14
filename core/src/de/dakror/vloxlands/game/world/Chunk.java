@@ -32,8 +32,7 @@ import de.dakror.vloxlands.util.math.MathHelper;
 /**
  * @author Dakror
  */
-public class Chunk implements Meshable, Tickable, Disposable, Savable
-{
+public class Chunk implements Meshable, Tickable, Disposable, Savable {
 	public static short[] indices;
 	public static final int SIZE = 16;
 	public static final int VERTEX_SIZE = 11;
@@ -81,8 +80,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	
 	Array<Disposable> disposables = new Array<Disposable>();
 	
-	public Chunk(Vector3 index, Island island)
-	{
+	public Chunk(Vector3 index, Island island) {
 		random = MathUtils.random(UNLOAD_TICKS);
 		
 		this.index = index;
@@ -98,20 +96,16 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		MeshingThread.register(this);
 	}
 	
-	public Chunk(int x, int y, int z, Island island)
-	{
+	public Chunk(int x, int y, int z, Island island) {
 		this(new Vector3(x, y, z), island);
 	}
 	
-	public void load()
-	{
-		if (indices == null)
-		{
+	public void load() {
+		if (indices == null) {
 			int len = SIZE * SIZE * SIZE * 6 * 6 / 3;
 			indices = new short[len];
 			short j = 0;
-			for (int i = 0; i < len; i += 6, j += 4)
-			{
+			for (int i = 0; i < len; i += 6, j += 4) {
 				indices[i + 0] = (short) (j + 0);
 				indices[i + 1] = (short) (j + 1);
 				indices[i + 2] = (short) (j + 2);
@@ -146,8 +140,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		drawn = false;
 	}
 	
-	public void unload()
-	{
+	public void unload() {
 		updateRequired = true;
 		doneMeshing = false;
 		meshing = false;
@@ -164,23 +157,19 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		transpMeshData = null;
 	}
 	
-	public void forceUpdate()
-	{
+	public void forceUpdate() {
 		updateRequired = true;
 	}
 	
-	public void add(int x, int y, int z, byte id)
-	{
+	public void add(int x, int y, int z, byte id) {
 		set(x, y, z, id, false);
 	}
 	
-	public boolean set(int x, int y, int z, byte id)
-	{
+	public boolean set(int x, int y, int z, byte id) {
 		return set(x, y, z, id, true);
 	}
 	
-	public boolean set(int x, int y, int z, byte id, boolean force)
-	{
+	public boolean set(int x, int y, int z, byte id, boolean force) {
 		if (x >= SIZE || x < 0) return false;
 		if (y >= SIZE || y < 0) return false;
 		if (z >= SIZE || z < 0) return false;
@@ -205,8 +194,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return true;
 	}
 	
-	public byte get(int x, int y, int z)
-	{
+	public byte get(int x, int y, int z) {
 		if (x >= SIZE || x < 0) return 0;
 		if (y >= SIZE || y < 0) return 0;
 		if (z >= SIZE || z < 0) return 0;
@@ -214,18 +202,15 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return voxels[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
-	public void addMeta(int x, int y, int z, byte id)
-	{
+	public void addMeta(int x, int y, int z, byte id) {
 		setMeta(x, y, z, id, false);
 	}
 	
-	public boolean setMeta(int x, int y, int z, byte id)
-	{
+	public boolean setMeta(int x, int y, int z, byte id) {
 		return setMeta(x, y, z, id, true);
 	}
 	
-	public boolean setMeta(int x, int y, int z, byte id, boolean force)
-	{
+	public boolean setMeta(int x, int y, int z, byte id, boolean force) {
 		if (x >= SIZE || x < 0) return false;
 		if (y >= SIZE || y < 0) return false;
 		if (z >= SIZE || z < 0) return false;
@@ -238,8 +223,7 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return true;
 	}
 	
-	public byte getMeta(int x, int y, int z)
-	{
+	public byte getMeta(int x, int y, int z) {
 		if (x >= SIZE || x < 0) return 0;
 		if (y >= SIZE || y < 0) return 0;
 		if (z >= SIZE || z < 0) return 0;
@@ -247,17 +231,14 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return meta[z + y * SIZE + x * SIZE * SIZE];
 	}
 	
-	public byte[] getVoxels()
-	{
+	public byte[] getVoxels() {
 		return voxels;
 	}
 	
-	public boolean updateMeshes()
-	{
+	public boolean updateMeshes() {
 		if (!loaded) return false;
 		
-		if (doneMeshing)
-		{
+		if (doneMeshing) {
 			opaque.setVertices(opaqueMeshData.items, 0, opaqueMeshData.size);
 			transp.setVertices(transpMeshData.items, 0, transpMeshData.size);
 			
@@ -277,35 +258,28 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return false;
 	}
 	
-	public Mesh getOpaqueMesh()
-	{
+	public Mesh getOpaqueMesh() {
 		return opaque;
 	}
 	
-	public Mesh getTransparentMesh()
-	{
+	public Mesh getTransparentMesh() {
 		return transp;
 	}
 	
-	public boolean isEmpty()
-	{
+	public boolean isEmpty() {
 		return getResource(Voxel.get("AIR").getId()) == SIZE * SIZE * SIZE;
 	}
 	
-	public boolean pickVoxel(Ray ray, Vector3 intersection, Vector3 v)
-	{
+	public boolean pickVoxel(Ray ray, Vector3 intersection, Vector3 v) {
 		byte air = Voxel.get("AIR").getId();
 		
 		float distance = 0;
 		Vector3 is = new Vector3();
 		Vector3 voxel = null;
 		
-		for (int x = 0; x < Chunk.SIZE; x++)
-		{
-			for (int y = 0; y < Chunk.SIZE; y++)
-			{
-				for (int z = 0; z < Chunk.SIZE; z++)
-				{
+		for (int x = 0; x < Chunk.SIZE; x++) {
+			for (int y = 0; y < Chunk.SIZE; y++) {
+				for (int z = 0; z < Chunk.SIZE; z++) {
 					byte b = get(x, y, z);
 					
 					if (b == air || !island.isTargetable(pos.x + x, pos.y + y, pos.z + z)) continue;
@@ -314,11 +288,9 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 					Game.instance.tmp4.set(Game.instance.tmp3.cpy().add(1, 1, 1));
 					Game.instance.bb2.set(Game.instance.tmp3, Game.instance.tmp4);
 					
-					if (Intersector.intersectRayBounds(ray, Game.instance.bb2, is))
-					{
+					if (Intersector.intersectRayBounds(ray, Game.instance.bb2, is)) {
 						float dist = ray.origin.dst(is);
-						if (voxel == null || (dist = ray.origin.dst(is)) < distance)
-						{
+						if (voxel == null || (dist = ray.origin.dst(is)) < distance) {
 							voxel = new Vector3(x, y, z);
 							distance = dist;
 							intersection.set(is);
@@ -333,20 +305,15 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		return voxel != null;
 	}
 	
-	public int getResource(byte id)
-	{
+	public int getResource(byte id) {
 		return resources[id + 128];
 	}
 	
-	public void calculateWeight()
-	{
+	public void calculateWeight() {
 		weight = 0;
-		for (int x = 0; x < SIZE; x++)
-		{
-			for (int y = 0; y < SIZE; y++)
-			{
-				for (int z = 0; z < SIZE; z++)
-				{
+		for (int x = 0; x < SIZE; x++) {
+			for (int y = 0; y < SIZE; y++) {
+				for (int z = 0; z < SIZE; z++) {
 					if (get(x, y, z) == 0) continue;
 					weight += Voxel.getForId(get(x, y, z)).getWeight();
 				}
@@ -354,15 +321,11 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 	}
 	
-	public void calculateUplift()
-	{
+	public void calculateUplift() {
 		uplift = 0;
-		for (int x = 0; x < SIZE; x++)
-		{
-			for (int y = 0; y < SIZE; y++)
-			{
-				for (int z = 0; z < SIZE; z++)
-				{
+		for (int x = 0; x < SIZE; x++) {
+			for (int y = 0; y < SIZE; y++) {
+				for (int z = 0; z < SIZE; z++) {
 					if (get(x, y, z) == 0) continue;
 					uplift += Voxel.getForId(get(x, y, z)).getUplift();
 				}
@@ -370,42 +333,32 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 	}
 	
-	public void spread(int maximum, boolean snow)
-	{
+	public void spread(int maximum, boolean snow) {
 		if (spreadDone || isEmpty() || (getResource(Voxel.get("DIRT").getId()) == 0 && getResource(Voxel.get(snow ? "GRASS" : "SNOW").getId()) == 0)) return;
 		
-		if (maximum == 0)
-		{
-			for (int i = 0; i < SIZE; i++)
-			{
-				for (int j = 0; j < SIZE; j++)
-				{
-					for (int k = 0; k < SIZE; k++)
-					{
+		if (maximum == 0) {
+			for (int i = 0; i < SIZE; i++) {
+				for (int j = 0; j < SIZE; j++) {
+					for (int k = 0; k < SIZE; k++) {
 						byte g = get(i, j, k);
-						if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0)
-						{
+						if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(i + pos.x, j + pos.y + 1, k + pos.z) == 0) {
 							set(i, j, k, Voxel.get(snow ? "SNOW" : "GRASS").getId());
 						}
 					}
 				}
 			}
-		}
-		else
-		{
+		} else {
 			IntArray f = new IntArray(MathHelper.indexShuffle(SIZE * SIZE * SIZE));
 			
 			int done = 0;
-			while (done < maximum && f.size > 0)
-			{
+			while (done < maximum && f.size > 0) {
 				int ind = f.pop();
 				int x = ind / (SIZE * SIZE);
 				int y = (ind / SIZE) % SIZE;
 				int z = ind % SIZE;
 				
 				byte g = get(x, y, z);
-				if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(x + pos.x, y + pos.y + 1, z + pos.z) == 0)
-				{
+				if ((g == Voxel.get("DIRT").getId() || g == Voxel.get(snow ? "GRASS" : "SNOW").getId()) && island.get(x + pos.x, y + pos.y + 1, z + pos.z) == 0) {
 					set(x, y, z, Voxel.get(snow ? "SNOW" : "GRASS").getId());
 					done++;
 				}
@@ -415,30 +368,24 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 		}
 	}
 	
-	private void getVertices()
-	{
+	private void getVertices() {
 		IntMap<TextureFace> faces = new IntMap<TextureFace>();
 		IntMap<TextureFace> transpFaces = new IntMap<TextureFace>();
 		
 		int i = 0;
-		for (int x = 0; x < SIZE; x++)
-		{
-			for (int y = 0; y < SIZE; y++)
-			{
-				for (int z = 0; z < SIZE; z++, i++)
-				{
+		for (int x = 0; x < SIZE; x++) {
+			for (int y = 0; y < SIZE; y++) {
+				for (int z = 0; z < SIZE; z++, i++) {
 					byte voxel = voxels[i];
 					if (voxel == 0) continue;
 					Voxel v = Voxel.getForId(voxel);
 					
 					if (island.isSurrounded(x + pos.x, y + pos.y, z + pos.z, v.isOpaque())) continue;
 					
-					for (Direction d : Direction.values())
-					{
+					for (Direction d : Direction.values()) {
 						byte w = island.get(x + d.dir.x + pos.x, y + d.dir.y + pos.y, z + d.dir.z + pos.z);
 						Voxel ww = Voxel.getForId(w);
-						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel)
-						{
+						if (w == 0 || (ww == null || !ww.isOpaque()) && w != voxel) {
 							TextureFace face = new TextureFace(d, new Vector3(x + pos.x, y + pos.y, z + pos.z), Voxel.getForId(voxel).getTextureUV(x, y, z, d));
 							if (v.isOpaque()) faces.put(face.hashCode(), face);
 							else transpFaces.put(face.hashCode(), face);
@@ -462,29 +409,22 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
-		if (!inFrustum && loaded && drawn && Game.instance.activeIsland != island)
-		{
+	public void tick(int tick) {
+		if (!inFrustum && loaded && drawn && Game.instance.activeIsland != island) {
 			ticksInvisible++;
 			if (ticksInvisible > UNLOAD_TICKS + random) requestsUnload = true;
-		}
-		else ticksInvisible = 0;
+		} else ticksInvisible = 0;
 		
-		if (loaded)
-		{
-			if ((tick + random) % SPREAD_TICKS == 0)
-			{
+		if (loaded) {
+			if ((tick + random) % SPREAD_TICKS == 0) {
 				boolean snow = island.pos.y + Island.SIZE / 2 >= SNOW_MIN_HEIGHT;
 				spread(snow ? SNOW_SPREAD : GRASS_SPREAD, snow);
 			}
 		}
 	}
 	
-	public void render()
-	{
-		if (requestsUnload && loaded)
-		{
+	public void render() {
+		if (requestsUnload && loaded) {
 			unload();
 			ticksInvisible = 0;
 			requestsUnload = false;
@@ -492,16 +432,13 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 	}
 	
 	@Override
-	public void mesh()
-	{
-		if (meshRequest && !meshing)
-		{
+	public void mesh() {
+		if (meshRequest && !meshing) {
 			if (!loaded) return;
 			meshing = true;
 			opaqueMeshData = new FloatArray();
 			transpMeshData = new FloatArray();
-			try
-			{
+			try {
 				getVertices();
 				int opaqueNumVerts = opaqueMeshData.size / VERTEX_SIZE;
 				int transpNumVerts = transpMeshData.size / VERTEX_SIZE;
@@ -510,24 +447,20 @@ public class Chunk implements Meshable, Tickable, Disposable, Savable
 				meshRequest = false;
 				doneMeshing = true;
 				meshing = false;
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				meshing = true;
 			}
 		}
 	}
 	
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		for (Disposable d : disposables)
 			d.dispose();
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		if (isEmpty()) return;
 		
 		baos.write((int) index.x);

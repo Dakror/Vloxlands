@@ -13,12 +13,10 @@ import com.badlogic.gdx.utils.BufferUtils;
  * @author Dakror
  */
 @SuppressWarnings("deprecation")
-public class DDirectionalShadowLight extends DirectionalShadowLight
-{
+public class DDirectionalShadowLight extends DirectionalShadowLight {
 	int maxSize;
 	
-	public DDirectionalShadowLight(int shadowQuality, float shadowViewportWidth, float shadowViewportHeight, float shadowNear, float shadowFar)
-	{
+	public DDirectionalShadowLight(int shadowQuality, float shadowViewportWidth, float shadowViewportHeight, float shadowNear, float shadowFar) {
 		super(Gdx.graphics.getWidth(), Gdx.graphics.getWidth(), shadowViewportWidth, shadowViewportHeight, shadowNear, shadowFar);
 		
 		IntBuffer ib = BufferUtils.newIntBuffer(16);
@@ -28,8 +26,7 @@ public class DDirectionalShadowLight extends DirectionalShadowLight
 		setShadowQuality(shadowQuality);
 	}
 	
-	public void setShadowQuality(int shadowQuality)
-	{
+	public void setShadowQuality(int shadowQuality) {
 		int size = Math.min(maxSize, Gdx.graphics.getWidth() * (shadowQuality + 1));
 		
 		fbo = new FrameBuffer(Format.RGBA8888, size, size, true);

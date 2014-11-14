@@ -11,41 +11,33 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public abstract class StaticEntity extends Entity
-{
+public abstract class StaticEntity extends Entity {
 	protected Vector3 voxelPos;
 	
-	protected StaticEntity(float x, float y, float z, String model)
-	{
+	protected StaticEntity(float x, float y, float z, String model) {
 		super(x, y, z, model);
 		voxelPos = new Vector3(Math.round(x), Math.round(y), Math.round(z));
 	}
 	
-	public void updateVoxelPos()
-	{
+	public void updateVoxelPos() {
 		modelInstance.transform.getTranslation(posCache);
 		modelInstance.transform.getRotation(rotCache);
 		Vector3 p = posCache.cpy().sub(island.pos).sub(blockTrn);
 		voxelPos = new Vector3(Math.round(p.x), Math.round(p.y), Math.round(p.z));
 	}
 	
-	public Vector3 getVoxelPos()
-	{
+	public Vector3 getVoxelPos() {
 		return voxelPos;
 	}
 	
-	public boolean canBePlaced()
-	{
+	public boolean canBePlaced() {
 		int width = (int) Math.ceil(boundingBox.getDimensions().x);
 		int height = (int) Math.ceil(boundingBox.getDimensions().y);
 		int depth = (int) Math.ceil(boundingBox.getDimensions().z);
 		
-		for (int i = 0; i < width; i++)
-		{
-			for (int j = -1; j < height; j++)
-			{
-				for (int k = 0; k < depth; k++)
-				{
+		for (int i = 0; i < width; i++) {
+			for (int j = -1; j < height; j++) {
+				for (int k = 0; k < depth; k++) {
 					if (j == -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) == 0) return false;
 					else if (j > -1 && island.get(i + voxelPos.x, j + voxelPos.y + 1, k + voxelPos.z) != 0) return false;
 				}
@@ -59,8 +51,7 @@ public abstract class StaticEntity extends Entity
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		super.save(baos);
 		
 		Bits.putVector3(baos, voxelPos);

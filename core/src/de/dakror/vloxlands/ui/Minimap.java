@@ -16,10 +16,8 @@ import de.dakror.vloxlands.game.world.Island;
 /**
  * @author Dakror
  */
-public class Minimap extends Group
-{
-	public Minimap()
-	{
+public class Minimap extends Group {
+	public Minimap() {
 		float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
 		
 		setBounds(Gdx.graphics.getWidth() - 250, Gdx.graphics.getHeight() - 250, 250, 250);
@@ -33,10 +31,8 @@ public class Minimap extends Group
 		float mapWidth = width / 2 * (Game.world.getWidth() + Game.world.getDepth());
 		float mapHeight = height / 2 * (Game.world.getWidth() + Game.world.getDepth());
 		
-		for (Island island : Game.world.getIslands())
-		{
-			if (island != null)
-			{
+		for (Island island : Game.world.getIslands()) {
+			if (island != null) {
 				int ix = (int) (Game.world.getWidth() - island.index.x);
 				
 				float x = width / 2 * (ix + island.index.z);
@@ -47,21 +43,17 @@ public class Minimap extends Group
 			}
 		}
 		
-		addListener(new InputListener()
-		{
+		addListener(new InputListener() {
 			@Override
-			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
-			{
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 				if (button != Buttons.LEFT) return false;
 				
 				for (Actor a : getChildren())
 					if (a instanceof MinimapIsland) ((MinimapIsland) a).active = false;
 				
 				Actor actor = hit(x, y, true);
-				if (actor != null && actor instanceof MinimapIsland)
-				{
-					if (Game.instance.cursorEntity == null && !Game.instance.regionSelectionMode)
-					{
+				if (actor != null && actor instanceof MinimapIsland) {
+					if (Game.instance.cursorEntity == null && !Game.instance.regionSelectionMode) {
 						((MinimapIsland) actor).active = true;
 						Game.instance.focusIsland(((MinimapIsland) actor).island, false);
 					}
@@ -72,8 +64,7 @@ public class Minimap extends Group
 	}
 	
 	@Override
-	public void draw(Batch batch, float parentAlpha)
-	{
+	public void draw(Batch batch, float parentAlpha) {
 		setPosition(Gdx.graphics.getWidth() - getWidth(), Gdx.graphics.getHeight() - getHeight());
 		
 		Drawable bg = Vloxlands.skin.getDrawable("paper_container");

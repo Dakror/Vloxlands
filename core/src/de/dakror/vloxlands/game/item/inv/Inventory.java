@@ -14,87 +14,71 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Inventory implements Savable
-{
+public class Inventory implements Savable {
 	protected Array<ItemStack> stacks;
 	protected int capacity;
 	protected int count;
 	
 	public Array<InventoryListener> listeners = new Array<InventoryListener>();
 	
-	public Inventory(int capacity)
-	{
+	public Inventory(int capacity) {
 		this.capacity = capacity;
 		stacks = new Array<ItemStack>();
 	}
 	
-	public Inventory()
-	{
+	public Inventory() {
 		this(10);
 	}
 	
-	public void clear()
-	{
+	public void clear() {
 		dispatchItemRemoved(count, null);
 		stacks.clear();
 		count = 0;
 	}
 	
-	public ItemStack add(ItemStack stack)
-	{
-		if (count + stack.getAmount() > capacity)
-		{
+	public ItemStack add(ItemStack stack) {
+		if (count + stack.getAmount() > capacity) {
 			addStack(stack, capacity - count);
 			stack.sub(capacity - count);
 			return stack;
-		}
-		else
-		{
+		} else {
 			addStack(stack, stack.getAmount());
 			return new ItemStack();
 		}
 	}
 	
-	public int get(Item item)
-	{
+	public int get(Item item) {
 		int amount = 0;
 		for (ItemStack stack : stacks)
 			if (stack.getItem().getId() == item.getId()) amount += stack.getAmount();
 		return amount;
 	}
 	
-	public int get(byte id)
-	{
+	public int get(byte id) {
 		int amount = 0;
 		for (ItemStack stack : stacks)
 			if (stack.getItem().getId() == id) amount += stack.getAmount();
 		return amount;
 	}
 	
-	public ItemStack getFirst()
-	{
+	public ItemStack getFirst() {
 		if (stacks.size == 0) return new ItemStack();
 		return stacks.first();
 	}
 	
-	public ItemStack take(Item item, int amount)
-	{
+	public ItemStack take(Item item, int amount) {
 		if (amount == 0) return null;
 		int oldCount = count;
 		ItemStack is = new ItemStack(item, 0);
 		
-		for (ItemStack stack : stacks)
-		{
+		for (ItemStack stack : stacks) {
 			if (stack.getItem().getId() != item.getId()) continue;
 			
-			if (amount >= stack.getAmount())
-			{
+			if (amount >= stack.getAmount()) {
 				amount -= stack.getAmount();
 				is.add(stack.getAmount());
 				stacks.removeValue(stack, true);
-			}
-			else
-			{
+			} else {
 				is.add(amount);
 				stack.sub(amount);
 			}
@@ -110,8 +94,7 @@ public class Inventory implements Savable
 	 * @param amount amount to get
 	 * @return only if at least <code>amount</code> items of type <code>item</code> are inside the inventory a stack, otherwise <code>null</code>
 	 */
-	public ItemStack takeIfHas(Item item, int amount)
-	{
+	public ItemStack takeIfHas(Item item, int amount) {
 		ItemStack is = take(item, amount);
 		if (is.getAmount() == amount) return is;
 		
@@ -119,12 +102,10 @@ public class Inventory implements Savable
 		return new ItemStack();
 	}
 	
-	protected void addStack(ItemStack stack, int amount)
-	{
+	protected void addStack(ItemStack stack, int amount) {
 		int oldCount = count;
 		int amount2 = amount;
-		for (ItemStack s : stacks)
-		{
+		for (ItemStack s : stacks) {
 			if (s.getItem().getId() != stack.getItem().getId() || s.isFull()) continue;
 			if (amount == 0) break;
 			
@@ -138,8 +119,7 @@ public class Inventory implements Savable
 		dispatchItemAdded(oldCount, stack.getItem());
 	}
 	
-	public boolean contains(ItemStack stack)
-	{
+	public boolean contains(ItemStack stack) {
 		for (ItemStack s : stacks)
 			if (s.getItem().getId() == stack.getItem().getId() && s.getAmount() >= stack.getAmount()) return true;
 		
@@ -152,67 +132,56 @@ public class Inventory implements Savable
 	 * @param class1 searched type
 	 * @return true if this contains item(s) of searched type
 	 */
-	public boolean contains(Class<?> class1)
-	{
+	public boolean contains(Class<?> class1) {
 		for (ItemStack s : stacks)
 			if (s.getItem().getClass().equals(class1)) return true;
 		
 		return false;
 	}
 	
-	public Item getAnyItemForToolType(Class<?> class1)
-	{
+	public Item getAnyItemForToolType(Class<?> class1) {
 		for (ItemStack s : stacks)
 			if (s.getItem().getClass().equals(class1)) return s.getItem();
 		
 		return null;
 	}
 	
-	public boolean isFull()
-	{
+	public boolean isFull() {
 		return count == capacity;
 	}
 	
-	public int getCapacity()
-	{
+	public int getCapacity() {
 		return capacity;
 	}
 	
-	public int getCount()
-	{
+	public int getCount() {
 		return count;
 	}
 	
-	public void setCapacity(int capacity)
-	{
+	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
 	
-	protected void dispatchItemAdded(int countBefore, Item item)
-	{
+	protected void dispatchItemAdded(int countBefore, Item item) {
 		for (InventoryListener isl : listeners)
 			isl.onItemAdded(countBefore, item, this);
 	}
 	
-	protected void dispatchItemRemoved(int countBefore, Item item)
-	{
+	protected void dispatchItemRemoved(int countBefore, Item item) {
 		for (InventoryListener isl : listeners)
 			isl.onItemRemoved(countBefore, item, this);
 	}
 	
-	public void addListener(InventoryListener listener)
-	{
+	public void addListener(InventoryListener listener) {
 		listeners.insert(0, listener);
 	}
 	
-	public void removeListener(InventoryListener listener)
-	{
+	public void removeListener(InventoryListener listener) {
 		listeners.removeValue(listener, true);
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		Bits.putInt(baos, capacity);
 		Bits.putInt(baos, count);
 		Bits.putInt(baos, stacks.size * 2 /* byte size of all stacks */);

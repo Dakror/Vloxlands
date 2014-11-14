@@ -43,8 +43,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  *
  * @author Dakror
  */
-public class BezierEditor extends InputListener implements ApplicationListener
-{
+public class BezierEditor extends InputListener implements ApplicationListener {
 	Stage stage;
 	SpriteBatch fontBatch;
 	Skin skin;
@@ -72,14 +71,10 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	Bezier<Vector2> bezierLogic;
 	
 	@Override
-	public void create()
-	{
-		try
-		{
+	public void create() {
+		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		stage = new Stage(new ScreenViewport());
@@ -99,8 +94,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		Vector2[] v = new Vector2[4];
 		Vector2[] w = new Vector2[4];
 		
-		for (int i = 0; i < knobs.length; i++)
-		{
+		for (int i = 0; i < knobs.length; i++) {
 			knobs[i] = new Image(skin.getDrawable("knob"));
 			knobs[i].setPosition(startPos[i].x, startPos[i].y);
 			stage.addActor(knobs[i]);
@@ -118,21 +112,18 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	}
 	
 	@Override
-	public void render()
-	{
+	public void render() {
 		Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		for (int i = 0; i < knobs.length; i++)
-		{
+		for (int i = 0; i < knobs.length; i++) {
 			bezier.points.get(i).set(knobs[i].getX() + 12, knobs[i].getY() + 12);
 			bezierLogic.points.get(i).set((knobs[i].getX() - X) / SIZE, (knobs[i].getY() - X) / SIZE);
 		}
 		
 		renderer.begin(stage.getBatch().getProjectionMatrix(), GL20.GL_LINE_STRIP);
 		float val = 0f;
-		while (val <= 1f)
-		{
+		while (val <= 1f) {
 			renderer.color(0f, 0f, 0f, 1f);
 			bezier.valueAt(tmpV, val);
 			renderer.vertex(tmpV.x, tmpV.y, 0);
@@ -160,8 +151,7 @@ public class BezierEditor extends InputListener implements ApplicationListener
 		fontBatch.end();
 	}
 	
-	public String s()
-	{
+	public String s() {
 		return String.format(Locale.ENGLISH, "%.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff, %.1ff", //
 				bezierLogic.points.get(0).x,//
 				bezierLogic.points.get(0).y,//
@@ -174,32 +164,26 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	}
 	
 	@Override
-	public void resize(int width, int height)
-	{}
+	public void resize(int width, int height) {}
 	
 	@Override
-	public void pause()
-	{}
+	public void pause() {}
 	
 	@Override
-	public void resume()
-	{}
+	public void resume() {}
 	
 	@Override
-	public void dispose()
-	{}
+	public void dispose() {}
 	
 	@Override
-	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
-	{
+	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 		Actor a = stage.hit(x, y, true);
 		if (a != null) selected = a;
 		return true;
 	}
 	
 	@Override
-	public void touchDragged(InputEvent event, float x, float y, int pointer)
-	{
+	public void touchDragged(InputEvent event, float x, float y, int pointer) {
 		if (selected == null) return;
 		
 		float x1 = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) ? selected.getX() : x - 12;
@@ -209,57 +193,40 @@ public class BezierEditor extends InputListener implements ApplicationListener
 	}
 	
 	@Override
-	public void touchUp(InputEvent event, float x, float y, int pointer, int button)
-	{
+	public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
 		selected = null;
 	}
 	
 	@Override
-	public boolean keyUp(InputEvent event, int keycode)
-	{
-		if (keycode == Keys.X)
-		{
-			for (int i = 0; i < knobs.length; i++)
-			{
+	public boolean keyUp(InputEvent event, int keycode) {
+		if (keycode == Keys.X) {
+			for (int i = 0; i < knobs.length; i++) {
 				knobs[i].setPosition(startPos[i].x, startPos[i].y);
 			}
-		}
-		else if (keycode == Keys.C)
-		{
+		} else if (keycode == Keys.C) {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(s()), null);
-		}
-		else if (keycode == Keys.V)
-		{
-			try
-			{
+		} else if (keycode == Keys.V) {
+			try {
 				String s = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 				String[] p = s.split(", ");
 				if (p.length != 8) return true;
-				for (int i = 0, j = 0; i < knobs.length; i++)
-				{
+				for (int i = 0, j = 0; i < knobs.length; i++) {
 					knobs[i].setX(Float.parseFloat(p[j++]) * SIZE + X);
 					knobs[i].setY(Float.parseFloat(p[j++]) * SIZE + X);
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		else if (keycode == Keys.B || keycode == Keys.N)
-		{
-			try
-			{
-				if (keycode == Keys.B || lastRad == 0)
-				{
+		} else if (keycode == Keys.B || keycode == Keys.N) {
+			try {
+				if (keycode == Keys.B || lastRad == 0) {
 					lastRad = Integer.parseInt(JOptionPane.showInputDialog("Maximum Radius (int)"));
 					lastHeight = Integer.parseInt(JOptionPane.showInputDialog("Height / Length (int)"));
 				}
 				
 				String[] lines = new String[lastHeight];
 				int highest = 0;
-				for (int i = 0; i < lastHeight; i++)
-				{
+				for (int i = 0; i < lastHeight; i++) {
 					bezierLogic.valueAt(tmpV2, i / (float) lastHeight);
 					int y = (int) Math.floor(tmpV2.y * lastRad);
 					if (y > highest) highest = y;
@@ -268,16 +235,13 @@ public class BezierEditor extends InputListener implements ApplicationListener
 						lines[i] += "=";
 				}
 				
-				for (String line : lines)
-				{
+				for (String line : lines) {
 					for (int i = 0; i < Math.round(highest - line.length() / 2f); i++)
 						System.out.print(" ");
 					System.out.print(line);
 					System.out.println();
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				return true;
 			}
 		}

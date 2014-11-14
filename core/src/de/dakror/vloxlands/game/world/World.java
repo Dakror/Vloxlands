@@ -36,8 +36,7 @@ import de.dakror.vloxlands.util.interf.Tickable;
 /**
  * @author Dakror
  */
-public class World implements RenderableProvider, Tickable, Queryable, Savable
-{
+public class World implements RenderableProvider, Tickable, Queryable, Savable {
 	public static final Color SELECTION = Color.WHITE;
 	
 	public static final int MAX_HEIGHT = 512;
@@ -55,8 +54,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	
 	public static final float gap = 0.01f;
 	
-	public World(int width, int depth)
-	{
+	public World(int width, int depth) {
 		this.width = width;
 		this.depth = depth;
 		
@@ -65,8 +63,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		highlight = new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/transparent.png", Texture.class)), ColorAttribute.createDiffuse(SELECTION));
 		
 		dataMaps = new Material[Config.dataMaps.length][2];
-		for (int i = 0; i < dataMaps.length; i++)
-		{
+		for (int i = 0; i < dataMaps.length; i++) {
 			Material trp = new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/datamaps/" + Config.dataMaps[i].toLowerCase() + ".png", Texture.class)), new BlendingAttribute());
 			Material opq = Config.dataMapFullBlending[i] ? trp : new Material(TextureAttribute.createDiffuse(Vloxlands.assets.get("img/datamaps/" + Config.dataMaps[i].toLowerCase() + ".png", Texture.class)));
 			dataMaps[i] = new Material[] { opq, trp };
@@ -78,50 +75,41 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	 * @param y in pos space
 	 * @param z in index space
 	 */
-	public void addIsland(int x, int z, Island island)
-	{
+	public void addIsland(int x, int z, Island island) {
 		islands[z * width + x] = island;
 		island.index.set(x, 0, z);
 		chunks += Island.CHUNKS * Island.CHUNKS * Island.CHUNKS;
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		for (Island island : islands)
 			if (island != null) island.tick(tick);
 	}
 	
-	public void update(float delta)
-	{
+	public void update(float delta) {
 		for (Island island : islands)
 			if (island != null) island.update(delta);
 	}
 	
-	public Island[] getIslands()
-	{
+	public Island[] getIslands() {
 		return islands;
 	}
 	
-	public int getWidth()
-	{
+	public int getWidth() {
 		return width;
 	}
 	
-	public int getDepth()
-	{
+	public int getDepth() {
 		return depth;
 	}
 	
 	@Override
-	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-	{
+	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
 		visibleChunks = 0;
 		loadedChunks = 0;
-		for (Island island : islands)
-		{
-			if (island != null && island.inFrustum)
-			{
+		for (Island island : islands) {
+			if (island != null && island.inFrustum) {
 				island.getRenderables(renderables, pool);
 				visibleChunks += island.visibleChunks;
 				loadedChunks += island.loadedChunks;
@@ -129,24 +117,20 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		}
 	}
 	
-	public void render(ModelBatch batch, Environment environment)
-	{
+	public void render(ModelBatch batch, Environment environment) {
 		batch.render(this, environment);
 		visibleEntities = 0;
 		totalEntities = 0;
 		
-		for (Island island : islands)
-		{
+		for (Island island : islands) {
 			island.render(batch, environment);
 			totalEntities += island.getStructureCount();
 		}
 	}
 	
 	@Override
-	public PathBundle query(Query query)
-	{
-		if (query.island == null)
-		{
+	public PathBundle query(Query query) {
+		if (query.island == null) {
 			Gdx.app.error("World.query", "You must specify an island index because they can't be connected yet! Return null.");
 			return null;
 		}
@@ -156,23 +140,19 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 		Path path = null;
 		float distance = 0;
 		
-		if (structure == null && creature == null)
-		{
+		if (structure == null && creature == null) {
 			Gdx.app.error("World.query", "You have to specify either a source Creature or Structure when querying! Return null.");
 			return null;
 		}
 		
-		if (query.searchingStructure)
-		{
-			if (query.sourceCreature == null)
-			{
+		if (query.searchingStructure) {
+			if (query.sourceCreature == null) {
 				Gdx.app.error("World.query", "You should specify a source Creature when querying a Structure! Return null.");
 				return null;
 			}
 			Vector3 v = query.pathStart != null ? query.pathStart : query.sourceCreature.getVoxelBelow();
 			
-			for (Entity s : query.island.entities)
-			{
+			for (Entity s : query.island.entities) {
 				if (!(s instanceof Structure)) continue;
 				if (s == query.sourceStructure) continue;
 				if (!query.searchedClass.isAssignableFrom(s.getClass())) continue;
@@ -191,25 +171,20 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				if (p == null) continue;
 				
 				float dist = p.length();
-				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
-				{
+				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance)) {
 					distance = dist;
 					path = p;
 					structure = (Structure) s;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			NodeType type = query.searchedNodeType != null ? query.searchedNodeType : NodeType.target;
 			
-			for (Entity e : query.island.entities)
-			{
+			for (Entity e : query.island.entities) {
 				if (!(e instanceof Creature)) continue;
 				if (e == query.sourceCreature) continue;
 				if (!e.getClass().equals(query.searchedClass)) continue;
-				if (query.searchedClass.equals(Human.class))
-				{
+				if (query.searchedClass.equals(Human.class)) {
 					if (query.mustIdle && !((Human) e).isIdle()) continue;
 					if (query.mustBeFull && !((Human) e).getCarryingItemStack().isFull()) continue;
 					if (query.mustBeEmpty && !((Human) e).getCarryingItemStack().isNull()) continue;
@@ -223,8 +198,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 				if (p == null) continue;
 				
 				float dist = p.length();
-				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance))
-				{
+				if (path == null || (query.takeClosest && dist < distance) || (!query.takeClosest && dist > distance)) {
 					distance = dist;
 					path = p;
 					creature = (Creature) e;
@@ -237,8 +211,7 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		baos.write(width);
 		baos.write(depth);
 		
@@ -246,38 +219,31 @@ public class World implements RenderableProvider, Tickable, Queryable, Savable
 			i.save(baos);
 	}
 	
-	public void setDataMap(int dataMap)
-	{
+	public void setDataMap(int dataMap) {
 		this.dataMap = Math.abs(dataMap) % dataMaps.length;
 	}
 	
-	public int getDataMap()
-	{
+	public int getDataMap() {
 		return dataMap;
 	}
 	
-	public Material getOpaque()
-	{
+	public Material getOpaque() {
 		return dataMaps[dataMap][0];
 	}
 	
-	public Material getTransp()
-	{
+	public Material getTransp() {
 		return dataMaps[dataMap][1];
 	}
 	
-	public Material getDefOpaque()
-	{
+	public Material getDefOpaque() {
 		return dataMaps[0][0];
 	}
 	
-	public Material getDefTransp()
-	{
+	public Material getDefTransp() {
 		return dataMaps[0][1];
 	}
 	
-	public static float calculateRelativeUplift(float y)
-	{
+	public static float calculateRelativeUplift(float y) {
 		return (1 - y / MAX_HEIGHT) * 8 + 0.1f;
 	}
 }

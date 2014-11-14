@@ -9,10 +9,8 @@ import de.dakror.vloxlands.util.CurserCommand;
 /**
  * @author Dakror
  */
-public class Lumberjack extends Structure
-{
-	public Lumberjack(float x, float y, float z)
-	{
+public class Lumberjack extends Structure {
+	public Lumberjack(float x, float y, float z) {
 		super(x, y, z, "structure/house.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
@@ -33,8 +31,7 @@ public class Lumberjack extends Structure
 	}
 	
 	@Override
-	public CurserCommand getDefaultCommand()
-	{
+	public CurserCommand getDefaultCommand() {
 		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
 	}
 }

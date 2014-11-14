@@ -19,8 +19,7 @@ import com.badlogic.gdx.utils.Pools;
  * 
  * @author Dakror
  */
-public class DProgressBar extends Widget
-{
+public class DProgressBar extends Widget {
 	public static Color lossTint = Color.GRAY;
 	
 	float min, max, stepSize, value, animateFromValue;
@@ -35,8 +34,7 @@ public class DProgressBar extends Widget
 	Drawable bg;
 	TextureRegion progress;
 	
-	public DProgressBar(float min, float max, float value, Skin skin)
-	{
+	public DProgressBar(float min, float max, float value, Skin skin) {
 		this.min = min;
 		this.max = max;
 		this.value = value;
@@ -47,15 +45,13 @@ public class DProgressBar extends Widget
 	}
 	
 	@Override
-	public void act(float delta)
-	{
+	public void act(float delta) {
 		super.act(delta);
 		animateTime -= delta;
 	}
 	
 	@Override
-	public void draw(Batch batch, float parentAlpha)
-	{
+	public void draw(Batch batch, float parentAlpha) {
 		float x = getX();
 		float y = getY();
 		float width = getWidth();
@@ -63,8 +59,7 @@ public class DProgressBar extends Widget
 		float value = getVisualValue() / (max - min);
 		
 		bg.draw(batch, x, y, width, height);
-		if (showLoss)
-		{
+		if (showLoss) {
 			
 			Color c = batch.getColor();
 			batch.setColor(lossTint);
@@ -75,41 +70,34 @@ public class DProgressBar extends Widget
 		batch.draw(progress.getTexture(), x + 8, y + 8, (width - 16) * value, height - 16, progress.getRegionX(), progress.getRegionY(), Math.round(progress.getRegionWidth() * value), progress.getRegionHeight(), false, false);
 	}
 	
-	public void setAnimateDuration(float duration)
-	{
+	public void setAnimateDuration(float duration) {
 		animateDuration = duration;
 	}
 	
-	public void setAnimateInterpolation(Interpolation animateInterpolation)
-	{
+	public void setAnimateInterpolation(Interpolation animateInterpolation) {
 		if (animateInterpolation == null) throw new IllegalArgumentException("animateInterpolation cannot be null.");
 		this.animateInterpolation = animateInterpolation;
 	}
 	
-	public float getMin()
-	{
+	public float getMin() {
 		return min;
 	}
 	
-	public float getMax()
-	{
+	public float getMax() {
 		return max;
 	}
 	
 	@Override
-	public float getMinHeight()
-	{
+	public float getMinHeight() {
 		return bg.getMinHeight();
 	}
 	
 	@Override
-	public float getMinWidth()
-	{
+	public float getMinWidth() {
 		return bg.getMinWidth();
 	}
 	
-	public boolean setValue(float value)
-	{
+	public boolean setValue(float value) {
 		value = clamp(Math.round(value / stepSize) * stepSize);
 		if (!shiftIgnoresSnap || (!Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) && !Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT))) value = snap(value);
 		float oldValue = this.value;
@@ -119,8 +107,7 @@ public class DProgressBar extends Widget
 		ChangeEvent changeEvent = Pools.obtain(ChangeEvent.class);
 		boolean cancelled = fire(changeEvent);
 		if (cancelled) this.value = oldValue;
-		else if (animateDuration > 0)
-		{
+		else if (animateDuration > 0) {
 			animateFromValue = oldVisualValue;
 			animateTime = animateDuration;
 		}
@@ -128,33 +115,27 @@ public class DProgressBar extends Widget
 		return !cancelled;
 	}
 	
-	public void setSnapToValues(float[] values, float threshold)
-	{
+	public void setSnapToValues(float[] values, float threshold) {
 		snapValues = values;
 		this.threshold = threshold;
 	}
 	
-	public float getVisualValue()
-	{
+	public float getVisualValue() {
 		if (animateTime > 0) return animateInterpolation.apply(animateFromValue, value, 1 - animateTime / animateDuration);
 		return value;
 	}
 	
-	public void setShowLoss(boolean showLoss)
-	{
+	public void setShowLoss(boolean showLoss) {
 		this.showLoss = showLoss;
 	}
 	
-	protected float clamp(float value)
-	{
+	protected float clamp(float value) {
 		return MathUtils.clamp(value, min, max);
 	}
 	
-	private float snap(float value)
-	{
+	private float snap(float value) {
 		if (snapValues == null) return value;
-		for (int i = 0; i < snapValues.length; i++)
-		{
+		for (int i = 0; i < snapValues.length; i++) {
 			if (Math.abs(value - snapValues[i]) <= threshold) return snapValues[i];
 		}
 		return value;

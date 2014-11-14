@@ -62,8 +62,7 @@ import de.dakror.vloxlands.util.math.CustomizableFrustum;
  * @author Dakror
  */
 @SuppressWarnings("deprecation")
-public class Game extends Layer
-{
+public class Game extends Layer {
 	public static long seed = (long) (Math.random() * Long.MAX_VALUE);
 	public static final float velocity = 10;
 	public static final float rotateSpeed = 0.2f;
@@ -138,8 +137,7 @@ public class Game extends Layer
 	public final BoundingBox bb3 = new BoundingBox();
 	
 	@Override
-	public void show()
-	{
+	public void show() {
 		modal = true;
 		instance = this;
 		
@@ -152,33 +150,26 @@ public class Game extends Layer
 		camera = new PerspectiveCamera(Config.fov, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.1f;
 		camera.far = pickRayMaxDistance;
-		controller = new CameraInputController(camera)
-		{
+		controller = new CameraInputController(camera) {
 			private final Vector3 tmpV1 = new Vector3();
 			private final Vector3 tmpV2 = new Vector3();
 			
 			@Override
-			protected boolean process(float deltaX, float deltaY, int button)
-			{
+			protected boolean process(float deltaX, float deltaY, int button) {
 				if (button == rotateButton && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) return false;
 				
-				if (button == rotateButton)
-				{
+				if (button == rotateButton) {
 					tmpV1.set(camera.direction).crs(camera.up).y = 0f;
 					camera.rotateAround(target, tmpV1.nor(), deltaY * rotateAngle);
 					
 					float dot = camera.direction.dot(Vector3.Y);
 					if (dot < -0.95f) camera.rotateAround(target, tmpV1.nor(), -deltaY * rotateAngle);
 					camera.rotateAround(target, Vector3.Y, deltaX * -rotateAngle);
-				}
-				else if (button == translateButton)
-				{
+				} else if (button == translateButton) {
 					camera.translate(tmpV1.set(camera.direction).crs(camera.up).nor().scl(-deltaX * translateUnits));
 					camera.translate(tmpV2.set(camera.up).scl(-deltaY * translateUnits));
 					if (translateTarget) target.add(tmpV1).add(tmpV2);
-				}
-				else if (button == forwardButton)
-				{
+				} else if (button == forwardButton) {
 					camera.translate(tmpV1.set(camera.direction).scl(deltaY * translateUnits));
 					if (forwardTarget) target.add(tmpV1);
 				}
@@ -187,15 +178,13 @@ public class Game extends Layer
 			}
 			
 			@Override
-			public boolean zoom(float amount)
-			{
+			public boolean zoom(float amount) {
 				if (!alwaysScroll && activateKey != 0 && !activatePressed) return false;
 				
 				tmpV1.set(camera.direction).scl(amount);
 				tmpV2.set(camera.position).add(tmpV1);
 				
-				if (tmpV2.dst(target) > 5)
-				{
+				if (tmpV2.dst(target) > 5) {
 					camera.translate(tmpV1);
 					if (scrollTarget) target.add(tmpV1);
 					if (autoUpdate) camera.update();
@@ -242,8 +231,7 @@ public class Game extends Layer
 		// Gdx.app.log("GameLayer.show", "World size: " + w + "x" + d);
 	}
 	
-	public void doneLoading()
-	{
+	public void doneLoading() {
 		for (Item item : Item.getAll())
 			item.onLoaded();
 		
@@ -269,16 +257,13 @@ public class Game extends Layer
 		doneLoading = true;
 	}
 	
-	public void focusIsland(Island island, boolean initial)
-	{
+	public void focusIsland(Island island, boolean initial) {
 		Vector3 islandCenter = new Vector3(island.pos.x + Island.SIZE / 2, island.pos.y + Island.SIZE / 4 * 3, island.pos.z + Island.SIZE / 2);
 		activeIsland = island;
 		selectedVoxel.set(-1, 0, 0);
-		if (!initial)
-		{
+		if (!initial) {
 			target.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
-			if (target.equals(camera.position))
-			{
+			if (target.equals(camera.position)) {
 				camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 				controller.target.set(islandCenter);
 				camera.lookAt(islandCenter);
@@ -306,9 +291,7 @@ public class Game extends Layer
 			camera.up.set(up);
 			
 			startTick = tick;
-		}
-		else
-		{
+		} else {
 			camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
 			controller.target.set(islandCenter);
 			camera.lookAt(islandCenter);
@@ -319,8 +302,7 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public void render(float delta)
-	{
+	public void render(float delta) {
 		if (!doneLoading) return;
 		controller.update();
 		((PerspectiveCamera) camera).fieldOfView = Config.fov;
@@ -340,15 +322,13 @@ public class Game extends Layer
 		world.render(modelBatch, env);
 		if (!Config.paused) world.update(delta);
 		// modelBatch.render(sky, env);
-		if (cursorEntity != null)
-		{
+		if (cursorEntity != null) {
 			cursorEntity.update(delta);
 			cursorEntity.render(modelBatch, env, false);
 		}
 		modelBatch.end();
 		
-		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1)
-		{
+		if (selectionStartVoxel.x > -1 && selectedVoxel.x > -1) {
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glEnable(GL20.GL_BLEND);
 			
@@ -370,14 +350,12 @@ public class Game extends Layer
 			Vloxlands.shapeRenderer.end();
 		}
 		
-		if (Vloxlands.showPathDebug)
-		{
+		if (Vloxlands.showPathDebug) {
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glEnable(GL20.GL_BLEND);
 			Vloxlands.shapeRenderer.begin(ShapeType.Filled);
 			Vloxlands.shapeRenderer.setProjectionMatrix(camera.combined);
-			for (BFSNode node : BFS.visited)
-			{
+			for (BFSNode node : BFS.visited) {
 				Vloxlands.shapeRenderer.identity();
 				Vloxlands.shapeRenderer.translate(activeIsland.pos.x + node.x, activeIsland.pos.y + node.y, activeIsland.pos.z + node.z + 1.01f);
 				Vloxlands.shapeRenderer.setColor(1, 1, 1, 0.3f);
@@ -388,12 +366,10 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		this.tick = tick;
 		
-		if (!Config.paused)
-		{
+		if (!Config.paused) {
 			time -= 0.00002777f;
 			if (time <= -0.99999999999f) time = 0.99999999999f;
 			
@@ -410,14 +386,12 @@ public class Game extends Layer
 		}
 		if (cursorEntity != null) cursorEntity.tick(tick);
 		
-		if (activeIsland != null && startTick > 0)
-		{
+		if (activeIsland != null && startTick > 0) {
 			camera.position.interpolate(target, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
 			camera.direction.interpolate(targetDirection, (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
 			camera.up.interpolate(new Vector3(0, 1, 0), (tick - startTick) / (float) (ticksForTravel * Config.getGameSpeed()), Interpolation.linear);
 			
-			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f)
-			{
+			if (tick >= startTick + ticksForTravel || camera.position.dst(target) < 0.1f) {
 				Vector3 islandCenter = new Vector3(activeIsland.pos.x + Island.SIZE / 2, activeIsland.pos.y + Island.SIZE / 4 * 3, activeIsland.pos.z + Island.SIZE / 2);
 				controller.target.set(islandCenter);
 				camera.position.set(islandCenter).add(-Island.SIZE / 3, Island.SIZE / 3, -Island.SIZE / 3);
@@ -431,8 +405,7 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public void resize(int width, int height)
-	{
+	public void resize(int width, int height) {
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();
@@ -442,28 +415,23 @@ public class Game extends Layer
 		minimapCamera.update();
 	}
 	
-	public void pickRay(boolean hover, boolean lmb, int x, int y)
-	{
+	public void pickRay(boolean hover, boolean lmb, int x, int y) {
 		Ray ray = camera.getPickRay(x, y);
 		
-		if (hover)
-		{
+		if (hover) {
 			Entity hovered = null;
 			float distance = 0;
 			
-			for (Entity e : activeIsland.getEntities())
-			{
+			for (Entity e : activeIsland.getEntities()) {
 				e.hovered = false;
 				if (!e.isVisible()) continue;
 				if (!e.inFrustum) continue;
 				
 				e.getWorldBoundingBox(bb);
 				
-				if (Intersector.intersectRayBounds(ray, bb, tmp))
-				{
+				if (Intersector.intersectRayBounds(ray, bb, tmp)) {
 					float dst = ray.origin.dst(tmp);
-					if (hovered == null || dst < distance)
-					{
+					if (hovered == null || dst < distance) {
 						hovered = e;
 						distance = dst;
 					}
@@ -471,42 +439,34 @@ public class Game extends Layer
 			}
 			
 			if (hovered != null) hovered.hovered = true;
-		}
-		else
-		{
+		} else {
 			Entity selectedEntity = null;
 			Chunk selectedChunk = null;
 			Vector3 selVoxel = new Vector3();
 			
 			float distance = 0;
 			
-			for (Entity e : activeIsland.getEntities())
-			{
+			for (Entity e : activeIsland.getEntities()) {
 				e.wasSelected = e.selected;
 				if (lmb) e.selected = false;
 				float dst = ray.origin.dst(e.posCache);
-				if (e.isVisible() && e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance)
-				{
+				if (e.isVisible() && e.inFrustum && e.hovered && (distance == 0 || dst < distance) && dst < pickRayMaxDistance) {
 					distance = dst;
 					selectedEntity = e;
 				}
 			}
 			
-			for (Chunk c : activeIsland.getChunks())
-			{
+			for (Chunk c : activeIsland.getChunks()) {
 				if (c == null) continue;
 				
-				if (c.inFrustum && !c.isEmpty())
-				{
+				if (c.inFrustum && !c.isEmpty()) {
 					tmp1.set(activeIsland.pos.x + c.pos.x, activeIsland.pos.y + c.pos.y, activeIsland.pos.z + c.pos.z);
 					tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
 					
 					bb.set(tmp1, tmp2);
-					if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
-					{
+					if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6)) {
 						float dst = ray.origin.dst(tmp5);
-						if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
-						{
+						if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance) {
 							distance = dst;
 							selVoxel.set(tmp6);
 							selectedChunk = c;
@@ -515,27 +475,23 @@ public class Game extends Layer
 				}
 			}
 			
-			if (selectedChunk != null)
-			{
+			if (selectedChunk != null) {
 				// -- determine selectedVoxelFace -- //
 				Direction dir = null;
 				float distanc = 0;
 				Vector3 is2 = new Vector3();
 				byte air = Voxel.get("AIR").getId();
 				
-				for (Direction d : Direction.values())
-				{
+				for (Direction d : Direction.values()) {
 					tmp7.set(activeIsland.pos.x + selectedChunk.pos.x + selVoxel.x + d.dir.x, activeIsland.pos.y + selectedChunk.pos.y + selVoxel.y + d.dir.y, activeIsland.pos.z + selectedChunk.pos.z + selVoxel.z + d.dir.z);
 					tmp8.set(tmp7.cpy().add(1, 1, 1));
 					bb3.set(tmp7, tmp8);
 					
 					if (activeIsland.get(selectedChunk.pos.x + selVoxel.x + d.dir.x, selectedChunk.pos.y + selVoxel.y + d.dir.y, selectedChunk.pos.z + selVoxel.z + d.dir.z) != air) continue;
 					
-					if (Intersector.intersectRayBounds(ray, bb3, is2))
-					{
+					if (Intersector.intersectRayBounds(ray, bb3, is2)) {
 						float dist = ray.origin.dst(is2);
-						if (dir == null || dist < distanc)
-						{
+						if (dir == null || dist < distanc) {
 							distanc = dist;
 							dir = d;
 						}
@@ -546,51 +502,39 @@ public class Game extends Layer
 				
 				for (SelectionListener sl : listeners)
 					sl.onVoxelSelection(new VoxelSelection(activeIsland, new VoxelPos(selVoxel.cpy().add(selectedChunk.pos), selectedChunk.get((int) selVoxel.x, (int) selVoxel.y, (int) selVoxel.z)), dir), lmb);
-			}
-			else if (selectedEntity != null)
-			{
+			} else if (selectedEntity != null) {
 				selVoxel.set(-1, 0, 0);
 				selectedEntity.selected = true;
-				if (selectedEntity instanceof Structure)
-				{
+				if (selectedEntity instanceof Structure) {
 					for (SelectionListener sl : listeners)
 						sl.onStructureSelection((Structure) selectedEntity, lmb);
-				}
-				else if (selectedEntity instanceof Creature)
-				{
+				} else if (selectedEntity instanceof Creature) {
 					for (SelectionListener sl : listeners)
 						sl.onCreatureSelection((Creature) selectedEntity, lmb);
 				}
-			}
-			else
-			{
+			} else {
 				for (SelectionListener sl : listeners)
 					sl.onNoSelection(lmb);
 			}
 		}
 	}
 	
-	public Chunk pickVoxelRay(Island island, Vector3 selVoxel, boolean lmb, int x, int y)
-	{
+	public Chunk pickVoxelRay(Island island, Vector3 selVoxel, boolean lmb, int x, int y) {
 		Chunk selectedChunk = null;
 		Ray ray = camera.getPickRay(x, y);
 		
 		float distance = 0;
 		
-		for (Chunk c : island.getChunks())
-		{
+		for (Chunk c : island.getChunks()) {
 			if (c == null) continue;
-			if (c.inFrustum && !c.isEmpty())
-			{
+			if (c.inFrustum && !c.isEmpty()) {
 				tmp1.set(island.pos.x + c.pos.x, island.pos.y + c.pos.y, island.pos.z + c.pos.z);
 				tmp2.set(tmp1.cpy().add(Chunk.SIZE, Chunk.SIZE, Chunk.SIZE));
 				
 				bb.set(tmp1, tmp2);
-				if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6))
-				{
+				if (Intersector.intersectRayBounds(ray, bb, null) && c.pickVoxel(ray, tmp5, tmp6)) {
 					float dst = ray.origin.dst(tmp5);
-					if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance)
-					{
+					if ((distance == 0 || dst < distance) && dst <= pickRayMaxDistance) {
 						distance = dst;
 						selVoxel.set(tmp6).add(c.pos);
 						selectedChunk = c;
@@ -602,8 +546,7 @@ public class Game extends Layer
 		return selectedChunk;
 	}
 	
-	public void selectionBox(Rectangle rectangle)
-	{
+	public void selectionBox(Rectangle rectangle) {
 		CustomizableFrustum frustum = new CustomizableFrustum(rectangle);
 		camera.update();
 		frustum.update(camera.invProjectionView);
@@ -612,8 +555,7 @@ public class Game extends Layer
 		boolean anyEntitySelected = false;
 		boolean dispatched = false;
 		
-		for (Entity entity : activeIsland.getEntities())
-		{
+		for (Entity entity : activeIsland.getEntities()) {
 			if (entity instanceof StaticEntity) continue;
 			if (!entity.isVisible()) continue;
 			entity.wasSelected = entity.selected;
@@ -621,12 +563,10 @@ public class Game extends Layer
 			entity.getWorldBoundingBox(bb);
 			
 			float dst = origin.dst(entity.posCache);
-			if (entity.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance)
-			{
+			if (entity.inFrustum && frustum.boundsInFrustum(bb) && dst < pickRayMaxDistance) {
 				entity.selected = true;
 				anyEntitySelected = true;
-				if (!dispatched && entity instanceof Creature)
-				{
+				if (!dispatched && entity instanceof Creature) {
 					for (SelectionListener sl : listeners)
 						sl.onCreatureSelection((Creature) entity, true);
 					dispatched = true;
@@ -634,13 +574,10 @@ public class Game extends Layer
 			}
 		}
 		
-		if (!anyEntitySelected)
-		{
-			for (Island i : world.getIslands())
-			{
+		if (!anyEntitySelected) {
+			for (Island i : world.getIslands()) {
 				if (i == null) continue;
-				for (Entity e : i.getEntities())
-				{
+				for (Entity e : i.getEntities()) {
 					if (!(e instanceof StaticEntity)) continue;
 					
 					e.wasSelected = e.selected;
@@ -655,10 +592,8 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer)
-	{
-		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-		{
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		if (middleDown && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
 			float f = 0.1f;
 			
 			controller.target.y = controllerTarget.y + (screenY - mouseDown.y) * f;
@@ -670,11 +605,9 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public boolean mouseMoved(int screenX, int screenY)
-	{
+	public boolean mouseMoved(int screenX, int screenY) {
 		if (regionSelectionMode) pickVoxelRay(activeIsland, selectedVoxel, false, screenX, screenY);
-		else if (cursorEntity != null)
-		{
+		else if (cursorEntity != null) {
 			pickVoxelRay(activeIsland, hoveredVoxel, false, screenX, screenY);
 			cursorEntity.getModelInstance().transform.setToTranslation(activeIsland.pos);
 			cursorEntity.getModelInstance().transform.translate(hoveredVoxel).translate(cursorEntity.getBoundingBox().getDimensions().x <= 1 ? cursorEntity.blockTrn.x : 0, cursorEntity.blockTrn.y, cursorEntity.getBoundingBox().getDimensions().z <= 1 ? cursorEntity.blockTrn.z : 0);
@@ -682,42 +615,34 @@ public class Game extends Layer
 			cursorEntity.updateVoxelPos();
 			cursorEntityPlacable = cursorEntity.canBePlaced();
 			
-			if (defaultCursorEntityMaterials == null)
-			{
+			if (defaultCursorEntityMaterials == null) {
 				defaultCursorEntityMaterials = new Array<Material>();
 				
 				for (Material m : cursorEntity.getModelInstance().materials)
 					defaultCursorEntityMaterials.add(m.copy());
 			}
 			
-			for (int i = 0; i < cursorEntity.getModelInstance().materials.size; i++)
-			{
+			for (int i = 0; i < cursorEntity.getModelInstance().materials.size; i++) {
 				Material m = cursorEntity.getModelInstance().materials.get(i);
 				
-				if (!cursorEntityPlacable)
-				{
+				if (!cursorEntityPlacable) {
 					m.set(new BlendingAttribute(0.8f), ColorAttribute.createDiffuse(Color.RED));
-				}
-				else
-				{
+				} else {
 					m.remove(ColorAttribute.Diffuse);
 					BlendingAttribute ba = (BlendingAttribute) defaultCursorEntityMaterials.get(i).get(BlendingAttribute.Type);
 					if (ba == null) m.remove(BlendingAttribute.Type);
 					else m.set(ba);
 				}
 			}
-		}
-		else if (activeIsland != null) pickRay(true, false, screenX, screenY);
+		} else if (activeIsland != null) pickRay(true, false, screenX, screenY);
 		return false;
 	}
 	
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button)
-	{
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		mouseDown.set(screenX, screenY);
 		
-		if (button == Buttons.MIDDLE)
-		{
+		if (button == Buttons.MIDDLE) {
 			controllerTarget.set(controller.target);
 			cameraPos.set(camera.position);
 			middleDown = true;
@@ -727,22 +652,15 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public boolean tap(float x, float y, int count, int button)
-	{
+	public boolean tap(float x, float y, int count, int button) {
 		if (!doneLoading) return false;
 		
-		if (button != Buttons.MIDDLE)
-		{
-			if (!regionSelectionMode)
-			{
-				if (cursorEntity != null)
-				{
-					if (button == Buttons.LEFT)
-					{
-						if (cursorEntityPlacable)
-						{
-							for (int i = 0; i < defaultCursorEntityMaterials.size; i++)
-							{
+		if (button != Buttons.MIDDLE) {
+			if (!regionSelectionMode) {
+				if (cursorEntity != null) {
+					if (button == Buttons.LEFT) {
+						if (cursorEntityPlacable) {
+							for (int i = 0; i < defaultCursorEntityMaterials.size; i++) {
 								cursorEntity.getModelInstance().materials.set(i, defaultCursorEntityMaterials.get(i));
 							}
 							
@@ -751,14 +669,11 @@ public class Game extends Layer
 							activeIsland.addEntity(cursorEntity, true, false);
 							cursorEntity.updateVoxelPos();
 							
-							if (!cursorEntityContinousPlacing)
-							{
+							if (!cursorEntityContinousPlacing) {
 								cursorEntity = null;
 								defaultCursorEntityMaterials = null;
 								cursorEntityPlacable = false;
-							}
-							else
-							{
+							} else {
 								cursorEntity = (StaticEntity) Entity.getForId(cursorEntity.getId(), cursorEntity.posCache.x, cursorEntity.posCache.y, cursorEntity.posCache.z);
 								cursorEntity.setIsland(activeIsland);
 								cursorEntity.getModelInstance().transform.translate(activeIsland.pos.x, activeIsland.pos.y, activeIsland.pos.z);
@@ -767,29 +682,20 @@ public class Game extends Layer
 								cursorEntity.setVisible(true);
 							}
 						}
-					}
-					else
-					{
+					} else {
 						cursorEntity = null;
 						defaultCursorEntityMaterials = null;
 						cursorEntityPlacable = false;
 					}
-				}
-				else
-				{
+				} else {
 					selectionStartVoxel.set(-1, 0, 0);
 					pickRay(false, button == Buttons.LEFT, (int) x, (int) y);
 				}
-			}
-			else
-			{
-				if (selectionStartVoxel.x == -1)
-				{
+			} else {
+				if (selectionStartVoxel.x == -1) {
 					selectedVoxel.set(-1, 0, 0);
 					pickVoxelRay(activeIsland, selectionStartVoxel, regionSelectionLMB = button == Buttons.LEFT, (int) x, (int) y);
-				}
-				else if (regionSelectionLMB == (button == Buttons.LEFT))
-				{
+				} else if (regionSelectionLMB == (button == Buttons.LEFT)) {
 					pickVoxelRay(activeIsland, selectedVoxel, button == Buttons.LEFT, (int) x, (int) y);
 					
 					for (SelectionListener sl : listeners)
@@ -803,44 +709,36 @@ public class Game extends Layer
 	}
 	
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button)
-	{
-		if (button == Buttons.MIDDLE)
-		{
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		if (button == Buttons.MIDDLE) {
 			middleDown = false;
 			Gdx.input.setCursorCatched(false);
 		}
 		return false;
 	}
 	
-	public void addListener(SelectionListener value)
-	{
+	public void addListener(SelectionListener value) {
 		listeners.insert(0, value);
 	}
 	
-	public boolean removeListener(SelectionListener value)
-	{
+	public boolean removeListener(SelectionListener value) {
 		return listeners.removeValue(value, true);
 	}
 	
 	/*
 	 * Only call when @param:action != null
 	 */
-	public void action(String action)
-	{
-		if (action.contains("|region"))
-		{
+	public void action(String action) {
+		if (action.contains("|region")) {
 			selectionStartVoxel.set(-1, 0, 0);
 			selectedVoxel.set(-1, 0, 0);
 			regionSelectionMode = true;
 		}
-		if (action.contains("entity"))
-		{
+		if (action.contains("entity")) {
 			String[] a = action.split("\\|");
 			String s = a[0].replace("entity:", "");
 			Entity e = Entity.getForId((byte) Integer.parseInt(s), 0, 0, 0);
-			if (e instanceof Structure)
-			{
+			if (e instanceof Structure) {
 				((Structure) e).setBuilt(true);
 				((Structure) e).tickRequestsEnabled = false;
 			}

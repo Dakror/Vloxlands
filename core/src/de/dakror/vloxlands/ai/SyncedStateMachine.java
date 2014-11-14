@@ -6,36 +6,30 @@ import com.badlogic.gdx.ai.fsm.State;
 /**
  * @author Dakror
  */
-public class SyncedStateMachine<E> extends DefaultStateMachine<E>
-{
+public class SyncedStateMachine<E> extends DefaultStateMachine<E> {
 	boolean newStateEntered;
 	
-	public SyncedStateMachine(E owner)
-	{
+	public SyncedStateMachine(E owner) {
 		super(owner);
 	}
 	
-	public SyncedStateMachine(E owner, State<E> initialState)
-	{
+	public SyncedStateMachine(E owner, State<E> initialState) {
 		super(owner, initialState);
 	}
 	
-	public SyncedStateMachine(E owner, State<E> initialState, State<E> globalState)
-	{
+	public SyncedStateMachine(E owner, State<E> initialState, State<E> globalState) {
 		super(owner, initialState, globalState);
 	}
 	
 	@Override
-	public void changeState(State<E> newState)
-	{
+	public void changeState(State<E> newState) {
 		newStateEntered = false;
 		super.changeState(newState);
 		newStateEntered = true;
 	}
 	
 	@Override
-	public void update()
-	{
+	public void update() {
 		// Execute the global state (if any)
 		if (globalState != null) globalState.update(owner);
 		

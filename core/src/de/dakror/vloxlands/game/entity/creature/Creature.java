@@ -19,8 +19,7 @@ import de.dakror.vloxlands.game.world.World;
  * @author Dakror
  */
 // TODO: saving
-public abstract class Creature extends Entity
-{
+public abstract class Creature extends Entity {
 	protected boolean airborne;
 	protected float climbHeight;
 	protected float speed;
@@ -30,20 +29,16 @@ public abstract class Creature extends Entity
 	
 	public Path path;
 	
-	public Creature(float x, float y, float z, String model)
-	{
+	public Creature(float x, float y, float z, String model) {
 		super(x, y, z, model);
 	}
 	
 	@Override
-	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
-	{
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode) {
 		super.render(batch, environment, minimapMode);
 		
-		try
-		{
-			if (path != null && path.size() > 0 && Vloxlands.showPathDebug && !minimapMode)
-			{
+		try {
+			if (path != null && path.size() > 0 && Vloxlands.showPathDebug && !minimapMode) {
 				Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 				Gdx.gl.glLineWidth(2);
 				Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
@@ -57,60 +52,46 @@ public abstract class Creature extends Entity
 				Vloxlands.shapeRenderer.circle(path.getLast().x + 0.5f, path.getLast().z + 0.5f, 0.25f, 100);
 				Vloxlands.shapeRenderer.translate(0, 0, -(-path.getLast().y - 1.0f - World.gap));
 				
-				for (int i = path.getIndex(); i < path.size() - 1; i++)
-				{
+				for (int i = path.getIndex(); i < path.size() - 1; i++) {
 					Vector3 start = path.get(i);
 					Vector3 end = path.get(i + 1);
 					Vloxlands.shapeRenderer.line(start.x + 0.5f, start.z + 0.5f, -start.y - 1.0f - World.gap, end.x + 0.5f, end.z + 0.5f, -end.y - 1.0f - World.gap);
 				}
 				Vloxlands.shapeRenderer.end();
 			}
-		}
-		catch (NullPointerException e)
-		{
+		} catch (NullPointerException e) {
 			Vloxlands.shapeRenderer.end();
 		}
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		super.tick(tick);
-		if (path != null)
-		{
-			try
-			{
-				if (path.size() > 0)
-				{
+		if (path != null) {
+			try {
+				if (path.size() > 0) {
 					Vector3 target = path.get().cpy().add(island.pos).add(blockTrn);
 					Vector3 dif = target.cpy().sub(posCache);
 					
-					if (dif.len() > speed)
-					{
+					if (dif.len() > speed) {
 						dif.limit(speed);
 						
 						posCache.add(dif);
 						modelInstance.transform.setTranslation(posCache);
 					}
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
 	@Override
-	public void update(float delta)
-	{
+	public void update(float delta) {
 		super.update(delta);
-		if (path != null)
-		{
-			try
-			{
-				if (path.size() > 0)
-				{
+		if (path != null) {
+			try {
+				if (path.size() > 0) {
 					modelInstance.transform.getRotation(rotCache);
 					modelInstance.transform.getTranslation(posCache);
 					
@@ -119,33 +100,26 @@ public abstract class Creature extends Entity
 					
 					float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
 					modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());
-					if (dif.len() <= speed)
-					{
+					if (dif.len() <= speed) {
 						if (path.isDone()) onReachTarget();
 						else path.next();
 					}
-				}
-				else onReachTarget();
-			}
-			catch (Exception e)
-			{
+				} else onReachTarget();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	public boolean isAirborne()
-	{
+	public boolean isAirborne() {
 		return airborne;
 	}
 	
-	public void setAirborne(boolean airborne)
-	{
+	public void setAirborne(boolean airborne) {
 		this.airborne = airborne;
 	}
 	
-	public Vector3 getVoxelBelow()
-	{
+	public Vector3 getVoxelBelow() {
 		modelInstance.transform.getTranslation(posCache);
 		
 		Vector3 v = posCache.cpy().sub(island.pos).sub(boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
@@ -154,33 +128,27 @@ public abstract class Creature extends Entity
 		return v;
 	}
 	
-	public boolean canFly()
-	{
+	public boolean canFly() {
 		return canFly;
 	}
 	
-	public int getHeight()
-	{
+	public int getHeight() {
 		return (int) Math.ceil(boundingBox.getDimensions().y);
 	}
 	
-	public float getRotationPerpendicular()
-	{
+	public float getRotationPerpendicular() {
 		float yaw = rotCache.getYawRad();
 		return (float) -Math.abs(Math.max(Math.sin(yaw), Math.cos(yaw)));
 	}
 	
 	// -- events -- //
-	public void onReachTarget()
-	{
+	public void onReachTarget() {
 		rotateTowardsGhostTarget(path);
 		path = null;
 	}
 	
-	protected void rotateTowardsGhostTarget(Path path)
-	{
-		if (path != null && path.getGhostTarget() != null)
-		{
+	protected void rotateTowardsGhostTarget(Path path) {
+		if (path != null && path.getGhostTarget() != null) {
 			Vector3 target = path.getGhostTarget().cpy().add(island.pos).add(blockTrn);
 			float rot = new Vector2(target.z - posCache.z, target.x - posCache.x).angle() - 180;
 			modelInstance.transform.rotate(Vector3.Y, rot - rotCache.getYaw());

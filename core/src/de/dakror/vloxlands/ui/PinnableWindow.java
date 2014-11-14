@@ -10,12 +10,10 @@ import de.dakror.vloxlands.ui.skin.DWindow;
 /**
  * @author Dakror
  */
-public class PinnableWindow extends DWindow
-{
+public class PinnableWindow extends DWindow {
 	CheckBox pin;
 	
-	public PinnableWindow(String title, Skin skin)
-	{
+	public PinnableWindow(String title, Skin skin) {
 		super(title, skin);
 		pin = new CheckBox("", Vloxlands.skin);
 		TextButton x = new TextButton("X", Vloxlands.skin, "image");
@@ -25,16 +23,14 @@ public class PinnableWindow extends DWindow
 	}
 	
 	@Override
-	public void initStyle()
-	{
+	public void initStyle() {
 		padLeft(16f);
 		padTop(50f);
 		padBottom(10);
 		padRight(10);
 	}
 	
-	public boolean setShown(boolean visible)
-	{
+	public boolean setShown(boolean visible) {
 		if (pin.isChecked() && !visible) return false;
 		setVisible(visible);
 		

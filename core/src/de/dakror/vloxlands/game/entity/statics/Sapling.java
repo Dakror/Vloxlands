@@ -11,12 +11,10 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Sapling extends StaticEntity
-{
+public class Sapling extends StaticEntity {
 	int growTicksLeft;
 	
-	public Sapling(float x, float y, float z)
-	{
+	public Sapling(float x, float y, float z) {
 		super(x + 0.25f, y - 0.5f, z + 0.25f, "entities/sapling/sapling.g3db");
 		
 		name = "Sapling";
@@ -26,8 +24,7 @@ public class Sapling extends StaticEntity
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		super.tick(tick);
 		
 		if (StateTools.isWorkingTime()) growTicksLeft--; // only grows in sunlight,
@@ -35,16 +32,14 @@ public class Sapling extends StaticEntity
 																											// 2</code> = real time is
 																											// takes
 		
-		if (growTicksLeft <= 0)
-		{
+		if (growTicksLeft <= 0) {
 			Generator.generateTree(island, (int) voxelPos.x, (int) voxelPos.y - 1, (int) voxelPos.z);
 			markedForRemoval = true;
 		}
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		super.save(baos);
 		
 		Bits.putInt(baos, growTicksLeft);

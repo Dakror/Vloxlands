@@ -17,15 +17,12 @@ import de.dakror.vloxlands.util.CurserCommand;
 /**
  * @author Dakror
  */
-public class Warehouse extends Structure
-{
-	public Warehouse(float x, float y, float z)
-	{
+public class Warehouse extends Structure {
+	public Warehouse(float x, float y, float z) {
 		this(x, y, z, "structure/house.vxi");
 	}
 	
-	protected Warehouse(float x, float y, float z, String model)
-	{
+	protected Warehouse(float x, float y, float z, String model) {
 		super(x, y, z, model);
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 2));
@@ -38,31 +35,25 @@ public class Warehouse extends Structure
 	}
 	
 	@Override
-	public CurserCommand getCommandForEntity(Entity selectedEntity)
-	{
+	public CurserCommand getCommandForEntity(Entity selectedEntity) {
 		if (selectedEntity instanceof Human && !((Human) selectedEntity).getCarryingItemStack().isNull()) return CurserCommand.DEPOSIT;
 		return super.getCommandForEntity(selectedEntity);
 	}
 	
 	@Override
-	protected void setupUI(final PinnableWindow window, Object... params)
-	{
+	protected void setupUI(final PinnableWindow window, Object... params) {
 		final VerticalGroup items = new VerticalGroup();
 		items.left();
-		items.addAction(new Action()
-		{
+		items.addAction(new Action() {
 			int hashCode = 0;
 			
 			@Override
-			public boolean act(float delta)
-			{
+			public boolean act(float delta) {
 				int hc = getInventory().hashCode();
-				if (hc != hashCode)
-				{
+				if (hc != hashCode) {
 					hashCode = hc;
 					
-					for (int i = 0; i < Item.ITEMS; i++)
-					{
+					for (int i = 0; i < Item.ITEMS; i++) {
 						Item item = Item.getForId(i);
 						if (item == null) continue;
 						

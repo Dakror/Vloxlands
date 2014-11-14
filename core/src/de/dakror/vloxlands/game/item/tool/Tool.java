@@ -14,29 +14,24 @@ import de.dakror.vloxlands.game.item.Item;
 /**
  * @author Dakror
  */
-public abstract class Tool extends Item
-{
+public abstract class Tool extends Item {
 	BoundingBox boundingBox;
 	
 	@Override
-	public void onLoaded()
-	{
+	public void onLoaded() {
 		ModelInstance mi = new ModelInstance(Vloxlands.assets.get("models/item/" + model, Model.class));
 		mi.calculateBoundingBox(boundingBox = new BoundingBox());
 	}
 	
-	public BoundingBox getBoundingBox()
-	{
+	public BoundingBox getBoundingBox() {
 		return boundingBox;
 	}
 	
-	public void transformInHand(Matrix4 transform, Creature c)
-	{
+	public void transformInHand(Matrix4 transform, Creature c) {
 		transformInHand(transform, c, 120);
 	}
 	
-	protected void transformInHand(Matrix4 transform, Creature c, float yRot)
-	{
+	protected void transformInHand(Matrix4 transform, Creature c, float yRot) {
 		Matrix4 tr = c.getModelInstance().getNode("Bone_006").globalTransform;
 		Matrix4 tr2 = c.getModelInstance().getNode("Bone_014").globalTransform;
 		Vector3 v = new Vector3();

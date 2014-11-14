@@ -9,10 +9,8 @@ import de.dakror.vloxlands.Vloxlands;
 /**
  * @author Dakror
  */
-public class DesktopLauncher
-{
-	public static void main(String[] arg)
-	{
+public class DesktopLauncher {
+	public static void main(String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Vloxlands";
 		config.foregroundFPS = 0;

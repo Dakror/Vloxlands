@@ -9,33 +9,27 @@ import de.dakror.vloxlands.util.interf.provider.InventoryProvider;
 /**
  * @author Dakror
  */
-public class DepositJob extends Job
-{
+public class DepositJob extends Job {
 	private Structure target;
 	
-	public DepositJob(Human human, Structure target, boolean persistent)
-	{
+	public DepositJob(Human human, Structure target, boolean persistent) {
 		super(human, "deposit", "Depositing carried items", 1, persistent);
 		this.target = target;
 	}
 	
-	public InventoryProvider getTarget()
-	{
+	public InventoryProvider getTarget() {
 		return target;
 	}
 	
 	@Override
-	public void onEnd()
-	{
+	public void onEnd() {
 		super.onEnd();
 		
-		if (!target.isBuilt())
-		{
+		if (!target.isBuilt()) {
 			target.getInventory().take(human.getCarryingItemStack().getItem(), human.getCarryingItemStack().getAmount());
 			human.setCarryingItemStack(new ItemStack());
 			if (target.getInventory().getCount() == 0 && target.getCosts().getCount() > 0) target.broadcast(HelperState.BUILD);
 			
-		}
-		else human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
+		} else human.setCarryingItemStack(target.getInventory().add(human.getCarryingItemStack()));
 	}
 }

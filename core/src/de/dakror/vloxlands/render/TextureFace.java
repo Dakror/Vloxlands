@@ -8,25 +8,21 @@ import com.badlogic.gdx.utils.FloatArray;
 import de.dakror.vloxlands.game.voxel.Voxel;
 import de.dakror.vloxlands.util.Direction;
 
-public class TextureFace extends Face<TextureFace>
-{
+public class TextureFace extends Face<TextureFace> {
 	public Vector2 tex;
 	public float texWidth = Voxel.TEXSIZE;
 	public float texHeight = Voxel.TEXSIZE;
 	
-	public TextureFace(Direction dir, Vector3 pos, Vector2 tex)
-	{
+	public TextureFace(Direction dir, Vector3 pos, Vector2 tex) {
 		this(dir, pos, tex, 1, 1, 1);
 	}
 	
-	public TextureFace(Direction dir, Vector3 pos, Vector2 tex, float sizeX, float sizeY, float sizeZ)
-	{
+	public TextureFace(Direction dir, Vector3 pos, Vector2 tex, float sizeX, float sizeY, float sizeZ) {
 		super(dir, pos, sizeX, sizeY, sizeZ);
 		this.tex = tex;
 	}
 	
-	public void getVertexData(FloatArray vert)
-	{
+	public void getVertexData(FloatArray vert) {
 		boolean zDir = dir == Direction.WEST || dir == Direction.EAST;
 		boolean yDir = dir == Direction.UP || dir == Direction.DOWN;
 		
@@ -85,8 +81,7 @@ public class TextureFace extends Face<TextureFace>
 	}
 	
 	@Override
-	public boolean canCombine(TextureFace o)
-	{
+	public boolean canCombine(TextureFace o) {
 		return o.tex.equals(tex);
 	}
 }

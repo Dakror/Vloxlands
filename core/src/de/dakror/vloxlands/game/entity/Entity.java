@@ -36,8 +36,7 @@ import de.dakror.vloxlands.util.math.Bits;
 /**
  * @author Dakror
  */
-public class Entity extends EntityBase implements Telegraph, Savable
-{
+public class Entity extends EntityBase implements Telegraph, Savable {
 	public static final int LINES[][] = { { 0, 1 }, { 0, 3 }, { 0, 4 }, { 6, 7 }, { 6, 5 }, { 6, 2 }, { 1, 5 }, { 2, 3 }, { 4, 5 }, { 3, 7 }, { 1, 2 }, { 7, 4 } };
 	
 	static HashMap<Byte, Class<?>> idToClassMap = new HashMap<Byte, Class<?>>();
@@ -76,15 +75,13 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	public final Quaternion tmpQ = new Quaternion();
 	final Matrix4 tmp = new Matrix4();
 	
-	public Entity(float x, float y, float z, String model)
-	{
+	public Entity(float x, float y, float z, String model) {
 		id = classToIdMap.get(getClass());
 		
 		modelInstance = new ModelInstance(Vloxlands.assets.get("models/" + model, Model.class));
 		modelInstance.calculateBoundingBox(boundingBox = new BoundingBox());
 		
-		if (boundingBox.getDimensions().x % 1 != 0 || boundingBox.getDimensions().y % 1 != 0 || boundingBox.getDimensions().z % 1 != 0)
-		{
+		if (boundingBox.getDimensions().x % 1 != 0 || boundingBox.getDimensions().y % 1 != 0 || boundingBox.getDimensions().z % 1 != 0) {
 			blockTrn.set(((float) Math.ceil(boundingBox.getDimensions().x) - boundingBox.getDimensions().x) / 2, 1 - boundingBox.getCenter().y, ((float) Math.ceil(boundingBox.getDimensions().z) - boundingBox.getDimensions().z) / 2);
 		}
 		blockTrn.add(boundingBox.getDimensions().cpy().scl(0.5f));
@@ -95,10 +92,8 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		markedForRemoval = false;
 		
 		subs = new Array<ModelInstance>();
-		for (Node n : modelInstance.nodes.get(0).children)
-		{
-			if (n.id.startsWith("model:"))
-			{
+		for (Node n : modelInstance.nodes.get(0).children) {
+			if (n.id.startsWith("model:")) {
 				subs.add(new ModelInstance(Vloxlands.assets.get("models/" + model.replace(model.substring(model.lastIndexOf("/") + 1), n.id.replace("model:", "")) + ".vxi", Model.class), n.translation));
 			}
 		}
@@ -114,106 +109,86 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		Game.instance.addListener(this);
 	}
 	
-	public void setIsland(Island island)
-	{
+	public void setIsland(Island island) {
 		this.island = island;
 	}
 	
-	public Island getIsland()
-	{
+	public Island getIsland() {
 		return island;
 	}
 	
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 	
-	public void setName(String name)
-	{
+	public void setName(String name) {
 		this.name = name;
 	}
 	
-	public float getWeight()
-	{
+	public float getWeight() {
 		return weight;
 	}
 	
-	public void setWeight(float weight)
-	{
+	public void setWeight(float weight) {
 		this.weight = weight;
 	}
 	
-	public float getUplift()
-	{
+	public float getUplift() {
 		return uplift;
 	}
 	
-	public void setUplift(float uplift)
-	{
+	public void setUplift(float uplift) {
 		this.uplift = uplift;
 	}
 	
-	public BoundingBox getBoundingBox()
-	{
+	public BoundingBox getBoundingBox() {
 		return boundingBox;
 	}
 	
-	public AnimationController getAnimationController()
-	{
+	public AnimationController getAnimationController() {
 		return animationController;
 	}
 	
-	public ModelInstance getModelInstance()
-	{
+	public ModelInstance getModelInstance() {
 		return modelInstance;
 	}
 	
-	public byte getId()
-	{
+	public byte getId() {
 		return id;
 	}
 	
-	public int getLevel()
-	{
+	public int getLevel() {
 		return level;
 	}
 	
-	public void setLevel(int level)
-	{
+	public void setLevel(int level) {
 		this.level = level;
 	}
 	
-	public boolean isMarkedForRemoval()
-	{
+	public boolean isMarkedForRemoval() {
 		return markedForRemoval;
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		modelInstance.transform.getTranslation(posCache);
 		modelInstance.transform.getRotation(rotCache);
 		inFrustum = Game.camera.frustum.boundsInFrustum(boundingBox.getCenter().x + posCache.x, boundingBox.getCenter().y + posCache.y, boundingBox.getCenter().z + posCache.z, boundingBox.getDimensions().x / 2, boundingBox.getDimensions().y / 2, boundingBox.getDimensions().z / 2);
 	}
 	
-	public void getWorldBoundingBox(BoundingBox bb)
-	{
+	public void getWorldBoundingBox(BoundingBox bb) {
 		bb.min.set(boundingBox.min).add(posCache);
 		bb.max.set(boundingBox.max).add(posCache);
 		
 		bb.set(bb.min, bb.max);
 	}
 	
-	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
-	{
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode) {
 		if (!visible) return;
 		
-		if (modelVisible)
-		{
+		if (modelVisible) {
 			batch.render(modelInstance, environment);
-			for (ModelInstance mi : subs)
-			{
+			for (ModelInstance mi : subs) {
 				tmp.set(mi.transform);
 				modelInstance.transform.getTranslation(posCache);
 				modelInstance.transform.getRotation(rotCache);
@@ -232,8 +207,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		}
 		if (additionalVisible) renderAdditional(batch, environment);
 		
-		if ((hovered || selected) && !minimapMode)
-		{
+		if ((hovered || selected) && !minimapMode) {
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Gdx.gl.glLineWidth(selected ? 3 : 2);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
@@ -247,8 +221,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 			Gdx.gl.glLineWidth(1);
 		}
 		
-		if (Vloxlands.wireframe && !minimapMode)
-		{
+		if (Vloxlands.wireframe && !minimapMode) {
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
 			Vloxlands.shapeRenderer.identity();
@@ -260,49 +233,40 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		}
 	}
 	
-	public void renderAdditional(ModelBatch batch, Environment environment)
-	{}
+	public void renderAdditional(ModelBatch batch, Environment environment) {}
 	
-	public void update(float delta)
-	{
+	public void update(float delta) {
 		animationController.update(delta);
 	}
 	
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		Game.instance.removeListener(this);
 	}
 	
-	public void kill()
-	{
+	public void kill() {
 		markedForRemoval = true;
 	}
 	
-	public boolean isSpawned()
-	{
+	public boolean isSpawned() {
 		return spawned;
 	}
 	
-	public boolean isVisible()
-	{
+	public boolean isVisible() {
 		return visible;
 	}
 	
-	public void setVisible(boolean visible)
-	{
+	public void setVisible(boolean visible) {
 		this.visible = visible;
 	}
 	
 	@Override
-	public boolean handleMessage(Telegram msg)
-	{
+	public boolean handleMessage(Telegram msg) {
 		return false;
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		baos.write(id);
 		
 		Bits.putMatrix4(baos, modelInstance.transform);
@@ -314,14 +278,11 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		Bits.putBoolean(baos, markedForRemoval);
 	}
 	
-	public void setUI(PinnableWindow window, Object... params)
-	{}
+	public void setUI(PinnableWindow window, Object... params) {}
 	
-	public void setActions(RevolverSlot parent)
-	{}
+	public void setActions(RevolverSlot parent) {}
 	
-	public boolean intersects(Entity o)
-	{
+	public boolean intersects(Entity o) {
 		float lx = Math.abs(posCache.x - o.posCache.x);
 		float sumx = (dimensions.x / 2.0f) + (o.dimensions.x / 2.0f);
 		
@@ -336,33 +297,26 @@ public class Entity extends EntityBase implements Telegraph, Savable
 	
 	// -- events -- //
 	
-	public void onSpawn()
-	{
+	public void onSpawn() {
 		spawned = true;
 	}
 	
 	// -- statics -- //
 	
-	public static void loadEntities()
-	{
+	public static void loadEntities() {
 		CSVReader csv = new CSVReader(Gdx.files.internal("data/entities.csv"));
 		csv.readRow(); // headers
 		
 		String cell;
 		Class<?> c = null;
 		boolean hasCell0 = false;
-		while ((cell = csv.readNext()) != null)
-		{
+		while ((cell = csv.readNext()) != null) {
 			if (cell.trim().length() == 0) continue;
-			try
-			{
-				if (csv.getIndex() == 0)
-				{
+			try {
+				if (csv.getIndex() == 0) {
 					hasCell0 = true;
 					c = Class.forName("de.dakror.vloxlands.game.entity." + cell);
-				}
-				else
-				{
+				} else {
 					if (!hasCell0) continue;
 					byte b = (byte) Integer.parseInt(cell.trim());
 					
@@ -371,9 +325,7 @@ public class Entity extends EntityBase implements Telegraph, Savable
 					
 					hasCell0 = false;
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -381,20 +333,15 @@ public class Entity extends EntityBase implements Telegraph, Savable
 		Gdx.app.log("Entity.loadEntities", idToClassMap.size() + " entities loaded.");
 	}
 	
-	public static Entity getForId(byte id, float x, float y, float z)
-	{
+	public static Entity getForId(byte id, float x, float y, float z) {
 		Class<?> c = idToClassMap.get(id);
-		if (c == null)
-		{
+		if (c == null) {
 			Gdx.app.error("Entity.getForId", "No Entity found for id=" + id + "!");
 			return null;
 		}
-		try
-		{
+		try {
 			return (Entity) c.getConstructor(float.class, float.class, float.class).newInstance(x, y, z);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}

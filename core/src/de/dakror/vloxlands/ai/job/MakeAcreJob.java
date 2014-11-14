@@ -9,10 +9,8 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 /**
  * @author Dakror
  */
-public class MakeAcreJob extends PlaceJob
-{
-	public MakeAcreJob(Human human, Vector3 target, Voxel voxel, boolean persistent)
-	{
+public class MakeAcreJob extends PlaceJob {
+	public MakeAcreJob(Human human, Vector3 target, Voxel voxel, boolean persistent) {
 		super(human, target, voxel, persistent);
 		
 		tool = FarmTool.class;

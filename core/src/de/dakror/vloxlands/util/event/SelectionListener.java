@@ -9,8 +9,7 @@ import de.dakror.vloxlands.game.world.Island;
 /**
  * @author Dakror
  */
-public interface SelectionListener
-{
+public interface SelectionListener {
 	public void onVoxelSelection(VoxelSelection vs, boolean lmb);
 	
 	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb);

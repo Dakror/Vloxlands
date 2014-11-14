@@ -7,8 +7,7 @@ import de.dakror.vloxlands.util.Direction;
 /**
  * @author Dakror
  */
-public abstract class Face<T extends Face<T>>
-{
+public abstract class Face<T extends Face<T>> {
 	public Direction dir;
 	public Vector3 pos, tl, tr, bl, br, n;
 	public float sizeX, sizeY, sizeZ;
@@ -16,20 +15,17 @@ public abstract class Face<T extends Face<T>>
 	int hash;
 	boolean hashDirty = true;
 	
-	public Face(Direction dir, Vector3 pos)
-	{
+	public Face(Direction dir, Vector3 pos) {
 		this(dir, pos, 1, 1, 1);
 	}
 	
-	public Face(Direction dir, Vector3 pos, float sizeX, float sizeY, float sizeZ)
-	{
+	public Face(Direction dir, Vector3 pos, float sizeX, float sizeY, float sizeZ) {
 		this.dir = dir;
 		this.pos = pos;
 		setSize(sizeX, sizeY, sizeZ);
 	}
 	
-	public void setSize(float sizeX, float sizeY, float sizeZ)
-	{
+	public void setSize(float sizeX, float sizeY, float sizeZ) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.sizeZ = sizeZ;
@@ -37,16 +33,13 @@ public abstract class Face<T extends Face<T>>
 		updateVertices();
 	}
 	
-	public void updateVertices()
-	{
+	public void updateVertices() {
 		tl = new Vector3(0, sizeY, 0);
 		tr = new Vector3(sizeX, sizeY, 0);
 		bl = new Vector3(0, 0, 0);
 		br = new Vector3(sizeX, 0, 0);
-		switch (dir)
-		{
-			case NORTH:
-			{
+		switch (dir) {
+			case NORTH: {
 				tl.x = sizeX;
 				bl.x = sizeX;
 				
@@ -55,8 +48,7 @@ public abstract class Face<T extends Face<T>>
 				
 				break;
 			}
-			case SOUTH:
-			{
+			case SOUTH: {
 				tl.z = sizeZ;
 				bl.z = sizeZ;
 				
@@ -65,8 +57,7 @@ public abstract class Face<T extends Face<T>>
 				
 				break;
 			}
-			case WEST:
-			{
+			case WEST: {
 				tl.z = sizeZ;
 				bl.z = sizeZ;
 				tr.z = sizeZ;
@@ -79,8 +70,7 @@ public abstract class Face<T extends Face<T>>
 				
 				break;
 			}
-			case UP:
-			{
+			case UP: {
 				tl.z = sizeZ;
 				tr.z = sizeZ;
 				
@@ -88,8 +78,7 @@ public abstract class Face<T extends Face<T>>
 				br.y = sizeY;
 				break;
 			}
-			case DOWN:
-			{
+			case DOWN: {
 				tl.y = 0;
 				tr.y = 0;
 				
@@ -104,41 +93,34 @@ public abstract class Face<T extends Face<T>>
 		n = bl.cpy().sub(br).crs(tr.cpy().sub(br)).nor();
 	}
 	
-	public void increaseSize(Vector3 direction)
-	{
+	public void increaseSize(Vector3 direction) {
 		setSize(sizeX + direction.x, sizeY + direction.y, sizeZ + direction.z);
 	}
 	
-	public void increaseSize(float x, float y, float z)
-	{
+	public void increaseSize(float x, float y, float z) {
 		setSize(sizeX + x, sizeY + y, sizeZ + z);
 	}
 	
-	public boolean isSameSize(T o, Vector3 direction)
-	{
+	public boolean isSameSize(T o, Vector3 direction) {
 		if (direction.x == 1) return sizeY == o.sizeY && sizeZ == o.sizeZ;
 		else if (direction.y == 1) return sizeX == o.sizeX && sizeZ == o.sizeZ;
 		else return sizeY == o.sizeY && sizeX == o.sizeX;
 	}
 	
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "VoxelFace[pos=" + pos.toString() + ", DIR=" + dir + ", sizeX=" + sizeX + ", sizeY=" + sizeY + ", sizeZ=" + sizeZ + ", tl=" + tl + ", tr=" + tr + ", bl=" + bl + ", br=" + br + "]";
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (!(obj instanceof Face)) return false;
 		return hashCode() == obj.hashCode() && sizeX == ((TextureFace) obj).sizeX && sizeY == ((TextureFace) obj).sizeY && sizeZ == ((TextureFace) obj).sizeZ;
 	}
 	
 	@Override
-	public int hashCode()
-	{
-		if (hashDirty)
-		{
+	public int hashCode() {
+		if (hashDirty) {
 			hash = Face.getHashCode((int) pos.x, (int) pos.y, (int) pos.z, dir.ordinal());
 			hashDirty = false;
 		}
@@ -147,8 +129,7 @@ public abstract class Face<T extends Face<T>>
 	
 	public abstract boolean canCombine(T o);
 	
-	public static int getHashCode(int x, int y, int z, int d)
-	{
+	public static int getHashCode(int x, int y, int z, int d) {
 		int hash = 0;
 		hash += x << 24;
 		hash += y << 16;

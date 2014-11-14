@@ -10,151 +10,124 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 /**
  * @author Dakror
  */
-public abstract class Layer implements Screen, InputProcessor, GestureListener
-{
+public abstract class Layer implements Screen, InputProcessor, GestureListener {
 	public GestureDetector gestureDetector;
 	protected Stage stage;
 	protected boolean modal;
 	
-	public Layer()
-	{
+	public Layer() {
 		gestureDetector = new GestureDetector(this);
 	}
 	
-	public boolean isModal()
-	{
+	public boolean isModal() {
 		return modal;
 	}
 	
-	public Stage getStage()
-	{
+	public Stage getStage() {
 		return stage;
 	}
 	
 	@Override
-	public void show()
-	{}
+	public void show() {}
 	
 	@Override
-	public void resize(int width, int height)
-	{
+	public void resize(int width, int height) {
 		if (stage != null) stage.getViewport().update(width, height, true);
 	}
 	
-	public void tick(int tick)
-	{}
+	public void tick(int tick) {}
 	
 	@Override
-	public void pause()
-	{}
+	public void pause() {}
 	
 	@Override
-	public void hide()
-	{}
+	public void hide() {}
 	
 	@Override
-	public void resume()
-	{}
+	public void resume() {}
 	
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		if (stage != null) stage.dispose();
 	}
 	
 	@Override
-	public boolean touchDown(float x, float y, int pointer, int button)
-	{
+	public boolean touchDown(float x, float y, int pointer, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean tap(float x, float y, int count, int button)
-	{
+	public boolean tap(float x, float y, int count, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean longPress(float x, float y)
-	{
+	public boolean longPress(float x, float y) {
 		return false;
 	}
 	
 	@Override
-	public boolean fling(float velocityX, float velocityY, int button)
-	{
+	public boolean fling(float velocityX, float velocityY, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean pan(float x, float y, float deltaX, float deltaY)
-	{
+	public boolean pan(float x, float y, float deltaX, float deltaY) {
 		return false;
 	}
 	
 	@Override
-	public boolean panStop(float x, float y, int pointer, int button)
-	{
+	public boolean panStop(float x, float y, int pointer, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean zoom(float initialDistance, float distance)
-	{
+	public boolean zoom(float initialDistance, float distance) {
 		return false;
 	}
 	
 	@Override
-	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2)
-	{
+	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
 		return false;
 	}
 	
 	@Override
-	public boolean keyDown(int keycode)
-	{
+	public boolean keyDown(int keycode) {
 		return false;
 	}
 	
 	@Override
-	public boolean keyUp(int keycode)
-	{
+	public boolean keyUp(int keycode) {
 		return false;
 	}
 	
 	@Override
-	public boolean keyTyped(char character)
-	{
+	public boolean keyTyped(char character) {
 		return false;
 	}
 	
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button)
-	{
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button)
-	{
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		return false;
 	}
 	
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer)
-	{
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		return false;
 	}
 	
 	@Override
-	public boolean mouseMoved(int screenX, int screenY)
-	{
+	public boolean mouseMoved(int screenX, int screenY) {
 		return false;
 	}
 	
 	@Override
-	public boolean scrolled(int amount)
-	{
+	public boolean scrolled(int amount) {
 		return false;
 	}
 }

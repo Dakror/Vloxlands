@@ -13,33 +13,25 @@ import de.dakror.vloxlands.util.interf.Tickable;
 /**
  * @author Dakror
  */
-public abstract class EntityBase implements Tickable, Disposable, SelectionListener
-{
+public abstract class EntityBase implements Tickable, Disposable, SelectionListener {
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{}
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb) {}
 	
 	@Override
-	public void onStructureSelection(Structure structure, boolean lmb)
-	{}
+	public void onStructureSelection(Structure structure, boolean lmb) {}
 	
 	@Override
-	public void onCreatureSelection(Creature creature, boolean lmb)
-	{}
+	public void onCreatureSelection(Creature creature, boolean lmb) {}
 	
 	@Override
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
-	{}
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb) {}
 	
 	@Override
-	public void onNoSelection(boolean lmb)
-	{}
+	public void onNoSelection(boolean lmb) {}
 	
 	@Override
-	public void dispose()
-	{}
+	public void dispose() {}
 	
 	@Override
-	public void tick(int tick)
-	{}
+	public void tick(int tick) {}
 }

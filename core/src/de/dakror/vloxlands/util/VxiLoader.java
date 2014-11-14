@@ -35,18 +35,14 @@ import de.dakror.vloxlands.util.VxiLoader.VxiParameter;
 /**
  * @author Dakror
  */
-public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
-{
-	public static class VxiParameter extends AssetLoaderParameters<Model>
-	{}
+public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter> {
+	public static class VxiParameter extends AssetLoaderParameters<Model> {}
 	
-	class ReferencePoint
-	{
+	class ReferencePoint {
 		String name;
 		int x, y, z;
 		
-		ReferencePoint(String name, int x, int y, int z)
-		{
+		ReferencePoint(String name, int x, int y, int z) {
 			this.name = name;
 			this.x = x;
 			this.y = y;
@@ -54,14 +50,12 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		}
 	}
 	
-	class Vertex
-	{
+	class Vertex {
 		Vector3 pos;
 		Vector3 nor;
 		Color col;
 		
-		public Vertex(Vector3 pos, Vector3 nor, Color col)
-		{
+		public Vertex(Vector3 pos, Vector3 nor, Color col) {
 			this.pos = pos;
 			this.nor = nor;
 			this.col = col;
@@ -84,15 +78,13 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	AssetManager assets;
 	Material material;
 	
-	public VxiLoader(AssetManager assets, FileHandleResolver resolver)
-	{
+	public VxiLoader(AssetManager assets, FileHandleResolver resolver) {
 		super(resolver);
 		this.assets = assets;
 	}
 	
 	@Override
-	public void loadAsync(AssetManager manager, String fileName, FileHandle file, VxiParameter parameter)
-	{
+	public void loadAsync(AssetManager manager, String fileName, FileHandle file, VxiParameter parameter) {
 		resolution = getResolution(fileName);
 		faces = new IntMap<ColorFace>();
 		
@@ -121,8 +113,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		int refPointCount = bb.get() & 0xff;
 		referencePoints = new ReferencePoint[refPointCount];
 		
-		for (int i = 0; i < referencePoints.length; i++)
-		{
+		for (int i = 0; i < referencePoints.length; i++) {
 			StringBuffer sb = new StringBuffer();
 			byte lastRead = 0;
 			while ((lastRead = (bb.get())) != 0)
@@ -143,8 +134,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	}
 	
 	@Override
-	public Model loadSync(AssetManager manager, String fileName, FileHandle file, VxiParameter parameter)
-	{
+	public Model loadSync(AssetManager manager, String fileName, FileHandle file, VxiParameter parameter) {
 		ModelBuilder mb = new ModelBuilder();
 		mb.begin();
 		MeshPartBuilder mpb = mb.part(file.nameWithoutExtension(), GL20.GL_TRIANGLES, new VertexAttributes(VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked()), material);
@@ -153,8 +143,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		offsetZ -= depth * (depth < height ? 0.3f : 1 / 3f);// TODO is this doing the trick?
 		
-		for (ColorFace f : faces.values())
-		{
+		for (ColorFace f : faces.values()) {
 			Vertex tl = new Vertex(f.tl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
 			Vertex bl = new Vertex(f.bl.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
 			Vertex br = new Vertex(f.br.cpy().add(f.pos).add(offsetX, offsetY, offsetZ).scl(resolution), f.dir.dir, f.c);
@@ -165,23 +154,19 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			rotate(br.pos);
 			rotate(tr.pos);
 			
-			if (!vertices.contains(tr, true))
-			{
+			if (!vertices.contains(tr, true)) {
 				mpb.vertex(tr.pos, tr.nor, f.c, null);
 				vertices.add(tr);
 			}
-			if (!vertices.contains(br, true))
-			{
+			if (!vertices.contains(br, true)) {
 				mpb.vertex(br.pos, br.nor, f.c, null);
 				vertices.add(br);
 			}
-			if (!vertices.contains(tl, true))
-			{
+			if (!vertices.contains(tl, true)) {
 				mpb.vertex(tl.pos, tl.nor, f.c, null);
 				vertices.add(tl);
 			}
-			if (!vertices.contains(bl, true))
-			{
+			if (!vertices.contains(bl, true)) {
 				mpb.vertex(bl.pos, bl.nor, f.c, null);
 				vertices.add(bl);
 			}
@@ -192,8 +177,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		
 		Model model = mb.end();
 		
-		for (ReferencePoint p : referencePoints)
-		{
+		for (ReferencePoint p : referencePoints) {
 			Node node = new Node();
 			node.id = p.name;
 			node.parent = model.nodes.get(0);
@@ -205,8 +189,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		return model;
 	}
 	
-	public void rotate(Vector3 v)
-	{
+	public void rotate(Vector3 v) {
 		tmp.set(offsetX * resolution, offsetY * resolution, offsetZ * resolution).sub(v);
 		v.add(tmp);
 		v.rotate(Vector3.X, -90);
@@ -214,8 +197,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		v.sub(tmp);
 	}
 	
-	public float getResolution(String fileName)
-	{
+	public float getResolution(String fileName) {
 		if (!fileName.contains("[") || !fileName.contains("]")) return defaultResolution;
 		int res = Integer.parseInt(fileName.substring(fileName.lastIndexOf("[") + 1, fileName.lastIndexOf("]")));
 		
@@ -224,13 +206,11 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public Array<AssetDescriptor> getDependencies(String fileName, FileHandle file, VxiParameter parameter)
-	{
+	public Array<AssetDescriptor> getDependencies(String fileName, FileHandle file, VxiParameter parameter) {
 		return null;
 	}
 	
-	private void loadMaterial(FileHandle file)
-	{
+	private void loadMaterial(FileHandle file) {
 		String line;
 		String[] tokens;
 		Color difcolor = Color.WHITE;
@@ -239,22 +219,17 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		float shininess = 0.f;
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(file.read()), 4096);
-		try
-		{
-			while ((line = reader.readLine()) != null)
-			{
+		try {
+			while ((line = reader.readLine()) != null) {
 				
 				if (line.length() > 0 && line.charAt(0) == '\t') line = line.substring(1).trim();
 				
 				tokens = line.split("\\s+");
 				
-				if (tokens[0].length() == 0)
-				{
+				if (tokens[0].length() == 0) {
 					continue;
-				}
-				else if (tokens[0].charAt(0) == '#') continue;
-				else
-				{
+				} else if (tokens[0].charAt(0) == '#') continue;
+				else {
 					final String key = tokens[0].toLowerCase();
 					if (key.equals("kd") || key.equals("ks")) // diffuse or specular
 					{
@@ -264,31 +239,22 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 						float a = 1;
 						if (tokens.length > 4) a = Float.parseFloat(tokens[4]);
 						
-						if (tokens[0].toLowerCase().equals("kd"))
-						{
+						if (tokens[0].toLowerCase().equals("kd")) {
 							difcolor = new Color();
 							difcolor.set(r, g, b, a);
-						}
-						else
-						{
+						} else {
 							speccolor = new Color();
 							speccolor.set(r, g, b, a);
 						}
-					}
-					else if (key.equals("tr") || key.equals("d"))
-					{
+					} else if (key.equals("tr") || key.equals("d")) {
 						opacity = Float.parseFloat(tokens[1]);
-					}
-					else if (key.equals("ns"))
-					{
+					} else if (key.equals("ns")) {
 						shininess = Float.parseFloat(tokens[1]);
 					}
 				}
 			}
 			reader.close();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
@@ -298,10 +264,8 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 		if (opacity != 1) material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, opacity));
 	}
 	
-	private void generateFaces()
-	{
-		for (int i = 0; i < data.length; i++)
-		{
+	private void generateFaces() {
+		for (int i = 0; i < data.length; i++) {
 			int c = data[i];
 			if (c == 255) continue;
 			
@@ -311,8 +275,7 @@ public class VxiLoader extends AsynchronousAssetLoader<Model, VxiParameter>
 			
 			Vector3 pos = new Vector3(x, y, z);
 			
-			for (Direction d : Direction.values())
-			{
+			for (Direction d : Direction.values()) {
 				int index2 = (int) ((x + d.dir.x) * height * depth + (y + d.dir.y) * depth + (z + d.dir.z));
 				if (x + d.dir.x > -1 && y + d.dir.y > -1 && z + d.dir.z > -1 && x + d.dir.x < width && y + d.dir.y < height && z + d.dir.z < depth && data[index2] != 255) continue;
 				

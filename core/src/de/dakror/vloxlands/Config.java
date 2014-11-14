@@ -8,8 +8,7 @@ import com.badlogic.gdx.files.FileHandle;
 /**
  * @author Dakror
  */
-public class Config
-{
+public class Config {
 	public static final String[] dataMaps = { "All", "Ores" };
 	public static final boolean[] dataMapFullBlending = { false, true };
 	
@@ -26,8 +25,7 @@ public class Config
 	
 	public static boolean debug = false;
 	
-	public static void changeGameSpeed(boolean increase)
-	{
+	public static void changeGameSpeed(boolean increase) {
 		if (increase && gameSpeed < gameSpeeds.length - 1) gameSpeed++;
 		else if (!increase && gameSpeed > 0) gameSpeed--;
 		else return;
@@ -35,13 +33,11 @@ public class Config
 		Gdx.app.log("Config.changeGameSpeed", "Setting Game speed to " + getGameSpeed());
 	}
 	
-	public static int getGameSpeed()
-	{
+	public static int getGameSpeed() {
 		return gameSpeeds[gameSpeed];
 	}
 	
-	public static void init()
-	{
+	public static void init() {
 		if (Gdx.app.getType() == ApplicationType.Android) dir = Gdx.files.local("de.dakror/Vloxlands/");
 		else dir = Gdx.files.external(".dakror/Vloxlands/");
 		
@@ -55,8 +51,7 @@ public class Config
 		pref.flush();
 	}
 	
-	public static void savePrefs()
-	{
+	public static void savePrefs() {
 		pref.putBoolean("fullscreen", Gdx.graphics.isFullscreen());
 		pref.putInteger("fov", fov);
 		pref.putInteger("shadowQuality", shadowQuality);

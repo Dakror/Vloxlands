@@ -26,8 +26,7 @@ import com.badlogic.gdx.utils.Array;
  * 
  * @author Dakror
  */
-public class InternalAssetManager
-{
+public class InternalAssetManager {
 	/**
 	 * Kindly copied from javax.swing.filechooser with removal of descriptions <br>
 	 * <br>
@@ -49,8 +48,7 @@ public class InternalAssetManager
 	 * @see javax.swing.JFileChooser#addChoosableFileFilter
 	 * @see javax.swing.JFileChooser#getFileFilter
 	 */
-	public static class FileNameExtensionFilter implements FileFilter
-	{
+	public static class FileNameExtensionFilter implements FileFilter {
 		// Known extensions.
 		private final String[] extensions;
 		// Cached ext
@@ -66,18 +64,14 @@ public class InternalAssetManager
 		 *           contains {@code null}, or contains an empty string
 		 * @see #accept
 		 */
-		public FileNameExtensionFilter(String... extensions)
-		{
-			if (extensions == null || extensions.length == 0)
-			{
+		public FileNameExtensionFilter(String... extensions) {
+			if (extensions == null || extensions.length == 0) {
 				throw new IllegalArgumentException("Extensions must be non-null and not empty");
 			}
 			this.extensions = new String[extensions.length];
 			lowerCaseExtensions = new String[extensions.length];
-			for (int i = 0; i < extensions.length; i++)
-			{
-				if (extensions[i] == null || extensions[i].length() == 0)
-				{
+			for (int i = 0; i < extensions.length; i++) {
+				if (extensions[i] == null || extensions[i].length() == 0) {
 					throw new IllegalArgumentException("Each extension must be non-null and not empty");
 				}
 				this.extensions[i] = extensions[i];
@@ -95,12 +89,9 @@ public class InternalAssetManager
 		 * @return true if the file is to be accepted, false otherwise
 		 */
 		@Override
-		public boolean accept(File f)
-		{
-			if (f != null)
-			{
-				if (f.isDirectory())
-				{
+		public boolean accept(File f) {
+			if (f != null) {
+				if (f.isDirectory()) {
 					return true;
 				}
 				// NOTE: we tested implementations using Maps, binary search
@@ -110,13 +101,10 @@ public class InternalAssetManager
 				// with the simple lightweight approach.
 				String fileName = f.getName();
 				int i = fileName.lastIndexOf('.');
-				if (i > 0 && i < fileName.length() - 1)
-				{
+				if (i > 0 && i < fileName.length() - 1) {
 					String desiredExtension = fileName.substring(i + 1).toLowerCase(Locale.ENGLISH);
-					for (String extension : lowerCaseExtensions)
-					{
-						if (desiredExtension.equals(extension))
-						{
+					for (String extension : lowerCaseExtensions) {
+						if (desiredExtension.equals(extension)) {
 							return true;
 						}
 					}
@@ -130,8 +118,7 @@ public class InternalAssetManager
 		 *
 		 * @return the set of file name extensions files are tested against
 		 */
-		public String[] getExtensions()
-		{
+		public String[] getExtensions() {
 			String[] result = new String[extensions.length];
 			System.arraycopy(extensions, 0, result, 0, extensions.length);
 			return result;
@@ -146,21 +133,18 @@ public class InternalAssetManager
 		 * @return a string representation of this {@code FileNameExtensionFilter}
 		 */
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			return super.toString() + "[extensions=" + java.util.Arrays.asList(getExtensions()) + "]";
 		}
 	}
 	
-	public static class FileNode
-	{
+	public static class FileNode {
 		public FileNode parent;
 		public FileHandle file;
 		public Array<FileNode> children;
 		public boolean directory;
 		
-		public FileNode(FileNode parent, FileHandle file, boolean directory)
-		{
+		public FileNode(FileNode parent, FileHandle file, boolean directory) {
 			this.parent = parent;
 			this.file = file;
 			this.directory = directory;
@@ -169,8 +153,7 @@ public class InternalAssetManager
 		}
 		
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			return (parent != null && parent.file != null ? parent.file.name() : "") + ", " + (file != null ? file.name() : "") + ", " + children;
 		}
 	}
@@ -184,14 +167,11 @@ public class InternalAssetManager
 	 * directories inside the assets folder.<br>
 	 * Then all files and directories get loaded in a tree data structure.
 	 */
-	public static void init()
-	{
-		try
-		{
+	public static void init() {
+		try {
 			Reader reader = null;
 			
-			if (!isRunningFromJarFile())
-			{
+			if (!isRunningFromJarFile()) {
 				File parent = new File(InternalAssetManager.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile();
 				
 				File dst = new File(parent, "core/assets");
@@ -204,7 +184,7 @@ public class InternalAssetManager
 				String s = sb.toString();
 				fw.write(s);
 				fw.close();
-
+				
 				reader = new StringReader(s);
 			}
 			
@@ -219,31 +199,25 @@ public class InternalAssetManager
 			FileNode activeNode = root;
 			int slashes = -1;
 			
-			while ((line = br.readLine()) != null)
-			{
+			while ((line = br.readLine()) != null) {
 				boolean dir = line.startsWith("d");
 				String path = line.substring(2);
 				
 				int sl = path.split("/").length - 1;
 				if (slashes == -1) slashes = sl;
 				
-				while (slashes > sl)
-				{
+				while (slashes > sl) {
 					activeNode = activeNode.parent;
 					slashes--;
 				}
 				
-				if (slashes == sl)
-				{
-					if (dir)
-					{
+				if (slashes == sl) {
+					if (dir) {
 						FileNode node = new FileNode(activeNode, Gdx.files.internal(path), true);
 						activeNode.children.add(node);
 						activeNode = node;
 						slashes++;
-					}
-					else
-					{
+					} else {
 						FileNode node = new FileNode(activeNode, Gdx.files.internal(path), false);
 						activeNode.children.add(node);
 						files++;
@@ -252,9 +226,7 @@ public class InternalAssetManager
 			}
 			
 			Gdx.app.log("InternalAssetsManager.init", files + " files loaded.");
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -263,8 +235,7 @@ public class InternalAssetManager
 	 * @param path the internal directory
 	 * @return a list of all FILES in the specified directory
 	 */
-	public static FileNode[] listFiles(String path)
-	{
+	public static FileNode[] listFiles(String path) {
 		return listFiles(path, false);
 	}
 	
@@ -273,8 +244,7 @@ public class InternalAssetManager
 	 * @param recursive wether all files in all subfolders should be listed too
 	 * @return a list of all FILES in the specified directory
 	 */
-	public static FileNode[] listFiles(String path, boolean recursive)
-	{
+	public static FileNode[] listFiles(String path, boolean recursive) {
 		return list(path, true, false, recursive);
 	}
 	
@@ -282,8 +252,7 @@ public class InternalAssetManager
 	 * @param path the internal directory
 	 * @return a list of all DIRECTORIES in the specified directory
 	 */
-	public static FileNode[] listDirectories(String path)
-	{
+	public static FileNode[] listDirectories(String path) {
 		return listDirectories(path, false);
 	}
 	
@@ -292,8 +261,7 @@ public class InternalAssetManager
 	 * @param recursive wether all files in all subfolders should be listed too
 	 * @return a list of all DIRECTORIES in the specified directory
 	 */
-	public static FileNode[] listDirectories(String path, boolean recursive)
-	{
+	public static FileNode[] listDirectories(String path, boolean recursive) {
 		return list(path, false, true, recursive);
 	}
 	
@@ -301,8 +269,7 @@ public class InternalAssetManager
 	 * @param path the internal directory
 	 * @return a list of EVERYTHING in the specified directory
 	 */
-	public static FileNode[] list(String path)
-	{
+	public static FileNode[] list(String path) {
 		return list(path, false);
 	}
 	
@@ -311,8 +278,7 @@ public class InternalAssetManager
 	 * @param recursive wether all files in all subfolders should be listed too
 	 * @return a list of EVERYTHING in the specified directory
 	 */
-	public static FileNode[] list(String path, boolean recursive)
-	{
+	public static FileNode[] list(String path, boolean recursive) {
 		return list(path, true, true, recursive);
 	}
 	
@@ -320,14 +286,10 @@ public class InternalAssetManager
 	 * @return wether the current program is located in a file tree or packed jar
 	 *         archive
 	 */
-	public static boolean isRunningFromJarFile()
-	{
-		try
-		{
+	public static boolean isRunningFromJarFile() {
+		try {
 			return new File(InternalAssetManager.class.getProtectionDomain().getCodeSource().getLocation().toURI()).isFile();
-		}
-		catch (URISyntaxException e)
-		{
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -344,13 +306,10 @@ public class InternalAssetManager
 	 * @param type the AssetManager Type e.g {@link Texture}
 	 * @param recursive wether all files in all subfolders should be loaded too
 	 */
-	public static void scheduleDirectory(AssetManager assets, String path, Class<?> type, boolean recursive)
-	{
-		scheduleDirectory(assets, path, type, new FileFilter()
-		{
+	public static void scheduleDirectory(AssetManager assets, String path, Class<?> type, boolean recursive) {
+		scheduleDirectory(assets, path, type, new FileFilter() {
 			@Override
-			public boolean accept(File pathname)
-			{
+			public boolean accept(File pathname) {
 				return true;
 			}
 		}, recursive);
@@ -368,16 +327,13 @@ public class InternalAssetManager
 	 * @param fileFilter the {@link FileFilter} to apply. Use e.g a {@link FileNameExtensionFilter}
 	 * @param recursive wether all files in all subfolders should be loaded too
 	 */
-	public static void scheduleDirectory(AssetManager assets, String path, Class<?> type, FileFilter fileFilter, boolean recursive)
-	{
-		for (FileNode fn : listFiles(path, recursive))
-		{
+	public static void scheduleDirectory(AssetManager assets, String path, Class<?> type, FileFilter fileFilter, boolean recursive) {
+		for (FileNode fn : listFiles(path, recursive)) {
 			if (fileFilter.accept(fn.file.file())) assets.load(fn.file.path(), type);
 		}
 	}
 	
-	static FileNode[] list(String path, boolean f, boolean d, boolean recursive)
-	{
+	static FileNode[] list(String path, boolean f, boolean d, boolean recursive) {
 		FileHandle dir = Gdx.files.internal(path);
 		FileNode fn = traverseTo(dir, root);
 		
@@ -385,18 +341,15 @@ public class InternalAssetManager
 		
 		Array<FileNode> dirs = new Array<FileNode>();
 		
-		for (FileNode file : fn.children)
-		{
-			if (file.directory)
-			{
+		for (FileNode file : fn.children) {
+			if (file.directory) {
 				if (d) files.add(file);
 				if (recursive) dirs.add(file);
 			}
 			if (!file.directory && f) files.add(file);
 		}
 		
-		if (recursive)
-		{
+		if (recursive) {
 			for (FileNode file : dirs)
 				files.addAll(list(file.file.path(), f, d, true));
 		}
@@ -404,27 +357,21 @@ public class InternalAssetManager
 		return files.toArray(FileNode.class);
 	}
 	
-	static FileNode traverseTo(FileHandle searched, FileNode parent)
-	{
+	static FileNode traverseTo(FileHandle searched, FileNode parent) {
 		if (parent.file != null && searched.equals(parent.file)) return parent;
-		for (FileNode fn : parent.children)
-		{
-			if (fn.directory && searched.path().substring(0, Math.min(fn.file.path().length(), searched.path().length())).equals(fn.file.path()))
-			{
+		for (FileNode fn : parent.children) {
+			if (fn.directory && searched.path().substring(0, Math.min(fn.file.path().length(), searched.path().length())).equals(fn.file.path())) {
 				return traverseTo(searched, fn);
 			}
 		}
 		return null;
 	}
 	
-	static void writeDirectory(StringBuffer sb, File dir, int pathOffset) throws IOException
-	{
+	static void writeDirectory(StringBuffer sb, File dir, int pathOffset) throws IOException {
 		File[] files = dir.listFiles();
-		Arrays.sort(files, new Comparator<File>()
-		{
+		Arrays.sort(files, new Comparator<File>() {
 			@Override
-			public int compare(File o1, File o2)
-			{
+			public int compare(File o1, File o2) {
 				boolean d1 = o1.isDirectory();
 				boolean d2 = o2.isDirectory();
 				
@@ -433,8 +380,7 @@ public class InternalAssetManager
 				else return o1.getName().compareTo(o2.getName());
 			}
 		});
-		for (File f : files)
-		{
+		for (File f : files) {
 			sb.append((f.isDirectory() ? "d " : "f ") + f.getPath().substring(pathOffset).replace("\\", "/") + "\r\n");
 			if (f.isDirectory()) writeDirectory(sb, f, pathOffset);
 		}

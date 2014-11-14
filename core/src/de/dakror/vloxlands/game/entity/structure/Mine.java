@@ -10,12 +10,10 @@ import de.dakror.vloxlands.util.CurserCommand;
 /**
  * @author Dakror
  */
-public class Mine extends Structure
-{
+public class Mine extends Structure {
 	byte activeOre;
 	
-	public Mine(float x, float y, float z)
-	{
+	public Mine(float x, float y, float z) {
 		super(x, y, z, "structure/house.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));
@@ -38,18 +36,15 @@ public class Mine extends Structure
 	}
 	
 	@Override
-	public CurserCommand getDefaultCommand()
-	{
+	public CurserCommand getDefaultCommand() {
 		return inventory.getCount() > 0 ? CurserCommand.PICKUP : super.getDefaultCommand();
 	}
 	
-	public byte getActiveOre()
-	{
+	public byte getActiveOre() {
 		return activeOre;
 	}
 	
-	public void setActiveOre(byte activeOre)
-	{
+	public void setActiveOre(byte activeOre) {
 		this.activeOre = activeOre;
 	}
 }

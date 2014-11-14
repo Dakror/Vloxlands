@@ -7,24 +7,20 @@ import de.dakror.vloxlands.util.interf.Meshable;
 /**
  * @author Dakror
  */
-public class MeshingThread extends Thread
-{
+public class MeshingThread extends Thread {
 	public static MeshingThread currentMeshingThread;
 	
 	Array<Meshable> meshables = new Array<Meshable>();
 	
-	public static void register(Meshable m)
-	{
+	public static void register(Meshable m) {
 		currentMeshingThread.meshables.add(m);
 	}
 	
-	public static void dispose(Meshable m)
-	{
+	public static void dispose(Meshable m) {
 		currentMeshingThread.meshables.removeValue(m, true);
 	}
 	
-	public MeshingThread()
-	{
+	public MeshingThread() {
 		setPriority(7);
 		setName("Meshing Thread");
 		currentMeshingThread = this;
@@ -32,10 +28,8 @@ public class MeshingThread extends Thread
 	}
 	
 	@Override
-	public void run()
-	{
-		while (true)
-		{
+	public void run() {
+		while (true) {
 			for (Meshable m : meshables)
 				if (m != null) m.mesh();
 		}

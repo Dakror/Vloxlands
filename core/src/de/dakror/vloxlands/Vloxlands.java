@@ -44,8 +44,7 @@ import de.dakror.vloxlands.util.base.GameBase;
 import de.dakror.vloxlands.util.math.Bits;
 import de.dakror.vloxlands.util.math.MathHelper;
 
-public class Vloxlands extends GameBase
-{
+public class Vloxlands extends GameBase {
 	public static ShapeRenderer shapeRenderer;
 	public static Vloxlands instance;
 	public static AssetManager assets;
@@ -55,8 +54,7 @@ public class Vloxlands extends GameBase
 	public static boolean wireframe;
 	
 	@Override
-	public void create()
-	{
+	public void create() {
 		instance = this;
 		
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -74,28 +72,20 @@ public class Vloxlands extends GameBase
 		assets = new AssetManager();
 		assets.setLoader(Model.class, ".vxi", new VxiLoader(assets, new InternalFileHandleResolver()));
 		
-		skin = new Skin(new TextureAtlas(Gdx.files.internal("skin/RPGConstrUI/uiskin.atlas")))
-		{
+		skin = new Skin(new TextureAtlas(Gdx.files.internal("skin/RPGConstrUI/uiskin.atlas"))) {
 			@Override
-			protected Json getJsonLoader(FileHandle skinFile)
-			{
+			protected Json getJsonLoader(FileHandle skinFile) {
 				Json json = super.getJsonLoader(skinFile);
 				
-				json.setSerializer(TilesetDrawable.class, new ReadOnlySerializer<TilesetDrawable>()
-				{
+				json.setSerializer(TilesetDrawable.class, new ReadOnlySerializer<TilesetDrawable>() {
 					@SuppressWarnings("rawtypes")
 					@Override
-					public TilesetDrawable read(Json json, JsonValue jsonData, Class type)
-					{
+					public TilesetDrawable read(Json json, JsonValue jsonData, Class type) {
 						TextureRegion[] regions = new TextureRegion[9];
-						for (int i = 0; i < 9; i++)
-						{
-							try
-							{
+						for (int i = 0; i < 9; i++) {
+							try {
 								regions[i] = getRegion(json.readValue(TilesetDrawable.values[i], String.class, jsonData));
-							}
-							catch (Exception e)
-							{}
+							} catch (Exception e) {}
 						}
 						TilesetDrawable td = new TilesetDrawable(regions);
 						if (jsonData.has("center") && json.readValue("center", Boolean.class, jsonData) == true) td.center = true;
@@ -103,30 +93,22 @@ public class Vloxlands extends GameBase
 					}
 				});
 				
-				json.setSerializer(DoubleDrawable.class, new ReadOnlySerializer<DoubleDrawable>()
-				{
+				json.setSerializer(DoubleDrawable.class, new ReadOnlySerializer<DoubleDrawable>() {
 					@SuppressWarnings("rawtypes")
 					@Override
-					public DoubleDrawable read(Json json, JsonValue jsonData, Class type)
-					{
+					public DoubleDrawable read(Json json, JsonValue jsonData, Class type) {
 						Drawable fg = null;
-						try
-						{
+						try {
 							if (jsonData.has("fg_tile") && json.readValue("fg_tile", Boolean.class, jsonData) == Boolean.TRUE) fg = getTiledDrawable(json.readValue("fg", String.class, jsonData));
 							else fg = getDrawable(json.readValue("fg", String.class, jsonData));
-						}
-						catch (Exception e)
-						{
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 						Drawable bg = null;
-						try
-						{
+						try {
 							if (jsonData.has("bg_tile") && json.readValue("bg_tile", Boolean.class, jsonData) == Boolean.TRUE) bg = getTiledDrawable(json.readValue("bg", String.class, jsonData));
 							else bg = getDrawable(json.readValue("bg", String.class, jsonData));
-						}
-						catch (Exception e)
-						{
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 						return new DoubleDrawable(fg, bg);
@@ -137,8 +119,7 @@ public class Vloxlands extends GameBase
 			}
 			
 			@Override
-			public Drawable getDrawable(String name)
-			{
+			public Drawable getDrawable(String name) {
 				TilesetDrawable tilesetDrawable = optional(name, TilesetDrawable.class);
 				if (tilesetDrawable != null) return tilesetDrawable;
 				DoubleDrawable doubleDrawable = optional(name, DoubleDrawable.class);
@@ -158,8 +139,7 @@ public class Vloxlands extends GameBase
 	}
 	
 	@Override
-	public void render()
-	{
+	public void render() {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
 		for (Layer l : layers)
@@ -168,37 +148,31 @@ public class Vloxlands extends GameBase
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean keyUp(int keycode)
-	{
-		if (keycode == Keys.F1)
-		{
+	public boolean keyUp(int keycode) {
+		if (keycode == Keys.F1) {
 			Config.debug = !Config.debug;
 			toggleLayer(new DebugLayer());
 			return true;
 		}
 		if (keycode == Keys.F2) showPathDebug = !showPathDebug;
 		if (keycode == Keys.F3) wireframe = !wireframe;
-		if (Game.world != null)
-		{
+		if (Game.world != null) {
 			if (keycode == Keys.F4) Game.world.setDataMap(Game.world.getDataMap() + 1);
 			if (keycode == Keys.F5) Game.world.setDataMap(Game.world.getDataMap() - 1);
 			if (keycode == Keys.F6) saveGame();
 			if (keycode == Keys.F7) Game.world.getIslands()[0].pos.y += 5;
 			if (keycode == Keys.F9) Config.shadowQuality++;
 			if (keycode == Keys.F10) Config.shadowQuality--;
-			if (keycode == Keys.F9 || keycode == Keys.F10)
-			{
+			if (keycode == Keys.F9 || keycode == Keys.F10) {
 				Config.shadowQuality = Math.max(0, Config.shadowQuality);
 				((DDirectionalShadowLight) Game.instance.env.shadowMap).setShadowQuality(Config.shadowQuality);
 			}
-			if (keycode == Keys.F11)
-			{
+			if (keycode == Keys.F11) {
 				setFullscreen(!Gdx.graphics.isFullscreen());
 				
 				return true;
 			}
-			if (keycode == Keys.F12)
-			{
+			if (keycode == Keys.F12) {
 				takeScreenshot();
 				
 				return true;
@@ -212,38 +186,32 @@ public class Vloxlands extends GameBase
 	}
 	
 	@Override
-	public void pause()
-	{
+	public void pause() {
 		Config.savePrefs();
 	}
 	
-	public void setFullscreen(boolean fullscreen)
-	{
+	public void setFullscreen(boolean fullscreen) {
 		if (!fullscreen) Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, false);
 		else Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
 	}
 	
-	public void takeScreenshot()
-	{
+	public void takeScreenshot() {
 		String name = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
 		FileHandle file = Gdx.files.external(".dakror/Vloxlands/screenshots/" + name + ".png");
 		PixmapIO.writePNG(file, getScreenshot(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true));
 		Gdx.app.log("Vloxlands.takeScreenshot", "Screenshot saved as " + name + ".");
 	}
 	
-	private static Pixmap getScreenshot(int x, int y, int w, int h, boolean yDown)
-	{
+	private static Pixmap getScreenshot(int x, int y, int w, int h, boolean yDown) {
 		final Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(x, y, w, h);
 		
-		if (yDown)
-		{
+		if (yDown) {
 			// Flip the pixmap upside down
 			ByteBuffer pixels = pixmap.getPixels();
 			int numBytes = w * h * 4;
 			byte[] lines = new byte[numBytes];
 			int numBytesPerLine = w * 4;
-			for (int i = 0; i < h; i++)
-			{
+			for (int i = 0; i < h; i++) {
 				pixels.position((h - i - 1) * numBytesPerLine);
 				pixels.get(lines, i * numBytesPerLine, numBytesPerLine);
 			}
@@ -254,13 +222,10 @@ public class Vloxlands extends GameBase
 		return pixmap;
 	}
 	
-	public void saveGame()
-	{
-		try
-		{
+	public void saveGame() {
+		try {
 			boolean wasNull = false;
-			if (Config.savegameName == null)
-			{
+			if (Config.savegameName == null) {
 				wasNull = true;
 				Config.savegameName = new SimpleDateFormat("dd.MM.yy HH-mm-ss").format(new Date());
 			}
@@ -271,9 +236,7 @@ public class Vloxlands extends GameBase
 			FileHandle file = Gdx.files.external(".dakror/Vloxlands/maps/" + Config.savegameName + ".map");
 			file.writeBytes(Compressor.compress(baos.toByteArray()), false);
 			Gdx.app.log("Vloxlands.saveGame", "Game saved" + (wasNull ? " as " + file.name() + " (" + MathHelper.formatBinarySize(file.length(), 0) + ")." : "."));
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

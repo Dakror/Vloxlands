@@ -7,10 +7,8 @@ import de.dakror.vloxlands.game.item.inv.Inventory;
 /**
  * @author Dakror
  */
-public class Forester extends Structure
-{
-	public Forester(float x, float y, float z)
-	{
+public class Forester extends Structure {
+	public Forester(float x, float y, float z) {
 		super(x, y, z, "structure/house.vxi");
 		
 		nodes.add(new StructureNode(NodeType.deposit, 0, 0, 1));

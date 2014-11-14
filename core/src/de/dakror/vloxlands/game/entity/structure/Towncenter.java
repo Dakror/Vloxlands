@@ -9,10 +9,8 @@ import de.dakror.vloxlands.ui.RevolverSlot;
 /**
  * @author Dakror
  */
-public class Towncenter extends Warehouse
-{
-	public Towncenter(float x, float y, float z)
-	{
+public class Towncenter extends Warehouse {
+	public Towncenter(float x, float y, float z) {
 		super(x, y, z, "structure/towncenter.vxi");
 		
 		name = "Towncenter";
@@ -28,8 +26,7 @@ public class Towncenter extends Warehouse
 	}
 	
 	@Override
-	public void setActions(RevolverSlot parent)
-	{
+	public void setActions(RevolverSlot parent) {
 		super.setActions(parent);
 		
 		parent.setIcon(new Vector2(1, 5));

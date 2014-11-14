@@ -10,8 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 /**
  * @author Dakror
  */
-public class TilesetDrawable extends BaseDrawable
-{
+public class TilesetDrawable extends BaseDrawable {
 	/**
 	 * Indices:<br>
 	 * 0-1-2<br>
@@ -24,17 +23,14 @@ public class TilesetDrawable extends BaseDrawable
 	public TextureRegion lt, mt, rt, lm, mm, rm, lb, mb, rb;
 	public boolean center = false;
 	
-	public TilesetDrawable()
-	{}
+	public TilesetDrawable() {}
 	
-	public TilesetDrawable(Drawable... drawables)
-	{
+	public TilesetDrawable(Drawable... drawables) {
 		assert (drawables.length == 9);
 		this.drawables = drawables;
 	}
 	
-	public TilesetDrawable(TextureRegion... regions)
-	{
+	public TilesetDrawable(TextureRegion... regions) {
 		assert (drawables.length == 9);
 		drawables = new Drawable[9];
 		drawables[0] = new TextureRegionDrawable(regions[0]);
@@ -48,21 +44,18 @@ public class TilesetDrawable extends BaseDrawable
 		if (regions[8] != null) drawables[8] = new TextureRegionDrawable(regions[8]);
 	}
 	
-	public TilesetDrawable(Drawable drawable)
-	{
+	public TilesetDrawable(Drawable drawable) {
 		super(drawable);
 	}
 	
 	@Override
-	public void draw(Batch batch, float x1, float y1, float w1, float h1)
-	{
+	public void draw(Batch batch, float x1, float y1, float w1, float h1) {
 		int x = (int) x1;
 		int y = (int) y1;
 		int width = (int) w1;
 		int height = (int) h1;
 		
-		if (drawables == null)
-		{
+		if (drawables == null) {
 			drawables = new Drawable[9];
 			drawables[0] = new TextureRegionDrawable(lt);
 			if (mt != null) drawables[1] = new TiledDrawable(mt);
@@ -102,14 +95,12 @@ public class TilesetDrawable extends BaseDrawable
 	}
 	
 	@Override
-	public float getMinWidth()
-	{
+	public float getMinWidth() {
 		return drawables[0].getMinWidth() * 2;
 	}
 	
 	@Override
-	public float getMinHeight()
-	{
+	public float getMinHeight() {
 		return drawables[0].getMinHeight() * 2;
 	}
 }

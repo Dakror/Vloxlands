@@ -12,49 +12,38 @@ import de.dakror.vloxlands.game.entity.structure.Structure;
 /**
  * @author Dakror
  */
-public class TaskListItem extends Label
-{
+public class TaskListItem extends Label {
 	public Structure structure;
 	
-	public TaskListItem(CharSequence text, Skin skin)
-	{
+	public TaskListItem(CharSequence text, Skin skin) {
 		super(text, skin);
 	}
 	
-	public TaskListItem(CharSequence text, LabelStyle style)
-	{
+	public TaskListItem(CharSequence text, LabelStyle style) {
 		super(text, style);
 	}
 	
-	public TaskListItem(CharSequence text, Skin skin, String styleName)
-	{
+	public TaskListItem(CharSequence text, Skin skin, String styleName) {
 		super(text, skin, styleName);
 	}
 	
-	public TaskListItem(CharSequence text, Skin skin, String fontName, Color color)
-	{
+	public TaskListItem(CharSequence text, Skin skin, String fontName, Color color) {
 		super(text, skin, fontName, color);
 	}
 	
-	public TaskListItem(CharSequence text, Skin skin, String fontName, String colorName)
-	{
+	public TaskListItem(CharSequence text, Skin skin, String fontName, String colorName) {
 		super(text, skin, fontName, colorName);
 	}
 	
 	@Override
-	public void draw(Batch batch, float parentAlpha)
-	{
-		try
-		{
-			if ((Integer) getUserObject() == 0)
-			{
+	public void draw(Batch batch, float parentAlpha) {
+		try {
+			if ((Integer) getUserObject() == 0) {
 				float fac = (1 - (structure.getTaskTicksLeft() / (float) structure.firstTask().getDuration()));
 				TextureRegion t = Vloxlands.skin.getRegion("progressBar");
 				batch.draw(t.getTexture(), getX(), getY(), Math.round(getParent().getWidth() * fac), (int) getHeight(), t.getRegionX(), t.getRegionY(), Math.round(t.getRegionWidth() * fac), t.getRegionHeight(), false, false);
 			}
-		}
-		catch (NullPointerException e)
-		{
+		} catch (NullPointerException e) {
 			return;
 		}
 		

@@ -72,8 +72,7 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
  * @author Dakror
  */
 // TODO: saving
-public abstract class Structure extends StaticEntity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable
-{
+public abstract class Structure extends StaticEntity implements InventoryProvider, InventoryListener, ResourceListProvider, Savable {
 	Array<StructureNode> nodes;
 	Array<Human> workers;
 	Inventory inventory;
@@ -106,8 +105,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	
 	final Vector3 tmp = new Vector3();
 	
-	public Structure(float x, float y, float z, String model)
-	{
+	public Structure(float x, float y, float z, String model) {
 		super(Math.round(x), Math.round(y), Math.round(z), model);
 		
 		nodes = new Array<StructureNode>();
@@ -141,61 +139,51 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		setBuilt(false);
 	}
 	
-	public boolean isBuilt()
-	{
+	public boolean isBuilt() {
 		return built;
 	}
 	
-	public void setBuilt(boolean built)
-	{
+	public void setBuilt(boolean built) {
 		this.built = built;
 		modelVisible = built;
 		additionalVisible = built;
 		
-		if (!built)
-		{
+		if (!built) {
 			buildInventory.clear();
-			for (Byte b : costs.getAll())
-			{
+			for (Byte b : costs.getAll()) {
 				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip people and buildings
 				buildInventory.add(new ItemStack(Item.getForId(b), costs.get(b)));
 			}
 		}
 	}
 	
-	public Vector3 getCenter()
-	{
+	public Vector3 getCenter() {
 		return voxelPos.cpy().add(boundingBox.getDimensions().cpy().scl(0.5f));
 	}
 	
 	/**
 	 * @return true if building is done
 	 */
-	public boolean progressBuild()
-	{
-		if (buildProgress == costs.getCount())
-		{
+	public boolean progressBuild() {
+		if (buildProgress == costs.getCount()) {
 			if (!built) setBuilt(true);
 			return true;
 		}
 		
 		buildProgress++;
 		
-		if (buildProgress == costs.getCount())
-		{
+		if (buildProgress == costs.getCount()) {
 			if (!built) setBuilt(true);
 			return true;
 		}
 		return false;
 	}
 	
-	public int getBuildProgress()
-	{
+	public int getBuildProgress() {
 		return buildProgress;
 	}
 	
-	public boolean addWorker(Human human)
-	{
+	public boolean addWorker(Human human) {
 		if (workers.size >= costs.get(Item.get("PEOPLE"))) return false;
 		if (human.getWorkPlace() != null) return false;
 		
@@ -208,14 +196,11 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	}
 	
 	@Override
-	public void onSpawn()
-	{
+	public void onSpawn() {
 		super.onSpawn();
 		
-		for (int i = 0; i < modelInstance.nodes.get(0).children.size; i++)
-		{
-			if (modelInstance.nodes.get(0).children.get(i).id.contains("model:door_"))
-			{
+		for (int i = 0; i < modelInstance.nodes.get(0).children.size; i++) {
+			if (modelInstance.nodes.get(0).children.get(i).id.contains("model:door_")) {
 				ModelInstance mi = subs.get(i);
 				mi.transform.rotate(0, -1, 0, 135);
 			}
@@ -223,17 +208,14 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		inventory.addListener(this);
 		
-		for (Entity e : island.getEntities())
-		{
-			if (e instanceof Creature && ((Creature) e).path != null)
-			{
+		for (Entity e : island.getEntities()) {
+			if (e instanceof Creature && ((Creature) e).path != null) {
 				((Creature) e).path = AStar.findPath(((Creature) e).getVoxelBelow(), ((Creature) e).path.getGhostTarget() != null ? ((Creature) e).path.getGhostTarget() : ((Creature) e).path.getLast(), (Creature) e, ((Creature) e).path.getGhostTarget() != null);
 			}
 		}
 		
 		tickRequestsEnabled = true;
-		if (!built)
-		{
+		if (!built) {
 			int width = (int) Math.ceil(boundingBox.getDimensions().x);
 			int depth = (int) Math.ceil(boundingBox.getDimensions().z);
 			
@@ -248,23 +230,18 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		super.tick(tick);
 		
-		if (taskQueue.size > 0)
-		{
+		if (taskQueue.size > 0) {
 			taskTicksLeft--;
-			if (taskTicksLeft <= 0)
-			{
-				if (taskQueue.first().started)
-				{
+			if (taskTicksLeft <= 0) {
+				if (taskQueue.first().started) {
 					taskQueue.first().exit();
 					taskQueue.removeIndex(0);
 				}
 				
-				if (taskQueue.size > 0)
-				{
+				if (taskQueue.size > 0) {
 					taskTicksLeft = taskQueue.first().getDuration();
 					taskQueue.first().enter();
 				}
@@ -273,14 +250,12 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		if (lastStateRequest == 0) lastStateRequest = tick;
 		
-		if ((tick - lastStateRequest) % 60 == 0 && tickRequestsEnabled)
-		{
+		if ((tick - lastStateRequest) % 60 == 0 && tickRequestsEnabled) {
 			for (State<Human> s : requestedHumanStates)
 				broadcast(s);
 			
 			if (workers.size < costs.get(Item.get("PEOPLE")) && built) broadcast(HelperState.START_WORK);
-			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.get(Item.get("PEOPLE")) > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true))
-			{
+			if (inventory.getCount() >= inventory.getCapacity() / 2 && costs.get(Item.get("PEOPLE")) > 0 && !requestedHumanStates.contains(HelperState.EMPTY_INVENTORY, true) && !handledHumanStates.contains(HelperState.EMPTY_INVENTORY, true)) {
 				requestedHumanStates.add(HelperState.EMPTY_INVENTORY);
 				handledHumanStates.add(HelperState.EMPTY_INVENTORY);
 			}
@@ -292,10 +267,8 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	/**
 	 * @param from expected to be in world space
 	 */
-	public StructureNode getStructureNode(Vector3 from, NodeType type, String name)
-	{
-		if (name != null)
-		{
+	public StructureNode getStructureNode(Vector3 from, NodeType type, String name) {
+		if (name != null) {
 			for (StructureNode sn : nodes)
 				if (sn.name.equals(name)) return sn;
 		}
@@ -303,14 +276,12 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		StructureNode node = null;
 		float distance = 0;
 		
-		for (StructureNode sn : nodes)
-		{
+		for (StructureNode sn : nodes) {
 			if (type != null && sn.type != type) continue;
 			if (from == null) return sn;
 			
 			tmp.set(posCache).add(sn.pos);
-			if (node == null || from.dst(tmp) < distance)
-			{
+			if (node == null || from.dst(tmp) < distance) {
 				node = sn;
 				distance = from.dst(tmp);
 			}
@@ -319,23 +290,18 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		return node;
 	}
 	
-	public boolean hasStructureNode(NodeType type)
-	{
-		try
-		{
+	public boolean hasStructureNode(NodeType type) {
+		try {
 			for (StructureNode sn : nodes)
 				if (sn.type == type) return true;
-		}
-		catch (NoSuchElementException e)
-		{
+		} catch (NoSuchElementException e) {
 			return false;
 		}
 		
 		return false;
 	}
 	
-	public boolean hasStructureNode(String name)
-	{
+	public boolean hasStructureNode(String name) {
 		for (StructureNode sn : nodes)
 			if (sn.name.equals(name)) return true;
 		
@@ -345,70 +311,57 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	/**
 	 * @param from expected to be in world space
 	 */
-	public StructureNode getStructureNode(Vector3 from, NodeType type)
-	{
+	public StructureNode getStructureNode(Vector3 from, NodeType type) {
 		return getStructureNode(from, type, null);
 	}
 	
-	public Array<StructureNode> getStructureNodes()
-	{
+	public Array<StructureNode> getStructureNodes() {
 		return nodes;
 	}
 	
 	@Override
-	public Inventory getInventory()
-	{
+	public Inventory getInventory() {
 		return built ? inventory : buildInventory;
 	}
 	
-	public NonStackingInventory getBuildInventory()
-	{
+	public NonStackingInventory getBuildInventory() {
 		return buildInventory;
 	}
 	
-	public Inventory getInnerInventory()
-	{
+	public Inventory getInnerInventory() {
 		return inventory;
 	}
 	
 	@Override
-	public ResourceList getCosts()
-	{
+	public ResourceList getCosts() {
 		return costs;
 	}
 	
 	@Override
-	public ResourceList getResult()
-	{
+	public ResourceList getResult() {
 		return null;
 	}
 	
-	public float getWorkRadius()
-	{
+	public float getWorkRadius() {
 		return workRadius;
 	}
 	
-	public boolean isWorking()
-	{
+	public boolean isWorking() {
 		return working;
 	}
 	
-	public boolean isConfirmDismantle()
-	{
+	public boolean isConfirmDismantle() {
 		return confirmDismante;
 	}
 	
-	public void setWorking(boolean working)
-	{
+	public void setWorking(boolean working) {
 		this.working = working;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean handleMessage(Telegram msg)
-	{
-		if (msg.message == MessageType.YOU_ARE_DISMANTLED.ordinal())
-		{
+	public boolean handleMessage(Telegram msg) {
+		if (msg.message == MessageType.YOU_ARE_DISMANTLED.ordinal()) {
 			kill();
 			Vector3 p = Game.instance.activeIsland.pos;
 			ItemDrop i = new ItemDrop(Island.SIZE / 2 - 5, Island.SIZE / 4 * 3 + p.y + 1, Island.SIZE / 2, Item.get("YELLOW_CRYSTAL"), 1);
@@ -416,34 +369,28 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			return true;
 		}
 		
-		if (msg.message == MessageType.STRUCTURE_BROADCAST_HANDLED.ordinal())
-		{
+		if (msg.message == MessageType.STRUCTURE_BROADCAST_HANDLED.ordinal()) {
 			requestedHumanStates.removeValue((State<Human>) msg.extraInfo, true);
 		}
 		
 		return false;
 	}
 	
-	protected void onWorkerAdded(Human human)
-	{}
+	protected void onWorkerAdded(Human human) {}
 	
-	public State<Human> getWorkerState()
-	{
+	public State<Human> getWorkerState() {
 		return workerState;
 	}
 	
-	public Class<?> getWorkerTool()
-	{
+	public Class<?> getWorkerTool() {
 		return workerTool;
 	}
 	
-	public void broadcast(State<Human> requestedState, Object... params)
-	{
+	public void broadcast(State<Human> requestedState, Object... params) {
 		broadcast(0, requestedState, params);
 	}
 	
-	public void broadcast(float delay, State<Human> requestedState, Object... params)
-	{
+	public void broadcast(float delay, State<Human> requestedState, Object... params) {
 		Array<Object> array = new Array<Object>(params);
 		array.insert(0, this);
 		
@@ -453,35 +400,29 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	}
 	
 	@Override
-	public void onItemAdded(int countBefore, Item item, Inventory inventory)
-	{}
+	public void onItemAdded(int countBefore, Item item, Inventory inventory) {}
 	
 	@Override
-	public void onItemRemoved(int countBefore, Item item, Inventory inventory)
-	{
+	public void onItemRemoved(int countBefore, Item item, Inventory inventory) {
 		handledHumanStates.removeValue(HelperState.EMPTY_INVENTORY, true);
 	}
 	
-	public CurserCommand getDefaultCommand()
-	{
+	public CurserCommand getDefaultCommand() {
 		return CurserCommand.WALK;
 	}
 	
-	public CurserCommand getCommandForEntity(Entity selectedEntity)
-	{
+	public CurserCommand getCommandForEntity(Entity selectedEntity) {
 		if (selectedEntity instanceof Human && !built) return CurserCommand.BUILD;
 		if (selectedEntity instanceof Human && built) return CurserCommand.WORK;
 		
 		return getDefaultCommand();
 	}
 	
-	public CurserCommand getCommandForStructure(Structure selectedStructure)
-	{
+	public CurserCommand getCommandForStructure(Structure selectedStructure) {
 		return getDefaultCommand();
 	}
 	
-	protected Table getDefaultTable(final PinnableWindow window, Object... params)
-	{
+	protected Table getDefaultTable(final PinnableWindow window, Object... params) {
 		ImageButtonStyle style = new ImageButtonStyle(Vloxlands.skin.get("image", ButtonStyle.class));
 		style.imageUp = Vloxlands.skin.getDrawable("bomb");
 		style.imageUp.setMinWidth(ItemSlot.size);
@@ -491,18 +432,13 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		style.imageDown.setMinHeight(ItemSlot.size);
 		final TooltipImageButton dismantle = new TooltipImageButton(style);
 		window.getStage().addActor(dismantle.getTooltip());
-		dismantle.addListener(new ClickListener()
-		{
+		dismantle.addListener(new ClickListener() {
 			@Override
-			public void clicked(InputEvent event, float x, float y)
-			{
-				if (isConfirmDismantle())
-				{
-					Dialog d = new Dialog("Confirm Dismantle", Vloxlands.skin)
-					{
+			public void clicked(InputEvent event, float x, float y) {
+				if (isConfirmDismantle()) {
+					Dialog d = new Dialog("Confirm Dismantle", Vloxlands.skin) {
 						@Override
-						protected void result(Object object)
-						{
+						protected void result(Object object) {
 							if (object != null) broadcast(HelperState.DISMANTLE);
 						}
 					};
@@ -511,8 +447,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 					d.button("Yes", true);
 					
 					d.show(window.getStage());
-				}
-				else broadcast(HelperState.DISMANTLE);
+				} else broadcast(HelperState.DISMANTLE);
 			}
 		});
 		dismantle.getTooltip().set("Dismantle building", "Request a Human to dismantle this building. The building costs get refunded by 60%.");
@@ -527,11 +462,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		final TooltipImageButton sleep = new TooltipImageButton(style);
 		window.getStage().addActor(sleep.getTooltip());
 		sleep.setChecked(isWorking());
-		sleep.addListener(new ClickListener()
-		{
+		sleep.addListener(new ClickListener() {
 			@Override
-			public void clicked(InputEvent event, float x, float y)
-			{
+			public void clicked(InputEvent event, float x, float y) {
 				setWorking(!isWorking());
 				sleep.getTooltip().set((sleep.isChecked() ? "Dis" : "En") + "able building", "Toggle the building's working state.");
 			}
@@ -541,11 +474,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		
 		final Label capacity = new Label("Capacity: 0 / 10 Items", Vloxlands.skin);
 		capacity.setAlignment(Align.center, Align.center);
-		capacity.addAction(new Action()
-		{
+		capacity.addAction(new Action() {
 			@Override
-			public boolean act(float delta)
-			{
+			public boolean act(float delta) {
 				capacity.setText("Capacity: " + getInnerInventory().getCount() + " / " + getInnerInventory().getCapacity() + " Items");
 				
 				float percent = getInnerInventory().getCount() / (float) getInnerInventory().getCapacity();
@@ -568,11 +499,9 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		style.imageDown.setMinHeight(ItemSlot.size);
 		final TooltipImageButton queue = new TooltipImageButton(style);
 		window.getStage().addActor(queue.getTooltip());
-		ClickListener cl = new ClickListener()
-		{
+		ClickListener cl = new ClickListener() {
 			@Override
-			public void clicked(InputEvent event, float x, float y)
-			{
+			public void clicked(InputEvent event, float x, float y) {
 				Actor actor = window.findActor("TaskWrap");
 				Cell<Actor> cell = window.getCell(actor);
 				cell.height(cell.getMinHeight() == 100 ? 0 : 100);
@@ -585,8 +514,7 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		queue.setName("queue");
 		queue.getTooltip().set("Task Queue", "Toggle Task Queue display");
 		
-		if (params[0] == Boolean.TRUE)
-		{
+		if (params[0] == Boolean.TRUE) {
 			queue.setChecked(true);
 			cl.clicked(null, -3, 0);
 		}
@@ -602,29 +530,22 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		return rightSide;
 	}
 	
-	protected void setupTaskQueueUI(final PinnableWindow window, Object... params)
-	{
+	protected void setupTaskQueueUI(final PinnableWindow window, Object... params) {
 		final VerticalGroup tasks = new VerticalGroup();
 		tasks.left();
-		tasks.addAction(new Action()
-		{
+		tasks.addAction(new Action() {
 			@Override
-			public boolean act(float delta)
-			{
-				if (taskQueue.size != tasks.getChildren().size)
-				{
+			public boolean act(float delta) {
+				if (taskQueue.size != tasks.getChildren().size) {
 					int size = tasks.getChildren().size;
-					for (Actor a : tasks.getChildren())
-					{
-						if (taskQueue.size < size)
-						{
+					for (Actor a : tasks.getChildren()) {
+						if (taskQueue.size < size) {
 							a.remove();
 							size--;
 						}
 					}
 					
-					for (int i = size; i < taskQueue.size; i++)
-					{
+					for (int i = size; i < taskQueue.size; i++) {
 						final TaskListItem l = new TaskListItem(taskQueue.get(i).getTitle(), Vloxlands.skin);
 						l.setWrap(true);
 						l.setWidth(tasks.getWidth());
@@ -648,30 +569,24 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		window.add(tasksWrap).height(0);
 	}
 	
-	protected void setupUI(PinnableWindow window, Object... params)
-	{
+	protected void setupUI(PinnableWindow window, Object... params) {
 		window.row().center();
 	}
 	
 	@Override
-	public final void setUI(PinnableWindow window, Object... params)
-	{
+	public final void setUI(PinnableWindow window, Object... params) {
 		window.padRight(16);
 		
-		if (isBuilt())
-		{
+		if (isBuilt()) {
 			setupTaskQueueUI(window, params);
 			setupUI(window, params);
 			window.add(getDefaultTable(window, params)).width(204).expandX();
-		}
-		else
-		{
+		} else {
 			final Table res = new Table();
 			Inventory inv = getInventory();
 			Texture tex = Vloxlands.assets.get("img/icons.png", Texture.class);
 			int i = 0;
-			for (Byte b : getCosts().getAll())
-			{
+			for (Byte b : getCosts().getAll()) {
 				if (b == (byte) (254 + 128) || b == (byte) (255 + 128)) continue; // skip
 																																					// people
 																																					// and
@@ -696,25 +611,20 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 			final DProgressBar progress = new DProgressBar(0, getCosts().getCount(), 0, Vloxlands.skin);
 			progress.setAnimateDuration(0.2f);
 			progress.setAnimateInterpolation(Interpolation.pow3);
-			window.addAction(new Action()
-			{
+			window.addAction(new Action() {
 				@Override
-				public boolean act(float delta)
-				{
+				public boolean act(float delta) {
 					Inventory inv = getInventory();
 					progress.setValue(getBuildProgress());
-					for (Byte b : getCosts().getAll())
-					{
+					for (Byte b : getCosts().getAll()) {
 						Actor a = res.findActor(b + "");
-						if (a instanceof Label)
-						{
+						if (a instanceof Label) {
 							int max = getCosts().get(b);
 							((Label) a).setText((max - inv.get(b)) + " / " + max);
 						}
 					}
 					
-					if (isBuilt())
-					{
+					if (isBuilt()) {
 						for (SelectionListener sl : Game.instance.listeners)
 							sl.onStructureSelection(Structure.this, true);
 						return true;
@@ -729,51 +639,41 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 	}
 	
 	@Override
-	public void setActions(RevolverSlot parent)
-	{
-		tasks.sort(new Comparator<Task>()
-		{
+	public void setActions(RevolverSlot parent) {
+		tasks.sort(new Comparator<Task>() {
 			
 			@Override
-			public int compare(Task o1, Task o2)
-			{
+			public int compare(Task o1, Task o2) {
 				return o1.getTitle().compareTo(o2.getTitle());
 			}
 		});
-		for (Task task : tasks)
-		{
+		for (Task task : tasks) {
 			final Task copy = task;
 			final RevolverSlot s = new RevolverSlot(parent.getStage(), task.getIcon(), "task:" + task.getName());
 			s.getTooltip().set(task.getTitle(), task.getDescription());
-			s.addListener(new InputListener()
-			{
+			s.addListener(new InputListener() {
 				@Override
-				public boolean touchDown(InputEvent event, float x, float y, int pointer, int button)
-				{
+				public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 					return button == Buttons.LEFT;
 				}
 				
 				@Override
-				public void touchUp(InputEvent event, float x, float y, int pointer, int button)
-				{
+				public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
 					if (!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts())) return; // safety
 																																																		// first
 																																																		// ;)
 					
-					for (Byte b : copy.getCosts().getAll())
-					{
+					for (Byte b : copy.getCosts().getAll()) {
 						island.takeItemsIslandWide(Item.getForId(b), copy.getCosts().get(b));
 					}
 					
 					queueTask(copy);
 				}
 			});
-			s.addAction(new Action()
-			{
+			s.addAction(new Action() {
 				
 				@Override
-				public boolean act(float delta)
-				{
+				public boolean act(float delta) {
 					s.setDisabled(!Game.instance.activeIsland.availableResources.canSubtract(copy.getCosts()));
 					return false;
 				}
@@ -782,37 +682,31 @@ public abstract class Structure extends StaticEntity implements InventoryProvide
 		}
 	}
 	
-	public void queueTask(Task task)
-	{
+	public void queueTask(Task task) {
 		if (!tasks.contains(task, true)) throw new IllegalArgumentException("Can't queue task '" + task + "' in structure '" + name + "'");
 		
 		task.setOrigin(this);
 		taskQueue.add(task);
-		if (taskQueue.size == 1)
-		{
+		if (taskQueue.size == 1) {
 			taskTicksLeft = task.getDuration();
 			task.enter();
 		}
 	}
 	
-	public Task firstTask()
-	{
+	public Task firstTask() {
 		if (taskQueue.size == 0) return null;
 		return taskQueue.first();
 	}
 	
-	public int getTaskTicksLeft()
-	{
+	public int getTaskTicksLeft() {
 		return taskTicksLeft;
 	}
 	
 	@Override
-	public void render(ModelBatch batch, Environment environment, boolean minimapMode)
-	{
+	public void render(ModelBatch batch, Environment environment, boolean minimapMode) {
 		super.render(batch, environment, minimapMode);
 		
-		if ((hovered || selected) && !minimapMode && Vloxlands.wireframe)
-		{
+		if ((hovered || selected) && !minimapMode && Vloxlands.wireframe) {
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			Vloxlands.shapeRenderer.setProjectionMatrix(Game.camera.combined);
 			Vloxlands.shapeRenderer.identity();

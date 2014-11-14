@@ -12,8 +12,7 @@ import de.dakror.vloxlands.util.interf.Tickable;
  * 
  * @author Dakror
  */
-public abstract class Job implements Tickable
-{
+public abstract class Job implements Tickable {
 	String animation;
 	String text;
 	int repeats;
@@ -29,8 +28,7 @@ public abstract class Job implements Tickable
 	
 	Callback endEvent;
 	
-	public Job(Human human, String animation, String text, int repeats, boolean persistent)
-	{
+	public Job(Human human, String animation, String text, int repeats, boolean persistent) {
 		this.human = human;
 		this.text = text;
 		this.animation = animation;
@@ -40,36 +38,28 @@ public abstract class Job implements Tickable
 		active = false;
 	}
 	
-	public boolean isUsingTool()
-	{
+	public boolean isUsingTool() {
 		return tool != null;
 	}
 	
-	public Class<?> getTool()
-	{
+	public Class<?> getTool() {
 		return tool;
 	}
 	
-	public void queue()
-	{}
+	public void queue() {}
 	
-	public void trigger(int tick)
-	{
+	public void trigger(int tick) {
 		AnimationDesc ad = human.getAnimationController().animate(animation, repeats, Config.getGameSpeed(), null, 0.2f);
-		if (ad != null)
-		{
+		if (ad != null) {
 			duration = ticksLeft = ad.duration * 60f / Config.getGameSpeed();
-		}
-		else done = true;
+		} else done = true;
 		active = true;
 	}
 	
 	@Override
-	public void tick(int tick)
-	{
+	public void tick(int tick) {
 		ticksLeft -= 1f / Config.getGameSpeed();
-		if (ticksLeft <= 0)
-		{
+		if (ticksLeft <= 0) {
 			if (repeats > -1) repeats = repeats > 0 ? repeats - 1 : 0;
 			
 			onAnimationFinished();
@@ -79,64 +69,52 @@ public abstract class Job implements Tickable
 		}
 	}
 	
-	public void setDone()
-	{
+	public void setDone() {
 		done = true;
 	}
 	
-	protected void onAnimationFinished()
-	{}
+	protected void onAnimationFinished() {}
 	
-	public void onEnd()
-	{
+	public void onEnd() {
 		human.getAnimationController().animate(null, 0.2f); // TODO replace with
 																												// idle animation
 	}
 	
-	public void triggerEndEvent()
-	{
+	public void triggerEndEvent() {
 		if (endEvent != null) endEvent.trigger();
 	}
 	
-	public void setEndEvent(Callback event)
-	{
+	public void setEndEvent(Callback event) {
 		endEvent = event;
 	}
 	
-	public void resetState()
-	{
+	public void resetState() {
 		done = false;
 		active = false;
 	}
 	
-	public boolean isActive()
-	{
+	public boolean isActive() {
 		return active;
 	}
 	
-	public boolean isDone()
-	{
+	public boolean isDone() {
 		return done;
 	}
 	
-	public boolean isPersistent()
-	{
+	public boolean isPersistent() {
 		return persistent;
 	}
 	
-	public void setPersistent(boolean b)
-	{
+	public void setPersistent(boolean b) {
 		persistent = b;
 	}
 	
-	public String getText()
-	{
+	public String getText() {
 		return text;
 	}
 	
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return text;
 	}
 }

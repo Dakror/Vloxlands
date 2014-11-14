@@ -6,18 +6,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 /**
  * @author Dakror
  */
-public class HidingClickListener extends ClickListener
-{
+public class HidingClickListener extends ClickListener {
 	PinnableWindow actor;
 	
-	public HidingClickListener(PinnableWindow actor)
-	{
+	public HidingClickListener(PinnableWindow actor) {
 		this.actor = actor;
 	}
 	
 	@Override
-	public void clicked(InputEvent event, float x, float y)
-	{
+	public void clicked(InputEvent event, float x, float y) {
 		actor.setVisible(false);
 	}
 }

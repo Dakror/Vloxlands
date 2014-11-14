@@ -11,34 +11,28 @@ import de.dakror.vloxlands.util.interf.Savable;
 /**
  * @author Dakror
  */
-public class ItemStack implements Savable
-{
+public class ItemStack implements Savable {
 	Item item;
 	int amount;
 	
 	public Array<ItemStackListener> listeners = new Array<ItemStackListener>();
 	
-	public ItemStack()
-	{
+	public ItemStack() {
 		this(Item.get("NOTHING"), 0);
 	}
 	
-	public ItemStack(Item item, int amount)
-	{
+	public ItemStack(Item item, int amount) {
 		this.item = item;
 		this.amount = amount;
 	}
 	
-	public int getAmount()
-	{
+	public int getAmount() {
 		return amount;
 	}
 	
-	public int setAmount(int amount)
-	{
+	public int setAmount(int amount) {
 		this.amount = amount;
-		if (amount > item.getStack())
-		{
+		if (amount > item.getStack()) {
 			this.amount = item.getStack();
 			
 			dispatchStackChanged();
@@ -50,38 +44,31 @@ public class ItemStack implements Savable
 		return 0;
 	}
 	
-	public int add(int amount)
-	{
+	public int add(int amount) {
 		return setAmount(this.amount + amount);
 	}
 	
-	public int sub(int amount)
-	{
+	public int sub(int amount) {
 		return setAmount(this.amount - amount);
 	}
 	
-	public boolean isFull()
-	{
+	public boolean isFull() {
 		return amount == item.getStack();
 	}
 	
-	public void setItem(Item item)
-	{
+	public void setItem(Item item) {
 		this.item = item;
 	}
 	
-	public Item getItem()
-	{
+	public Item getItem() {
 		return item;
 	}
 	
-	public boolean isNull()
-	{
+	public boolean isNull() {
 		return amount == 0;
 	}
 	
-	public void set(ItemStack o)
-	{
+	public void set(ItemStack o) {
 		amount = o.amount;
 		item = o.item;
 		listeners.addAll(o.listeners);
@@ -89,50 +76,42 @@ public class ItemStack implements Savable
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (!(obj instanceof ItemStack)) return false;
 		return item.getId() == ((ItemStack) obj).getItem().getId() && amount == ((ItemStack) obj).getAmount();
 	}
 	
-	public boolean canAdd(ItemStack stack)
-	{
+	public boolean canAdd(ItemStack stack) {
 		if (stack.getItem().getId() != item.getId()) return false;
 		return amount + stack.getAmount() <= item.getStack();
 	}
 	
-	public boolean canAddWithOverflow(ItemStack stack)
-	{
+	public boolean canAddWithOverflow(ItemStack stack) {
 		if (stack.getItem().getId() != item.getId()) return false;
 		return !isFull();
 	}
 	
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		if (isNull()) return "Null";
 		return amount + "x " + item.getName();
 	}
 	
-	private void dispatchStackChanged()
-	{
+	private void dispatchStackChanged() {
 		for (ItemStackListener isl : listeners)
 			isl.onStackChanged();
 	}
 	
-	public void addListener(ItemStackListener listener)
-	{
+	public void addListener(ItemStackListener listener) {
 		listeners.insert(0, listener);
 	}
 	
-	public void removeListener(ItemStackListener listener)
-	{
+	public void removeListener(ItemStackListener listener) {
 		listeners.removeValue(listener, true);
 	}
 	
 	@Override
-	public void save(ByteArrayOutputStream baos) throws IOException
-	{
+	public void save(ByteArrayOutputStream baos) throws IOException {
 		baos.write(item.getId());
 		baos.write(amount);
 	}

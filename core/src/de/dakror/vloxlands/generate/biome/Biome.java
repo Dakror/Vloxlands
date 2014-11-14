@@ -7,12 +7,10 @@ import de.dakror.vloxlands.generate.WorldGenerator;
 /**
  * @author Dakror
  */
-public abstract class Biome extends Generator
-{
+public abstract class Biome extends Generator {
 	@Override
 	@Deprecated
-	public void generate(WorldGenerator worldGen, Island island)
-	{}
+	public void generate(WorldGenerator worldGen, Island island) {}
 	
 	public abstract void generate(WorldGenerator worldGen, Island island, int radius);
 }

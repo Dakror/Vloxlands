@@ -32,8 +32,7 @@ import de.dakror.vloxlands.util.event.VoxelSelection;
 /**
  * @author Dakror
  */
-public class HudLayer extends Layer implements SelectionListener
-{
+public class HudLayer extends Layer implements SelectionListener {
 	PinnableWindow selectedEntityWindow;
 	PinnableWindow selectedStructureWindow;
 	
@@ -47,8 +46,7 @@ public class HudLayer extends Layer implements SelectionListener
 	final Vector2 dragEnd = new Vector2(-1, -1);
 	
 	@Override
-	public void show()
-	{
+	public void show() {
 		modal = true;
 		Game.instance.addListener(this);
 		
@@ -76,14 +74,12 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		super.dispose();
 		Game.instance.removeListener(this);
 	}
 	
-	public void addActionsMenu()
-	{
+	public void addActionsMenu() {
 		actions = new Revolver();
 		actions.setPosition(10, 10);
 		
@@ -136,36 +132,29 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onCreatureSelection(final Creature creature, boolean lmb)
-	{
-		if (lmb && selectedStructureWindow.setShown(false))
-		{
+	public void onCreatureSelection(final Creature creature, boolean lmb) {
+		if (lmb && selectedStructureWindow.setShown(false)) {
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 		}
 		
-		if (creature == null && lmb && selectedEntityWindow.setShown(false))
-		{
+		if (creature == null && lmb && selectedEntityWindow.setShown(false)) {
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
 		
-		if (lmb && creature != null)
-		{
+		if (lmb && creature != null) {
 			boolean jobsWereExpanded = selectedEntityWindow.isVisible() && selectedEntityWindow.getTitle().equals(creature.getName()) && creature instanceof Human && ((Button) selectedEntityWindow.findActor("job")).isChecked();
 			
 			selectedEntityWindow.setTitle(creature.getName());
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 			selectedEntityWindow.addActor(selectedEntityWindow.getButtonTable());
-			selectedEntityWindow.addAction(new Action()
-			{
+			selectedEntityWindow.addAction(new Action() {
 				@Override
-				public boolean act(float delta)
-				{
+				public boolean act(float delta) {
 					selectedEntityWindow.setTitle(creature.getName());
-					if (!creature.isVisible())
-					{
+					if (!creature.isVisible()) {
 						onCreatureSelection(null, true);
 						return true;
 					}
@@ -187,15 +176,12 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelSelection(VoxelSelection vs, boolean lmb)
-	{
-		if (lmb && selectedEntityWindow.setShown(false))
-		{
+	public void onVoxelSelection(VoxelSelection vs, boolean lmb) {
+		if (lmb && selectedEntityWindow.setShown(false)) {
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
-		if (lmb && selectedStructureWindow.setShown(false))
-		{
+		if (lmb && selectedStructureWindow.setShown(false)) {
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 		}
@@ -206,22 +192,18 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onStructureSelection(final Structure structure, boolean lmb)
-	{
-		if (lmb && selectedEntityWindow.setShown(false))
-		{
+	public void onStructureSelection(final Structure structure, boolean lmb) {
+		if (lmb && selectedEntityWindow.setShown(false)) {
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
 		
-		if (structure == null && lmb && selectedStructureWindow.setShown(false))
-		{
+		if (structure == null && lmb && selectedStructureWindow.setShown(false)) {
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 		}
 		
-		if (lmb && structure != null)
-		{
+		if (lmb && structure != null) {
 			boolean tasksWereExpanded = selectedStructureWindow.isVisible() && selectedStructureWindow.getTitle().equals(structure.getName()) && ((Button) selectedStructureWindow.findActor("queue")) != null && ((Button) selectedStructureWindow.findActor("queue")).isChecked();
 			
 			selectedStructureWindow.setTitle(structure.getName());
@@ -243,31 +225,24 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb)
-	{}
+	public void onVoxelRangeSelection(Island island, Vector3 start, Vector3 end, boolean lmb) {}
 	
 	@Override
-	public void onNoSelection(boolean lmb)
-	{
-		if (lmb && selectedEntityWindow.setShown(false))
-		{
+	public void onNoSelection(boolean lmb) {
+		if (lmb && selectedEntityWindow.setShown(false)) {
 			selectedEntityWindow.clearChildren();
 			selectedEntityWindow.clearActions();
 		}
-		if (lmb && selectedStructureWindow.setShown(false))
-		{
+		if (lmb && selectedStructureWindow.setShown(false)) {
 			selectedStructureWindow.clearChildren();
 			selectedStructureWindow.clearActions();
 		}
 	}
 	
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button)
-	{
-		if (button == Buttons.LEFT)
-		{
-			if (dragEnd.x > -1)
-			{
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		if (button == Buttons.LEFT) {
+			if (dragEnd.x > -1) {
 				float x = Math.min(dragStart.x, dragEnd.x) / Gdx.graphics.getWidth();
 				float y = Math.min(dragStart.y, dragEnd.y) / Gdx.graphics.getHeight();
 				float width = Math.abs(dragStart.x - dragEnd.x) / Gdx.graphics.getWidth();
@@ -285,23 +260,18 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button)
-	{
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		buttonDown = button;
 		return false;
 	}
 	
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer)
-	{
-		if (buttonDown == Buttons.LEFT)
-		{
-			if (dragStart.x == -1)
-			{
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		if (buttonDown == Buttons.LEFT) {
+			if (dragStart.x == -1) {
 				dragStart.set(screenX, Gdx.graphics.getHeight() - screenY);
 				dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
-			}
-			else dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
+			} else dragEnd.set(screenX, Gdx.graphics.getHeight() - screenY);
 			
 			return true;
 		}
@@ -310,14 +280,11 @@ public class HudLayer extends Layer implements SelectionListener
 	}
 	
 	@Override
-	public void render(float delta)
-	{
+	public void render(float delta) {
 		stage.act();
-		if (Vloxlands.instance.getActiveLayer() == this || !Vloxlands.instance.getActiveLayer().isModal())
-		{
+		if (Vloxlands.instance.getActiveLayer() == this || !Vloxlands.instance.getActiveLayer().isModal()) {
 			stage.draw();
-			if (dragStart.x > -1)
-			{
+			if (dragStart.x > -1) {
 				shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 				shapeRenderer.begin(ShapeType.Line);
 				shapeRenderer.identity();

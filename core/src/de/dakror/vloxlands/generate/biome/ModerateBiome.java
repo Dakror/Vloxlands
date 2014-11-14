@@ -10,8 +10,7 @@ import de.dakror.vloxlands.generate.WorldGenerator;
 /**
  * @author Dakror
  */
-public class ModerateBiome extends Biome
-{
+public class ModerateBiome extends Biome {
 	protected int treeMin = 5;
 	protected int treeMax = 10;
 	protected int boulderMin = 5;
@@ -19,8 +18,7 @@ public class ModerateBiome extends Biome
 	protected float spikeFactor = 1;
 	
 	@Override
-	public void generate(WorldGenerator worldGen, Island island, int radius)
-	{
+	public void generate(WorldGenerator worldGen, Island island, int radius) {
 		int j = (int) (3 + 3 * MathUtils.random() + radius / 8f);
 		generateBezier(island, Beziers.TOPLAYER, Island.SIZE / 2, Island.SIZE / 2, radius, Island.SIZE / 4 * 3, j, new byte[] { Voxel.get("DIRT").getId() }, true);
 		worldGen.step();

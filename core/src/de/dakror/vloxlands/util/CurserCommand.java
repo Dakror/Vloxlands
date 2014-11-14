@@ -3,8 +3,7 @@ package de.dakror.vloxlands.util;
 /**
  * @author Ichmed, Dakror
  */
-public enum CurserCommand
-{
+public enum CurserCommand {
 	NO_OP,
 	WALK,
 	PICKUP,

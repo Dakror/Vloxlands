@@ -23,13 +23,10 @@ import de.dakror.vloxlands.game.query.PathBundle;
 import de.dakror.vloxlands.game.query.Query;
 import de.dakror.vloxlands.util.event.BroadcastPayload;
 
-public enum HelperState implements State<Human>
-{
-	BUILD
-	{
+public enum HelperState implements State<Human> {
+	BUILD {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			Structure target = (Structure) human.stateParams.get(0);
 			BuildJob bj = new BuildJob(human, target, false);
 			
@@ -41,11 +38,9 @@ public enum HelperState implements State<Human>
 			else human.setJob(p, bj);
 		}
 	},
-	DISMANTLE
-	{
+	DISMANTLE {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			Structure target = (Structure) human.stateParams.get(0);
 			
 			DismantleJob dj = new DismantleJob(human, target, false);
@@ -57,11 +52,9 @@ public enum HelperState implements State<Human>
 			else human.queueJob(p, dj);
 		}
 	},
-	EMPTY_INVENTORY
-	{
+	EMPTY_INVENTORY {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			Structure target = (Structure) human.stateParams.get(0);
 			
 			ItemStack is = target.getInventory().getFirst();
@@ -71,104 +64,82 @@ public enum HelperState implements State<Human>
 			boolean queue = StateTools.equipTool(human, pj.getTool(), false, pathStart);
 			
 			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.pickup).pos.cpy().add(target.getVoxelPos()), human, NodeType.pickup.useGhostTarget);
-			if (p != null)
-			{
-				if (!queue)
-				{
+			if (p != null) {
+				if (!queue) {
 					human.setJob(p, pj);
 					queue = true;
-				}
-				else human.queueJob(p, pj);
+				} else human.queueJob(p, pj);
 				
 				PathBundle pb = Game.world.query(new Query(human).structure(true).searchClass(Warehouse.class).node(NodeType.deposit).start(p.getLast()).capacityForTransported(true).transport(is));
 				if (pb != null) human.queueJob(pb.path, new DepositJob(human, pb.structure, false));
 				else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a Warehouse to deposit stuff!");
-			}
-			else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a way to target structure!");
+			} else Gdx.app.error("HelperState.EMPTY_INVENTORY.enter", "Didn't find a way to target structure!");
 		}
 	},
-	GET_RESOURCES_FOR_BUILD
-	{
+	GET_RESOURCES_FOR_BUILD {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			getNextResource(human);
 		}
 		
-		void getNextResource(Human human)
-		{
+		void getNextResource(Human human) {
 			Structure target = (Structure) human.stateParams.get(0);
 			
 			ItemStack is = target.getBuildInventory().getFirst();
-			if (is.isNull())
-			{
+			if (is.isNull()) {
 				human.changeState(IDLE);
 				return;
 			}
 			
 			Vector3 pathStart = human.getVoxelBelow();
 			boolean queue = false;
-			if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().getItem().getId() != is.getItem().getId())
-			{
+			if (human.getCarryingItemStack().isNull() || human.getCarryingItemStack().getItem().getId() != is.getItem().getId()) {
 				PickupJob pj = new PickupJob(human, null, is, false, false);
 				
 				queue = StateTools.equipTool(human, pj.getTool(), queue, pathStart);
 				
 				PathBundle pb = Game.world.query(new Query(human).searchClass(Warehouse.class).structure(true).stack(is).node(NodeType.pickup).start(pathStart).capacityForTransported(true).transport(human.getCarryingItemStack()));
-				if (pb != null)
-				{
+				if (pb != null) {
 					pj.setTarget(pb.structure);
 					
-					if (!human.getCarryingItemStack().isNull())
-					{
+					if (!human.getCarryingItemStack().isNull()) {
 						DepositJob dj = new DepositJob(human, pb.structure, false);
 						if (queue) human.queueJob(pb.path, dj);
-						else
-						{
+						else {
 							human.setJob(pb.path, dj);
 							queue = true;
 						}
 						
 						human.queueJob(null, pj);
-					}
-					else
-					{
+					} else {
 						if (queue) human.queueJob(pb.path, pj);
-						else
-						{
+						else {
 							human.setJob(pb.path, pj);
 							queue = true;
 						}
 					}
 					
 					pathStart = pb.path.getLast();
-				}
-				else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a Warehouse containing the needed resources on island: 0!");
+				} else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a Warehouse containing the needed resources on island: 0!");
 			}
 			
 			Path p = AStar.findPath(pathStart, target.getStructureNode(pathStart, NodeType.build).pos.cpy().add(target.getVoxelPos()), human, NodeType.build.useGhostTarget);
-			if (p != null)
-			{
+			if (p != null) {
 				DepositJob dj = new DepositJob(human, target, false);
 				if (queue) human.queueJob(p, dj);
 				else human.setJob(p, dj);
-			}
-			else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a path to target structure!");
+			} else Gdx.app.error("HelperState.GET_RESOURCES_FOR_BUILD.getNextResource", "Didn't find a path to target structure!");
 		}
 		
 		@Override
-		public void update(Human human)
-		{
+		public void update(Human human) {
 			if (human.isIdle()) getNextResource(human);
 		}
 	},
-	IDLE
-	{
+	IDLE {
 		@Override
-		public boolean onMessage(Human human, Telegram telegram)
-		{
-			if (telegram.message == MessageType.STRUCTURE_BROADCAST.ordinal())
-			{
+		public boolean onMessage(Human human, Telegram telegram) {
+			if (telegram.message == MessageType.STRUCTURE_BROADCAST.ordinal()) {
 				BroadcastPayload payload = (BroadcastPayload) telegram.extraInfo;
 				if (payload.handled) return false;
 				
@@ -182,20 +153,16 @@ public enum HelperState implements State<Human>
 			return false;
 		}
 	},
-	WALK_TO_TARGET
-	{
+	WALK_TO_TARGET {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			Path p = AStar.findPath(human.getVoxelBelow(), (Vector3) human.stateParams.get(0), human, false);
 			if (p != null) human.setJob(p, null);
 		}
 	},
-	START_WORK
-	{
+	START_WORK {
 		@Override
-		public void enter(Human human)
-		{
+		public void enter(Human human) {
 			Structure target = (Structure) human.stateParams.get(0);
 			if (!target.addWorker(human)) human.changeState(IDLE);
 		}
@@ -204,22 +171,18 @@ public enum HelperState implements State<Human>
 	;
 	
 	@Override
-	public void enter(Human human)
-	{}
+	public void enter(Human human) {}
 	
 	@Override
-	public void exit(Human human)
-	{}
+	public void exit(Human human) {}
 	
 	@Override
-	public void update(Human human)
-	{
+	public void update(Human human) {
 		if (human.isIdle() && human.getState() != IDLE) human.changeState(IDLE);
 	}
 	
 	@Override
-	public boolean onMessage(Human human, Telegram telegram)
-	{
+	public boolean onMessage(Human human, Telegram telegram) {
 		return false;
 	}
 }

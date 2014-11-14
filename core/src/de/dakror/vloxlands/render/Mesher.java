@@ -13,39 +13,31 @@ import de.dakror.vloxlands.util.Direction;
 /**
  * @author Dakror
  */
-public class Mesher
-{
+public class Mesher {
 	public static final Vector3[] directions = { Vector3.X, Vector3.Y, Vector3.Z };
 	
 	static long millis;
 	static int count;
 	
-	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, IntMap<T> faces)
-	{
+	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, IntMap<T> faces) {
 		generateGreedyMesh(offsetX, offsetY, offsetZ, Chunk.SIZE, Chunk.SIZE, Chunk.SIZE, faces);
 	}
 	
-	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, int width, int height, int depth, IntMap<T> faces)
-	{
+	public static <T extends Face<T>> void generateGreedyMesh(int offsetX, int offsetY, int offsetZ, int width, int height, int depth, IntMap<T> faces) {
 		if (faces.size == 0) return;
 		
-		for (Vector3 direction : directions)
-		{
+		for (Vector3 direction : directions) {
 			IntArray removedByMe = new IntArray();
 			
-			for (Direction dir : Direction.values())
-			{
+			for (Direction dir : Direction.values()) {
 				if (!canFace(dir, direction)) continue;
 				
 				T activeFace = null;
 				int activeI = 0;
 				int activeJ = 0;
-				for (int i = 0; i < width; i++)
-				{
-					for (int j = 0; j < height; j++)
-					{
-						for (int k = 0; k < depth; k++)
-						{
+				for (int i = 0; i < width; i++) {
+					for (int j = 0; j < height; j++) {
+						for (int k = 0; k < depth; k++) {
 							int x = direction.x == 1 ? k : direction.z == 1 ? i : j;
 							int y = direction.y == 1 ? k : direction.z == 1 ? j : i;
 							int z = direction.z == 1 ? k : direction.x == 1 ? j : i;
@@ -53,10 +45,8 @@ public class Mesher
 							int hash = Face.getHashCode(x + offsetX, y + offsetY, z + offsetZ, dir.ordinal());
 							T face = faces.get(hash);
 							
-							if (face == null)
-							{
-								if (!removedByMe.contains(hash))
-								{
+							if (face == null) {
+								if (!removedByMe.contains(hash)) {
 									activeI = -1;
 									activeJ = -1;
 									activeFace = null;
@@ -64,14 +54,11 @@ public class Mesher
 								continue;
 							}
 							
-							if (activeFace != null && i == activeI && j == activeJ && face.canCombine(activeFace) && face.isSameSize(activeFace, direction))
-							{
+							if (activeFace != null && i == activeI && j == activeJ && face.canCombine(activeFace) && face.isSameSize(activeFace, direction)) {
 								activeFace.increaseSize(direction.x * face.sizeX, direction.y * face.sizeY, direction.z * face.sizeZ);
 								removedByMe.add(hash);
 								faces.remove(hash);
-							}
-							else
-							{
+							} else {
 								activeI = i;
 								activeJ = j;
 								activeFace = face;
@@ -83,15 +70,13 @@ public class Mesher
 		}
 	}
 	
-	public static boolean canFace(Direction dir, Vector3 direction)
-	{
+	public static boolean canFace(Direction dir, Vector3 direction) {
 		if (direction.x == 1) return dir.dir.x == 0;
 		else if (direction.y == 1) return dir.dir.y == 0;
 		else return dir.dir.z == 0;
 	}
 	
-	public static Mesh genCube(float size, float texX, float texY, float texSize)
-	{
+	public static Mesh genCube(float size, float texX, float texY, float texSize) {
 		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.ColorPacked(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
 																																																																																												 * how
 																																																																																												 * many
@@ -112,8 +97,7 @@ public class Mesher
 		int pIdx = 0;
 		int nIdx = 0;
 		int tIdx = 0;
-		for (int i = 0; i < vertices.length;)
-		{
+		for (int i = 0; i < vertices.length;) {
 			vertices[i++] = cubeVerts[pIdx++];
 			vertices[i++] = cubeVerts[pIdx++];
 			vertices[i++] = cubeVerts[pIdx++];
@@ -135,8 +119,7 @@ public class Mesher
 		return mesh;
 	}
 	
-	public static Mesh genCubeWireframe(float size)
-	{
+	public static Mesh genCubeWireframe(float size) {
 		Mesh mesh = new Mesh(true, 24, 36, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), VertexAttribute.TexCoords(1) /*
 																																																																												 * how
 																																																																												 * many
@@ -149,8 +132,7 @@ public class Mesher
 		
 		float[] vertices = new float[cubeVerts.length / 3 * 10];
 		int pIdx = 0;
-		for (int i = 0; i < vertices.length;)
-		{
+		for (int i = 0; i < vertices.length;) {
 			vertices[i++] = cubeVerts[pIdx++];
 			vertices[i++] = cubeVerts[pIdx++];
 			vertices[i++] = cubeVerts[pIdx++];

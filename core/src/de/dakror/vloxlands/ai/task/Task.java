@@ -11,8 +11,7 @@ import de.dakror.vloxlands.util.interf.provider.ResourceListProvider;
  * 
  * @author Dakror
  */
-public abstract class Task implements ResourceListProvider
-{
+public abstract class Task implements ResourceListProvider {
 	ResourceList costs, result;
 	int duration;
 	String name, title, description;
@@ -21,16 +20,14 @@ public abstract class Task implements ResourceListProvider
 	
 	public boolean started;
 	
-	public Task()
-	{
+	public Task() {
 		costs = new ResourceList();
 		result = new ResourceList();
 		duration = 0;
 		title = "";
 	}
 	
-	public Task(String name, String title, String description, Vector2 icon, int duration, ResourceList costs, ResourceList result)
-	{
+	public Task(String name, String title, String description, Vector2 icon, int duration, ResourceList costs, ResourceList result) {
 		this.name = name;
 		this.title = title;
 		this.description = description != null ? description : "";
@@ -40,56 +37,46 @@ public abstract class Task implements ResourceListProvider
 		this.result = result != null ? result : new ResourceList();
 	}
 	
-	public void setOrigin(Structure origin)
-	{
+	public void setOrigin(Structure origin) {
 		this.origin = origin;
 	}
 	
 	@Override
-	public ResourceList getCosts()
-	{
+	public ResourceList getCosts() {
 		return costs;
 	}
 	
 	@Override
-	public ResourceList getResult()
-	{
+	public ResourceList getResult() {
 		return result;
 	}
 	
-	public int getDuration()
-	{
+	public int getDuration() {
 		return duration;
 	}
 	
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 	
-	public String getTitle()
-	{
+	public String getTitle() {
 		return title;
 	}
 	
-	public String getDescription()
-	{
+	public String getDescription() {
 		return description;
 	}
 	
-	public Vector2 getIcon()
-	{
+	public Vector2 getIcon() {
 		return icon;
 	}
 	
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return name;
 	}
 	
-	public void enter()
-	{
+	public void enter() {
 		started = true;
 	}
 	

@@ -15,12 +15,10 @@ import de.dakror.vloxlands.game.world.Chunk;
 import de.dakror.vloxlands.game.world.Island;
 import de.dakror.vloxlands.game.world.World;
 
-public abstract class Generator
-{
+public abstract class Generator {
 	public abstract void generate(WorldGenerator worldGen, Island island);
 	
-	public static Array<Byte> getNaturalTypes()
-	{
+	public static Array<Byte> getNaturalTypes() {
 		Array<Byte> naturalVoxels = new Array<Byte>();
 		naturalVoxels.add(Voxel.get("SANDSTONE").getId());
 		naturalVoxels.add(Voxel.get("STONE").getId());
@@ -28,26 +26,20 @@ public abstract class Generator
 		return naturalVoxels;
 	}
 	
-	public static byte[] createRatio(byte[] keys, int[] vals)
-	{
+	public static byte[] createRatio(byte[] keys, int[] vals) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		for (int i = 0; i < keys.length; i++)
-		{
-			for (int j = 0; j < vals[i]; j++)
-			{
+		for (int i = 0; i < keys.length; i++) {
+			for (int j = 0; j < vals[i]; j++) {
 				baos.write(keys[i]);
 			}
 		}
 		return baos.toByteArray();
 	}
 	
-	public static void fillHorizontalCircle(Island island, int x, int y, int z, float radius, byte[] b, boolean force)
-	{
+	public static void fillHorizontalCircle(Island island, int x, int y, int z, float radius, byte[] b, boolean force) {
 		int rad = (int) Math.ceil(radius);
-		for (int i = -rad; i <= rad; i++)
-		{
-			for (int j = -rad; j <= rad; j++)
-			{
+		for (int i = -rad; i <= rad; i++) {
+			for (int j = -rad; j <= rad; j++) {
 				int x1 = x + i;
 				int z1 = z + j;
 				if (Vector2.dst(i, j, 0, 0) < radius) island.set(x1, y, z1, b[((int) (MathUtils.random() * b.length))], force, false);
@@ -55,14 +47,12 @@ public abstract class Generator
 		}
 	}
 	
-	public static void generateBezier(Island island, float[] c, int x, int z, int radius, int off, int h, byte[] b, boolean force)
-	{
+	public static void generateBezier(Island island, float[] c, int x, int z, int radius, int off, int h, byte[] b, boolean force) {
 		Vector2 p0 = new Vector2(c[0], c[1]);
 		Vector2 p1 = new Vector2(c[2], c[3]);
 		Vector2 p2 = new Vector2(c[4], c[5]);
 		Vector2 p3 = new Vector2(c[6], c[7]);
-		for (int i = 0; i < h; i++)
-		{
+		for (int i = 0; i < h; i++) {
 			float t = i / (float) h;
 			
 			float rad = (float) Math.floor(radius * Bezier.cubic(new Vector2(), t, p0, p1, p2, p3, new Vector2()).y);
@@ -70,19 +60,16 @@ public abstract class Generator
 		}
 	}
 	
-	public static Vector2 getHighestBezierValue(float[] c)
-	{
+	public static Vector2 getHighestBezierValue(float[] c) {
 		Vector2 p0 = new Vector2(c[0], c[1]);
 		Vector2 p1 = new Vector2(c[2], c[3]);
 		Vector2 p2 = new Vector2(c[4], c[5]);
 		Vector2 p3 = new Vector2(c[6], c[7]);
 		float y = 0;
 		float x = 0;
-		for (float i = 0; i < 1; i += 0.01f)
-		{
+		for (float i = 0; i < 1; i += 0.01f) {
 			Vector2 v = Bezier.cubic(new Vector2(), i, p0, p1, p2, p3, new Vector2());
-			if (v.y > y)
-			{
+			if (v.y > y) {
 				x = i;
 				y = v.y;
 			}
@@ -94,8 +81,7 @@ public abstract class Generator
 	/**
 	 * [0 - 1]
 	 */
-	public static float getBezierValue(float[] c, float x)
-	{
+	public static float getBezierValue(float[] c, float x) {
 		Vector2 p0 = new Vector2(c[0], c[1]);
 		Vector2 p1 = new Vector2(c[2], c[3]);
 		Vector2 p2 = new Vector2(c[4], c[5]);
@@ -104,8 +90,7 @@ public abstract class Generator
 		return Bezier.cubic(new Vector2(), x, p0, p1, p2, p3, new Vector2()).y;
 	}
 	
-	public static Vector2 getRandomCircleInCircle(Vector2 center, int radius, int rad2)
-	{
+	public static Vector2 getRandomCircleInCircle(Vector2 center, int radius, int rad2) {
 		Vector2 v = new Vector2();
 		do
 			v = new Vector2(Math.round(MathUtils.random() * radius * 2 - radius + center.x), Math.round(MathUtils.random() * radius * 2 - radius + center.y));
@@ -114,8 +99,7 @@ public abstract class Generator
 		return v;
 	}
 	
-	public static boolean hasNaturalVoxel(Chunk c)
-	{
+	public static boolean hasNaturalVoxel(Chunk c) {
 		if (c == null) return false;
 		
 		for (byte b : getNaturalTypes())
@@ -124,8 +108,7 @@ public abstract class Generator
 		return false;
 	}
 	
-	public static Vector3 pickRandomNaturalChunk(Island island, int maxY)
-	{
+	public static Vector3 pickRandomNaturalChunk(Island island, int maxY) {
 		int i = 0;
 		int chunks = island.getChunks().length;
 		
@@ -136,8 +119,7 @@ public abstract class Generator
 		return island.getChunk(i).index;
 	}
 	
-	public static Vector3 pickRandomNaturalVoxel(Island island, int maxY)
-	{
+	public static Vector3 pickRandomNaturalVoxel(Island island, int maxY) {
 		Array<Byte> naturalTypes = getNaturalTypes();
 		
 		Vector3 c = pickRandomNaturalChunk(island, maxY);
@@ -145,12 +127,9 @@ public abstract class Generator
 		
 		Array<Vector3> chunkVoxels = new Array<Vector3>();
 		
-		for (int i = 0; i < Chunk.SIZE; i++)
-		{
-			for (int j = 0; j < Chunk.SIZE; j++)
-			{
-				for (int k = 0; k < Chunk.SIZE; k++)
-				{
+		for (int i = 0; i < Chunk.SIZE; i++) {
+			for (int j = 0; j < Chunk.SIZE; j++) {
+				for (int k = 0; k < Chunk.SIZE; k++) {
 					if (chunkVoxels.size > 50) break;
 					
 					byte id = chunk.get(i, j, k);
@@ -162,8 +141,7 @@ public abstract class Generator
 		return chunkVoxels.get((int) (MathUtils.random() * chunkVoxels.size));
 	}
 	
-	public static VoxelStats generateVein(Island island, VoxelStats maximum, float min, float max, int maxY, byte[] b)
-	{
+	public static VoxelStats generateVein(Island island, VoxelStats maximum, float min, float max, int maxY, byte[] b) {
 		int size = (int) MathUtils.random(min, max);
 		
 		Vector3 c = pickRandomNaturalVoxel(island, maxY);
@@ -171,14 +149,10 @@ public abstract class Generator
 		
 		float maxDistance = (float) (size * Math.sqrt(3)) / 2;
 		
-		for (int i = (int) (c.x - size * .5f); i < c.x + size * .5f; i++)
-		{
-			for (int j = (int) (c.y - size * .5f); j < c.y + size * .5f; j++)
-			{
-				for (int k = (int) (c.z - size * .5f); k < c.z + size * .5f; k++)
-				{
-					if (MathUtils.random() * maxDistance > Vector3.dst(i, j, k, c.x, c.y, c.z))
-					{
+		for (int i = (int) (c.x - size * .5f); i < c.x + size * .5f; i++) {
+			for (int j = (int) (c.y - size * .5f); j < c.y + size * .5f; j++) {
+				for (int k = (int) (c.z - size * .5f); k < c.z + size * .5f; k++) {
+					if (MathUtils.random() * maxDistance > Vector3.dst(i, j, k, c.x, c.y, c.z)) {
 						byte bv = b[(int) (MathUtils.random() * b.length)];
 						Voxel v = Voxel.getForId(bv);
 						if (vs.uplift + v.getUplift() >= maximum.uplift && maximum.weight > 0) return vs;
@@ -202,15 +176,12 @@ public abstract class Generator
 	
 	// -- structures -- //
 	
-	public static void generateTrees(Island island, int min, int max)
-	{
+	public static void generateTrees(Island island, int min, int max) {
 		int width = MathUtils.random(min, max);
 		int depth = MathUtils.random(min, max);
 		int size = MathUtils.ceil(Island.SIZE / (float) Math.min(width, depth));
-		for (int i = 0; i < width; i++)
-		{
-			for (int j = 0; j < depth; j++)
-			{
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < depth; j++) {
 				int x = i * size + MathUtils.random(-size / 2, size / 2);
 				int z = j * size + MathUtils.random(-size / 2, size / 2);
 				
@@ -238,10 +209,8 @@ public abstract class Generator
 		generateBezier(island, Beziers.TREE, x, z, 5, (int) (y + 1 + height * 1.5f), (int) (height * 1.4f), new byte[] { Voxel.get("LEAVES").getId() }, false);
 	}
 	
-	public static void generateSpikes(Island island, int amount, int y, int radius, int topLayers, byte[] ratio)
-	{
-		for (int i = 0; i < amount; i++)
-		{
+	public static void generateSpikes(Island island, int amount, int y, int radius, int topLayers, byte[] ratio) {
+		for (int i = 0; i < amount; i++) {
 			int MAXRAD = (int) (radius * 0.3f + 5);
 			int rad = Math.round(MathUtils.random() * (radius * 0.3f)) + 3;
 			
@@ -261,12 +230,10 @@ public abstract class Generator
 		}
 	}
 	
-	public static void generateBoulders(Island island, int y, int radius, int min, int max, int minRad, int maxRad, int minHeight, int maxHeight, byte[] b)
-	{
+	public static void generateBoulders(Island island, int y, int radius, int min, int max, int minRad, int maxRad, int minHeight, int maxHeight, byte[] b) {
 		int boulders = MathUtils.random(min, max);
 		int highest = (int) (getHighestBezierValue(Beziers.BOULDER).y * radius);
-		for (int i = 0; i < boulders; i++)
-		{
+		for (int i = 0; i < boulders; i++) {
 			int rad = MathUtils.random(minRad, maxRad);
 			int height = MathUtils.random(minHeight, maxHeight);
 			Vector2 pos = getRandomCircleInCircle(new Vector2(Island.SIZE / 2, Island.SIZE / 2), highest, rad);
@@ -274,52 +241,44 @@ public abstract class Generator
 		}
 	}
 	
-	public static void generateCrystals(Island island)
-	{
+	public static void generateCrystals(Island island) {
 		final Voxel[] CRYSTALS = { Voxel.get("BLUE_CRYSTAL"), Voxel.get("RED_CRYSTAL"), Voxel.get("YELLOW_CRYSTAL") };
 		
 		island.calculateWeight();
 		
 		float weightNeededToUplift = island.getWeight() / World.calculateRelativeUplift(island.pos.y);
 		
-		while (weightNeededToUplift > 100)
-		{
+		while (weightNeededToUplift > 100) {
 			int index = (int) (MathUtils.random() * CRYSTALS.length);
 			weightNeededToUplift -= generateVein(island, new VoxelStats(0, weightNeededToUplift), index + 1, index + 4, Island.SIZE / 4 * 3, new byte[] { CRYSTALS[index].getId() }).uplift;
 		}
 		
 		int[] amounts = new int[CRYSTALS.length];
-		for (int i = 0; i < amounts.length; i++)
-		{
+		for (int i = 0; i < amounts.length; i++) {
 			amounts[i] = (int) (weightNeededToUplift / CRYSTALS[i].getUplift());
 			weightNeededToUplift %= CRYSTALS[i].getUplift();
 		}
 		
-		for (int j = 0; j < amounts.length; j++)
-		{
-			for (int i = 0; i < amounts[j]; i++)
-			{
+		for (int j = 0; j < amounts.length; j++) {
+			for (int i = 0; i < amounts[j]; i++) {
 				Vector3 v = pickRandomNaturalVoxel(island, Island.SIZE / 4 * 3);
 				island.set((int) v.x, (int) v.y, (int) v.z, CRYSTALS[j].getId(), true, false);
 			}
 		}
 	}
 	
-	public static void generateOreVeins(Island island)
-	{
+	public static void generateOreVeins(Island island) {
 		final Voxel[] ORES = { Voxel.get("COAL_ORE"), Voxel.get("IRON_ORE"), Voxel.get("GOLD_ORE") };
 		final float[][] BEZIERS = { Beziers.COALORE_HEIGHT, Beziers.IRONORE_HEIGHT, Beziers.GOLDORE_HEIGHT };
 		
 		int height = Island.SIZE / 4 * 3;
 		
-		for (int i = 0; i < ORES.length; i++)
-		{
+		for (int i = 0; i < ORES.length; i++) {
 			int y = MathUtils.random(8, height);
 			
 			int veins = Math.round(getBezierValue(BEZIERS[i], y / (float) height) * height) * 2;
 			
-			for (int j = 0; j < veins; j++)
-			{
+			for (int j = 0; j < veins; j++) {
 				int size = MathUtils.random(3);
 				generateVein(island, new VoxelStats(), size, size + 2, height, new byte[] { ORES[i].getId() });
 			}

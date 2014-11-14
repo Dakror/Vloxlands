@@ -19,13 +19,10 @@ import de.dakror.vloxlands.game.voxel.Voxel;
 /**
  * @author Dakror
  */
-public class AStar
-{
-	static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>()
-	{
+public class AStar {
+	static final Comparator<AStarNode> COMPARATOR = new Comparator<AStarNode>() {
 		@Override
-		public int compare(AStarNode o1, AStarNode o2)
-		{
+		public int compare(AStarNode o1, AStarNode o2) {
 			return Float.compare(o1.F, o2.F);
 		}
 	};
@@ -36,13 +33,11 @@ public class AStar
 	static int targetedOthers;
 	static boolean takeNeighbor; // because other human goes to target already
 	
-	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget)
-	{
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, boolean useGhostTarget) {
 		return findPath(from, to, c, 0, useGhostTarget);
 	}
 	
-	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
-	{
+	public synchronized static Path findPath(Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget) {
 		if (from == null || to == null) return null;
 		
 		if (maxRange == 0) maxRange = Math.max(from.dst(to), 1) * 5;
@@ -51,15 +46,11 @@ public class AStar
 		
 		takeNeighbor = false;
 		targetedOthers = 0;
-		for (Entity e : c.getIsland().getEntities())
-		{
-			if (e instanceof Human && e != c)
-			{
-				if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
-				{
+		for (Entity e : c.getIsland().getEntities()) {
+			if (e instanceof Human && e != c) {
+				if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null) {
 					Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
-					if ((p.realTarget != null && p.realTarget.equals(to)) || p.getLast().equals(to))
-					{
+					if ((p.realTarget != null && p.realTarget.equals(to)) || p.getLast().equals(to)) {
 						takeNeighbor = true;
 						targetedOthers++;
 					}
@@ -74,22 +65,19 @@ public class AStar
 		
 		openList.add(new AStarNode(from.x, from.y, from.z, 0, from.dst(to), null));
 		
-		if (useGhostTarget || takeNeighbor)
-		{
+		if (useGhostTarget || takeNeighbor) {
 			if (from.equals(to)) target = openList.get(0);
 			else target = new AStarNode(to.x, to.y, to.z, 1, 0, null);
 		}
 		AStarNode selected = null;
 		AStarNode ghostNode = null;
-		while (true)
-		{
+		while (true) {
 			if (openList.size() == 0) return null; // no way
 			
 			Collections.sort(openList, COMPARATOR);
 			selected = openList.get(0);
 			openList.remove(0);
-			while (selected.cantBeNeighborForGhostTarget && openList.size() > 0)
-			{
+			while (selected.cantBeNeighborForGhostTarget && openList.size() > 0) {
 				selected = openList.get(0);
 				openList.remove(0);
 			}
@@ -102,8 +90,7 @@ public class AStar
 		}
 		
 		Array<Vector3> v = new Array<Vector3>();
-		while (selected != null)
-		{
+		while (selected != null) {
 			v.add(new Vector3(selected.x, selected.y, selected.z));
 			selected = (AStarNode) selected.parent;
 		}
@@ -121,8 +108,7 @@ public class AStar
 		return p;
 	}
 	
-	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget)
-	{
+	public static AStarNode addNeighbors(AStarNode selected, Vector3 from, Vector3 to, Creature c, float maxRange, boolean useGhostTarget) {
 		int height = c.getHeight();
 		
 		byte air = Voxel.get("AIR").getId();
@@ -132,12 +118,9 @@ public class AStar
 		final BoundingBox b2 = new BoundingBox();
 		final float malus = 0.01f;
 		
-		for (int x = -1; x < 2; x++)
-		{
-			for (int z = -1; z < 2; z++)
-			{
-				for (int y = -1; y < 3; y++)
-				{
+		for (int x = -1; x < 2; x++) {
+			for (int z = -1; z < 2; z++) {
+				for (int y = -1; y < 3; y++) {
 					if (x != 0 && z != 0 && y != 0) continue;
 					if (x == 0 && z == 0 && y == 0) continue;
 					
@@ -157,65 +140,50 @@ public class AStar
 					int index = openList.indexOf(node);
 					boolean ctn = openList.contains(node);
 					
-					if (ctn && openList.get(index).G > node.G)
-					{
+					if (ctn && openList.get(index).G > node.G) {
 						openList.get(index).G = node.G;
 						openList.get(index).parent = selected;
-					}
-					else if (!ctn)
-					{
+					} else if (!ctn) {
 						boolean free = true;
 						
 						if (!c.getIsland().isSpaceAbove(v.x, v.y, v.z, height)) free = false;
 						
-						if (x != 0 && z != 0 && free)
-						{
+						if (x != 0 && z != 0 && free) {
 							if (!c.getIsland().isSpaceAbove(selected.x, v.y, v.z, height)) free = false;
 							else if (!c.getIsland().isSpaceAbove(v.x, v.y, selected.z, height)) free = false;
 						}
 						
-						if (y != 0)
-						{
+						if (y != 0) {
 							if (y < 0 && !c.getIsland().isSpaceAbove(v.x, v.y, v.z, height + 1)) free = false;
 							else if (y > 0 && !c.getIsland().isSpaceAbove(selected.x, selected.y, selected.z, height + 1)) free = false;
 						}
 						
-						if (free)
-						{
-							for (Entity e : c.getIsland().getEntities())
-							{
-								if (e instanceof Human && e != c)
-								{
-									if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null)
-									{
+						if (free) {
+							for (Entity e : c.getIsland().getEntities()) {
+								if (e instanceof Human && e != c) {
+									if (((Human) e).firstJob() instanceof WalkJob || ((Human) e).path != null) {
 										Path p = (WalkJob) ((Human) e).firstJob() instanceof WalkJob ? ((WalkJob) (((Human) e).firstJob())).getPath() : ((Human) e).path;
-										if (p.getLast().equals(v) || (p.ghostTarget != null && p.ghostTarget.equals(v)))
-										{
+										if (p.getLast().equals(v) || (p.ghostTarget != null && p.ghostTarget.equals(v))) {
 											free = false;
 											break;
 										}
 									}
-								}
-								else if (e instanceof StaticEntity)
-								{
+								} else if (e instanceof StaticEntity) {
 									e.getWorldBoundingBox(b);
 									
 									b2.min.set(v).add(c.getIsland().pos).add(malus, 1, malus);
 									b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 									b2.set(b2.min, b2.max);
-									if (b.intersects(b2))
-									{
+									if (b.intersects(b2)) {
 										free = false;
 										break;
 									}
-									if (x != 0 && z != 0 && free)
-									{
+									if (x != 0 && z != 0 && free) {
 										b2.min.set(selected.x, v.y, v.z).add(c.getIsland().pos).add(malus, 1, malus);
 										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 										b2.set(b2.min, b2.max);
 										
-										if (b.intersects(b2))
-										{
+										if (b.intersects(b2)) {
 											free = false;
 											break;
 										}
@@ -224,8 +192,7 @@ public class AStar
 										b2.max.set(b2.min).add(1 - 2 * malus, height, 1 - 2 * malus);
 										b2.set(b2.min, b2.max);
 										
-										if (b.intersects(b2))
-										{
+										if (b.intersects(b2)) {
 											free = false;
 											break;
 										}
@@ -234,8 +201,7 @@ public class AStar
 							}
 						}
 						
-						if (useGhostTarget || takeNeighbor)
-						{
+						if (useGhostTarget || takeNeighbor) {
 							int cd = chebyshevDistance(to, v) + 1;
 							boolean ringFull = targetedOthers % 9 == 0;
 							boolean takeThisAsNeighbor = takeNeighbor && (cd == Math.ceil(targetedOthers / 9f) || (ringFull && cd == Math.ceil(targetedOthers / 9f) + 1));
@@ -244,12 +210,10 @@ public class AStar
 							
 							if (x == 0 && z == 0) close = false;
 							
-							if (targetable && close)
-							{
+							if (targetable && close) {
 								if (!v.equals(to)) neighbor = v;
 								return v.equals(to) || takeThisAsNeighbor ? node : target;
-							}
-							else if (targetable) node.cantBeNeighborForGhostTarget = true;
+							} else if (targetable) node.cantBeNeighborForGhostTarget = true;
 						}
 						
 						if (free && y < 2) openList.add(node);
@@ -261,8 +225,7 @@ public class AStar
 		return null;
 	}
 	
-	public static int chebyshevDistance(Vector3 o1, Vector3 o2)
-	{
+	public static int chebyshevDistance(Vector3 o1, Vector3 o2) {
 		return (int) Math.max(Math.abs(o1.x - o2.x), Math.abs(o1.z - o2.z));
 	}
 }

@@ -20,8 +20,7 @@ import de.dakror.vloxlands.util.InternalAssetManager.FileNode;
 /**
  * @author Dakror
  */
-public class LoadingLayer extends Layer
-{
+public class LoadingLayer extends Layer {
 	Image logo;
 	Texture blur;
 	BitmapFont font;
@@ -35,26 +34,20 @@ public class LoadingLayer extends Layer
 	boolean iconsSet;
 	
 	@Override
-	public void render(float delta)
-	{
+	public void render(float delta) {
 		Gdx.gl.glClearColor(37 / 256f, 37 / 256f, 37 / 256f, 1);
 		
-		if (Vloxlands.assets.update())
-		{
-			if (!iconsSet)
-			{
+		if (Vloxlands.assets.update()) {
+			if (!iconsSet) {
 				for (FileNode fn : InternalAssetManager.listFiles("img/gui", true))
 					Vloxlands.skin.add(fn.file.nameWithoutExtension(), Vloxlands.assets.get(fn.file.path(), Texture.class));
 				iconsSet = true;
 			}
-			if (!worldGen)
-			{
+			if (!worldGen) {
 				Vloxlands.instance.addLayer(new Game());
 				worldGenerator.start();
 				worldGen = true;
-			}
-			else if (worldGenerator.done && percent > 0.99)
-			{
+			} else if (worldGenerator.done && percent > 0.99) {
 				Vloxlands.instance.addLayer(new HudLayer());
 				Vloxlands.instance.removeLayer(this);
 				
@@ -84,15 +77,13 @@ public class LoadingLayer extends Layer
 	}
 	
 	@Override
-	public void resize(int width, int height)
-	{
+	public void resize(int width, int height) {
 		logo.setX((Gdx.graphics.getWidth() - 256) / 2);
 		logo.setY((Gdx.graphics.getHeight() - 256) / 2);
 	}
 	
 	@Override
-	public void show()
-	{
+	public void show() {
 		modal = true;
 		
 		Vloxlands.assets.load("img/logo/logo256.png", Texture.class);
